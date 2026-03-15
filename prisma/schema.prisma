@@ -1,0 +1,366 @@
+// ============================================
+// EduPlatform — Prisma Schema (MVP Only)
+// ============================================
+//
+// RULE: This schema contains ONLY what the MVP needs.
+// DO NOT add Phase 2+ models (exams, homework, points, streaks, etc.)
+// When we reach those phases, we add models via new migrations.
+//
+// RULE: Every tenant-scoped model MUST have tenantId.
+// A query without tenantId = security bug = data leak.
+//
+// RULE: DO NOT modify existing models after Day 1 without team agreement.
+//       Adding NEW models for future phases is fine.
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// TENANT — The teacher or center
+// ============================================
+model Tenant {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  plan          Plan     @default(FREE)
+  planExpiresAt DateTime?
+  logoUrl       String?
+  themeColor    String   @default("#1A5276")
+  phone         String?
+  region        String?
+  bio           String?
+  subjects      String[]
+  isActive      Boolean  @default(true)
+  smsQuota      Int      @default(50)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  users         User[]
+  groups        Group[]
+  sessions      Session[]
+  attendance    Attendance[]
+  payments      Payment[]
+  notifications Notification[]
+
+  @@index([slug])
+}
+
+enum Plan {
+  FREE
+  BASIC
+  PRO
+  BUSINESS
+}
+
+// ============================================
+// USER — Single table for all roles
+// ============================================
+model User {
+  id           String   @id @default(cuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  phone        String
+  name         String
+  role         UserRole
+  avatarUrl    String?
+  gradeLevel   String?
+  parentName   String?
+  parentPhone  String?
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  enrollments       GroupStudent[]
+  attendanceRecords Attendance[]
+  markedAttendance  Attendance[]    @relation("MarkedBy")
+  studentPayments   Payment[]       @relation("StudentPayments")
+  recordedPayments  Payment[]       @relation("RecordedBy")
+  sentNotifications Notification[]
+  parentOf          ParentStudent[] @relation("ParentUser")
+  childOf           ParentStudent[] @relation("StudentUser")
+
+  @@unique([tenantId, phone])
+  @@index([tenantId])
+  @@index([tenantId, role])
+}
+
+enum UserRole {
+  TEACHER
+  STUDENT
+  PARENT
+  ASSISTANT
+}
+
+// ============================================
+// PARENT-STUDENT LINK
+// ============================================
+model ParentStudent {
+  id           String   @id @default(cuid())
+  parentId     String
+  parent       User     @relation("ParentUser", fields: [parentId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      User     @relation("StudentUser", fields: [studentId], references: [id], onDelete: Cascade)
+  relationship String   @default("parent")
+  createdAt    DateTime @default(now())
+
+  @@unique([parentId, studentId])
+}
+
+// ============================================
+// GROUP — A study group
+// ============================================
+model Group {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  subject     String
+  gradeLevel  String
+  days        String[]
+  timeStart   String
+  timeEnd     String
+  room        String?
+  maxCapacity Int      @default(40)
+  monthlyFee  Int
+  color       String   @default("#2E86C1")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  students    GroupStudent[]
+  sessions    Session[]
+  attendance  Attendance[]
+
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+}
+
+// ============================================
+// GROUP-STUDENT ENROLLMENT
+// ============================================
+model GroupStudent {
+  id         String           @id @default(cuid())
+  groupId    String
+  group      Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status     EnrollmentStatus @default(ACTIVE)
+  enrolledAt DateTime         @default(now())
+  droppedAt  DateTime?
+
+  @@unique([groupId, studentId])
+  @@index([groupId, status])
+  @@index([studentId])
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  WAITLIST
+  ARCHIVED
+  DROPPED
+}
+
+// ============================================
+// SESSION — An actual class occurrence
+// ============================================
+model Session {
+  id        String        @id @default(cuid())
+  tenantId  String
+  tenant    Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  groupId   String
+  group     Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  date      DateTime      @db.Date
+  timeStart String
+  timeEnd   String
+  status    SessionStatus @default(SCHEDULED)
+  type      SessionType   @default(REGULAR)
+  notes     String?
+  createdAt DateTime      @default(now())
+
+  attendance Attendance[]
+
+  @@unique([groupId, date])
+  @@index([tenantId, date])
+}
+
+enum SessionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum SessionType {
+  REGULAR
+  MAKEUP
+  EXTRA
+}
+
+// ============================================
+// ATTENDANCE — Per-student per-session record
+// ============================================
+model Attendance {
+  id         String           @id @default(cuid())
+  tenantId   String
+  tenant     Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sessionId  String
+  session    Session          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  groupId    String
+  group      Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status     AttendanceStatus @default(ABSENT)
+  markedById String?
+  markedBy   User?            @relation("MarkedBy", fields: [markedById], references: [id])
+  method     AttendanceMethod @default(MANUAL)
+  markedAt   DateTime         @default(now())
+  synced     Boolean          @default(true)
+  createdAt  DateTime         @default(now())
+
+  @@unique([sessionId, studentId])
+  @@index([tenantId, sessionId])
+  @@index([tenantId, studentId])
+  @@index([studentId, createdAt])
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum AttendanceMethod {
+  MANUAL
+  QR
+  GPS
+  CODE
+}
+
+// ============================================
+// PAYMENT — Monthly payment record per student
+// ============================================
+model Payment {
+  id                String        @id @default(cuid())
+  tenantId          String
+  tenant            Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  studentId         String
+  student           User          @relation("StudentPayments", fields: [studentId], references: [id], onDelete: Cascade)
+  amount            Int
+  month             String
+  status            PaymentStatus @default(PENDING)
+  method            PaymentMethod @default(CASH)
+  installmentNumber Int?
+  installmentTotal  Int?
+  receiptNumber     String?       @unique
+  receiptUrl        String?
+  paidAt            DateTime?
+  recordedById      String?
+  recordedBy        User?         @relation("RecordedBy", fields: [recordedById], references: [id])
+  notes             String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([tenantId, studentId])
+  @@index([tenantId, month])
+  @@index([tenantId, status])
+}
+
+enum PaymentStatus {
+  PAID
+  PARTIAL
+  PENDING
+  OVERDUE
+}
+
+enum PaymentMethod {
+  CASH
+  VODAFONE_CASH
+  FAWRY
+  INSTAPAY
+  CARD
+}
+
+// ============================================
+// NOTIFICATION — SMS/WhatsApp/Push log
+// ============================================
+model Notification {
+  id             String              @id @default(cuid())
+  tenantId       String
+  tenant         Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type           NotificationType
+  message        String
+  channel        NotificationChannel
+  status         NotificationStatus  @default(QUEUED)
+  recipientPhone String
+  sentAt         DateTime?
+  errorMessage   String?
+  retries        Int                 @default(0)
+  createdAt      DateTime            @default(now())
+
+  @@index([tenantId, status])
+  @@index([userId])
+  @@index([status, createdAt])
+}
+
+enum NotificationType {
+  ATTENDANCE_PRESENT
+  ATTENDANCE_ABSENT
+  PAYMENT_REMINDER
+  PAYMENT_OVERDUE
+  CLASS_REMINDER
+  ANNOUNCEMENT
+}
+
+enum NotificationChannel {
+  SMS
+  WHATSAPP
+  PUSH
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  FAILED
+}
+
+// ============================================
+// AUTH: OTP + Sessions
+// ============================================
+model OTP {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([phone, code])
+  @@index([phone, createdAt])
+}
+
+model AuthSession {
+  id           String   @id @default(cuid())
+  userId       String
+  tenantId     String
+  token        String   @unique
+  refreshToken String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([token])
+  @@index([refreshToken])
+  @@index([expiresAt])
+}

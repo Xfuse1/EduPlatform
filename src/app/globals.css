@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 207 33% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 207 33% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 207 33% 12%;
+    --primary: 203 64% 28%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 205 61% 47%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 28% 93%;
+    --muted-foreground: 214 16% 42%;
+    --accent: 197 63% 91%;
+    --accent-foreground: 203 64% 24%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 25% 88%;
+    --input: 214 25% 88%;
+    --ring: 203 64% 28%;
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 96%;
+    --card: 222 47% 13%;
+    --card-foreground: 210 40% 96%;
+    --popover: 222 47% 13%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 203 61% 54%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 205 61% 47%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 18%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 203 36% 20%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 63% 45%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 27% 21%;
+    --input: 217 27% 21%;
+    --ring: 203 61% 54%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    direction: rtl;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-cairo antialiased;
+    min-height: 100vh;
+    text-align: start;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+    background-image:
+      radial-gradient(circle at top, rgba(46, 134, 193, 0.12), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 1));
+    background-attachment: fixed;
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(circle at top, rgba(26, 82, 118, 0.32), transparent 28%),
+      linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 8, 23, 1));
+    color-scheme: dark;
+  }
+
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+
+  ::selection {
+    background: rgba(46, 134, 193, 0.24);
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer components {
+  .surface-card {
+    @apply rounded-[28px] border border-border/70 bg-card/80 shadow-soft backdrop-blur;
+  }
+}
+
+@layer utilities {
+  .ltr-numbers {
+    direction: ltr;
+    unicode-bidi: embed;
+  }
+}
