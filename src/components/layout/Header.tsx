@@ -1,7 +1,8 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useTheme } from 'next-themes'
 
 type HeaderProps = {
@@ -64,13 +65,7 @@ export default function Header({
   logoutHref = '#',
 }: HeaderProps) {
   const { resolvedTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const isDark = mounted && resolvedTheme === 'dark'
+  const isDark = resolvedTheme === 'dark'
   const initials = useMemo(() => getInitials(userName), [userName])
 
   return (
@@ -98,10 +93,13 @@ export default function Header({
           <details className="relative">
             <summary className="flex cursor-pointer list-none items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-start shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800">
               {avatarUrl ? (
-                <img
+                <Image
                   src={avatarUrl}
                   alt={userName}
+                  width={40}
+                  height={40}
                   className="h-10 w-10 rounded-full object-cover"
+                  unoptimized
                 />
               ) : (
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-sm font-bold text-sky-900 dark:bg-sky-900/50 dark:text-sky-100">

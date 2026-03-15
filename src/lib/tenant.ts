@@ -1,8 +1,10 @@
 import type { Tenant } from '@prisma/client'
 import { headers } from 'next/headers'
-import { notFound } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import type { NextRequest } from 'next/server'
 
+import { env } from '@/config/env'
+import { getCacheValue, setCacheValue } from '@/lib/cache'
 import { db } from '@/lib/db'
 
 const CACHE_TTL_SECONDS = 60 * 60
@@ -14,50 +16,20 @@ type CachedTenant = Omit<Tenant, 'planExpiresAt' | 'createdAt' | 'updatedAt'> & 
   updatedAt: string
 }
 
-function normalizeHost(host: string) {
-  return host
-    .trim()
-    .toLowerCase()
-    .split(',')[0]
-    ?.trim()
-    .replace(/^https?:\/\//, '')
-    .split('/')[0]
-    .split(':')[0]
+export class TenantNotFoundError extends Error {
+  constructor(message = 'المؤسسة غير موجودة') {
+    super(message)
+    this.name = 'TenantNotFoundError'
+  }
 }
 
-function extractTenantSlug(host: string) {
-  const normalizedHost = normalizeHost(host)
+export class InactiveTenantError extends Error {
+  tenantSlug: string
 
-  if (!normalizedHost || normalizedHost === 'localhost') {
-    return null
-  }
-
-  if (normalizedHost.endsWith('.localhost')) {
-    const slug = normalizedHost.replace(/\.localhost$/, '')
-    return slug && !RESERVED_SUBDOMAINS.has(slug) ? slug : null
-  }
-
-  const parts = normalizedHost.split('.').filter(Boolean)
-
-  if (parts.length < 3) {
-    return null
-  }
-
-  const slug = parts[0]
-  return RESERVED_SUBDOMAINS.has(slug) ? null : slug
-}
-
-function canUseRedisCache() {
-  return Boolean(
-    process.env.REDIS_URL &&
-      process.env.REDIS_TOKEN &&
-      process.env.REDIS_URL.startsWith('http'),
-  )
-}
-
-function getRedisHeaders() {
-  return {
-    Authorization: `Bearer ${process.env.REDIS_TOKEN}`,
+  constructor(tenantSlug: string, message = 'المؤسسة غير مفعلة') {
+    super(message)
+    this.name = 'InactiveTenantError'
+    this.tenantSlug = tenantSlug
   }
 }
 
@@ -87,52 +59,59 @@ function deserializeTenant(payload: string) {
   }
 }
 
+export function normalizeHost(host: string) {
+  return host
+    .trim()
+    .toLowerCase()
+    .split(',')[0]
+    ?.trim()
+    .replace(/^https?:\/\//, '')
+    .split('/')[0]
+    .split(':')[0]
+}
+
+export function extractSubdomain(host: string) {
+  const normalizedHost = normalizeHost(host)
+
+  if (!normalizedHost || normalizedHost === 'localhost') {
+    return null
+  }
+
+  if (normalizedHost.endsWith('.localhost')) {
+    return normalizedHost.replace(/\.localhost$/, '') || null
+  }
+
+  const parts = normalizedHost.split('.').filter(Boolean)
+
+  if (parts.length < 3) {
+    return null
+  }
+
+  return parts[0] ?? null
+}
+
+export function extractTenantSlug(host: string) {
+  const slug = extractSubdomain(host)
+
+  if (!slug || RESERVED_SUBDOMAINS.has(slug)) {
+    return null
+  }
+
+  return slug
+}
+
 async function getCachedTenant(slug: string) {
-  if (!canUseRedisCache()) {
+  const payload = await getCacheValue(`tenant:${slug}`)
+
+  if (!payload || typeof payload !== 'string') {
     return null
   }
 
-  try {
-    const response = await fetch(
-      `${process.env.REDIS_URL}/get/${encodeURIComponent(`tenant:${slug}`)}`,
-      {
-        headers: getRedisHeaders(),
-        cache: 'no-store',
-      },
-    )
-
-    if (!response.ok) {
-      return null
-    }
-
-    const payload = (await response.json()) as { result?: string | null }
-
-    if (!payload.result || typeof payload.result !== 'string') {
-      return null
-    }
-
-    return deserializeTenant(payload.result)
-  } catch {
-    return null
-  }
+  return deserializeTenant(payload)
 }
 
 async function setCachedTenant(slug: string, tenant: Tenant) {
-  if (!canUseRedisCache()) {
-    return
-  }
-
-  try {
-    await fetch(
-      `${process.env.REDIS_URL}/setex/${encodeURIComponent(`tenant:${slug}`)}/${CACHE_TTL_SECONDS}/${encodeURIComponent(serializeTenant(tenant))}`,
-      {
-        headers: getRedisHeaders(),
-        cache: 'no-store',
-      },
-    )
-  } catch {
-    // Cache failures should not block tenant resolution.
-  }
+  await setCacheValue(`tenant:${slug}`, serializeTenant(tenant), CACHE_TTL_SECONDS)
 }
 
 async function getTenantBySlug(slug: string) {
@@ -153,7 +132,7 @@ async function getTenantBySlug(slug: string) {
   return tenant
 }
 
-async function getRequestHost(req?: NextRequest) {
+export async function getRequestHost(req?: NextRequest) {
   if (req) {
     return req.headers.get('x-forwarded-host') ?? req.headers.get('host')
   }
@@ -162,34 +141,56 @@ async function getRequestHost(req?: NextRequest) {
   return requestHeaders.get('x-forwarded-host') ?? requestHeaders.get('host')
 }
 
-async function getRequestTenantSlug(req?: NextRequest) {
-  if (req) {
-    return req.headers.get('x-tenant-slug')
-  }
-
-  const requestHeaders = await headers()
-  return requestHeaders.get('x-tenant-slug')
+function getMarketingRedirectUrl(pathname = '/') {
+  return new URL(pathname, env.NEXT_PUBLIC_APP_URL).toString()
 }
 
-export async function getTenantFromHost(host: string) {
+async function resolveTenantRecord(host: string) {
   const slug = extractTenantSlug(host)
 
   if (!slug) {
-    return null
+    throw new TenantNotFoundError()
   }
 
-  return getTenantBySlug(slug)
-}
-
-export async function requireTenant(req?: NextRequest) {
-  const requestTenantSlug = await getRequestTenantSlug(req)
-  const tenant = requestTenantSlug
-    ? await getTenantBySlug(requestTenantSlug)
-    : await getTenantFromHost((await getRequestHost(req)) ?? '')
+  const tenant = await getTenantBySlug(slug)
 
   if (!tenant) {
-    notFound()
+    throw new TenantNotFoundError()
+  }
+
+  if (!tenant.isActive) {
+    throw new InactiveTenantError(tenant.slug)
   }
 
   return tenant
+}
+
+export async function getTenantFromHost(host: string) {
+  try {
+    return await resolveTenantRecord(host)
+  } catch {
+    return null
+  }
+}
+
+export async function requireTenant(req?: NextRequest) {
+  const host = (await getRequestHost(req)) ?? ''
+
+  try {
+    return await resolveTenantRecord(host)
+  } catch (error) {
+    if (req) {
+      throw error
+    }
+
+    if (error instanceof InactiveTenantError) {
+      redirect(getMarketingRedirectUrl(`/inactive?slug=${error.tenantSlug}`))
+    }
+
+    if (error instanceof TenantNotFoundError) {
+      redirect(getMarketingRedirectUrl('/'))
+    }
+
+    throw error
+  }
 }

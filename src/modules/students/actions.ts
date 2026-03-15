@@ -1,13 +1,6 @@
 'use server'
 
-import { randomUUID } from 'node:crypto'
-
-import {
-  EnrollmentStatus,
-  Prisma,
-  type UserRole,
-  UserRole as PrismaUserRole,
-} from '@prisma/client'
+import { EnrollmentStatus, Prisma, type UserRole, UserRole as PrismaUserRole } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 
 import { ROUTES } from '@/config/routes'
@@ -15,14 +8,10 @@ import { requireAuth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { requireTenant } from '@/lib/tenant'
 
-import {
-  parseStudentFormData,
-  parseStudentImportRecord,
-  type StudentCreateInput,
-} from './validations'
+import { parseStudentFormData, parseStudentImportRecord } from './validations'
 
 const MANAGE_STUDENT_ROLES: UserRole[] = ['TEACHER', 'ASSISTANT']
-const GENERATED_PHONE_PREFIX = '__student_without_phone__'
+const ACTIVE_ENROLLMENT_STATUSES = [EnrollmentStatus.ACTIVE, EnrollmentStatus.WAITLIST]
 
 function assertCanManageStudents(role: UserRole) {
   if (!MANAGE_STUDENT_ROLES.includes(role)) {
@@ -30,27 +19,7 @@ function assertCanManageStudents(role: UserRole) {
   }
 }
 
-function isGeneratedStudentPhone(phone: string) {
-  return phone.startsWith(GENERATED_PHONE_PREFIX)
-}
-
-function createGeneratedStudentPhone() {
-  return `${GENERATED_PHONE_PREFIX}_${randomUUID()}`
-}
-
-function getStoredStudentPhone(phone?: string, currentPhone?: string) {
-  if (phone) {
-    return phone
-  }
-
-  if (currentPhone && isGeneratedStudentPhone(currentPhone)) {
-    return currentPhone
-  }
-
-  return createGeneratedStudentPhone()
-}
-
-function revalidateStudentPages(studentId?: string, groupId?: string) {
+function revalidateStudentPages(studentId?: string, groupIds: string[] = []) {
   revalidatePath(ROUTES.teacher.students)
   revalidatePath(ROUTES.teacher.newStudent)
   revalidatePath(ROUTES.teacher.importStudents)
@@ -61,7 +30,7 @@ function revalidateStudentPages(studentId?: string, groupId?: string) {
 
   revalidatePath(ROUTES.teacher.groups)
 
-  if (groupId) {
+  for (const groupId of groupIds) {
     revalidatePath(`${ROUTES.teacher.groups}/${groupId}`)
     revalidatePath(`${ROUTES.teacher.groups}/${groupId}/edit`)
   }
@@ -77,25 +46,11 @@ async function getScopedStudent(tenantId: string, studentId: string) {
   })
 }
 
-async function getScopedGroup(tenantId: string, groupId: string) {
-  return db.group.findFirst({
-    where: {
-      id: groupId,
-      tenantId,
-      isActive: true,
-    },
-  })
-}
-
 async function ensureUniqueStudentPhone(
   tenantId: string,
-  phone: string | undefined,
+  phone: string,
   currentStudentId?: string,
 ) {
-  if (!phone) {
-    return
-  }
-
   const existingUser = await db.user.findFirst({
     where: {
       tenantId,
@@ -118,83 +73,144 @@ async function ensureUniqueStudentPhone(
   }
 }
 
-async function upsertStudentEnrollment(
+async function getActiveEnrollmentGroupIds(tenantId: string, studentId: string) {
+  const enrollments = await db.groupStudent.findMany({
+    where: {
+      studentId,
+      status: {
+        in: ACTIVE_ENROLLMENT_STATUSES,
+      },
+      group: {
+        tenantId,
+      },
+    },
+    select: {
+      groupId: true,
+    },
+  })
+
+  return enrollments.map((enrollment) => enrollment.groupId)
+}
+
+async function syncStudentEnrollments(
   tx: Prisma.TransactionClient,
   tenantId: string,
   studentId: string,
-  groupId: string,
+  groupIds: string[],
 ) {
-  const [group, existingEnrollment] = await Promise.all([
-    tx.group.findFirst({
+  const uniqueGroupIds = [...new Set(groupIds)]
+
+  const [targetGroups, existingEnrollments] = await Promise.all([
+    uniqueGroupIds.length > 0
+      ? tx.group.findMany({
+          where: {
+            tenantId,
+            isActive: true,
+            id: {
+              in: uniqueGroupIds,
+            },
+          },
+          select: {
+            id: true,
+            maxCapacity: true,
+          },
+        })
+      : Promise.resolve([]),
+    tx.groupStudent.findMany({
       where: {
-        id: groupId,
-        tenantId,
-        isActive: true,
+        studentId,
+        group: {
+          tenantId,
+        },
       },
       select: {
         id: true,
-        maxCapacity: true,
-      },
-    }),
-    tx.groupStudent.findUnique({
-      where: {
-        groupId_studentId: {
-          groupId,
-          studentId,
-        },
+        groupId: true,
+        status: true,
       },
     }),
   ])
 
-  if (!group) {
-    throw new Error('المجموعة غير موجودة')
+  if (targetGroups.length !== uniqueGroupIds.length) {
+    throw new Error('إحدى المجموعات المطلوبة غير موجودة أو غير نشطة')
   }
 
-  const activeEnrollmentCount = await tx.groupStudent.count({
-    where: {
-      groupId,
-      status: EnrollmentStatus.ACTIVE,
-      group: {
-        tenantId,
-      },
-      student: {
-        tenantId,
-        role: PrismaUserRole.STUDENT,
-      },
-      ...(existingEnrollment?.status === EnrollmentStatus.ACTIVE
-        ? {
-            studentId: {
-              not: studentId,
-            },
-          }
-        : {}),
-    },
-  })
+  const existingEnrollmentMap = new Map(
+    existingEnrollments.map((enrollment) => [enrollment.groupId, enrollment]),
+  )
 
-  const nextStatus =
-    activeEnrollmentCount >= group.maxCapacity
-      ? EnrollmentStatus.WAITLIST
-      : EnrollmentStatus.ACTIVE
+  for (const group of targetGroups) {
+    const existingEnrollment = existingEnrollmentMap.get(group.id)
 
-  if (existingEnrollment) {
-    return tx.groupStudent.update({
+    const activeEnrollmentCount = await tx.groupStudent.count({
       where: {
-        id: existingEnrollment.id,
+        groupId: group.id,
+        status: EnrollmentStatus.ACTIVE,
+        group: {
+          tenantId,
+        },
+        student: {
+          tenantId,
+          role: PrismaUserRole.STUDENT,
+        },
+        ...(existingEnrollment?.status === EnrollmentStatus.ACTIVE
+          ? {
+              studentId: {
+                not: studentId,
+              },
+            }
+          : {}),
       },
+    })
+
+    const nextStatus =
+      activeEnrollmentCount >= group.maxCapacity
+        ? EnrollmentStatus.WAITLIST
+        : EnrollmentStatus.ACTIVE
+
+    if (existingEnrollment) {
+      await tx.groupStudent.update({
+        where: {
+          id: existingEnrollment.id,
+        },
+        data: {
+          status: nextStatus,
+          droppedAt: null,
+        },
+      })
+      continue
+    }
+
+    await tx.groupStudent.create({
       data: {
+        groupId: group.id,
+        studentId,
         status: nextStatus,
-        droppedAt: null,
       },
     })
   }
 
-  return tx.groupStudent.create({
-    data: {
-      groupId,
-      studentId,
-      status: nextStatus,
-    },
-  })
+  const groupIdsToDrop = existingEnrollments
+    .filter(
+      (enrollment) =>
+        !uniqueGroupIds.includes(enrollment.groupId) &&
+        enrollment.status !== EnrollmentStatus.DROPPED,
+    )
+    .map((enrollment) => enrollment.id)
+
+  if (groupIdsToDrop.length > 0) {
+    await tx.groupStudent.updateMany({
+      where: {
+        id: {
+          in: groupIdsToDrop,
+        },
+      },
+      data: {
+        status: EnrollmentStatus.DROPPED,
+        droppedAt: new Date(),
+      },
+    })
+  }
 }
 
 function getImportErrorMessage(error: unknown) {
@@ -227,26 +243,26 @@ export async function createStudent(formData: FormData) {
         tenantId: tenant.id,
         role: PrismaUserRole.STUDENT,
         name: data.name,
-        phone: getStoredStudentPhone(data.phone),
+        phone: data.phone,
         parentName: data.parentName,
         parentPhone: data.parentPhone,
         gradeLevel: data.gradeLevel,
       },
     })
 
-    const enrollment = data.groupId
-      ? await upsertStudentEnrollment(tx, tenant.id, student.id, data.groupId)
-      : null
-
-    return {
-      student,
-      enrollment,
+    if (data.syncGroups) {
+      await syncStudentEnrollments(tx, tenant.id, student.id, data.groupIds)
     }
+
+    return student
   })
 
-  revalidateStudentPages(result.student.id, data.groupId)
+  revalidateStudentPages(result.id, data.groupIds)
 
-  return result
+  return {
+    student: result,
+    groupIds: data.groupIds,
+  }
 }
 
 export async function updateStudent(studentId: string, formData: FormData) {
@@ -261,6 +277,7 @@ export async function updateStudent(studentId: string, formData: FormData) {
     throw new Error('الطالب غير موجود')
   }
 
+  const currentGroupIds = await getActiveEnrollmentGroupIds(tenant.id, existingStudent.id)
   const data = parseStudentFormData(formData)
 
   await ensureUniqueStudentPhone(tenant.id, data.phone, existingStudent.id)
@@ -272,93 +289,83 @@ export async function updateStudent(studentId: string, formData: FormData) {
       },
       data: {
         name: data.name,
-        phone: getStoredStudentPhone(data.phone, existingStudent.phone),
+        phone: data.phone,
         parentName: data.parentName,
         parentPhone: data.parentPhone,
         gradeLevel: data.gradeLevel,
       },
     })
 
-    const enrollment = data.groupId
-      ? await upsertStudentEnrollment(tx, tenant.id, student.id, data.groupId)
-      : null
-
-    return {
-      student,
-      enrollment,
+    if (data.syncGroups) {
+      await syncStudentEnrollments(tx, tenant.id, student.id, data.groupIds)
     }
+
+    return student
   })
 
-  revalidateStudentPages(existingStudent.id, data.groupId)
+  revalidateStudentPages(
+    existingStudent.id,
+    data.syncGroups ? [...new Set([...currentGroupIds, ...data.groupIds])] : currentGroupIds,
+  )
 
-  return result
+  return {
+    student: result,
+    groupIds: data.syncGroups ? data.groupIds : currentGroupIds,
+  }
 }
 
-export async function enrollInGroup(studentId: string, groupId: string) {
+export async function syncStudentGroups(studentId: string, groupIds: string[]) {
   const tenant = await requireTenant()
   const user = await requireAuth()
 
   assertCanManageStudents(user.role)
 
-  const [student, group] = await Promise.all([
-    getScopedStudent(tenant.id, studentId),
-    getScopedGroup(tenant.id, groupId),
-  ])
+  const student = await getScopedStudent(tenant.id, studentId)
 
   if (!student) {
     throw new Error('الطالب غير موجود')
   }
 
-  if (!group) {
-    throw new Error('المجموعة غير موجودة')
-  }
+  const currentGroupIds = await getActiveEnrollmentGroupIds(tenant.id, student.id)
 
-  const enrollment = await db.$transaction((tx) =>
-    upsertStudentEnrollment(tx, tenant.id, student.id, group.id),
+  await db.$transaction((tx) =>
+    syncStudentEnrollments(tx, tenant.id, student.id, groupIds),
   )
 
-  revalidateStudentPages(student.id, group.id)
+  revalidateStudentPages(student.id, [...new Set([...currentGroupIds, ...groupIds])])
 
-  return enrollment
+  return {
+    studentId: student.id,
+    groupIds,
+  }
+}
+
+export async function enrollInGroup(studentId: string, groupId: string) {
+  const tenant = await requireTenant()
+  const currentGroupIds = await getActiveEnrollmentGroupIds(tenant.id, studentId)
+
+  if (currentGroupIds.includes(groupId)) {
+    return {
+      studentId,
+      groupIds: currentGroupIds,
+    }
+  }
+
+  return syncStudentGroups(studentId, [...currentGroupIds, groupId])
 }
 
 export async function removeFromGroup(studentId: string, groupId: string) {
   const tenant = await requireTenant()
-  const user = await requireAuth()
+  const currentGroupIds = await getActiveEnrollmentGroupIds(tenant.id, studentId)
 
-  assertCanManageStudents(user.role)
-
-  const enrollment = await db.groupStudent.findFirst({
-    where: {
-      studentId,
-      groupId,
-      group: {
-        tenantId: tenant.id,
-      },
-      student: {
-        tenantId: tenant.id,
-        role: PrismaUserRole.STUDENT,
-      },
-    },
-  })
-
-  if (!enrollment) {
+  if (!currentGroupIds.includes(groupId)) {
     throw new Error('الطالب غير مسجل في هذه المجموعة')
   }
 
-  const updatedEnrollment = await db.groupStudent.update({
-    where: {
-      id: enrollment.id,
-    },
-    data: {
-      status: EnrollmentStatus.DROPPED,
-      droppedAt: new Date(),
-    },
-  })
-
-  revalidateStudentPages(studentId, groupId)
-
-  return updatedEnrollment
+  return syncStudentGroups(
+    studentId,
+    currentGroupIds.filter((currentGroupId) => currentGroupId !== groupId),
+  )
 }
 
 export async function bulkImport(
@@ -382,10 +389,8 @@ export async function bulkImport(
   }> = []
 
   for (const [index, record] of records.entries()) {
-    let parsedRecord: StudentCreateInput
-
     try {
-      parsedRecord = parseStudentImportRecord(record)
+      const parsedRecord = parseStudentImportRecord(record)
       await ensureUniqueStudentPhone(tenant.id, parsedRecord.phone)
 
       const createdStudent = await db.$transaction(async (tx) => {
@@ -394,21 +399,14 @@ export async function bulkImport(
             tenantId: tenant.id,
             role: PrismaUserRole.STUDENT,
             name: parsedRecord.name,
-            phone: getStoredStudentPhone(parsedRecord.phone),
+            phone: parsedRecord.phone,
             parentName: parsedRecord.parentName,
             parentPhone: parsedRecord.parentPhone,
             gradeLevel: parsedRecord.gradeLevel,
           },
         })
 
-        if (parsedRecord.groupId) {
-          await upsertStudentEnrollment(
-            tx,
-            tenant.id,
-            student.id,
-            parsedRecord.groupId,
-          )
-        }
+        await syncStudentEnrollments(tx, tenant.id, student.id, parsedRecord.groupIds)
 
         return student
       })

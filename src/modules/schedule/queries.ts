@@ -1,4 +1,8 @@
-import { EnrollmentStatus, UserRole } from '@prisma/client'
+import {
+  AttendanceStatus,
+  EnrollmentStatus,
+  UserRole,
+} from '@prisma/client'
 
 import type { DayOfWeek } from '@/types'
 import { db } from '@/lib/db'
@@ -12,6 +16,10 @@ const DAY_ORDER: DayOfWeek[] = [
   'thursday',
   'friday',
 ]
+const ATTENDED_STATUSES: AttendanceStatus[] = [
+  AttendanceStatus.PRESENT,
+  AttendanceStatus.LATE,
+]
 
 type ConflictType = 'teacher' | 'teacher_and_room'
 
@@ -22,12 +30,6 @@ function isDayOfWeek(value: string): value is DayOfWeek {
 function getMinutesFromTime(time: string) {
   const [hours, minutes] = time.split(':').map(Number)
   return hours * 60 + minutes
-}
-
-function formatTimeFromMinutes(totalMinutes: number) {
-  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0')
-  const minutes = String(totalMinutes % 60).padStart(2, '0')
-  return `${hours}:${minutes}`
 }
 
 function normalizeRoom(room?: string | null) {
@@ -223,4 +225,34 @@ export async function getWeeklySchedule(tenantId: string) {
     days: entriesByDay,
     timeSlots,
   }
+}
+
+export async function getRecentGroupSessions(
+  tenantId: string,
+  groupId: string,
+  take = 6,
+) {
+  const sessions = await db.session.findMany({
+    where: {
+      tenantId,
+      groupId,
+    },
+    orderBy: [{ date: 'desc' }, { timeStart: 'desc' }],
+    take,
+    include: {
+      attendance: {
+        select: {
+          status: true,
+        },
+      },
+    },
+  })
+
+  return sessions.map(({ attendance, ...session }) => ({
+    ...session,
+    attendanceCount: attendance.length,
+    attendedCount: attendance.filter((record) =>
+      ATTENDED_STATUSES.includes(record.status),
+    ).length,
+  }))
 }

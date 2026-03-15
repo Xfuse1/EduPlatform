@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
+import { errorResponse } from '@/lib/api-response'
 
-export async function GET() {
-  return NextResponse.json({ message: 'Not implemented' }, { status: 501 })
+export async function POST() {
+  return errorResponse('NOT_READY', 'هذا المسار سيُستكمل مع موديول الإشعارات', 503)
 }

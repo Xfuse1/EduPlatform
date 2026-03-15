@@ -1,63 +1,25 @@
-import {
-  AttendanceStatus,
-  EnrollmentStatus,
-  PaymentStatus,
-  UserRole,
-} from '@prisma/client'
+import { EnrollmentStatus, PaymentStatus, UserRole } from '@prisma/client'
 
 import { db } from '@/lib/db'
+import {
+  getAttendanceRate,
+  getRecentAttendance,
+} from '@/modules/attendance/queries'
+import {
+  getCurrentMonthPaymentStatusMap,
+  getStudentPaymentHistory,
+  resolvePaymentStatus,
+} from '@/modules/payments/queries'
 
 const ACTIVE_ENROLLMENT_STATUSES = [
   EnrollmentStatus.ACTIVE,
   EnrollmentStatus.WAITLIST,
 ]
 
-const ATTENDED_STATUSES = [AttendanceStatus.PRESENT, AttendanceStatus.LATE]
-
 type GetStudentsFilters = {
   search?: string
   groupId?: string
   paymentStatus?: PaymentStatus
-}
-
-function getCurrentMonthKey(date = new Date()) {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    timeZone: 'Africa/Cairo',
-  }).formatToParts(date)
-
-  const year = parts.find((part) => part.type === 'year')?.value
-  const month = parts.find((part) => part.type === 'month')?.value
-
-  return `${year}-${month}`
-}
-
-function getAttendanceWindowStart(date = new Date()) {
-  const startDate = new Date(date)
-  startDate.setDate(startDate.getDate() - 30)
-  startDate.setHours(0, 0, 0, 0)
-  return startDate
-}
-
-function resolvePaymentStatus(statuses: PaymentStatus[]) {
-  if (statuses.includes(PaymentStatus.OVERDUE)) {
-    return PaymentStatus.OVERDUE
-  }
-
-  if (statuses.includes(PaymentStatus.PENDING)) {
-    return PaymentStatus.PENDING
-  }
-
-  if (statuses.includes(PaymentStatus.PARTIAL)) {
-    return PaymentStatus.PARTIAL
-  }
-
-  if (statuses.includes(PaymentStatus.PAID)) {
-    return PaymentStatus.PAID
-  }
-
-  return PaymentStatus.PENDING
 }
 
 function buildStudentSearchFilter(search?: string) {
@@ -107,78 +69,6 @@ function mapEnrollmentsToGroups<
     enrolledAt: enrollment.enrolledAt,
     droppedAt: enrollment.droppedAt,
   }))
-}
-
-function getStudentPaymentStatusMap<
-  TPayment extends {
-    studentId: string
-    status: PaymentStatus
-  },
->(payments: TPayment[]) {
-  return payments.reduce<Record<string, PaymentStatus[]>>((accumulator, payment) => {
-    accumulator[payment.studentId] ??= []
-    accumulator[payment.studentId].push(payment.status)
-    return accumulator
-  }, {})
-}
-
-async function getCurrentMonthPaymentStatusMap(
-  tenantId: string,
-  studentIds: string[],
-) {
-  if (studentIds.length === 0) {
-    return {}
-  }
-
-  const payments = await db.payment.findMany({
-    where: {
-      tenantId,
-      month: getCurrentMonthKey(),
-      studentId: {
-        in: studentIds,
-      },
-    },
-    select: {
-      studentId: true,
-      status: true,
-    },
-  })
-
-  return getStudentPaymentStatusMap(payments)
-}
-
-async function getAttendanceRateForStudent(tenantId: string, studentId: string) {
-  const startDate = getAttendanceWindowStart()
-
-  const [totalAttendanceRecords, attendedRecords] = await Promise.all([
-    db.attendance.count({
-      where: {
-        tenantId,
-        studentId,
-        createdAt: {
-          gte: startDate,
-        },
-      },
-    }),
-    db.attendance.count({
-      where: {
-        tenantId,
-        studentId,
-        createdAt: {
-          gte: startDate,
-        },
-        status: {
-          in: ATTENDED_STATUSES,
-        },
-      },
-    }),
-  ])
-
-  if (totalAttendanceRecords === 0) {
-    return 0
-  }
-
-  return Math.round((attendedRecords / totalAttendanceRecords) * 100)
 }
 
 export async function getStudents(
@@ -277,23 +167,6 @@ export async function getStudentById(tenantId: string, studentId: string) {
           group: true,
         },
       },
-      studentPayments: {
-        where: {
-          tenantId,
-        },
-        orderBy: [{ month: 'desc' }, { createdAt: 'desc' }],
-      },
-      attendanceRecords: {
-        where: {
-          tenantId,
-        },
-        orderBy: [{ createdAt: 'desc' }],
-        take: 20,
-        include: {
-          group: true,
-          session: true,
-        },
-      },
     },
   })
 
@@ -301,14 +174,18 @@ export async function getStudentById(tenantId: string, studentId: string) {
     return null
   }
 
+  const [paymentHistory, recentAttendance, paymentStatusMap] = await Promise.all([
+    getStudentPaymentHistory(tenantId, studentId),
+    getRecentAttendance(tenantId, studentId, 20),
+    getCurrentMonthPaymentStatusMap(tenantId, [studentId]),
+  ])
+
   return {
     ...student,
     groups: mapEnrollmentsToGroups(student.enrollments),
-    paymentStatus: resolvePaymentStatus(
-      student.studentPayments
-        .filter((payment) => payment.month === getCurrentMonthKey())
-        .map((payment) => payment.status),
-    ),
+    studentPayments: paymentHistory,
+    attendanceRecords: recentAttendance,
+    paymentStatus: resolvePaymentStatus(paymentStatusMap[student.id] ?? []),
   }
 }
 
@@ -335,25 +212,6 @@ export async function getStudentProfile(tenantId: string, studentId: string) {
           group: true,
         },
       },
-      studentPayments: {
-        where: {
-          tenantId,
-        },
-        orderBy: [{ month: 'desc' }, { createdAt: 'desc' }],
-      },
-      attendanceRecords: {
-        where: {
-          tenantId,
-          createdAt: {
-            gte: getAttendanceWindowStart(),
-          },
-        },
-        orderBy: [{ createdAt: 'desc' }],
-        include: {
-          group: true,
-          session: true,
-        },
-      },
     },
   })
 
@@ -361,23 +219,25 @@ export async function getStudentProfile(tenantId: string, studentId: string) {
     return null
   }
 
-  const attendanceRate = await getAttendanceRateForStudent(tenantId, studentId)
+  const [attendanceRate, paymentHistory, recentAttendance, paymentStatusMap] =
+    await Promise.all([
+      getAttendanceRate(tenantId, studentId),
+      getStudentPaymentHistory(tenantId, studentId),
+      getRecentAttendance(tenantId, studentId, 10),
+      getCurrentMonthPaymentStatusMap(tenantId, [studentId]),
+    ])
 
   return {
     student,
     attendanceRate,
-    paymentStatus: resolvePaymentStatus(
-      student.studentPayments
-        .filter((payment) => payment.month === getCurrentMonthKey())
-        .map((payment) => payment.status),
-    ),
-    paymentHistory: student.studentPayments,
+    paymentStatus: resolvePaymentStatus(paymentStatusMap[studentId] ?? []),
+    paymentHistory,
     enrolledGroups: mapEnrollmentsToGroups(student.enrollments).filter(
       (group) =>
         group.enrollmentStatus === EnrollmentStatus.ACTIVE ||
         group.enrollmentStatus === EnrollmentStatus.WAITLIST,
     ),
-    recentAttendance: student.attendanceRecords,
+    recentAttendance,
   }
 }
 

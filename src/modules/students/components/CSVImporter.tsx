@@ -27,6 +27,7 @@ type ImportField =
 
 const requiredFields: ImportField[] = [
   'name',
+  'phone',
   'parentName',
   'parentPhone',
   'gradeLevel',

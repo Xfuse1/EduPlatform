@@ -36,6 +36,37 @@ async function getScopedGroup(tenantId: string, groupId: string) {
   })
 }
 
+async function ensureUniqueGroupName(
+  tenantId: string,
+  name: string,
+  currentGroupId?: string,
+) {
+  const existingGroup = await db.group.findFirst({
+    where: {
+      tenantId,
+      isActive: true,
+      ...(currentGroupId
+        ? {
+            id: {
+              not: currentGroupId,
+            },
+          }
+        : {}),
+      name: {
+        equals: name,
+        mode: 'insensitive',
+      },
+    },
+    select: {
+      id: true,
+    },
+  })
+
+  if (existingGroup) {
+    throw new Error('توجد مجموعة أخرى بنفس الاسم داخل نفس المؤسسة')
+  }
+}
+
 export async function createGroup(formData: FormData) {
   const tenant = await requireTenant()
   const user = await requireAuth()
@@ -43,6 +74,7 @@ export async function createGroup(formData: FormData) {
   assertCanManageGroups(user.role)
 
   const data = parseGroupFormData(formData)
+  await ensureUniqueGroupName(tenant.id, data.name)
 
   const group = await db.group.create({
     data: {
@@ -70,6 +102,7 @@ export async function updateGroup(groupId: string, formData: FormData) {
   }
 
   const data = parseGroupFormData(formData)
+  await ensureUniqueGroupName(tenant.id, data.name, existingGroup.id)
 
   const group = await db.group.update({
     where: {

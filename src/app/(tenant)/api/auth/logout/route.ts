@@ -1,5 +1,33 @@
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-export async function GET() {
-  return NextResponse.json({ message: 'Not implemented' }, { status: 501 })
+import {
+  clearSessionCookie,
+  getSessionToken,
+} from '@/lib/auth'
+import { successResponse } from '@/lib/api-response'
+import { ROUTES } from '@/config/routes'
+import { logout } from '@/modules/auth/actions'
+
+async function buildLogoutResponse(request: NextRequest, redirectToLogin: boolean) {
+  const token = await getSessionToken(request)
+  await logout(token)
+
+  if (redirectToLogin) {
+    const response = NextResponse.redirect(new URL(ROUTES.auth.login, request.url))
+    clearSessionCookie(response)
+    return response
+  }
+
+  const response = successResponse({ success: true })
+  clearSessionCookie(response)
+  return response
+}
+
+export async function GET(request: NextRequest) {
+  return buildLogoutResponse(request, true)
+}
+
+export async function POST(request: NextRequest) {
+  return buildLogoutResponse(request, false)
 }
