@@ -75,7 +75,7 @@ export function Sidebar({ role }: { role: Role; currentPath: string }) {
 
             return (
               <Link
-                key={item.href}
+                key={`${item.href}-${item.label}`}
                 href={item.href}
                 className={cn(
                   "group relative flex min-h-[52px] items-center justify-between gap-3 overflow-hidden rounded-[22px] px-4 py-3 text-sm font-semibold transition duration-300",
