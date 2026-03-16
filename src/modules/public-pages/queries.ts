@@ -1,69 +1,31 @@
 import { cache } from "react";
 
-import { db } from "@/lib/db";
+import { MOCK_GROUPS, MOCK_TENANT } from "@/lib/mock-data";
 
-export const getTeacherPublicProfile = cache(async (tenantId: string) => {
-  return db.tenant.findFirst({
-    where: {
-      id: tenantId,
-      isActive: true,
-    },
-    select: {
-      id: true,
-      name: true,
-      logoUrl: true,
-      themeColor: true,
-      region: true,
-      bio: true,
-      subjects: true,
-    },
-  });
+export const getTeacherPublicProfile = cache(async (_tenantId: string) => {
+  return {
+    id: MOCK_TENANT.id,
+    name: MOCK_TENANT.name,
+    logoUrl: MOCK_TENANT.logoUrl,
+    themeColor: MOCK_TENANT.themeColor,
+    region: MOCK_TENANT.region,
+    bio: MOCK_TENANT.bio,
+    subjects: MOCK_TENANT.subjects,
+  };
 });
 
-export const getOpenGroups = cache(async (tenantId: string) => {
-  const groups = await db.group.findMany({
-    where: {
-      tenantId,
-      isActive: true,
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
-    select: {
-      id: true,
-      name: true,
-      days: true,
-      timeStart: true,
-      timeEnd: true,
-      monthlyFee: true,
-      maxCapacity: true,
-      color: true,
-      students: {
-        where: {
-          status: "ACTIVE",
-        },
-        select: {
-          id: true,
-        },
-      },
-    },
-  });
-
-  return groups.map((group) => {
-    const enrolledCount = group.students.length;
-
-    return {
-      id: group.id,
-      name: group.name,
-      days: group.days,
-      timeStart: group.timeStart,
-      timeEnd: group.timeEnd,
-      monthlyFee: group.monthlyFee,
-      maxCapacity: group.maxCapacity,
-      enrolledCount,
-      remainingCapacity: Math.max(group.maxCapacity - enrolledCount, 0),
-      color: group.color,
-      isFull: enrolledCount >= group.maxCapacity,
-    };
-  });
+export const getOpenGroups = cache(async (_tenantId: string) => {
+  return MOCK_GROUPS.map((group) => ({
+    id: group.id,
+    name: group.name,
+    days: group.days,
+    timeStart: group.timeStart,
+    timeEnd: group.timeEnd,
+    monthlyFee: group.monthlyFee,
+    maxCapacity: group.maxCapacity,
+    enrolledCount: group.enrolledCount,
+    remainingCapacity: Math.max(group.maxCapacity - group.enrolledCount, 0),
+    color: group.color,
+    isFull: group.enrolledCount >= group.maxCapacity,
+  }));
 });

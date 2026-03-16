@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { db } from "@/lib/db";
+import { MOCK_PARENT_NEXT_SESSION, MOCK_STUDENT_NEXT_SESSION, MOCK_TEACHER_ALERTS } from "@/lib/mock-data";
 import { getAttendanceOverview, getStudentAttendanceSnapshot, getTodaySessions } from "@/modules/attendance/queries";
 import { getRevenueSummary, getStudentPaymentSnapshot } from "@/modules/payments/queries";
 import { getParentChildren, getStudentCountSummary, getStudentProfile } from "@/modules/students/queries";
@@ -11,19 +11,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
     getTodaySessions(tenantId),
     getStudentCountSummary(tenantId),
     getAttendanceOverview(tenantId),
-    db.payment.findMany({
-      where: {
-        tenantId,
-        status: { in: ["OVERDUE", "PENDING"] },
-      },
-      take: 3,
-      orderBy: { updatedAt: "desc" },
-      select: {
-        id: true,
-        amount: true,
-        student: { select: { name: true } },
-      },
-    }),
+    Promise.resolve(MOCK_TEACHER_ALERTS),
   ]);
 
   return {
@@ -38,6 +26,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
     todaySessions,
     alerts: overdueStudents.map((item) => ({
       id: item.id,
+      studentName: item.student.name,
       message: `مبلغ متأخر على ${item.student.name}`,
       amount: item.amount,
       severity: "high" as const,
@@ -46,34 +35,13 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
 });
 
 export const getStudentDashboardData = cache(async (tenantId: string, studentId: string) => {
-  const [profile, attendance, payment, nextSession] = await Promise.all([
+  const [profile, attendance, payment] = await Promise.all([
     getStudentProfile(tenantId, studentId),
     getStudentAttendanceSnapshot(tenantId, studentId),
     getStudentPaymentSnapshot(tenantId, studentId),
-    db.session.findFirst({
-      where: {
-        tenantId,
-        group: {
-          students: {
-            some: {
-              studentId,
-              status: "ACTIVE",
-            },
-          },
-        },
-        date: { gte: new Date() },
-      },
-      orderBy: [{ date: "asc" }, { timeStart: "asc" }],
-      select: {
-        date: true,
-        timeStart: true,
-        timeEnd: true,
-        group: { select: { name: true } },
-      },
-    }),
   ]);
 
-  return { profile, attendance, payment, nextSession };
+  return { profile, attendance, payment, nextSession: MOCK_STUDENT_NEXT_SESSION };
 });
 
 export const getParentDashboardData = cache(async (tenantId: string, parentId: string) => {
@@ -81,57 +49,9 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
 
   const childrenData = await Promise.all(
     children.map(async ({ student }) => {
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      const todayEnd = new Date();
-      todayEnd.setHours(23, 59, 59, 999);
-
-      const [attendance, payment, todaySession, attendanceRecord, nextSession] = await Promise.all([
+      const [attendance, payment] = await Promise.all([
         getStudentAttendanceSnapshot(tenantId, student.id),
         getStudentPaymentSnapshot(tenantId, student.id),
-        db.session.findFirst({
-          where: {
-            tenantId,
-            group: {
-              students: {
-                some: {
-                  studentId: student.id,
-                  status: "ACTIVE",
-                },
-              },
-            },
-            date: { gte: todayStart, lte: todayEnd },
-          },
-          select: { id: true },
-        }),
-        db.attendance.findFirst({
-          where: {
-            tenantId,
-            studentId: student.id,
-            session: { date: { gte: todayStart, lte: todayEnd } },
-          },
-          select: { status: true },
-        }),
-        db.session.findFirst({
-          where: {
-            tenantId,
-            group: {
-              students: {
-                some: {
-                  studentId: student.id,
-                  status: "ACTIVE",
-                },
-              },
-            },
-            date: { gt: new Date() },
-          },
-          orderBy: [{ date: "asc" }, { timeStart: "asc" }],
-          select: {
-            date: true,
-            timeStart: true,
-            group: { select: { name: true } },
-          },
-        }),
       ]);
 
       return {
@@ -140,8 +60,8 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
         grade: student.gradeLevel ?? "غير محدد",
         attendanceRate: attendance.rate,
         payment,
-        todayStatus: attendanceRecord?.status ?? (todaySession ? "NO_RECORD" : "NO_SESSION"),
-        nextSession,
+        todayStatus: "PRESENT",
+        nextSession: MOCK_PARENT_NEXT_SESSION,
       };
     }),
   );

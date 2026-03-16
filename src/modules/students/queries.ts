@@ -1,80 +1,15 @@
 import { cache } from "react";
 
-import { db } from "@/lib/db";
+import { MOCK_PARENT_CHILDREN, MOCK_STUDENT_COUNT_SUMMARY, MOCK_STUDENT_PROFILE } from "@/lib/mock-data";
 
-export const getStudentCountSummary = cache(async (tenantId: string) => {
-  const total = await db.user.count({
-    where: { tenantId, role: "STUDENT", isActive: true },
-  });
-
-  const recentDate = new Date();
-  recentDate.setDate(recentDate.getDate() - 30);
-
-  const recent = await db.user.count({
-    where: {
-      tenantId,
-      role: "STUDENT",
-      isActive: true,
-      createdAt: { gte: recentDate },
-    },
-  });
-
-  return { total, recent };
+export const getStudentCountSummary = cache(async (_tenantId: string) => {
+  return MOCK_STUDENT_COUNT_SUMMARY;
 });
 
-export const getStudentProfile = cache(async (tenantId: string, studentId: string) => {
-  return db.user.findFirst({
-    where: { tenantId, id: studentId, role: "STUDENT" },
-    select: {
-      id: true,
-      name: true,
-      gradeLevel: true,
-      enrollments: {
-        where: { status: "ACTIVE", group: { tenantId } },
-        select: {
-          group: {
-            select: {
-              id: true,
-              name: true,
-              timeStart: true,
-              timeEnd: true,
-              days: true,
-            },
-          },
-        },
-      },
-    },
-  });
+export const getStudentProfile = cache(async (_tenantId: string, _studentId: string) => {
+  return MOCK_STUDENT_PROFILE;
 });
 
-export const getParentChildren = cache(async (tenantId: string, parentId: string) => {
-  return db.parentStudent.findMany({
-    where: {
-      parentId,
-      parent: { tenantId },
-      student: { tenantId },
-    },
-    select: {
-      student: {
-        select: {
-          id: true,
-          name: true,
-          gradeLevel: true,
-          enrollments: {
-            where: { status: "ACTIVE", group: { tenantId } },
-            select: {
-              group: {
-                select: {
-                  name: true,
-                  days: true,
-                  timeStart: true,
-                  timeEnd: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
+export const getParentChildren = cache(async (_tenantId: string, _parentId: string) => {
+  return MOCK_PARENT_CHILDREN;
 });

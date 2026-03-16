@@ -1,5 +1,6 @@
 'use client';
 
+import { CheckCircle2, TimerReset } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
@@ -86,16 +87,30 @@ export function OTPInput({ phone, tenantName }: { phone: string; tenantName: str
   };
 
   return (
-    <Card className="overflow-hidden">
-      <div className="bg-primary px-6 py-8 text-center text-white sm:px-8">
-        <p className="text-sm font-medium text-white/80">{tenantName}</p>
-        <h1 className="mt-3 text-2xl font-extrabold">أدخل كود التحقق</h1>
+    <Card className="overflow-hidden rounded-[24px] border-slate-200/80 dark:border-slate-800">
+      <div className="bg-[linear-gradient(135deg,_#163b54,_#1A5276_45%,_#2E86C1)] px-6 py-8 text-center text-white sm:px-8">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-white/10">
+          <CheckCircle2 className="h-8 w-8" />
+        </div>
+        <p className="mt-4 text-sm font-medium text-white/80">{tenantName}</p>
+        <h1 className="mt-3 text-3xl font-extrabold">أدخل كود التحقق</h1>
         <p className="mt-3 text-sm leading-7 text-white/90">
-          أدخل كود التحقق المرسل إلى <span dir="ltr">{phone}</span>
+          أدخل الكود المرسل إلى <span dir="ltr">{phone}</span>
         </p>
       </div>
 
-      <CardContent className="p-6 sm:p-8">
+      <CardContent className="space-y-6 p-6 sm:p-8">
+        <div className="flex items-center justify-between rounded-[16px] bg-slate-50 px-4 py-3 dark:bg-slate-900/70">
+          <div className="text-start">
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">مدة صلاحية الكود</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">يرجى إدخال الرمز قبل انتهاء العد التنازلي</p>
+          </div>
+          <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-primary shadow-sm dark:bg-slate-800">
+            <TimerReset className="h-4 w-4" />
+            <span dir="ltr">{secondsLeft}</span>
+          </div>
+        </div>
+
         <div className="flex items-center justify-between gap-2" dir="ltr">
           {digits.map((digit, index) => (
             <input
@@ -103,7 +118,7 @@ export function OTPInput({ phone, tenantName }: { phone: string; tenantName: str
               ref={(element) => {
                 inputsRef.current[index] = element;
               }}
-              className="touch-target h-12 w-12 rounded-2xl border border-slate-300 text-center text-xl font-bold text-slate-900 outline-none transition focus:border-secondary sm:h-14 sm:w-14"
+              className="touch-target h-14 w-14 rounded-xl border border-slate-300 bg-white text-center text-2xl font-extrabold text-slate-900 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15 dark:border-slate-700 dark:bg-slate-900 dark:text-white sm:h-14 sm:w-14"
               inputMode="numeric"
               maxLength={1}
               onChange={(event) => handleChange(index, event.target.value)}
@@ -113,22 +128,30 @@ export function OTPInput({ phone, tenantName }: { phone: string; tenantName: str
           ))}
         </div>
 
-        {error ? <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p> : null}
+        {error ? (
+          <p className="rounded-[16px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200">
+            {error}
+          </p>
+        ) : null}
 
-        <div className="mt-6 text-center text-sm text-slate-600">
+        <div className="rounded-[16px] border border-slate-200 bg-white px-4 py-4 text-center dark:border-slate-800 dark:bg-slate-900">
           {secondsLeft > 0 ? (
-            <p>
+            <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
               يمكنك إعادة الإرسال بعد <span dir="ltr">{secondsLeft}</span> ثانية
             </p>
           ) : (
-            <button className="touch-target font-semibold text-primary" onClick={handleResend} type="button">
+            <button
+              className="touch-target inline-flex min-h-11 items-center justify-center rounded-xl bg-primary/10 px-5 py-3 text-sm font-bold text-primary transition hover:bg-primary/15 dark:bg-sky-400/10 dark:text-sky-300"
+              onClick={handleResend}
+              type="button"
+            >
               إعادة إرسال الكود
             </button>
           )}
         </div>
 
-        <Button className="mt-6 w-full" disabled={isPending || code.length !== OTP_LENGTH}>
-          {isPending ? "جارٍ التحقق..." : "جارٍ انتظار اكتمال الكود"}
+        <Button className="w-full text-base" disabled={isPending || code.length !== OTP_LENGTH}>
+          {isPending ? "جارٍ التحقق..." : "بانتظار اكتمال إدخال الكود"}
         </Button>
       </CardContent>
     </Card>

@@ -38,7 +38,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <AppShell currentPath={currentPath} role={role} tenantName={tenant.name}>
+    <AppShell currentPath={currentPath} role={role} tenantName={tenant.name} userName={user.name}>
       {children}
     </AppShell>
   );

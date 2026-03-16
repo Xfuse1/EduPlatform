@@ -6,6 +6,14 @@
 
 :root {
   color-scheme: light;
+  --chart-card-bg: #ffffff;
+  --chart-grid: #cbd5e1;
+  --chart-text: #334155;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-border: #cbd5e1;
+  --chart-primary: #1a5276;
+  --chart-primary-fill: rgba(26, 82, 118, 0.18);
+  --chart-success: #27ae60;
 }
 
 html {
@@ -13,12 +21,24 @@ html {
 }
 
 body {
-  @apply min-h-screen bg-slate-50 text-slate-900 antialiased;
+  @apply min-h-screen bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100;
   font-family: "Cairo", "Tajawal", sans-serif;
 }
 
 * {
-  @apply border-slate-200;
+  @apply border-slate-200 dark:border-slate-800;
+}
+
+.dark {
+  color-scheme: dark;
+  --chart-card-bg: #1e293b;
+  --chart-grid: #334155;
+  --chart-text: #e2e8f0;
+  --chart-tooltip-bg: #0f172a;
+  --chart-tooltip-border: #334155;
+  --chart-primary: #5dade2;
+  --chart-primary-fill: rgba(93, 173, 226, 0.18);
+  --chart-success: #58d68d;
 }
 
 a,
@@ -32,4 +52,20 @@ textarea {
 .touch-target {
   min-width: 44px;
   min-height: 44px;
+}
+
+.page-enter {
+  animation: page-enter 0.45s ease-out;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 
-import { db } from "@/lib/db";
+import { MOCK_TENANT } from "@/lib/mock-data";
 
 export type ResolvedTenant = {
   id: string;
@@ -12,6 +12,7 @@ export type ResolvedTenant = {
   region: string | null;
   bio: string | null;
   subjects: string[];
+  plan: "FREE";
 };
 
 export async function getTenantFromHost(host: string) {
@@ -27,50 +28,17 @@ export async function getTenantFromHost(host: string) {
   }
 
   if (!slug || slug === "www" || slug === "app") {
-    return null;
+    return MOCK_TENANT;
   }
 
-  return db.tenant.findFirst({
-    where: {
-      slug,
-      isActive: true,
-    },
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      logoUrl: true,
-      themeColor: true,
-      region: true,
-      bio: true,
-      subjects: true,
-    },
-  });
+  return slug === MOCK_TENANT.slug ? MOCK_TENANT : MOCK_TENANT;
 }
 
 export async function requireTenant() {
   const headerStore = await headers();
-  const host = headerStore.get("host") ?? "";
-  const forcedSlug = headerStore.get("x-tenant-slug");
-
-  const tenant = forcedSlug
-    ? await db.tenant.findFirst({
-        where: {
-          slug: forcedSlug,
-          isActive: true,
-        },
-        select: {
-          id: true,
-          slug: true,
-          name: true,
-          logoUrl: true,
-          themeColor: true,
-          region: true,
-          bio: true,
-          subjects: true,
-        },
-      })
-    : await getTenantFromHost(host);
+  const host = headerStore.get("host") ?? "localhost:3000";
+  const forcedSlug = headerStore.get("x-tenant-slug") ?? MOCK_TENANT.slug;
+  const tenant = forcedSlug === MOCK_TENANT.slug ? MOCK_TENANT : await getTenantFromHost(host);
 
   if (!tenant) {
     notFound();

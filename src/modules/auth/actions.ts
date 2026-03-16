@@ -2,10 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { randomUUID } from "node:crypto";
 
+import { getMockUserByPhone } from "@/lib/mock-data";
 import { requireTenant } from "@/lib/tenant";
-import { db } from "@/lib/db";
 import { otpSchema, phoneSchema } from "@/modules/auth/validations";
 
 type ActionResult = {
@@ -16,7 +15,7 @@ type ActionResult = {
 };
 
 export async function sendOTP(formData: FormData): Promise<ActionResult> {
-  const tenant = await requireTenant();
+  await requireTenant();
   const parsed = phoneSchema.safeParse(formData.get("phone"));
 
   if (!parsed.success) {
@@ -28,21 +27,13 @@ export async function sendOTP(formData: FormData): Promise<ActionResult> {
 
   const phone = parsed.data;
 
-  await db.oTP.create({
-    data: {
-      phone,
-      code: "123456",
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-    },
-  });
-
   revalidatePath("/login");
 
   return {
     success: true,
     phone,
     redirectTo: `/verify?phone=${encodeURIComponent(phone)}`,
-    message: `تم إرسال كود التحقق إلى <span dir="ltr">${phone}</span>`,
+    message: `تم إرسال كود التحقق إلى ${phone}`,
   };
 }
 
@@ -51,7 +42,7 @@ export async function resendOTP(formData: FormData): Promise<ActionResult> {
 }
 
 export async function verifyOTPAction(formData: FormData): Promise<ActionResult> {
-  const tenant = await requireTenant();
+  await requireTenant();
   const phoneResult = phoneSchema.safeParse(formData.get("phone"));
   const codeResult = otpSchema.safeParse(formData.get("code"));
 
@@ -62,68 +53,16 @@ export async function verifyOTPAction(formData: FormData): Promise<ActionResult>
     };
   }
 
-  const otp = await db.oTP.findFirst({
-    where: {
-      phone: phoneResult.data,
-      code: codeResult.data,
-      used: false,
-      expiresAt: {
-        gt: new Date(),
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  if (!otp) {
+  if (codeResult.data !== "123456") {
     return {
       success: false,
       message: "كود التحقق غير صحيح أو منتهي الصلاحية",
     };
   }
 
-  await db.oTP.update({
-    where: {
-      id: otp.id,
-    },
-    data: {
-      used: true,
-    },
-  });
-
-  const user = await db.user.findFirst({
-    where: {
-      tenantId: tenant.id,
-      phone: phoneResult.data,
-      isActive: true,
-    },
-    select: {
-      id: true,
-      role: true,
-    },
-  });
-
-  if (!user) {
-    return {
-      success: false,
-      message: "لا يوجد حساب مرتبط بهذا الرقم داخل هذا السنتر",
-    };
-  }
-
+  const user = getMockUserByPhone(phoneResult.data);
   const cookieStore = await cookies();
-  const token = randomUUID();
-  const refreshToken = randomUUID();
-
-  await db.authSession.create({
-    data: {
-      userId: user.id,
-      tenantId: tenant.id,
-      token,
-      refreshToken,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    },
-  });
+  const token = `mock-session-${user.role}`;
 
   cookieStore.set("eduplatform-session", token, {
     httpOnly: true,
