@@ -55,70 +55,76 @@ export function Sidebar({ role }: { role: Role; currentPath: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-[280px] shrink-0 border-s border-slate-200/40 bg-[linear-gradient(180deg,_#1d4f73_0%,_#1f5f88_42%,_#184766_100%)] text-white xl:block dark:border-slate-800/60 dark:bg-[linear-gradient(180deg,_#0b1327_0%,_#10203b_34%,_#153756_100%)]">
-      <div className="sticky top-0 flex min-h-screen flex-col overflow-hidden px-5 py-6">
-        <div className="pointer-events-none absolute inset-0 opacity-90">
-          <div className="absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top,_rgba(125,211,252,0.26),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(96,165,250,0.16),_transparent_58%)]" />
-          <div className="absolute inset-y-0 start-0 w-px bg-white/12 dark:bg-white/5" />
+    <aside className="hidden w-[340px] shrink-0 border-s border-slate-200/40 bg-[linear-gradient(180deg,#142138_0%,#12203a_42%,#10203a_100%)] text-white xl:block dark:border-white/8 dark:bg-[linear-gradient(180deg,#0b1327_0%,#0e1b32_38%,#10243f_100%)]">
+      <div className="sticky top-0 flex min-h-screen flex-col overflow-hidden px-7 py-7">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-x-0 top-0 h-52 bg-[radial-gradient(circle_at_top,rgba(125,211,252,0.12),transparent_62%)] dark:bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.10),transparent_58%)]" />
+          <div className="absolute inset-y-0 start-0 w-px bg-white/10 dark:bg-white/5" />
+          <div className="absolute inset-y-0 end-0 w-px bg-black/10 dark:bg-black/20" />
         </div>
 
-        <div className="relative rounded-[30px] border border-white/15 bg-white/10 p-6 shadow-[0_24px_60px_rgba(8,15,35,0.18)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5 dark:shadow-[0_28px_70px_rgba(2,6,23,0.35)]">
-          <p className="text-start text-sm font-semibold text-white/75">EduPlatform</p>
-          <h2 className="mt-3 text-start text-[2rem] font-extrabold leading-tight">منصة التعليم الذكية</h2>
-          <p className="mt-3 text-start text-sm leading-8 text-white/80">واجهة موحدة لإدارة الحضور والمجموعات والتحصيل بسهولة.</p>
+        <div className="relative rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] px-7 py-6 shadow-[0_14px_32px_rgba(3,10,25,0.18)] backdrop-blur-xl dark:border-white/6 dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.015)_100%)]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white/72">
+            <span className="h-2 w-2 rounded-full bg-sky-300 shadow-[0_0_0_4px_rgba(125,211,252,0.12)]" />
+            <span>EduPlatform</span>
+          </div>
+          <h2 className="mt-6 text-start text-[2rem] font-extrabold leading-[1.08] tracking-tight text-white">
+            منصة
+            <br />
+            التعليم الذكية
+          </h2>
+          <p className="mt-4 max-w-[16rem] text-start text-sm leading-7 text-white/62">
+            إدارة الحضور والمجموعات والتحصيل داخل تجربة أوضح وأهدأ.
+          </p>
         </div>
 
-        <nav className="relative mt-8 space-y-2.5">
-          {navigation[role].map((item) => {
-            const isActive = isItemActive(pathname, item.href);
-            const Icon = item.icon;
+        <div className="relative mt-10">
+          <div className="mb-4 px-2">
+            <p className="text-xs font-bold tracking-wide text-white/38">التنقل الرئيسي</p>
+          </div>
 
-            return (
-              <Link
-                key={`${item.href}-${item.label}`}
-                href={item.href}
-                className={cn(
-                  "group relative flex min-h-[52px] items-center justify-between gap-3 overflow-hidden rounded-[22px] px-4 py-3 text-sm font-semibold transition duration-300",
-                  isActive
-                    ? "bg-[linear-gradient(180deg,_rgba(255,255,255,0.96),_rgba(241,245,249,0.92))] text-primary shadow-[0_14px_34px_rgba(8,15,35,0.22)]"
-                    : "text-white/88 hover:bg-white/10 hover:text-white dark:hover:bg-white/8",
-                )}
-              >
-                <span
+          <nav className="space-y-3.5">
+            {navigation[role].map((item, index) => {
+              const isActive = isItemActive(pathname, item.href);
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={`${item.href}-${item.label}`}
+                  href={item.href}
                   className={cn(
-                    "absolute inset-y-2 start-1 w-1 rounded-full transition-all duration-300",
-                    isActive ? "bg-secondary shadow-[0_0_0_4px_rgba(46,134,193,0.16)]" : "bg-transparent group-hover:bg-white/45",
-                  )}
-                />
-                <span
-                  className={cn(
-                    "absolute inset-0 transition-opacity duration-300",
+                    "group relative flex min-h-[58px] items-center gap-4 overflow-hidden rounded-[22px] px-5 py-3 transition duration-300",
                     isActive
-                      ? "bg-[linear-gradient(90deg,_rgba(46,134,193,0.10),_transparent_55%)] opacity-100"
-                      : "opacity-0 group-hover:opacity-100 group-hover:bg-[linear-gradient(90deg,_rgba(255,255,255,0.09),_transparent_60%)]",
+                      ? "bg-[linear-gradient(90deg,rgba(255,255,255,0.96)_0%,rgba(241,245,249,0.92)_100%)] text-primary shadow-[0_8px_20px_rgba(2,8,20,0.15)]"
+                      : "text-white/84 hover:bg-white/[0.045] hover:text-white",
                   )}
-                />
-                <div className="relative flex min-w-0 flex-1 items-center justify-between gap-3">
-                  <span className="truncate text-start">{item.label}</span>
+                >
+                  {isActive ? (
+                    <>
+                      <div className="pointer-events-none absolute inset-y-3 end-3 w-1 rounded-full bg-secondary/90" />
+                    </>
+                  ) : null}
+
                   <span
                     className={cn(
-                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition duration-300",
+                      "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[15px] transition duration-300",
                       isActive
                         ? "bg-primary/10 text-primary"
-                        : "bg-white/8 text-white/92 group-hover:bg-white/14 group-hover:text-white dark:bg-white/6 dark:group-hover:bg-white/10",
+                        : "bg-white/[0.045] text-white/88 group-hover:bg-white/[0.06]",
                     )}
                   >
-                    <Icon className={cn("h-5 w-5 transition duration-300", isActive ? "scale-110" : "group-hover:scale-110 group-hover:-translate-y-0.5")} />
+                    <Icon className={cn("h-5 w-5 transition duration-300", isActive ? "scale-110" : "group-hover:scale-110")} />
                   </span>
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
 
-        <div className="relative mt-auto rounded-[28px] border border-white/15 bg-white/10 p-5 backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
-          <p className="text-start text-sm font-bold text-white">لوحة مصممة للجوال أولاً</p>
-          <p className="mt-3 text-start text-sm leading-8 text-white/78">تنقل سريع، تباين واضح، ولمسات بصرية ثابتة في كل الصفحات.</p>
+                  <div className="relative flex min-w-0 flex-1 items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-start text-[1.02rem] font-bold">{item.label}</p>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
       </div>
     </aside>

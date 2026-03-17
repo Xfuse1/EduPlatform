@@ -7,6 +7,7 @@ import { TeacherDashboardCharts } from "@/modules/dashboard/components/TeacherDa
 
 type TeacherDashboardProps = {
   data: Awaited<ReturnType<typeof import("@/modules/dashboard/queries").getTeacherDashboardData>>;
+  teacherName?: string;
 };
 
 const statCardStyles = [
@@ -28,7 +29,8 @@ function SessionBadge({ status }: { status: string }) {
   return <span className={`rounded-full border px-3 py-2 text-xs font-bold ${styles}`}>{label}</span>;
 }
 
-export function TeacherDashboard({ data }: TeacherDashboardProps) {
+export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
+  const displayTeacherName = teacherName?.trim() || data.teacherName?.trim() || "المعلم";
   const stats = [
     {
       title: "إيرادات الشهر",
@@ -56,7 +58,7 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
     <div className="space-y-6">
       <section className="overflow-hidden rounded-[24px] bg-[linear-gradient(135deg,_#163b54,_#1A5276_45%,_#2E86C1)] px-6 py-7 text-white shadow-[0_20px_60px_rgba(26,82,118,0.25)]">
         <p className="text-start text-sm font-semibold text-white/75">لوحة المعلم</p>
-        <h1 className="mt-3 text-start text-3xl font-extrabold">مرحباً، أ/ أحمد حسن</h1>
+        <h1 className="mt-3 text-start text-3xl font-extrabold">مرحبًا، {displayTeacherName}</h1>
         <p className="mt-3 max-w-2xl text-start text-sm leading-7 text-white/85">
           كل مؤشرات اليوم بين يديك: الحضور، التحصيل، الحصص، والتنبيهات المهمة.
         </p>
@@ -162,3 +164,4 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
     </div>
   );
 }
+

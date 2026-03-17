@@ -15,6 +15,14 @@ function todayStatusLabel(status: string) {
 }
 
 export function ParentDashboard({ data }: ParentDashboardProps) {
+  const formatSessionDate = (date: Date) =>
+    date.toLocaleDateString("ar-EG", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
   return (
     <div className="space-y-6">
       <section className="grid gap-4 md:grid-cols-3">
@@ -96,6 +104,9 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                   <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
                     {child.nextSession ? `${child.nextSession.group.name} - ${child.nextSession.timeStart}` : "لا توجد حصة قادمة"}
                   </p>
+                  {child.nextSession ? (
+                    <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">{formatSessionDate(child.nextSession.date)}</p>
+                  ) : null}
                 </div>
               </div>
             </CardContent>
@@ -105,3 +116,4 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
     </div>
   );
 }
+

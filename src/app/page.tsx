@@ -77,6 +77,8 @@ const audienceCards = [
     icon: GraduationCap,
     iconClassName: "bg-[#2E86C1]/15 text-[#2E86C1]",
     borderClassName: "border-[#2E86C1]/30",
+    accentClassName: "from-[#2E86C1]/20 to-transparent",
+    badge: "إدارة لحظية",
     points: [
       "تتبع الحضور في ثوانٍ",
       "اعرف مين دفع ومين لأ",
@@ -89,6 +91,8 @@ const audienceCards = [
     icon: Heart,
     iconClassName: "bg-[#27AE60]/15 text-[#27AE60]",
     borderClassName: "border-[#27AE60]/30",
+    accentClassName: "from-[#27AE60]/20 to-transparent",
+    badge: "اطمئنان يومي",
     points: [
       "اعرف حضور ابنك يومياً",
       "تلقّ إشعار فور انتهاء الحصة",
@@ -101,6 +105,8 @@ const audienceCards = [
     icon: BookOpen,
     iconClassName: "bg-[#8E44AD]/15 text-[#8E44AD]",
     borderClassName: "border-[#8E44AD]/30",
+    accentClassName: "from-[#8E44AD]/20 to-transparent",
+    badge: "تجربة منظمة",
     points: [
       "شوف جدولك الأسبوعي",
       "تابع نسبة حضورك",
@@ -193,7 +199,7 @@ export default function MarketingPage() {
                 </Link>
                 <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-[0_16px_35px_rgba(46,134,193,0.35)] transition hover:bg-secondary"
-                  href="/register"
+                  href="/signup"
                 >
                   ابدأ مجاناً
                 </Link>
@@ -207,7 +213,7 @@ export default function MarketingPage() {
                 </Link>
                 <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-3 py-3 text-sm font-bold text-white transition hover:bg-secondary"
-                  href="/register"
+                  href="/signup"
                 >
                   ابدأ
                 </Link>
@@ -233,7 +239,7 @@ export default function MarketingPage() {
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <Link
                     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-primary transition hover:bg-slate-100"
-                    href="/register"
+                    href="/signup"
                   >
                     ابدأ مجاناً — سجّل الآن
                     <ArrowLeft className="h-4 w-4" />
@@ -329,8 +335,8 @@ export default function MarketingPage() {
 
             <div className="mt-8 flex justify-center lg:justify-start">
               <Link
-                className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-[0_16px_35px_rgba(46,134,193,0.35)] transition hover:bg-secondary"
-                href="/register"
+                className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-bold !text-slate-50 shadow-[0_16px_35px_rgba(46,134,193,0.35)] transition hover:bg-secondary hover:!text-white"
+                href="/signup"
               >
                 ابدأ الآن مجاناً
               </Link>
@@ -351,17 +357,28 @@ export default function MarketingPage() {
                 return (
                   <Card
                     key={card.title}
-                    className={`bg-white shadow-[0_16px_35px_rgba(15,23,42,0.08)] dark:bg-slate-900/80 dark:shadow-[0_20px_50px_rgba(2,6,23,0.28)] ${card.borderClassName}`}
+                    className={`group relative overflow-hidden rounded-[30px] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.96)_100%)] shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(15,23,42,0.12)] dark:bg-[linear-gradient(180deg,rgba(20,30,49,0.98)_0%,rgba(18,27,44,0.98)_100%)] dark:shadow-[0_22px_60px_rgba(2,6,23,0.30)] dark:hover:shadow-[0_28px_70px_rgba(2,8,20,0.38)] ${card.borderClassName}`}
                   >
-                    <CardContent className="space-y-5">
-                      <div className={`flex h-14 w-14 items-center justify-center rounded-full ${card.iconClassName}`}>
-                        <Icon className="h-6 w-6" />
+                    <div className={`pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${card.accentClassName}`} />
+                    <CardContent className="relative space-y-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className={`flex h-16 w-16 items-center justify-center rounded-[22px] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] ${card.iconClassName}`}>
+                          <Icon className="h-7 w-7" />
+                        </div>
+                        <span className="rounded-full border border-slate-200/80 bg-white/70 px-3 py-1 text-xs font-bold text-slate-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300">
+                          {card.badge}
+                        </span>
                       </div>
-                      <h3 className="text-start text-xl font-bold text-white">{card.title}</h3>
-                      <div className="space-y-3">
+                      <div>
+                        <h3 className="text-start text-2xl font-extrabold tracking-tight text-white">{card.title}</h3>
+                        <p className="mt-2 text-start text-sm leading-7 text-slate-300">واجهة أكثر وضوحًا وتركيزًا لما يهم هذه الفئة داخل المنصة.</p>
+                      </div>
+                      <div className="space-y-3 border-t border-slate-200/70 pt-5 dark:border-white/8">
                         {card.points.map((point) => (
-                          <p key={point} className="flex items-center gap-2 text-start text-sm text-slate-200">
-                            <Check className="h-4 w-4 shrink-0 text-sky-300" />
+                          <p key={point} className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/70 px-4 py-3 text-start text-sm text-slate-200 shadow-[0_10px_24px_rgba(15,23,42,0.04)] dark:border-white/8 dark:bg-white/[0.03] dark:shadow-none">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-400/10 text-sky-300">
+                              <Check className="h-4 w-4" />
+                            </span>
                             <span>{point}</span>
                           </p>
                         ))}
@@ -412,8 +429,8 @@ export default function MarketingPage() {
                       ))}
                     </div>
                     <Link
-                      className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-white transition hover:bg-secondary"
-                      href="/register"
+                      className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold !text-slate-50 transition hover:bg-secondary hover:!text-white"
+                      href="/signup"
                     >
                       {index === 0 ? "ابدأ مجاناً" : "اشترك الآن"}
                     </Link>
@@ -489,7 +506,7 @@ export default function MarketingPage() {
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Link
                   className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-bold text-primary transition hover:bg-slate-100"
-                  href="/register"
+                  href="/signup"
                 >
                   ابدأ مجاناً الآن
                 </Link>
@@ -539,3 +556,6 @@ export default function MarketingPage() {
     </main>
   );
 }
+
+
+

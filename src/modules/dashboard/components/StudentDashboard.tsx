@@ -11,6 +11,15 @@ type StudentDashboardProps = {
 const groupColors = ["#1A5276", "#2E86C1", "#27AE60"];
 
 export function StudentDashboard({ data }: StudentDashboardProps) {
+  const nextSessionDate = data.nextSession
+    ? data.nextSession.date.toLocaleDateString("ar-EG", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
+
   return (
     <div className="space-y-6">
       <Card className="overflow-hidden bg-[linear-gradient(135deg,_#163b54,_#1A5276_45%,_#2E86C1)] text-white">
@@ -19,7 +28,7 @@ export function StudentDashboard({ data }: StudentDashboardProps) {
           {data.nextSession ? (
             <div className="mt-4 space-y-3">
               <p className="text-2xl font-extrabold">{data.nextSession.group.name}</p>
-              <p className="text-sm text-white/85">{formatArabicDate(data.nextSession.date)}</p>
+              <p className="text-sm text-white/85">{nextSessionDate || formatArabicDate(data.nextSession.date)}</p>
               <p className="flex items-center gap-2 text-sm text-white/85">
                 <Clock3 className="h-4 w-4" />
                 <span dir="ltr">

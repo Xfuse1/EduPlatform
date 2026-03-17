@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { MOCK_PARENT_NEXT_SESSION, MOCK_STUDENT_NEXT_SESSION, MOCK_TEACHER_ALERTS } from "@/lib/mock-data";
+import { MOCK_PARENT_NEXT_SESSION, MOCK_STUDENT_NEXT_SESSION, MOCK_TEACHER_ALERTS, MOCK_TENANT } from "@/lib/mock-data";
 import { getAttendanceOverview, getStudentAttendanceSnapshot, getTodaySessions } from "@/modules/attendance/queries";
 import { getRevenueSummary, getStudentPaymentSnapshot } from "@/modules/payments/queries";
 import { getParentChildren, getStudentCountSummary, getStudentProfile } from "@/modules/students/queries";
@@ -15,6 +15,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
   ]);
 
   return {
+    teacherName: MOCK_TENANT.name,
     revenue: {
       thisMonth: revenue.thisMonth,
       lastMonth: revenue.lastMonth,
