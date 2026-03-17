@@ -260,14 +260,16 @@ model Payment {
   method            PaymentMethod @default(CASH)
   installmentNumber Int?
   installmentTotal  Int?
-  receiptNumber     String?       @unique
-  receiptUrl        String?
-  paidAt            DateTime?
-  recordedById      String?
-  recordedBy        User?         @relation("RecordedBy", fields: [recordedById], references: [id])
-  notes             String?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  receiptNumber        String?       @unique
+  receiptUrl           String?
+  kashierOrderId       String?       @unique
+  kashierTransactionId String?
+  paidAt               DateTime?
+  recordedById         String?
+  recordedBy           User?         @relation("RecordedBy", fields: [recordedById], references: [id])
+  notes                String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
 
   @@index([tenantId, studentId])
   @@index([tenantId, month])
@@ -287,6 +289,7 @@ enum PaymentMethod {
   FAWRY
   INSTAPAY
   CARD
+  KASHIER
 }
 
 // ============================================

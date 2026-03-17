@@ -2,10 +2,16 @@ import Link from 'next/link'
 import { requireTenant } from '@/lib/tenant'
 import { getRevenueSummary, getPayments } from '@/modules/payments/queries'
 import { RevenueCards } from '@/modules/payments/components/RevenueCards'
+import { KashierResultBanner } from '@/modules/payments/components/KashierResultBanner'
 
 // ── B-04: Payments Index Page ────────────────────────────────────────────────
 
-export default async function PaymentsPage() {
+interface Props {
+  searchParams: Promise<{ kashier?: string }>
+}
+
+export default async function PaymentsPage({ searchParams }: Props) {
+  const { kashier } = await searchParams
   const tenant = await requireTenant()
   const [summary, recentPayments] = await Promise.all([
     getRevenueSummary(tenant.id),
@@ -14,6 +20,9 @@ export default async function PaymentsPage() {
 
   return (
     <div className="p-4 space-y-6">
+      {/* بانر نتيجة Kashier — يظهر فقط لو المستخدم راجع من Checkout */}
+      {kashier && <KashierResultBanner status={kashier} />}
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">

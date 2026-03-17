@@ -10,7 +10,8 @@ export default async function RecordPaymentPage() {
   const students = await getStudents(tenant.id)
 
   // نأخذ فقط البيانات المطلوبة للفورم
-  const studentsList = students.map((s: any) => ({
+  type StudentEntry = { id: string; name: string; gradeLevel: string | null }
+  const studentsList = (students as StudentEntry[]).map((s) => ({
     id: s.id,
     name: s.name,
     gradeLevel: s.gradeLevel,

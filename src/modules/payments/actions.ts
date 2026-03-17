@@ -3,7 +3,9 @@ import { requireTenant } from '@/lib/tenant'
 import { requireAuth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
-import { paymentRecordSchema } from './validations'
+import { paymentRecordSchema, initiatePaymentSchema } from './validations'
+import { createKashierCheckoutUrl } from './providers/kashier'
+import { env } from '@/config/env'
 
 // ── B-03: Payments Actions (mutations — 'use server') ───────────────────────
 
@@ -136,4 +138,81 @@ export async function generateReceipt(paymentId: string) {
     success: true,
     data: { payment, tenantName: tenant.name },
   }
+}
+
+/**
+ * بدء دفع أونلاين عبر Kashier
+ * 1. ينشئ سجل Payment بحالة PENDING في DB
+ * 2. يولّد رابط Kashier Checkout
+ * 3. يرجع الرابط للـ client للـ redirect
+ *
+ * ⚠️ الإيصال يُكتمل بعد تأكيد الـ webhook — مش هنا
+ */
+export async function initiateOnlinePayment(formData: FormData) {
+  const tenant = await requireTenant()
+  const user = await requireAuth()
+
+  const data = initiatePaymentSchema.parse({
+    studentId: formData.get('studentId'),
+    amount: Number(formData.get('amount')),
+    month: formData.get('month'),
+    notes: formData.get('notes') || undefined,
+  })
+
+  // جيب بيانات الطالب — تحقق من tenantId
+  const student = await db.user.findFirst({
+    where: { id: data.studentId, tenantId: tenant.id },
+    select: { id: true, name: true },
+  })
+  if (!student) throw new Error('الطالب غير موجود أو لا ينتمي لهذا الحساب')
+
+  // تأكد إن مفيش دفعة Kashier معلقة لنفس الطالب ونفس الشهر
+  const existing = await db.payment.findFirst({
+    where: {
+      tenantId: tenant.id,
+      studentId: data.studentId,
+      month: data.month,
+      method: 'KASHIER',
+      status: 'PENDING',
+    },
+  })
+  if (existing) throw new Error('يوجد طلب دفع أونلاين معلق لهذا الشهر — انتظر تأكيد العملية أو تواصل مع الدعم')
+
+  // توليد orderId فريد: KSH-{slug}-{YYYYMMDD}-{count+1}
+  const count = await db.payment.count({ where: { tenantId: tenant.id } })
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  const kashierOrderId = `KSH-${tenant.slug}-${date}-${String(count + 1).padStart(4, '0')}`
+  const receiptNumber = `RCP-${tenant.slug}-${date}-${String(count + 1).padStart(4, '0')}`
+
+  // إنشاء سجل Payment معلق — سيُحدَّث عبر webhook
+  await db.payment.create({
+    data: {
+      tenantId: tenant.id,
+      studentId: data.studentId,
+      amount: data.amount,
+      month: data.month,
+      status: 'PENDING',
+      method: 'KASHIER',
+      receiptNumber,
+      kashierOrderId,
+      recordedById: user.id,
+      notes: data.notes ?? null,
+    },
+  })
+
+  // بناء الـ URLs
+  const appUrl = env.NEXT_PUBLIC_APP_URL
+  // ⚠️ callbackUrl = API route الذي يقرأ حالة DB ويعمل redirect للمستخدم
+  const callbackUrl = `${appUrl}/api/payments/kashier/callback?orderId=${kashierOrderId}`
+  const webhookUrl = `${appUrl}/api/payments/kashier/webhook`
+
+  const checkoutUrl = createKashierCheckoutUrl({
+    orderId: kashierOrderId,
+    amount: data.amount,
+    studentName: student.name ?? 'طالب',
+    callbackUrl,
+    webhookUrl,
+  })
+
+  return { success: true, checkoutUrl }
 }

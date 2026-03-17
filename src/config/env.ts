@@ -11,6 +11,9 @@ type OptionalEnvKey =
   | 'WHATSAPP_API_URL'
   | 'WHATSAPP_ACCESS_TOKEN'
   | 'NEXT_PUBLIC_DEFAULT_THEME'
+  | 'KASHIER_MERCHANT_ID'
+  | 'KASHIER_API_KEY'
+  | 'KASHIER_WEBHOOK_SECRET'
 
 type EnvConfig = {
   DATABASE_URL: string
@@ -23,6 +26,9 @@ type EnvConfig = {
   WHATSAPP_API_URL?: string
   WHATSAPP_ACCESS_TOKEN?: string
   NEXT_PUBLIC_DEFAULT_THEME: 'light' | 'dark' | 'system'
+  KASHIER_MERCHANT_ID?: string
+  KASHIER_API_KEY?: string
+  KASHIER_WEBHOOK_SECRET?: string
 }
 
 function readEnv(key: string) {
@@ -95,6 +101,9 @@ function createEnv(): EnvConfig {
     NEXT_PUBLIC_DEFAULT_THEME: validateTheme(
       optionalEnv('NEXT_PUBLIC_DEFAULT_THEME'),
     ),
+    KASHIER_MERCHANT_ID: optionalEnv('KASHIER_MERCHANT_ID'),
+    KASHIER_API_KEY: optionalEnv('KASHIER_API_KEY'),
+    KASHIER_WEBHOOK_SECRET: optionalEnv('KASHIER_WEBHOOK_SECRET'),
   }
 }
 

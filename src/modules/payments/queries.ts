@@ -132,3 +132,18 @@ export const getRevenueSummary = cache(
     }
   },
 )
+
+/**
+ * جلب Payment بواسطة kashierOrderId — يُستخدم في webhook handler
+ * ⚠️ لا تثق بـ tenantId من الـ request — اجلبه من DB
+ */
+export const getPaymentByKashierOrderId = cache(
+  async (kashierOrderId: string) => {
+    return db.payment.findUnique({
+      where: { kashierOrderId },
+      include: {
+        student: { select: { id: true, name: true, parentPhone: true } },
+      },
+    })
+  },
+)

@@ -25,7 +25,22 @@
 | **FIX-02** | **توحيد API routes على api-response helpers** | ✅ مكتمل | 17 مارس 2026 |
 | **FIX-03** | **إضافة Zod validation لـ notifications API** | ✅ مكتمل | 17 مارس 2026 |
 | **FIX-04** | **إصلاح input[type=month] (Firefox/Safari)** | ✅ مكتمل | 17 مارس 2026 |
-| **FIX-05** | **تنفيذ attendance/reports/page.tsx** | ✅ مكتمل | 17 مارس 2026 |
+| **FIX-05** | **تنفيذ AttendanceHistory.tsx (كان فارغاً)** | ✅ مكتمل | 17 مارس 2026 |
+| **FIX-06** | **تنفيذ AttendanceReport.tsx (كان فارغاً)** | ✅ مكتمل | 17 مارس 2026 |
+| **FIX-07** | **إصلاح `any` في history/page.tsx + استخدام AttendanceHistory** | ✅ مكتمل | 17 مارس 2026 |
+| **FIX-08** | **إصلاح `any` في payments/record/page.tsx** | ✅ مكتمل | 17 مارس 2026 |
+| **FIX-09** | **تعبئة notifications/components/index.ts (barrel export)** | ✅ مكتمل | 17 مارس 2026 |
+| **KASHIER-01** | **إضافة KASHIER لـ PaymentMethod enum + fields في schema** | ✅ مكتمل | 17 مارس 2026 |
+| **KASHIER-02** | **kashier.ts provider (createKashierCheckoutUrl + verifySignature)** | ✅ مكتمل | 17 مارس 2026 |
+| **KASHIER-03** | **initiatePaymentSchema + kashierWebhookSchema في validations.ts** | ✅ مكتمل | 17 مارس 2026 |
+| **KASHIER-04** | **initiateOnlinePayment() action في actions.ts** | ✅ مكتمل | 17 مارس 2026 |
+| **KASHIER-05** | **getPaymentByKashierOrderId() في queries.ts** | ✅ مكتمل | 17 مارس 2026 |
+| **KASHIER-06** | **Webhook route مع HMAC verification (timingSafeEqual)** | ✅ مكتمل | 17 مارس 2026 |
+| **KASHIER-07** | **Callback route (redirect بعد الدفع)** | ✅ مكتمل | 17 مارس 2026 |
+| **KASHIER-08** | **PaymentForm toggle (يدوي / Kashier أونلاين)** | ✅ مكتمل | 17 مارس 2026 |
+| **KASHIER-09** | **PaymentLedger.tsx (سجل مدفوعات الطالب)** | ✅ مكتمل | 17 مارس 2026 |
+| **KASHIER-10** | **ReceiptPDF.tsx (إيصال قابل للطباعة)** | ✅ مكتمل | 17 مارس 2026 |
+| **KASHIER-11** | **Kashier env vars في src/config/env.ts** | ✅ مكتمل | 17 مارس 2026 |
 
 ---
 
@@ -188,7 +203,60 @@ src/app/(tenant)/api/notifications/      → موجود
 
 ---
 
-### 🟡 [FIX-05] تنفيذ `/attendance/reports/page.tsx` (كانت placeholder)
+### 🟢 [FIX-05] تنفيذ `AttendanceHistory.tsx` (كان فارغاً — 11 bytes)
+
+**المشكلة:** `src/modules/attendance/components/AttendanceHistory.tsx` كان `export {}` فقط.
+
+**الإصلاح:**
+- مكوّن `AttendanceHistory` يقبل `sessions: HistorySession[]`
+- يعرض قائمة الحصص المكتملة مع لون المجموعة وتاريخ الحصة وعدد الحاضرين
+- دعم RTL (`text-start`) + empty state + dark mode
+
+---
+
+### 🟢 [FIX-06] تنفيذ `AttendanceReport.tsx` (كان فارغاً — 11 bytes)
+
+**المشكلة:** `src/modules/attendance/components/AttendanceReport.tsx` كان `export {}` فقط.
+
+**الإصلاح:**
+- مكوّن `AttendanceReport` يقبل `sessions`, `totalSessions`, `avgAttendance`
+- بطاقتان: عدد الحصص + متوسط الحضور
+- قائمة الحصص مع لون المجموعة + empty state
+
+---
+
+### 🟢 [FIX-07] إصلاح `any` في `attendance/history/page.tsx` + ربطه بـ `AttendanceHistory`
+
+**المشكلة:**
+1. `(session: any)` في `.map()` — خرق قاعدة 7
+2. الصفحة كانت تبني الـ UI بنفسها بدل استخدام المكوّن
+
+**الإصلاح:**
+- أضفنا `type HistorySession` محلي
+- استخدمنا `as HistorySession[]` على نتيجة Prisma
+- الصفحة تستورد وتستخدم `<AttendanceHistory sessions={sessions} />`
+
+---
+
+### 🟢 [FIX-08] إصلاح `any` في `payments/record/page.tsx`
+
+**المشكلة:** `students.map((s: any) => ...)` — خرق قاعدة 7
+
+**الإصلاح:**
+- أضفنا `type StudentEntry = { id, name, gradeLevel }` محلي
+- استخدمنا `(students as StudentEntry[]).map((s) => ...)`
+
+---
+
+### 🟢 [FIX-09] تعبئة `notifications/components/index.ts`
+
+**المشكلة:** الملف كان `export {}` فقط.
+
+**الإصلاح:** barrel export مع تعليق توضيحي — جاهز لإضافة مكونات UI للإشعارات لاحقاً.
+
+---
+
+### 🔴 [FIX-05-OLD] تنفيذ `/attendance/reports/page.tsx` (كانت placeholder)
 
 **المشكلة:** الصفحة كانت `<div>Attendance reports page placeholder</div>` فارغة.
 
