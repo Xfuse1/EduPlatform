@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
-import { getMockUserByPhone } from "@/lib/mock-data";
+import { sendOTP as sendOTPRequest, verifyOTP } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
 import { otpSchema, phoneSchema } from "@/modules/auth/validations";
 
@@ -11,7 +11,15 @@ type ActionResult = {
   success: boolean;
   message?: string;
   phone?: string;
+  role?: "TEACHER" | "STUDENT" | "PARENT" | "ASSISTANT";
   redirectTo?: string;
+};
+
+const redirectMap: Record<"TEACHER" | "STUDENT" | "PARENT" | "ASSISTANT", string> = {
+  TEACHER: "/teacher",
+  STUDENT: "/student",
+  PARENT: "/parent",
+  ASSISTANT: "/teacher",
 };
 
 export async function sendOTP(formData: FormData): Promise<ActionResult> {
@@ -27,14 +35,33 @@ export async function sendOTP(formData: FormData): Promise<ActionResult> {
 
   const phone = parsed.data;
 
-  revalidatePath("/login");
+  try {
+    await sendOTPRequest(phone);
 
-  return {
-    success: true,
-    phone,
-    redirectTo: `/verify?phone=${encodeURIComponent(phone)}`,
-    message: `تم إرسال كود التحقق إلى ${phone}`,
-  };
+    const cookieStore = await cookies();
+    cookieStore.set("otp-phone", phone, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      expires: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    revalidatePath("/login");
+
+    return {
+      success: true,
+      phone,
+      redirectTo: `/verify?phone=${encodeURIComponent(phone)}`,
+      message: `تم إرسال كود التحقق إلى ${phone}`,
+    };
+  } catch (error) {
+    console.error("sendOTP action failed:", error);
+
+    return {
+      success: false,
+      message: "تعذر إرسال كود التحقق",
+    };
+  }
 }
 
 export async function resendOTP(formData: FormData): Promise<ActionResult> {
@@ -53,35 +80,31 @@ export async function verifyOTPAction(formData: FormData): Promise<ActionResult>
     };
   }
 
-  if (codeResult.data !== "123456") {
+  try {
+    const result = await verifyOTP(phoneResult.data, codeResult.data);
+    const cookieStore = await cookies();
+
+    cookieStore.set("auth-token", result.token, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+    cookieStore.delete("otp-phone");
+
+    revalidatePath("/verify");
+
+    return {
+      success: true,
+      role: result.user.role,
+      redirectTo: redirectMap[result.user.role],
+    };
+  } catch (error) {
+    console.error("verifyOTP action failed:", error);
+
     return {
       success: false,
       message: "كود التحقق غير صحيح أو منتهي الصلاحية",
     };
   }
-
-  const user = getMockUserByPhone(phoneResult.data);
-  const cookieStore = await cookies();
-  const token = `mock-session-${user.role}`;
-
-  cookieStore.set("eduplatform-session", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  });
-
-  const redirectMap: Record<string, string> = {
-    TEACHER: "/teacher",
-    STUDENT: "/student",
-    PARENT: "/parent",
-    ASSISTANT: "/teacher",
-  };
-
-  revalidatePath("/verify");
-
-  return {
-    success: true,
-    redirectTo: redirectMap[user.role] ?? "/teacher",
-  };
 }

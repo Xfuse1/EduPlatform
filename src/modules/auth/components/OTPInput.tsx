@@ -2,8 +2,6 @@
 
 import { CheckCircle2, TimerReset } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { resendOTP, verifyOTPAction } from "@/modules/auth/actions";
@@ -11,7 +9,6 @@ import { resendOTP, verifyOTPAction } from "@/modules/auth/actions";
 const OTP_LENGTH = 6;
 
 export function OTPInput({ phone, tenantName }: { phone: string; tenantName: string }) {
-  const router = useRouter();
   const [digits, setDigits] = useState<string[]>(Array.from({ length: OTP_LENGTH }, () => ""));
   const [error, setError] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(60);
@@ -44,10 +41,10 @@ export function OTPInput({ phone, tenantName }: { phone: string; tenantName: str
           return;
         }
 
-        router.push(result.redirectTo ?? "/teacher");
+        window.location.replace(result.redirectTo ?? "/teacher");
       });
     }
-  }, [code, digits, phone, router, startTransition]);
+  }, [code, digits, phone, startTransition]);
 
   const handleChange = (index: number, value: string) => {
     const nextValue = value.replace(/\D/g, "").slice(-1);
