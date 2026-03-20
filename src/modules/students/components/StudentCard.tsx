@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import Badge from '@/components/data-display/Badge'
+import { formatPhone } from '@/lib/utils'
 
 type StudentCardProps = {
   student: {
@@ -82,7 +83,7 @@ export default function StudentCard({ student }: StudentCardProps) {
             هاتف ولي الأمر
           </p>
           <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
-            {student.parentPhone || 'غير متوفر'}
+            {formatPhone(student.parentPhone)}
           </p>
         </div>
       </div>

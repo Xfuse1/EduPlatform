@@ -1,7 +1,8 @@
 'use client'
 
-import type { ChangeEvent, FormEvent } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import type { ChangeEvent, FormEvent } from 'react'
 import { useState, useTransition } from 'react'
 
 import ColorPicker from '@/components/forms/ColorPicker'
@@ -185,10 +186,13 @@ export default function TenantSettingsForm({
 
             {logoPreview ? (
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-                <img
+                <Image
                   src={logoPreview}
                   alt="شعار المؤسسة"
+                  width={80}
+                  height={80}
                   className="h-20 w-20 rounded-2xl object-cover"
+                  unoptimized
                 />
               </div>
             ) : null}

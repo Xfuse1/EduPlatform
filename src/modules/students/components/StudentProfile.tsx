@@ -5,7 +5,8 @@ import { useState, useTransition } from 'react'
 
 import Badge from '@/components/data-display/Badge'
 import EmptyState from '@/components/shared/EmptyState'
-import { enrollInGroup, removeFromGroup } from '@/modules/students/actions'
+import { formatPhone } from '@/lib/utils'
+import { syncStudentGroups } from '@/modules/students/actions'
 
 import StudentForm from './StudentForm'
 
@@ -30,7 +31,7 @@ type PaymentHistoryItem = {
 type AttendanceItem = {
   id: string
   status: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED'
-  createdAt: Date
+  markedAt: Date
   group: {
     name: string
   }
@@ -102,7 +103,6 @@ const enrollmentStatusLabels = {
   DROPPED: 'منسحب',
 } as const
 
-const generatedPhonePrefix = '__student_without_phone__'
 const numberFormatter = new Intl.NumberFormat('ar-EG')
 const dateFormatter = new Intl.DateTimeFormat('ar-EG', {
   day: 'numeric',
@@ -112,14 +112,6 @@ const dateFormatter = new Intl.DateTimeFormat('ar-EG', {
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ')
-}
-
-function getVisiblePhone(phone?: string | null) {
-  if (!phone || phone.startsWith(generatedPhonePrefix)) {
-    return 'غير متوفر'
-  }
-
-  return phone
 }
 
 export default function StudentProfile({
@@ -136,8 +128,6 @@ export default function StudentProfile({
     profile.enrolledGroups.map((group) => group.id),
   )
 
-  const attendanceHistory = profile.recentAttendance.slice(0, 10)
-
   function toggleGroup(groupId: string) {
     setSelectedGroupIds((currentValue) => {
       if (currentValue.includes(groupId)) {
@@ -151,22 +141,10 @@ export default function StudentProfile({
   function handleSaveGroups() {
     setGroupError(null)
 
-    const currentGroupIds = profile.enrolledGroups.map((group) => group.id)
-    const groupsToAdd = selectedGroupIds.filter(
-      (groupId) => !currentGroupIds.includes(groupId),
-    )
-    const groupsToRemove = currentGroupIds.filter(
-      (groupId) => !selectedGroupIds.includes(groupId),
-    )
-
     startTransition(() => {
       void (async () => {
         try {
-          await Promise.all([
-            ...groupsToAdd.map((groupId) => enrollInGroup(studentId, groupId)),
-            ...groupsToRemove.map((groupId) => removeFromGroup(studentId, groupId)),
-          ])
-
+          await syncStudentGroups(studentId, selectedGroupIds)
           setIsGroupsOpen(false)
           router.refresh()
         } catch (error) {
@@ -210,14 +188,14 @@ export default function StudentProfile({
               <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
                 <p className="text-xs text-sky-100">هاتف الطالب</p>
                 <p className="mt-1 text-sm font-semibold">
-                  {getVisiblePhone(profile.student.phone)}
+                  {formatPhone(profile.student.phone)}
                 </p>
               </div>
 
               <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur">
                 <p className="text-xs text-sky-100">هاتف ولي الأمر</p>
                 <p className="mt-1 text-sm font-semibold">
-                  {profile.student.parentPhone || 'غير متوفر'}
+                  {formatPhone(profile.student.parentPhone)}
                 </p>
               </div>
             </div>
@@ -299,9 +277,9 @@ export default function StudentProfile({
               </span>
             </div>
 
-            {attendanceHistory.length > 0 ? (
+            {profile.recentAttendance.length > 0 ? (
               <div className="mt-4 space-y-3">
-                {attendanceHistory.map((record) => (
+                {profile.recentAttendance.map((record) => (
                   <div
                     key={record.id}
                     className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
@@ -438,7 +416,7 @@ export default function StudentProfile({
                   تغيير المجموعات
                 </h2>
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                  اختر المجموعات الحالية للطالب. سيتم الإضافة والإزالة عند الحفظ.
+                  اختر المجموعات الحالية للطالب. سيتم الحفظ داخل عملية واحدة.
                 </p>
               </div>
 

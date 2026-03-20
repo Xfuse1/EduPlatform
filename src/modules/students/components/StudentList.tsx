@@ -1,12 +1,20 @@
 'use client'
 
 import Link from 'next/link'
-import { useDeferredValue, useState } from 'react'
+import {
+  useDeferredValue,
+  useEffect,
+  useState,
+  useTransition,
+} from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import Badge from '@/components/data-display/Badge'
 import DataTable from '@/components/data-display/DataTable'
 import EmptyState from '@/components/shared/EmptyState'
 import SearchBar from '@/components/shared/SearchBar'
+import { ROUTES } from '@/config/routes'
+import { formatPhone } from '@/lib/utils'
 
 import StudentCard from './StudentCard'
 import StudentForm from './StudentForm'
@@ -37,6 +45,11 @@ type AvailableGroup = {
 type StudentListProps = {
   students: StudentListItem[]
   groups: AvailableGroup[]
+  initialFilters: {
+    search: string
+    groupId: string
+    paymentStatus: string
+  }
 }
 
 const paymentStatusLabels = {
@@ -57,26 +70,72 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function StudentList({ students, groups }: StudentListProps) {
-  const [search, setSearch] = useState('')
-  const [groupFilter, setGroupFilter] = useState('')
-  const [paymentFilter, setPaymentFilter] = useState('')
+export default function StudentList({
+  students,
+  groups,
+  initialFilters,
+}: StudentListProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [isFiltering, startFilteringTransition] = useTransition()
+  const [search, setSearch] = useState(initialFilters.search)
+  const [groupFilter, setGroupFilter] = useState(initialFilters.groupId)
+  const [paymentFilter, setPaymentFilter] = useState(initialFilters.paymentStatus)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const deferredSearch = useDeferredValue(search)
+  const hasActiveFilters = Boolean(
+    deferredSearch.trim() || groupFilter || paymentFilter,
+  )
 
-  const filteredStudents = students.filter((student) => {
-    const matchesSearch =
-      deferredSearch.trim() === '' ||
-      student.name.toLowerCase().includes(deferredSearch.trim().toLowerCase())
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    const normalizedSearch = deferredSearch.trim()
 
-    const matchesGroup =
-      !groupFilter || student.groups.some((group) => group.id === groupFilter)
+    if (normalizedSearch) {
+      params.set('search', normalizedSearch)
+    } else {
+      params.delete('search')
+    }
 
-    const matchesPayment =
-      !paymentFilter || student.paymentStatus === paymentFilter
+    if (groupFilter) {
+      params.set('groupId', groupFilter)
+    } else {
+      params.delete('groupId')
+    }
 
-    return matchesSearch && matchesGroup && matchesPayment
-  })
+    if (paymentFilter) {
+      params.set('paymentStatus', paymentFilter)
+    } else {
+      params.delete('paymentStatus')
+    }
+
+    const nextQueryString = params.toString()
+    const currentQueryString = searchParams.toString()
+
+    if (nextQueryString === currentQueryString) {
+      return
+    }
+
+    startFilteringTransition(() => {
+      router.replace(nextQueryString ? `${pathname}?${nextQueryString}` : pathname, {
+        scroll: false,
+      })
+    })
+  }, [
+    deferredSearch,
+    groupFilter,
+    pathname,
+    paymentFilter,
+    router,
+    searchParams,
+  ])
+
+  function clearFilters() {
+    setSearch('')
+    setGroupFilter('')
+    setPaymentFilter('')
+  }
 
   return (
     <section className="space-y-6">
@@ -91,7 +150,7 @@ export default function StudentList({ students, groups }: StudentListProps) {
 
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href="/teacher/students/import"
+            href={ROUTES.teacher.importStudents}
             className="inline-flex items-center justify-center rounded-2xl border border-white/25 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/15"
           >
             استيراد CSV
@@ -141,33 +200,74 @@ export default function StudentList({ students, groups }: StudentListProps) {
             ))}
           </select>
         </div>
+
+        <div className="mt-4 flex flex-col gap-3 text-sm text-slate-500 dark:text-slate-400 md:flex-row md:items-center md:justify-between">
+          <p>
+            {isFiltering
+              ? 'جاري تحديث النتائج...'
+              : `عدد النتائج: ${new Intl.NumberFormat('ar-EG').format(students.length)}`}
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
+              >
+                مسح الفلاتر
+              </button>
+            ) : null}
+
+            <Link
+              href={ROUTES.teacher.newStudent}
+              className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
+            >
+              صفحة إضافة مستقلة
+            </Link>
+          </div>
+        </div>
       </div>
 
-      {filteredStudents.length === 0 ? (
+      {students.length === 0 ? (
         <EmptyState
-          title="لا توجد نتائج مطابقة"
-          message="غيّر معايير البحث أو أضف طالبًا جديدًا ليظهر هنا."
+          title={hasActiveFilters ? 'لا توجد نتائج مطابقة' : 'لا يوجد طلاب مسجلون بعد'}
+          message={
+            hasActiveFilters
+              ? 'غيّر معايير البحث أو امسح الفلاتر لتوسيع النتائج.'
+              : 'ابدأ بإضافة أول طالب أو استيراد ملف CSV لعرض القائمة هنا.'
+          }
           action={
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center justify-center rounded-2xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-800 dark:bg-sky-600 dark:text-slate-950 dark:hover:bg-sky-500"
-            >
-              إضافة طالب
-            </button>
+            hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="inline-flex items-center justify-center rounded-2xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-800 dark:bg-sky-600 dark:text-slate-950 dark:hover:bg-sky-500"
+              >
+                مسح الفلاتر
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(true)}
+                className="inline-flex items-center justify-center rounded-2xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-800 dark:bg-sky-600 dark:text-slate-950 dark:hover:bg-sky-500"
+              >
+                إضافة طالب
+              </button>
+            )
           }
         />
       ) : (
         <>
           <div className="space-y-4 md:hidden">
-            {filteredStudents.map((student) => (
+            {students.map((student) => (
               <StudentCard key={student.id} student={student} />
             ))}
           </div>
 
           <div className="hidden md:block">
             <DataTable
-              data={filteredStudents}
+              data={students}
               rowKey={(student) => student.id}
               columns={[
                 {
@@ -176,7 +276,7 @@ export default function StudentList({ students, groups }: StudentListProps) {
                   render: (student) => (
                     <div>
                       <Link
-                        href={`/teacher/students/${student.id}`}
+                        href={`${ROUTES.teacher.students}/${student.id}`}
                         className="font-semibold text-slate-950 transition-colors hover:text-sky-800 dark:text-white dark:hover:text-sky-300"
                       >
                         {student.name}
@@ -225,7 +325,7 @@ export default function StudentList({ students, groups }: StudentListProps) {
                 {
                   key: 'parentPhone',
                   header: 'هاتف ولي الأمر',
-                  render: (student) => student.parentPhone || 'غير متوفر',
+                  render: (student) => formatPhone(student.parentPhone),
                 },
               ]}
             />

@@ -1,41 +1,13 @@
-import { EnrollmentStatus, PaymentStatus, UserRole } from '@prisma/client'
+import { EnrollmentStatus, UserRole } from '@prisma/client'
 
 import { db } from '@/lib/db'
+import {
+  getCurrentMonthPaymentStatusMap,
+  resolvePaymentStatus,
+} from '@/modules/payments/queries'
+import { getRecentGroupSessions } from '@/modules/schedule/queries'
 
 const ACTIVE_GROUP_STATUSES = [EnrollmentStatus.ACTIVE, EnrollmentStatus.WAITLIST]
-
-function getCurrentMonthKey(date = new Date()) {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    timeZone: 'Africa/Cairo',
-  }).formatToParts(date)
-
-  const year = parts.find((part) => part.type === 'year')?.value
-  const month = parts.find((part) => part.type === 'month')?.value
-
-  return `${year}-${month}`
-}
-
-function resolvePaymentStatus(statuses: PaymentStatus[]) {
-  if (statuses.includes(PaymentStatus.OVERDUE)) {
-    return PaymentStatus.OVERDUE
-  }
-
-  if (statuses.includes(PaymentStatus.PENDING)) {
-    return PaymentStatus.PENDING
-  }
-
-  if (statuses.includes(PaymentStatus.PARTIAL)) {
-    return PaymentStatus.PARTIAL
-  }
-
-  if (statuses.includes(PaymentStatus.PAID)) {
-    return PaymentStatus.PAID
-  }
-
-  return PaymentStatus.PENDING
-}
 
 export async function getGroups(tenantId: string) {
   const groups = await db.group.findMany({
@@ -98,27 +70,9 @@ export async function getGroupStudents(tenantId: string, groupId: string) {
     return []
   }
 
-  const payments = await db.payment.findMany({
-    where: {
-      tenantId,
-      month: getCurrentMonthKey(),
-      studentId: {
-        in: enrollments.map((enrollment) => enrollment.studentId),
-      },
-    },
-    select: {
-      studentId: true,
-      status: true,
-    },
-  })
-
-  const paymentStatuses = payments.reduce<Record<string, PaymentStatus[]>>(
-    (accumulator, payment) => {
-      accumulator[payment.studentId] ??= []
-      accumulator[payment.studentId].push(payment.status)
-      return accumulator
-    },
-    {},
+  const paymentStatuses = await getCurrentMonthPaymentStatusMap(
+    tenantId,
+    enrollments.map((enrollment) => enrollment.studentId),
   )
 
   return enrollments.map((enrollment) => ({
@@ -141,10 +95,22 @@ export async function getGroupById(tenantId: string, groupId: string) {
     return null
   }
 
-  const students = await getGroupStudents(tenantId, groupId)
+  const [students, recentSessions] = await Promise.all([
+    getGroupStudents(tenantId, groupId),
+    getRecentGroupSessions(tenantId, groupId),
+  ])
+  const activeStudentCount = students.filter(
+    (student) => student.status === EnrollmentStatus.ACTIVE,
+  ).length
+  const waitlistCount = students.filter(
+    (student) => student.status === EnrollmentStatus.WAITLIST,
+  ).length
 
   return {
     ...group,
+    activeStudentCount,
+    waitlistCount,
     students,
+    recentSessions,
   }
 }

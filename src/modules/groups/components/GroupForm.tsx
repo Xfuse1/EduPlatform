@@ -9,23 +9,20 @@ import ColorPicker from '@/components/forms/ColorPicker'
 import DaysPicker from '@/components/forms/DaysPicker'
 import FormField from '@/components/forms/FormField'
 import { ROUTES } from '@/config/routes'
-import { createGroup } from '@/modules/groups/actions'
+import { createGroup, updateGroup } from '@/modules/groups/actions'
 import {
   groupCreateSchema,
   type GroupCreateInput,
 } from '@/modules/groups/validations'
 
 type GroupFormProps = {
+  mode?: 'create' | 'edit'
+  groupId?: string
+  initialValues?: GroupCreateInput
   redirectTo?: string
 }
 
-type FieldErrorState = Partial<
-  Record<
-    | keyof GroupCreateInput
-    | 'form',
-    string
-  >
->
+type FieldErrorState = Partial<Record<keyof GroupCreateInput | 'form', string>>
 
 const defaultValues: GroupCreateInput = {
   name: '',
@@ -59,20 +56,19 @@ function buildFieldErrors(
   ) as FieldErrorState
 }
 
-function getSubmitButtonLabel(isPending: boolean) {
-  return isPending ? 'جارٍ إنشاء المجموعة...' : 'حفظ المجموعة'
-}
-
 const inputClassName =
   'h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900/60'
 
 export default function GroupForm({
+  mode = 'create',
+  groupId,
+  initialValues = defaultValues,
   redirectTo = ROUTES.teacher.groups,
 }: GroupFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [days, setDays] = useState(defaultValues.days)
-  const [color, setColor] = useState(defaultValues.color)
+  const [days, setDays] = useState(initialValues.days)
+  const [color, setColor] = useState(initialValues.color)
   const [errors, setErrors] = useState<FieldErrorState>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -93,13 +89,28 @@ export default function GroupForm({
       return
     }
 
+    formData.delete('days')
+    formData.set('color', color)
+    for (const day of days) {
+      formData.append('days', day)
+    }
+
     setErrors({})
     setSubmitError(null)
 
     startTransition(() => {
       void (async () => {
         try {
-          await createGroup(formData)
+          if (mode === 'edit') {
+            if (!groupId) {
+              throw new Error('معرف المجموعة مطلوب للتعديل')
+            }
+
+            await updateGroup(groupId, formData)
+          } else {
+            await createGroup(formData)
+          }
+
           router.push(redirectTo)
           router.refresh()
         } catch (error) {
@@ -118,7 +129,7 @@ export default function GroupForm({
     >
       <div className="space-y-2">
         <h2 className="text-xl font-bold text-slate-950 dark:text-white">
-          بيانات المجموعة
+          {mode === 'edit' ? 'تعديل بيانات المجموعة' : 'بيانات المجموعة'}
         </h2>
         <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
           أدخل تفاصيل المجموعة كما ستظهر في لوحة المعلم والحضور والمصاريف.
@@ -136,6 +147,7 @@ export default function GroupForm({
             id="name"
             name="name"
             type="text"
+            defaultValue={initialValues.name}
             placeholder="مثال: مجموعة ثالثة ثانوي A"
             className={inputClassName}
             aria-invalid={Boolean(errors.name)}
@@ -152,6 +164,7 @@ export default function GroupForm({
             id="subject"
             name="subject"
             type="text"
+            defaultValue={initialValues.subject}
             placeholder="مثال: الرياضيات"
             className={inputClassName}
             aria-invalid={Boolean(errors.subject)}
@@ -168,6 +181,7 @@ export default function GroupForm({
             id="gradeLevel"
             name="gradeLevel"
             type="text"
+            defaultValue={initialValues.gradeLevel}
             placeholder="مثال: الصف الثالث الثانوي"
             className={inputClassName}
             aria-invalid={Boolean(errors.gradeLevel)}
@@ -179,7 +193,8 @@ export default function GroupForm({
             id="room"
             name="room"
             type="text"
-            placeholder="مثال: قاعة ٢"
+            defaultValue={initialValues.room ?? ''}
+            placeholder="مثال: قاعة 2"
             className={inputClassName}
             aria-invalid={Boolean(errors.room)}
           />
@@ -195,6 +210,7 @@ export default function GroupForm({
             id="timeStart"
             name="timeStart"
             type="time"
+            defaultValue={initialValues.timeStart}
             className={inputClassName}
             aria-invalid={Boolean(errors.timeStart)}
           />
@@ -210,6 +226,7 @@ export default function GroupForm({
             id="timeEnd"
             name="timeEnd"
             type="time"
+            defaultValue={initialValues.timeEnd}
             className={inputClassName}
             aria-invalid={Boolean(errors.timeEnd)}
           />
@@ -227,7 +244,7 @@ export default function GroupForm({
             type="number"
             min={1}
             max={200}
-            defaultValue={String(defaultValues.maxCapacity)}
+            defaultValue={String(initialValues.maxCapacity)}
             className={inputClassName}
             aria-invalid={Boolean(errors.maxCapacity)}
           />
@@ -245,7 +262,7 @@ export default function GroupForm({
             name="monthlyFee"
             type="number"
             min={0}
-            defaultValue={String(defaultValues.monthlyFee)}
+            defaultValue={String(initialValues.monthlyFee)}
             className={inputClassName}
             aria-invalid={Boolean(errors.monthlyFee)}
           />
@@ -267,11 +284,7 @@ export default function GroupForm({
         error={errors.color}
         hint="يظهر هذا اللون أعلى البطاقة وفي أجزاء من الواجهة"
       >
-        <ColorPicker
-          value={color}
-          onChange={setColor}
-          disabled={isPending}
-        />
+        <ColorPicker value={color} onChange={setColor} disabled={isPending} />
       </FormField>
 
       {submitError ? (
@@ -296,7 +309,13 @@ export default function GroupForm({
             isPending && 'cursor-not-allowed opacity-70',
           )}
         >
-          {getSubmitButtonLabel(isPending)}
+          {isPending
+            ? mode === 'edit'
+              ? 'جارٍ حفظ التعديلات...'
+              : 'جارٍ إنشاء المجموعة...'
+            : mode === 'edit'
+              ? 'حفظ التعديلات'
+              : 'حفظ المجموعة'}
         </button>
       </div>
     </form>

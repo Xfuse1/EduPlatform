@@ -6,11 +6,7 @@ import { useState, useTransition } from 'react'
 
 import Badge from '@/components/data-display/Badge'
 import FormField from '@/components/forms/FormField'
-import {
-  createStudent,
-  enrollInGroup,
-  updateStudent,
-} from '@/modules/students/actions'
+import { createStudent, updateStudent } from '@/modules/students/actions'
 import {
   studentCreateSchema,
   type StudentCreateInput,
@@ -43,8 +39,6 @@ type StudentFormProps = {
 
 type FieldErrorState = Partial<Record<keyof StudentCreateInput | 'form', string>>
 
-const generatedPhonePrefix = '__student_without_phone__'
-
 const inputClassName =
   'h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900/60'
 
@@ -65,14 +59,6 @@ function buildFieldErrors(
       .map(([key, value]) => [key, value?.[0]])
       .filter((entry): entry is [string, string] => Boolean(entry[1])),
   ) as FieldErrorState
-}
-
-function getVisiblePhone(phone?: string | null) {
-  if (!phone || phone.startsWith(generatedPhonePrefix)) {
-    return ''
-  }
-
-  return phone
 }
 
 export default function StudentForm({
@@ -107,17 +93,20 @@ export default function StudentForm({
 
     const form = event.currentTarget
     const formData = new FormData(form)
-    const primaryGroupId = showGroupSelector ? selectedGroupIds[0] : undefined
 
-    if (primaryGroupId) {
-      formData.set('groupId', primaryGroupId)
-    } else {
-      formData.delete('groupId')
+    formData.delete('groupIds')
+    formData.set('syncGroups', showGroupSelector ? 'true' : 'false')
+
+    if (showGroupSelector) {
+      for (const groupId of selectedGroupIds) {
+        formData.append('groupIds', groupId)
+      }
     }
 
     const validationResult = studentCreateSchema.safeParse({
       ...Object.fromEntries(formData.entries()),
-      groupId: primaryGroupId,
+      groupIds: showGroupSelector ? selectedGroupIds : [],
+      syncGroups: showGroupSelector,
     })
 
     if (!validationResult.success) {
@@ -133,18 +122,7 @@ export default function StudentForm({
       void (async () => {
         try {
           if (mode === 'create') {
-            const result = await createStudent(formData)
-            const extraGroupIds = showGroupSelector
-              ? selectedGroupIds.slice(1)
-              : []
-
-            if (extraGroupIds.length > 0) {
-              await Promise.all(
-                extraGroupIds.map((groupId) =>
-                  enrollInGroup(result.student.id, groupId),
-                ),
-              )
-            }
+            await createStudent(formData)
           } else {
             if (!studentId) {
               throw new Error('معرف الطالب مطلوب للتعديل')
@@ -183,13 +161,13 @@ export default function StudentForm({
           />
         </FormField>
 
-        <FormField label="هاتف الطالب" htmlFor="phone" error={errors.phone}>
+        <FormField label="هاتف الطالب" htmlFor="phone" required error={errors.phone}>
           <input
             id="phone"
             name="phone"
             type="tel"
-            defaultValue={getVisiblePhone(defaultValues?.phone)}
-            placeholder="اختياري"
+            defaultValue={defaultValues?.phone ?? ''}
+            placeholder="+201012345678"
             className={inputClassName}
             aria-invalid={Boolean(errors.phone)}
           />
@@ -222,6 +200,7 @@ export default function StudentForm({
             name="parentPhone"
             type="tel"
             defaultValue={defaultValues?.parentPhone ?? ''}
+            placeholder="+201012345678"
             className={inputClassName}
             aria-invalid={Boolean(errors.parentPhone)}
           />
@@ -248,7 +227,8 @@ export default function StudentForm({
       {showGroupSelector ? (
         <FormField
           label="المجموعات"
-          hint="يمكن اختيار أكثر من مجموعة. أول اختيار يُرسل مع الإنشاء، والباقي يُضاف بعد الحفظ."
+          hint="يمكن اختيار أكثر من مجموعة، وسيتم حفظ التغييرات كلها داخل عملية واحدة."
+          error={errors.groupIds}
         >
           <div className="flex flex-wrap gap-2">
             {availableGroups.map((group) => {

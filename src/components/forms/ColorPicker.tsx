@@ -20,16 +20,6 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ')
 }
 
-function normalizeColor(value: string) {
-  const normalizedValue = value.trim()
-
-  if (!normalizedValue.startsWith('#')) {
-    return `#${normalizedValue}`
-  }
-
-  return normalizedValue
-}
-
 export default function ColorPicker({
   name = 'color',
   value,

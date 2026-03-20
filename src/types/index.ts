@@ -111,7 +111,7 @@ export interface Group {
   name: string
   subject: string
   gradeLevel: string
-  days: DayOfWeek[]
+  days: string[]
   timeStart: string
   timeEnd: string
   room: string | null
