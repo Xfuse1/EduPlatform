@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { getCurrentUser } from "@/lib/auth";
+import { canManageTeacherAccounts } from "@/lib/teacher-access";
 import { requireTenant } from "@/lib/tenant";
 
 function normalizeRole(role: "TEACHER" | "STUDENT" | "PARENT" | "ASSISTANT") {
@@ -24,6 +25,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const headerStore = await headers();
   const currentPath = headerStore.get("next-url") ?? "";
   const role = normalizeRole(user.role);
+  const canManageTeachers = canManageTeacherAccounts(tenant, user);
+  const tenantLabel = tenant.accountType === "CENTER" ? "اسم السنتر" : "اسم الحساب";
 
   if (currentPath.includes("/teacher") && role !== "teacher") {
     redirect(role === "student" ? "/student" : "/parent");
@@ -37,8 +40,19 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect(role === "teacher" ? "/teacher" : "/student");
   }
 
+  if (currentPath.includes("/teacher/teachers") && !canManageTeachers) {
+    redirect("/teacher");
+  }
+
   return (
-    <AppShell currentPath={currentPath} role={role} tenantName={tenant.name} userName={user.name}>
+    <AppShell
+      canManageTeachers={canManageTeachers}
+      currentPath={currentPath}
+      role={role}
+      tenantLabel={tenantLabel}
+      tenantName={tenant.name}
+      userName={user.name}
+    >
       {children}
     </AppShell>
   );

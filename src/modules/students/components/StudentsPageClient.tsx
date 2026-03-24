@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { getInitials, toArabicDigits } from "@/lib/utils";
 
-type StudentPaymentStatus = "PAID" | "OVERDUE" | "PENDING";
+type StudentPaymentStatus = "PAID" | "OVERDUE" | "PENDING" | "PARTIAL";
 
-type StudentItem = {
+export type StudentItem = {
   id: string;
   name: string;
   grade: string;
@@ -20,17 +20,19 @@ type StudentItem = {
   amountDue: number;
 };
 
-type FilterValue = "ALL" | "PAID" | "OVERDUE";
+type FilterValue = "ALL" | "PAID" | "OVERDUE" | "PARTIAL";
 
 function paymentBadge(status: StudentPaymentStatus) {
   if (status === "PAID") return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300";
   if (status === "OVERDUE") return "bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300";
-  return "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300";
+  if (status === "PARTIAL") return "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300";
+  return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200";
 }
 
 function paymentLabel(status: StudentPaymentStatus) {
   if (status === "PAID") return "مدفوع";
   if (status === "OVERDUE") return "متأخر";
+  if (status === "PARTIAL") return "مسدد جزئيًا";
   return "معلق";
 }
 
@@ -38,6 +40,7 @@ const filters: Array<{ label: string; value: FilterValue }> = [
   { label: "الكل", value: "ALL" },
   { label: "مدفوع", value: "PAID" },
   { label: "متأخر", value: "OVERDUE" },
+  { label: "جزئي", value: "PARTIAL" },
 ];
 
 export function StudentsPageClient({ students }: { students: StudentItem[] }) {

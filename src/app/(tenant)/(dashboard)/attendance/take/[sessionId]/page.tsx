@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation'
+import { requireAuth } from '@/lib/auth'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
 import { getSessionAttendance } from '@/modules/attendance/queries'
 import { AttendanceSheet } from '@/modules/attendance/components/AttendanceSheet'
@@ -12,7 +14,9 @@ interface Props {
 export default async function TakeAttendancePage({ params }: Props) {
   const { sessionId } = await params
   const tenant = await requireTenant()
-  const data = await getSessionAttendance(tenant.id, sessionId)
+  const user = await requireAuth()
+  const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
+  const data = await getSessionAttendance(tenant.id, sessionId, teacherScopeUserId ?? undefined)
 
   if (!data) notFound()
 

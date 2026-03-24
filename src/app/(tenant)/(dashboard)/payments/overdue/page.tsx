@@ -1,3 +1,5 @@
+import { requireAuth } from '@/lib/auth'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
 import { getOverdueStudents } from '@/modules/payments/queries'
 import { OverdueList } from '@/modules/payments/components/OverdueList'
@@ -6,7 +8,9 @@ import { OverdueList } from '@/modules/payments/components/OverdueList'
 
 export default async function OverduePage() {
   const tenant = await requireTenant()
-  const overduePayments = await getOverdueStudents(tenant.id)
+  const user = await requireAuth()
+  const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
+  const overduePayments = await getOverdueStudents(tenant.id, teacherScopeUserId ?? undefined)
 
   return (
     <div className="p-4 space-y-4">

@@ -172,8 +172,10 @@ export async function initiateOnlinePayment(formData: FormData) {
       tenantId: tenant.id,
       studentId: data.studentId,
       month: data.month,
-      method: 'KASHIER',
       status: 'PENDING',
+      receiptNumber: {
+        startsWith: 'KSH-',
+      },
     },
   })
   if (existing) throw new Error('يوجد طلب دفع أونلاين معلق لهذا الشهر — انتظر تأكيد العملية أو تواصل مع الدعم')
@@ -182,7 +184,6 @@ export async function initiateOnlinePayment(formData: FormData) {
   const count = await db.payment.count({ where: { tenantId: tenant.id } })
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
   const kashierOrderId = `KSH-${tenant.slug}-${date}-${String(count + 1).padStart(4, '0')}`
-  const receiptNumber = `RCP-${tenant.slug}-${date}-${String(count + 1).padStart(4, '0')}`
 
   // إنشاء سجل Payment معلق — سيُحدَّث عبر webhook
   await db.payment.create({
@@ -192,11 +193,10 @@ export async function initiateOnlinePayment(formData: FormData) {
       amount: data.amount,
       month: data.month,
       status: 'PENDING',
-      method: 'KASHIER',
-      receiptNumber,
-      kashierOrderId,
+      method: 'CARD',
+      receiptNumber: kashierOrderId,
       recordedById: user.id,
-      notes: data.notes ?? null,
+      notes: data.notes ? `Kashier: ${data.notes}` : 'Kashier checkout initiated',
     },
   })
 
@@ -215,4 +215,141 @@ export async function initiateOnlinePayment(formData: FormData) {
   })
 
   return { success: true, checkoutUrl }
+}
+
+function mapPaymentToClientItem(payment: {
+  id: string
+  studentId: string
+  month: string
+  status: 'PAID' | 'PARTIAL' | 'PENDING' | 'OVERDUE'
+  amount: number
+  student: {
+    name: string
+  }
+}) {
+  return {
+    id: payment.id,
+    studentId: payment.studentId,
+    studentName: payment.student.name,
+    month: payment.month,
+    status: payment.status,
+    amount: payment.amount,
+  }
+}
+
+export async function savePayment(input: {
+  id?: string
+  studentId: string
+  month: string
+  amount: number
+  status: 'PAID' | 'PARTIAL' | 'PENDING' | 'OVERDUE'
+}) {
+  try {
+    const tenant = await requireTenant()
+    const user = await requireAuth()
+
+    const student = await db.user.findFirst({
+      where: {
+        id: input.studentId,
+        tenantId: tenant.id,
+      },
+      select: {
+        id: true,
+      },
+    })
+
+    if (!student) {
+      throw new Error('الطالب غير موجود')
+    }
+
+    let paymentId = input.id
+
+    if (paymentId) {
+      const existingPayment = await db.payment.findFirst({
+        where: {
+          id: paymentId,
+          tenantId: tenant.id,
+        },
+        select: {
+          id: true,
+        },
+      })
+
+      if (!existingPayment) {
+        throw new Error('الدفعة غير موجودة')
+      }
+
+      await db.payment.update({
+        where: {
+          id: existingPayment.id,
+        },
+        data: {
+          studentId: input.studentId,
+          month: input.month,
+          amount: input.amount,
+          status: input.status,
+          method: 'CASH',
+          paidAt: input.status === 'PAID' ? new Date() : null,
+          recordedById: user.id,
+        },
+      })
+    } else {
+      const count = await db.payment.count({ where: { tenantId: tenant.id } })
+      const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+      const receiptNumber = `RCP-${tenant.slug}-${date}-${String(count + 1).padStart(4, '0')}`
+
+      const createdPayment = await db.payment.create({
+        data: {
+          tenantId: tenant.id,
+          studentId: input.studentId,
+          month: input.month,
+          amount: input.amount,
+          status: input.status,
+          method: 'CASH',
+          receiptNumber,
+          paidAt: input.status === 'PAID' ? new Date() : null,
+          recordedById: user.id,
+        },
+        select: {
+          id: true,
+        },
+      })
+
+      paymentId = createdPayment.id
+    }
+
+    const payment = await db.payment.findUnique({
+      where: {
+        id: paymentId,
+      },
+      select: {
+        id: true,
+        studentId: true,
+        month: true,
+        status: true,
+        amount: true,
+        student: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    })
+
+    if (!payment) {
+      throw new Error('تعذر تحميل بيانات الدفعة بعد الحفظ')
+    }
+
+    revalidatePath('/payments')
+
+    return {
+      success: true,
+      payment: mapPaymentToClientItem(payment),
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'تعذر حفظ الدفعة',
+    }
+  }
 }

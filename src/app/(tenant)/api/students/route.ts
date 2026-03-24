@@ -4,6 +4,7 @@ import { ZodError } from 'zod'
 
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import { errorResponse, forbidden, successResponse, validationError } from '@/lib/api-response'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import {
   InactiveTenantError,
   TenantNotFoundError,
@@ -52,18 +53,22 @@ export async function GET(request: NextRequest) {
 
     const search = request.nextUrl.searchParams.get('search') ?? undefined
     const groupId = request.nextUrl.searchParams.get('groupId') ?? undefined
-    const paymentStatusValue =
-      request.nextUrl.searchParams.get('paymentStatus') ?? undefined
-    const paymentStatus = paymentStatusValue &&
-      Object.values(PaymentStatus).includes(paymentStatusValue as PaymentStatus)
-      ? (paymentStatusValue as PaymentStatus)
-      : undefined
+    const paymentStatusValue = request.nextUrl.searchParams.get('paymentStatus') ?? undefined
+    const paymentStatus =
+      paymentStatusValue && Object.values(PaymentStatus).includes(paymentStatusValue as PaymentStatus)
+        ? (paymentStatusValue as PaymentStatus)
+        : undefined
+    const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
 
-    const students = await getStudents(tenant.id, {
-      search,
-      groupId,
-      paymentStatus,
-    })
+    const students = await getStudents(
+      tenant.id,
+      {
+        search,
+        groupId,
+        paymentStatus,
+      },
+      teacherScopeUserId ?? undefined,
+    )
 
     return successResponse(students, { total: students.length, page: 1 })
   } catch (error) {

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 
 import { ROUTES } from '@/config/routes'
 import { requireAuth } from '@/lib/auth'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
 import GroupForm from '@/modules/groups/components/GroupForm'
 import { GROUP_DAY_VALUES } from '@/modules/groups/validations'
@@ -28,7 +29,8 @@ export default async function EditGroupPage({ params }: EditGroupPageProps) {
     notFound()
   }
 
-  const group = await getGroupById(tenant.id, groupId)
+  const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
+  const group = await getGroupById(tenant.id, groupId, teacherScopeUserId ?? undefined)
 
   if (!group) {
     notFound()

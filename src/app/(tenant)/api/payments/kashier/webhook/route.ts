@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   // جيب الـ payment من DB مباشرة — لا تستخدم cached query في webhook
   // لا تثق بـ tenantId من الـ request
   const payment = await db.payment.findUnique({
-    where: { kashierOrderId: orderId },
+    where: { receiptNumber: orderId },
   })
   if (!payment) {
     // قد يكون orderId غير موجود — نرجع 200 لمنع Kashier من إعادة الإرسال
@@ -62,8 +62,10 @@ export async function POST(req: NextRequest) {
     where: { id: payment.id },
     data: {
       status: newStatus,
-      kashierTransactionId: transactionId ?? null,
       paidAt: status === 'SUCCESS' ? new Date() : null,
+      notes: transactionId
+        ? `Kashier transaction: ${transactionId}`
+        : payment.notes,
     },
   })
 

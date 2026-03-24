@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import { errorResponse, forbidden, successResponse } from '@/lib/api-response'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import {
   InactiveTenantError,
   TenantNotFoundError,
@@ -27,7 +28,9 @@ export async function GET(request: NextRequest, { params }: RouteProps) {
       return forbidden()
     }
 
-    const students = await getGroupStudents(tenant.id, groupId)
+    const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
+    const students = await getGroupStudents(tenant.id, groupId, teacherScopeUserId ?? undefined)
+
     return successResponse(students, { total: students.length, page: 1 })
   } catch (error) {
     if (error instanceof UnauthorizedError) {

@@ -6,6 +6,7 @@ import { formatCurrency, getSessionStatusLabel, toArabicDigits } from "@/lib/uti
 import { TeacherDashboardCharts } from "@/modules/dashboard/components/TeacherDashboardCharts";
 
 type TeacherDashboardProps = {
+  accountType: "CENTER" | "TEACHER";
   data: Awaited<ReturnType<typeof import("@/modules/dashboard/queries").getTeacherDashboardData>>;
   teacherName?: string;
 };
@@ -29,8 +30,13 @@ function SessionBadge({ status }: { status: string }) {
   return <span className={`rounded-full border px-3 py-2 text-xs font-bold ${styles}`}>{label}</span>;
 }
 
-export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
+export function TeacherDashboard({ accountType, data, teacherName }: TeacherDashboardProps) {
   const displayTeacherName = teacherName?.trim() || data.teacherName?.trim() || "المعلم";
+  const dashboardTitle = accountType === "CENTER" ? "لوحة السنتر" : "لوحة المعلم";
+  const dashboardDescription =
+    accountType === "CENTER"
+      ? "تابع مؤشرات السنتر، واستخدم أزرار الداشات الموجودة أعلى الصفحة للوصول للحساب المطلوب بعد تسجيل الدخول."
+      : "تابع مؤشراتك، واستخدم أزرار الداشات الموجودة أعلى الصفحة للوصول إلى ولي الأمر أو الطالب بعد تسجيل الدخول.";
   const stats = [
     {
       title: "إيرادات الشهر",
@@ -57,11 +63,9 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
   return (
     <div className="space-y-6">
       <section className="overflow-hidden rounded-[24px] bg-[linear-gradient(135deg,_#163b54,_#1A5276_45%,_#2E86C1)] px-6 py-7 text-white shadow-[0_20px_60px_rgba(26,82,118,0.25)]">
-        <p className="text-start text-sm font-semibold text-white/75">لوحة المعلم</p>
+        <p className="text-start text-sm font-semibold text-white/75">{dashboardTitle}</p>
         <h1 className="mt-3 text-start text-3xl font-extrabold">مرحبًا، {displayTeacherName}</h1>
-        <p className="mt-3 max-w-2xl text-start text-sm leading-7 text-white/85">
-          كل مؤشرات اليوم بين يديك: الحضور، التحصيل، الحصص، والتنبيهات المهمة.
-        </p>
+        <p className="mt-3 max-w-2xl text-start text-sm leading-7 text-white/85">{dashboardDescription}</p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -90,7 +94,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
         })}
       </section>
 
-      <TeacherDashboardCharts />
+      <TeacherDashboardCharts attendanceData={data.attendanceSeries} revenueData={data.revenueSeries} />
 
       <section className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
         <Card>

@@ -1,3 +1,5 @@
+import { requireAuth } from '@/lib/auth'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
 import { getRevenueSummary } from '@/modules/payments/queries'
 
@@ -5,6 +7,8 @@ import { getRevenueSummary } from '@/modules/payments/queries'
 
 export default async function PaymentReportsPage() {
   const tenant = await requireTenant()
+  const user = await requireAuth()
+  const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
 
   // اجمع آخر 6 شهور
   const months = Array.from({ length: 6 }, (_, i) => {
@@ -15,11 +19,11 @@ export default async function PaymentReportsPage() {
 
   const summaries = await Promise.all(
     months.map((month) =>
-      getRevenueSummary(tenant.id, month).then((s) => ({ month, ...s })),
+      getRevenueSummary(tenant.id, month, teacherScopeUserId ?? undefined).then((s) => ({ month, ...s })),
     ),
   )
 
-  const maxCollected = Math.max(...summaries.map((s) => s.collected), 1)
+  const maxCollected = Math.max(...summaries.map((s) => s.thisMonth), 1)
 
   return (
     <div className="p-4 space-y-4">
@@ -32,26 +36,31 @@ export default async function PaymentReportsPage() {
             <div className="flex justify-between mb-2">
               <span className="font-semibold">{s.month}</span>
               <span className="font-bold text-green-600 dark:text-green-400">
-                {s.collected.toLocaleString('ar-EG')} جنيه
+                {s.thisMonth.toLocaleString('ar-EG')} جنيه
               </span>
             </div>
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>متأخر: {s.outstanding.toLocaleString('ar-EG')} جنيه</span>
-              <span>نسبة التحصيل: {s.collectionRate}%</span>
+              <span>متأخر: {s.outstanding.total.toLocaleString('ar-EG')} جنيه</span>
+              <span>
+                نسبة التحصيل:{' '}
+                {Math.round((s.thisMonth / Math.max(s.thisMonth + s.outstanding.total, 1)) * 100)}%
+              </span>
             </div>
             {/* شريط التحصيل */}
             <div className="w-full bg-muted rounded-full h-1.5 mt-2">
               <div
                 className="bg-primary h-1.5 rounded-full transition-all duration-500"
-                style={{ width: `${s.collectionRate}%` }}
+                style={{
+                  width: `${Math.round((s.thisMonth / Math.max(s.thisMonth + s.outstanding.total, 1)) * 100)}%`,
+                }}
               />
             </div>
             {/* شريط المقارنة النسبية بين الشهور */}
-            {s.collected > 0 && (
+            {s.thisMonth > 0 && (
               <div className="w-full bg-green-100 dark:bg-green-900/20 rounded-full h-1 mt-1">
                 <div
                   className="bg-green-500 h-1 rounded-full"
-                  style={{ width: `${Math.round((s.collected / maxCollected) * 100)}%` }}
+                  style={{ width: `${Math.round((s.thisMonth / maxCollected) * 100)}%` }}
                 />
               </div>
             )}

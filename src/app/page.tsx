@@ -198,6 +198,12 @@ export default function MarketingPage() {
                   تسجيل الدخول
                 </Link>
                 <Link
+                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:hover:bg-emerald-400/15"
+                  href="/parent-register"
+                >
+                  إنشاء حساب ولي أمر
+                </Link>
+                <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-[0_16px_35px_rgba(46,134,193,0.35)] transition hover:bg-secondary"
                   href="/signup"
                 >
@@ -210,6 +216,12 @@ export default function MarketingPage() {
                   href="/login"
                 >
                   دخول
+                </Link>
+                <Link
+                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:hover:bg-emerald-400/15"
+                  href="/parent-register"
+                >
+                  ولي أمر
                 </Link>
                 <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-3 py-3 text-sm font-bold text-white transition hover:bg-secondary"

@@ -1,6 +1,7 @@
 import { EnrollmentStatus, UserRole } from '@prisma/client'
 
 import { db } from '@/lib/db'
+import { buildWeeklyScheduleItems } from '@/lib/schedule'
 import {
   getCurrentMonthPaymentStatusMap,
   resolvePaymentStatus,
@@ -8,12 +9,26 @@ import {
 import { getRecentGroupSessions } from '@/modules/schedule/queries'
 
 const ACTIVE_GROUP_STATUSES = [EnrollmentStatus.ACTIVE, EnrollmentStatus.WAITLIST]
+const DAY_LABELS: Record<string, string> = {
+  saturday: 'السبت',
+  sunday: 'الأحد',
+  monday: 'الاثنين',
+  tuesday: 'الثلاثاء',
+  wednesday: 'الأربعاء',
+  thursday: 'الخميس',
+  friday: 'الجمعة',
+}
 
-export async function getGroups(tenantId: string) {
+function toArabicDay(day: string) {
+  return DAY_LABELS[day] ?? day
+}
+
+export async function getGroups(tenantId: string, teacherId?: string) {
   const groups = await db.group.findMany({
     where: {
       tenantId,
       isActive: true,
+      ...(teacherId ? { teacherId } : {}),
     },
     orderBy: [
       { subject: 'asc' },
@@ -43,7 +58,7 @@ export async function getGroups(tenantId: string) {
   }))
 }
 
-export async function getGroupStudents(tenantId: string, groupId: string) {
+export async function getGroupStudents(tenantId: string, groupId: string, teacherId?: string) {
   const enrollments = await db.groupStudent.findMany({
     where: {
       groupId,
@@ -53,6 +68,7 @@ export async function getGroupStudents(tenantId: string, groupId: string) {
       group: {
         id: groupId,
         tenantId,
+        ...(teacherId ? { teacherId } : {}),
       },
       student: {
         tenantId,
@@ -83,11 +99,12 @@ export async function getGroupStudents(tenantId: string, groupId: string) {
   }))
 }
 
-export async function getGroupById(tenantId: string, groupId: string) {
+export async function getGroupById(tenantId: string, groupId: string, teacherId?: string) {
   const group = await db.group.findFirst({
     where: {
       id: groupId,
       tenantId,
+      ...(teacherId ? { teacherId } : {}),
     },
   })
 
@@ -96,7 +113,7 @@ export async function getGroupById(tenantId: string, groupId: string) {
   }
 
   const [students, recentSessions] = await Promise.all([
-    getGroupStudents(tenantId, groupId),
+    getGroupStudents(tenantId, groupId, teacherId),
     getRecentGroupSessions(tenantId, groupId),
   ])
   const activeStudentCount = students.filter(
@@ -113,4 +130,89 @@ export async function getGroupById(tenantId: string, groupId: string) {
     students,
     recentSessions,
   }
+}
+
+export async function getGroupsList(tenantId: string, teacherId?: string) {
+  const groups = await getGroups(tenantId, teacherId)
+
+  return groups.map((group) => ({
+    id: group.id,
+    name: group.name,
+    subject: group.subject,
+    gradeLevel: group.gradeLevel,
+    days: group.days.map(toArabicDay),
+    timeStart: group.timeStart,
+    timeEnd: group.timeEnd,
+    room: group.room,
+    monthlyFee: group.monthlyFee,
+    maxCapacity: group.maxCapacity,
+    enrolledCount: group.studentCount,
+    color: group.color,
+  }))
+}
+
+export async function getTeacherScheduleItems(tenantId: string, teacherId?: string) {
+  const groups = await db.group.findMany({
+    where: {
+      tenantId,
+      isActive: true,
+      ...(teacherId ? { teacherId } : {}),
+    },
+    orderBy: [{ timeStart: 'asc' }, { name: 'asc' }],
+    select: {
+      id: true,
+      name: true,
+      subject: true,
+      days: true,
+      timeStart: true,
+      timeEnd: true,
+      room: true,
+      color: true,
+    },
+  })
+
+  return buildWeeklyScheduleItems(
+    groups.map((group) => ({
+      ...group,
+      days: group.days.map(toArabicDay),
+    })),
+  )
+}
+
+export async function getStudentScheduleItems(tenantId: string, studentId: string) {
+  const enrollments = await db.groupStudent.findMany({
+    where: {
+      studentId,
+      status: EnrollmentStatus.ACTIVE,
+      student: {
+        tenantId,
+        role: UserRole.STUDENT,
+      },
+      group: {
+        tenantId,
+        isActive: true,
+      },
+    },
+    select: {
+      group: {
+        select: {
+          id: true,
+          name: true,
+          subject: true,
+          days: true,
+          timeStart: true,
+          timeEnd: true,
+          room: true,
+          color: true,
+        },
+      },
+    },
+  })
+
+  return buildWeeklyScheduleItems(
+    enrollments.map(({ group }) => ({
+      ...group,
+      days: group.days.map(toArabicDay),
+    })),
+  )
 }

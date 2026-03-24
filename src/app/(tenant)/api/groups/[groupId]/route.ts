@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import { errorResponse, forbidden, notFound, successResponse } from '@/lib/api-response'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import {
   InactiveTenantError,
   TenantNotFoundError,
@@ -27,7 +28,8 @@ export async function GET(request: NextRequest, { params }: RouteProps) {
       return forbidden()
     }
 
-    const group = await getGroupById(tenant.id, groupId)
+    const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
+    const group = await getGroupById(tenant.id, groupId, teacherScopeUserId ?? undefined)
 
     if (!group) {
       return notFound('المجموعة غير موجودة')

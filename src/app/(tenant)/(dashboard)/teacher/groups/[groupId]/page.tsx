@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import { requireAuth } from '@/lib/auth'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
 import GroupDetails from '@/modules/groups/components/GroupDetails'
 import { getGroupById } from '@/modules/groups/queries'
@@ -27,9 +28,11 @@ export default async function GroupDetailsPage({
     notFound()
   }
 
+  const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
+
   const [group, availableStudents] = await Promise.all([
-    getGroupById(tenant.id, groupId),
-    getStudents(tenant.id),
+    getGroupById(tenant.id, groupId, teacherScopeUserId ?? undefined),
+    getStudents(tenant.id, {}, teacherScopeUserId ?? undefined),
   ])
 
   if (!group) {

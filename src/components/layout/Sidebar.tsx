@@ -7,6 +7,7 @@ import {
   Heart,
   LayoutDashboard,
   Settings,
+  User,
   Users,
   Wallet,
 } from "lucide-react";
@@ -16,43 +17,137 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 type Role = "teacher" | "student" | "parent";
+export type DashboardRole = Role;
 
 type NavigationItem = {
   href: string;
   label: string;
+  shortLabel: string;
+  activeMode?: "exact" | "nested";
   icon: React.ComponentType<{ className?: string }>;
 };
 
-const navigation: Record<Role, NavigationItem[]> = {
-  teacher: [
-    { href: "/teacher", label: "لوحة التحكم", icon: LayoutDashboard },
-    { href: "/teacher/groups", label: "المجموعات", icon: Users },
-    { href: "/teacher/students", label: "الطلاب", icon: GraduationCap },
-    { href: "/attendance", label: "الحضور", icon: CheckSquare },
-    { href: "/payments", label: "المصاريف", icon: Wallet },
-    { href: "/teacher/schedule", label: "الجدول", icon: Calendar },
-    { href: "/teacher/settings", label: "الإعدادات", icon: Settings },
-  ],
-  student: [
-    { href: "/student", label: "لوحة التحكم", icon: LayoutDashboard },
-    { href: "/student/schedule", label: "جدولي", icon: Calendar },
-  ],
-  parent: [
-    { href: "/parent", label: "لوحة التحكم", icon: LayoutDashboard },
-    { href: "/parent", label: "أبنائي", icon: Heart },
-  ],
-};
-
-function isItemActive(pathname: string, href: string) {
-  if (href === "/teacher" || href === "/student" || href === "/parent") {
-    return pathname === href;
-  }
-
-  return pathname.startsWith(href);
+function getNavigation(canManageTeachers: boolean): Record<Role, NavigationItem[]> {
+  return {
+    teacher: [
+      {
+        href: "/teacher",
+        label: "لوحة التحكم",
+        shortLabel: "الرئيسية",
+        activeMode: "exact",
+        icon: LayoutDashboard,
+      },
+      ...(canManageTeachers
+        ? [
+            {
+              href: "/teacher/teachers",
+              label: "مدرسين",
+              shortLabel: "مدرسين",
+              icon: User,
+            },
+          ]
+        : []),
+      {
+        href: "/teacher/groups",
+        label: "المجموعات",
+        shortLabel: "المجموعات",
+        icon: Users,
+      },
+      {
+        href: "/teacher/students",
+        label: "الطلاب",
+        shortLabel: "الطلاب",
+        icon: GraduationCap,
+      },
+      {
+        href: "/attendance",
+        label: "الحضور",
+        shortLabel: "الحضور",
+        icon: CheckSquare,
+      },
+      {
+        href: "/payments",
+        label: "المصاريف",
+        shortLabel: "المصاريف",
+        icon: Wallet,
+      },
+      {
+        href: "/teacher/schedule",
+        label: "الجدول",
+        shortLabel: "الجدول",
+        icon: Calendar,
+      },
+      {
+        href: "/teacher/settings",
+        label: "الإعدادات",
+        shortLabel: "إعدادات",
+        icon: Settings,
+      },
+    ],
+    student: [
+      {
+        href: "/student",
+        label: "لوحة التحكم",
+        shortLabel: "الرئيسية",
+        activeMode: "exact",
+        icon: LayoutDashboard,
+      },
+      {
+        href: "/student/schedule",
+        label: "جدولي",
+        shortLabel: "جدولي",
+        icon: Calendar,
+      },
+    ],
+    parent: [
+      {
+        href: "/parent",
+        label: "لوحة التحكم",
+        shortLabel: "الرئيسية",
+        activeMode: "exact",
+        icon: LayoutDashboard,
+      },
+      {
+        href: "/parent/children",
+        label: "أبنائي",
+        shortLabel: "أبنائي",
+        activeMode: "nested",
+        icon: Heart,
+      },
+    ],
+  };
 }
 
-export function Sidebar({ role }: { role: Role; currentPath: string }) {
+export function getNavigationItems(role: DashboardRole, canManageTeachers = false) {
+  return getNavigation(canManageTeachers)[role];
+}
+
+function isItemActive(pathname: string, item: NavigationItem) {
+  if (item.activeMode === "exact") {
+    return pathname === item.href;
+  }
+
+  if (item.activeMode === "nested") {
+    return pathname === item.href || pathname.startsWith(`${item.href}/`);
+  }
+
+  if (item.href === "/teacher" || item.href === "/student" || item.href === "/parent") {
+    return pathname === item.href;
+  }
+
+  return pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+export function Sidebar({
+  role,
+  canManageTeachers = false,
+}: {
+  role: Role;
+  currentPath: string;
+  canManageTeachers?: boolean;
+}) {
   const pathname = usePathname();
+  const navigation = getNavigationItems(role, canManageTeachers);
 
   return (
     <aside className="hidden w-[340px] shrink-0 border-s border-slate-200/40 bg-[linear-gradient(180deg,#142138_0%,#12203a_42%,#10203a_100%)] text-white xl:block dark:border-white/8 dark:bg-[linear-gradient(180deg,#0b1327_0%,#0e1b32_38%,#10243f_100%)]">
@@ -84,8 +179,8 @@ export function Sidebar({ role }: { role: Role; currentPath: string }) {
           </div>
 
           <nav className="space-y-3.5">
-            {navigation[role].map((item, index) => {
-              const isActive = isItemActive(pathname, item.href);
+            {navigation.map((item) => {
+              const active = isItemActive(pathname, item);
               const Icon = item.icon;
 
               return (
@@ -94,26 +189,22 @@ export function Sidebar({ role }: { role: Role; currentPath: string }) {
                   href={item.href}
                   className={cn(
                     "group relative flex min-h-[58px] items-center gap-4 overflow-hidden rounded-[22px] px-5 py-3 transition duration-300",
-                    isActive
+                    active
                       ? "bg-[linear-gradient(90deg,rgba(255,255,255,0.96)_0%,rgba(241,245,249,0.92)_100%)] text-primary shadow-[0_8px_20px_rgba(2,8,20,0.15)]"
                       : "text-white/84 hover:bg-white/[0.045] hover:text-white",
                   )}
                 >
-                  {isActive ? (
-                    <>
-                      <div className="pointer-events-none absolute inset-y-3 end-3 w-1 rounded-full bg-secondary/90" />
-                    </>
-                  ) : null}
+                  {active ? <div className="pointer-events-none absolute inset-y-3 end-3 w-1 rounded-full bg-secondary/90" /> : null}
 
                   <span
                     className={cn(
                       "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[15px] transition duration-300",
-                      isActive
+                      active
                         ? "bg-primary/10 text-primary"
                         : "bg-white/[0.045] text-white/88 group-hover:bg-white/[0.06]",
                     )}
                   >
-                    <Icon className={cn("h-5 w-5 transition duration-300", isActive ? "scale-110" : "group-hover:scale-110")} />
+                    <Icon className={cn("h-5 w-5 transition duration-300", active ? "scale-110" : "group-hover:scale-110")} />
                   </span>
 
                   <div className="relative flex min-w-0 flex-1 items-center justify-between gap-3">

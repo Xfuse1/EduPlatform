@@ -1,7 +1,18 @@
-import { notFound } from "next/navigation";
+import { Plan, TenantAccountType } from "@prisma/client";
 import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 
-import { MOCK_TENANT } from "@/lib/mock-data";
+import { db } from "@/lib/db";
+
+type HeaderReader = {
+  get(name: string): string | null | undefined;
+};
+
+type TenantRequestLike = {
+  headers?: HeaderReader;
+};
+
+const RESERVED_SUBDOMAINS = new Set(["", "www", "app", "localhost"]);
 
 export type ResolvedTenant = {
   id: string;
@@ -12,35 +23,161 @@ export type ResolvedTenant = {
   region: string | null;
   bio: string | null;
   subjects: string[];
-  plan: "FREE";
+  plan: Plan;
+  phone: string | null;
+  isActive: boolean;
+  accountType: TenantAccountType;
 };
 
-export async function getTenantFromHost(host: string) {
-  const hostname = host.split(":")[0].trim().toLowerCase();
-  const parts = hostname.split(".");
-
-  let slug = "";
-
-  if (hostname.endsWith(".localhost")) {
-    slug = parts[0] ?? "";
-  } else if (parts.length > 2) {
-    slug = parts[0] ?? "";
+export class TenantNotFoundError extends Error {
+  constructor(message = "السنتر المطلوب غير موجود") {
+    super(message);
+    this.name = "TenantNotFoundError";
   }
-
-  if (!slug || slug === "www" || slug === "app") {
-    return MOCK_TENANT;
-  }
-
-  return slug === MOCK_TENANT.slug ? MOCK_TENANT : MOCK_TENANT;
 }
 
-export async function requireTenant() {
+export class InactiveTenantError extends Error {
+  constructor(message = "السنتر المطلوب غير مفعل حاليًا") {
+    super(message);
+    this.name = "InactiveTenantError";
+  }
+}
+
+function normalizeHost(host: string) {
+  return host
+    .trim()
+    .toLowerCase()
+    .split(",")[0]
+    ?.trim()
+    .replace(/^https?:\/\//, "")
+    .split("/")[0] ?? "";
+}
+
+export function extractSubdomain(host: string) {
+  const hostname = normalizeHost(host).split(":")[0];
+  const parts = hostname.split(".");
+
+  if (hostname.endsWith(".localhost")) {
+    return parts[0] ?? "";
+  }
+
+  if (parts.length > 2) {
+    return parts[0] ?? "";
+  }
+
+  return "";
+}
+
+export function extractTenantSlug(host: string) {
+  const subdomain = extractSubdomain(host);
+  return RESERVED_SUBDOMAINS.has(subdomain) ? "" : subdomain;
+}
+
+function getTenantSlugFromHost(host: string) {
+  return extractTenantSlug(host);
+}
+
+async function getHeaderValue(request: TenantRequestLike | undefined, name: string) {
+  if (request?.headers) {
+    return request.headers.get(name)?.trim() ?? null;
+  }
+
   const headerStore = await headers();
-  const host = headerStore.get("host") ?? "localhost:3000";
-  const forcedSlug = headerStore.get("x-tenant-slug") ?? MOCK_TENANT.slug;
-  const tenant = forcedSlug === MOCK_TENANT.slug ? MOCK_TENANT : await getTenantFromHost(host);
+  return headerStore.get(name)?.trim() ?? null;
+}
+
+export async function getTenantBySlug(slug: string) {
+  return db.tenant.findUnique({
+    where: { slug },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      logoUrl: true,
+      themeColor: true,
+      region: true,
+      bio: true,
+      subjects: true,
+      plan: true,
+      phone: true,
+      isActive: true,
+      accountType: true,
+    },
+  });
+}
+
+async function getDefaultTenant() {
+  return db.tenant.findFirst({
+    where: { isActive: true },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      logoUrl: true,
+      themeColor: true,
+      region: true,
+      bio: true,
+      subjects: true,
+      plan: true,
+      phone: true,
+      isActive: true,
+      accountType: true,
+    },
+  });
+}
+
+export async function getTenantFromHost(host: string) {
+  const slug = getTenantSlugFromHost(host);
+
+  if (!slug || slug === "www" || slug === "app" || slug === "localhost") {
+    return getDefaultTenant();
+  }
+
+  return getTenantBySlug(slug);
+}
+
+export async function getOptionalTenant(request?: TenantRequestLike) {
+  const forcedSlug = (await getHeaderValue(request, "x-tenant-slug"))?.toLowerCase();
+
+  if (forcedSlug) {
+    return getTenantBySlug(forcedSlug);
+  }
+
+  const host =
+    (await getHeaderValue(request, "x-forwarded-host")) ??
+    (await getHeaderValue(request, "host")) ??
+    "localhost:3000";
+  const slug = getTenantSlugFromHost(host);
+
+  if (!slug) {
+    return null;
+  }
+
+  return getTenantBySlug(slug);
+}
+
+export async function requireTenant(request?: TenantRequestLike) {
+  const host =
+    (await getHeaderValue(request, "x-forwarded-host")) ??
+    (await getHeaderValue(request, "host")) ??
+    "localhost:3000";
+  const forcedSlug = (await getHeaderValue(request, "x-tenant-slug"))?.toLowerCase();
+  const tenant = forcedSlug ? await getTenantBySlug(forcedSlug) : await getTenantFromHost(host);
 
   if (!tenant) {
+    if (request) {
+      throw new TenantNotFoundError();
+    }
+
+    notFound();
+  }
+
+  if (!tenant.isActive) {
+    if (request) {
+      throw new InactiveTenantError();
+    }
+
     notFound();
   }
 

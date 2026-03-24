@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import { errorResponse, forbidden, successResponse } from '@/lib/api-response'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import {
   InactiveTenantError,
   TenantNotFoundError,
@@ -21,9 +22,10 @@ export async function GET(request: NextRequest) {
       return forbidden()
     }
 
+    const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
     const [groups, students] = await Promise.all([
-      getGroups(tenant.id),
-      getStudents(tenant.id),
+      getGroups(tenant.id, teacherScopeUserId ?? undefined),
+      getStudents(tenant.id, {}, teacherScopeUserId ?? undefined),
     ])
 
     return successResponse({

@@ -12,6 +12,7 @@ model Tenant {
   id            String   @id @default(cuid())
   slug          String   @unique
   name          String
+  accountType   TenantAccountType @default(TEACHER)
   plan          Plan     @default(FREE)
   planExpiresAt DateTime?
   logoUrl       String?
@@ -50,6 +51,9 @@ model User {
   name              String
   role              UserRole
   avatarUrl         String?
+  email             String?
+  subject           String?
+  bio               String?
   gradeLevel        String?
   parentName        String?
   parentPhone       String?
@@ -66,6 +70,7 @@ model User {
   parentOf          ParentStudent[]   @relation("ParentUser")
   childOf           ParentStudent[]   @relation("StudentUser")
   sessions          AuthSession[]
+  assignedGroups    Group[]           @relation("GroupTeacher")
 
   @@unique([tenantId, phone])
   @@index([tenantId])
@@ -95,6 +100,8 @@ model Group {
   id          String   @id @default(cuid())
   tenantId    String
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  teacherId   String?
+  teacher     User?    @relation("GroupTeacher", fields: [teacherId], references: [id], onDelete: SetNull)
   name        String
   subject     String
   gradeLevel  String
@@ -115,6 +122,13 @@ model Group {
 
   @@index([tenantId])
   @@index([tenantId, isActive])
+  @@index([tenantId, teacherId])
+}
+
+enum TenantAccountType {
+  CENTER
+  TEACHER
+  PARENT
 }
 
 model GroupStudent {

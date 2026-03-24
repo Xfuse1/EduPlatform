@@ -77,6 +77,9 @@ export interface User {
   name: string
   role: UserRole
   avatarUrl: string | null
+  email: string | null
+  subject: string | null
+  bio: string | null
   gradeLevel: string | null
   parentName: string | null
   parentPhone: string | null

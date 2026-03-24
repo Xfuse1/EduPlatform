@@ -39,7 +39,7 @@ export const ROUTES = {
   },
   parent: {
     dashboard: '/parent',
-    children: '/parent',
+    children: '/parent/children',
   },
   api: {
     auth: {

@@ -1,4 +1,6 @@
+import { requireAuth } from '@/lib/auth'
 import { requireTenant } from '@/lib/tenant'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { db } from '@/lib/db'
 import { AttendanceHistory } from '@/modules/attendance/components/AttendanceHistory'
 
@@ -13,9 +15,21 @@ type HistorySession = {
 
 export default async function AttendanceHistoryPage() {
   const tenant = await requireTenant()
+  const user = await requireAuth()
+  const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
 
   const sessions = (await db.session.findMany({
-    where: { tenantId: tenant.id, status: 'COMPLETED' },
+    where: {
+      tenantId: tenant.id,
+      status: 'COMPLETED',
+      ...(teacherScopeUserId
+        ? {
+            group: {
+              teacherId: teacherScopeUserId,
+            },
+          }
+        : {}),
+    },
     include: {
       group: { select: { name: true, color: true } },
       _count: { select: { attendance: { where: { status: 'PRESENT' } } } },

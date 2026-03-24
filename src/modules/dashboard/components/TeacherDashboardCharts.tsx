@@ -13,23 +13,11 @@ import {
   YAxis,
 } from "recharts";
 
-const revenueData = [
-  { month: "أكتوبر", revenue: 12500 },
-  { month: "نوفمبر", revenue: 14200 },
-  { month: "ديسمبر", revenue: 11800 },
-  { month: "يناير", revenue: 16500 },
-  { month: "فبراير", revenue: 15200 },
-  { month: "مارس", revenue: 18250 },
-] as const;
-
-const attendanceData = [
-  { month: "أكتوبر", rate: 82 },
-  { month: "نوفمبر", rate: 88 },
-  { month: "ديسمبر", rate: 79 },
-  { month: "يناير", rate: 91 },
-  { month: "فبراير", rate: 87 },
-  { month: "مارس", rate: 92 },
-] as const;
+type ChartPoint = {
+  month: string;
+  revenue?: number;
+  rate?: number;
+};
 
 function toArabicDigits(value: number | string) {
   const arabicDigits = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
@@ -89,7 +77,13 @@ function ChartCard({ title, children }: { title: string; children: ReactNode }) 
   );
 }
 
-export function TeacherDashboardCharts() {
+export function TeacherDashboardCharts({
+  revenueData,
+  attendanceData,
+}: {
+  revenueData: ChartPoint[];
+  attendanceData: ChartPoint[];
+}) {
   const axisStyle = { fill: "var(--chart-text)", fontSize: 12 };
 
   return (

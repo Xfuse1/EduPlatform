@@ -3,6 +3,7 @@ import { ZodError } from 'zod'
 
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import { errorResponse, forbidden, successResponse, validationError } from '@/lib/api-response'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import {
   InactiveTenantError,
   TenantNotFoundError,
@@ -46,7 +47,9 @@ export async function GET(request: NextRequest) {
       return forbidden()
     }
 
-    const groups = await getGroups(tenant.id)
+    const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
+    const groups = await getGroups(tenant.id, teacherScopeUserId ?? undefined)
+
     return successResponse(groups, { total: groups.length, page: 1 })
   } catch (error) {
     if (error instanceof UnauthorizedError) {

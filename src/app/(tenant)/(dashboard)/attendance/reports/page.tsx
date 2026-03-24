@@ -1,3 +1,5 @@
+import { requireAuth } from '@/lib/auth'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
 import { getAttendanceReport } from '@/modules/attendance/queries'
 
@@ -10,6 +12,8 @@ interface Props {
 export default async function AttendanceReportsPage({ searchParams }: Props) {
   const { month: monthParam } = await searchParams
   const tenant = await requireTenant()
+  const user = await requireAuth()
+  const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
 
   const currentMonth = new Date().toISOString().slice(0, 7)
   const month = monthParam ?? currentMonth
@@ -22,7 +26,7 @@ export default async function AttendanceReportsPage({ searchParams }: Props) {
     _count: { attendance: number }
   }
 
-  const sessions = (await getAttendanceReport(tenant.id, month)) as ReportSession[]
+  const sessions = (await getAttendanceReport(tenant.id, month, teacherScopeUserId ?? undefined)) as ReportSession[]
 
   const totalSessions = sessions.length
   const totalPresent = sessions.reduce(

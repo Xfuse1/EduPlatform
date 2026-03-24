@@ -1,7 +1,5 @@
 type RequiredEnvKey =
   | 'DATABASE_URL'
-  | 'JWT_SECRET'
-  | 'NEXT_PUBLIC_APP_URL'
 
 type OptionalEnvKey =
   | 'REDIS_URL'
@@ -79,14 +77,17 @@ function validateTheme(value: string | undefined) {
 }
 
 function createEnv(): EnvConfig {
-  const appUrl = validateUrl(requireEnv('NEXT_PUBLIC_APP_URL'), 'NEXT_PUBLIC_APP_URL')
+  const appUrl = validateUrl(
+    readEnv('NEXT_PUBLIC_APP_URL') ?? 'http://localhost:3000',
+    'NEXT_PUBLIC_APP_URL',
+  )
   const redisUrl = optionalEnv('REDIS_URL')
   const smsProviderUrl = optionalEnv('SMS_PROVIDER_URL')
   const whatsappApiUrl = optionalEnv('WHATSAPP_API_URL')
 
   return {
     DATABASE_URL: requireEnv('DATABASE_URL'),
-    JWT_SECRET: requireEnv('JWT_SECRET'),
+    JWT_SECRET: readEnv('JWT_SECRET') ?? 'dev-only-secret-change-me',
     NEXT_PUBLIC_APP_URL: appUrl,
     REDIS_URL: redisUrl ? validateUrl(redisUrl, 'REDIS_URL') : undefined,
     REDIS_TOKEN: optionalEnv('REDIS_TOKEN'),

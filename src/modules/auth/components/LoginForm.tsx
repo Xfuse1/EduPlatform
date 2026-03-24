@@ -1,19 +1,20 @@
 'use client';
 
-import { ArrowLeft, Phone } from "lucide-react";
+import { ArrowLeft, Loader2, Phone } from "lucide-react";
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { sendOTP } from "@/modules/auth/actions";
+import { preparePhoneLogin } from "@/modules/auth/actions";
 
 type TenantSummary = {
+  slug: string | null;
   name: string;
   logoUrl: string | null;
   themeColor: string;
+  accountType: "CENTER" | "TEACHER" | "PARENT" | null;
 };
 
 function getInitials(name: string) {
@@ -25,34 +26,50 @@ function getInitials(name: string) {
     .join("");
 }
 
+function getLoginDescription(tenant: TenantSummary, isGenericLogin: boolean) {
+  if (isGenericLogin) {
+    return "أدخل رقم هاتفك وسنوجهك إلى صفحة التحقق الخاصة بالحساب المرتبط به.";
+  }
+
+  if (tenant.accountType === "PARENT") {
+    return "سجل الدخول إلى حساب ولي الأمر المستقل برقم الهاتف المرتبط به.";
+  }
+
+  if (tenant.accountType === "CENTER") {
+    return "سجل الدخول برقم الهاتف وسيصلك كود تحقق عبر Firebase.";
+  }
+
+  return "سجل الدخول إلى هذا الحساب برقم الهاتف وسيصلك كود تحقق عبر Firebase.";
+}
+
 export function LoginForm({ tenant }: { tenant: TenantSummary }) {
-  const router = useRouter();
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
-  const [isPending, startTransition] = useTransition();
+  const [isRouting, startRouting] = useTransition();
+  const isGenericLogin = !tenant.slug;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!/^01\d{9}$/.test(phone)) {
-      setError("يرجى إدخال رقم هاتف مصري صحيح يبدأ بـ ٠١");
+      setError("يرجى إدخال رقم هاتف مصري صحيح يبدأ بـ 01");
       return;
     }
 
     setError("");
 
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.set("phone", phone);
+    startRouting(async () => {
+      const result = await preparePhoneLogin({
+        phone,
+        tenantSlug: tenant.slug ?? undefined,
+      });
 
-      const result = await sendOTP(formData);
-
-      if (!result.success) {
-        setError(result.message ?? "تعذر إرسال كود التحقق");
+      if (!result.success || !result.redirectTo) {
+        setError(result.message ?? "تعذر تجهيز صفحة التحقق");
         return;
       }
 
-      router.push(result.redirectTo ?? `/verify?phone=${encodeURIComponent(phone)}`);
+      window.location.assign(result.redirectTo);
     });
   };
 
@@ -75,7 +92,7 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
             )}
           </div>
           <h1 className="mt-5 text-3xl font-extrabold">{tenant.name}</h1>
-          <p className="mt-3 text-sm leading-7 text-white/90">سجّل الدخول برقم الهاتف لاستلام كود تحقق آمن وسريع.</p>
+          <p className="mt-3 text-sm leading-7 text-white/90">{getLoginDescription(tenant, isGenericLogin)}</p>
         </div>
       </div>
 
@@ -89,6 +106,7 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
                 <Phone className="h-4 w-4" />
               </span>
               <Input
+                className="ps-24 text-base font-semibold"
                 dir="ltr"
                 id="phone"
                 inputMode="numeric"
@@ -97,11 +115,10 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
                 onChange={(event) => setPhone(event.target.value.replace(/\D/g, ""))}
                 placeholder="01XXXXXXXXX"
                 value={phone}
-                className="ps-24 text-base font-semibold"
               />
             </div>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              يجب أن يبدأ الرقم بـ <span dir="ltr">01</span> ويتكون من <span dir="ltr">11</span> رقماً.
+              يجب أن يبدأ الرقم بـ <span dir="ltr">01</span> ويتكون من <span dir="ltr">11</span> رقمًا.
             </p>
           </div>
 
@@ -111,9 +128,18 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
             </p>
           ) : null}
 
-          <Button className="w-full gap-2 text-base" disabled={isPending} type="submit">
-            <span>{isPending ? "جارٍ الإرسال..." : "إرسال كود التحقق"}</span>
-            <ArrowLeft className="h-4 w-4" />
+          <Button className="w-full gap-2 text-base" disabled={isRouting} type="submit">
+            {isRouting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                جارٍ تجهيز صفحة التحقق...
+              </>
+            ) : (
+              <>
+                <span>المتابعة إلى التحقق</span>
+                <ArrowLeft className="h-4 w-4" />
+              </>
+            )}
           </Button>
         </form>
       </CardContent>
