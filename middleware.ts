@@ -2,6 +2,8 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
 const RESERVED_SUBDOMAINS = new Set(['', 'www', 'app', 'localhost'])
+const INTERNAL_ROUTE_GROUP_PREFIXES = ['/(marketing)', '/(tenant)', '/(platform-admin)']
+const PLATFORM_HOST_SUFFIXES = ['.vercel.app', '.vercel.sh']
 
 function normalizeHost(host: string) {
   return (
@@ -15,9 +17,28 @@ function normalizeHost(host: string) {
   )
 }
 
+function getHostname(host: string) {
+  return normalizeHost(host).split(':')[0] ?? ''
+}
+
+function isPlatformDeploymentHost(host: string) {
+  const hostname = getHostname(host)
+  return PLATFORM_HOST_SUFFIXES.some((suffix) => hostname.endsWith(suffix))
+}
+
+function isInternalGroupPath(pathname: string) {
+  return INTERNAL_ROUTE_GROUP_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  )
+}
+
 function extractSubdomain(host: string) {
-  const hostname = normalizeHost(host).split(':')[0]
+  const hostname = getHostname(host)
   const parts = hostname.split('.')
+
+  if (!hostname || hostname === 'localhost' || isPlatformDeploymentHost(hostname)) {
+    return ''
+  }
 
   if (hostname.endsWith('.localhost')) {
     return parts[0] ?? ''
@@ -47,32 +68,42 @@ function rewriteToGroup(request: NextRequest, group: string) {
 }
 
 export function middleware(request: NextRequest) {
-  const host = normalizeHost(
-    request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? '',
-  )
+  try {
+    if (isInternalGroupPath(request.nextUrl.pathname)) {
+      return NextResponse.next()
+    }
 
-  const subdomain = extractSubdomain(host)
-  const tenantSlug = extractTenantSlug(host)
+    const host = normalizeHost(
+      request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? '',
+    )
 
-  if (!subdomain || subdomain === 'www') {
-    return request.nextUrl.pathname === '/'
-      ? NextResponse.next()
-      : rewriteToGroup(request, '/(marketing)')
+    const subdomain = extractSubdomain(host)
+    const tenantSlug = extractTenantSlug(host)
+
+    if (!subdomain || subdomain === 'www') {
+      return request.nextUrl.pathname === '/'
+        ? NextResponse.next()
+        : rewriteToGroup(request, '/(marketing)')
+    }
+
+    // `app.` is reserved for a future admin surface; until then keep it on the public app.
+    if (subdomain === 'app') {
+      return request.nextUrl.pathname === '/'
+        ? NextResponse.next()
+        : rewriteToGroup(request, '/(marketing)')
+    }
+
+    if (!tenantSlug) {
+      return request.nextUrl.pathname === '/'
+        ? NextResponse.next()
+        : rewriteToGroup(request, '/(marketing)')
+    }
+
+    return rewriteToGroup(request, '/(tenant)')
+  } catch (error) {
+    console.error('[middleware]', error)
+    return NextResponse.next()
   }
-
-  if (subdomain === 'app') {
-    return rewriteToGroup(request, '/(platform-admin)')
-  }
-
-  if (!tenantSlug) {
-    return request.nextUrl.pathname === '/'
-      ? NextResponse.next()
-      : rewriteToGroup(request, '/(marketing)')
-  }
-
-  return request.nextUrl.pathname === '/'
-    ? NextResponse.next()
-    : rewriteToGroup(request, '/(tenant)')
 }
 
 export const config = {
