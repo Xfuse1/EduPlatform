@@ -7,6 +7,8 @@ import { normalizeEgyptPhone, toEgyptE164 } from "@/lib/phone";
 
 let recaptchaVerifier: RecaptchaVerifier | null = null;
 let recaptchaContainerId: string | null = null;
+let recaptchaRenderElement: HTMLDivElement | null = null;
+let recaptchaRenderNonce = 0;
 let confirmationResult: ConfirmationResult | null = null;
 
 function isLocalDevelopmentHost() {
@@ -54,31 +56,45 @@ function mapFirebaseAuthError(error: unknown) {
   }
 }
 
-async function clearRecaptcha() {
+function clearRecaptcha() {
   if (recaptchaVerifier) {
     recaptchaVerifier.clear();
     recaptchaVerifier = null;
+  }
+
+  recaptchaRenderElement?.remove();
+  recaptchaRenderElement = null;
+
+  if (recaptchaContainerId) {
+    const container = document.getElementById(recaptchaContainerId);
+    container?.replaceChildren();
     recaptchaContainerId = null;
   }
 }
 
-async function getOrCreateRecaptcha(containerId: string) {
-  const auth = await getFirebaseAuth();
-
-  if (recaptchaVerifier && recaptchaContainerId === containerId) {
-    return { auth, verifier: recaptchaVerifier };
-  }
-
-  await clearRecaptcha();
-
+function createRecaptchaRenderTarget(containerId: string) {
   const container = document.getElementById(containerId);
 
   if (!container) {
     throw new Error(`Missing reCAPTCHA container: ${containerId}`);
   }
 
-  container.innerHTML = "";
-  recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+  const renderTarget = document.createElement("div");
+  renderTarget.id = `${containerId}-widget-${++recaptchaRenderNonce}`;
+
+  container.replaceChildren(renderTarget);
+  recaptchaRenderElement = renderTarget;
+
+  return renderTarget;
+}
+
+async function createRecaptcha(containerId: string) {
+  const auth = await getFirebaseAuth();
+
+  clearRecaptcha();
+  const renderTarget = createRecaptchaRenderTarget(containerId);
+  recaptchaRenderElement = renderTarget;
+  recaptchaVerifier = new RecaptchaVerifier(auth, renderTarget, {
     size: "invisible",
   });
   recaptchaContainerId = containerId;
@@ -92,9 +108,10 @@ async function getOrCreateRecaptcha(containerId: string) {
 export async function sendFirebasePhoneOtp(phone: string, containerId: string) {
   try {
     const normalizedPhone = normalizeEgyptPhone(phone);
-    const { auth, verifier } = await getOrCreateRecaptcha(containerId);
+    const { auth, verifier } = await createRecaptcha(containerId);
 
     confirmationResult = await signInWithPhoneNumber(auth, toEgyptE164(normalizedPhone), verifier);
+    clearRecaptcha();
 
     return {
       success: true,
@@ -103,7 +120,7 @@ export async function sendFirebasePhoneOtp(phone: string, containerId: string) {
     };
   } catch (error) {
     confirmationResult = null;
-    await clearRecaptcha();
+    clearRecaptcha();
 
     return {
       success: false,
@@ -127,6 +144,7 @@ export async function confirmFirebasePhoneOtp(code: string) {
 
     await signOut(await getFirebaseAuth());
     confirmationResult = null;
+    clearRecaptcha();
 
     return {
       success: true,
@@ -148,6 +166,6 @@ export async function resetFirebasePhoneOtp() {
     await signOut(auth).catch(() => {});
   } finally {
     confirmationResult = null;
-    await clearRecaptcha();
+    clearRecaptcha();
   }
 }
