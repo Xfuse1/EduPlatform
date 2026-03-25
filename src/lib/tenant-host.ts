@@ -13,11 +13,40 @@ export function normalizeHost(host: string) {
   );
 }
 
+function extractHostname(host: string) {
+  const normalizedHost = normalizeHost(host);
+
+  if (!normalizedHost) {
+    return "";
+  }
+
+  try {
+    return new URL(`http://${normalizedHost}`).hostname.toLowerCase();
+  } catch {
+    return normalizedHost.split(":")[0]?.toLowerCase() ?? "";
+  }
+}
+
+function isIpAddress(hostname: string) {
+  const normalizedHostname = hostname.replace(/^\[|\]$/g, "");
+
+  return (
+    /^\d{1,3}(?:\.\d{1,3}){3}$/.test(normalizedHostname) ||
+    /^[a-f0-9:]+$/i.test(normalizedHostname)
+  );
+}
+
 export function extractSubdomain(host: string) {
-  const hostname = normalizeHost(host).split(":")[0];
+  const hostname = extractHostname(host);
   const parts = hostname.split(".");
 
-  if (!hostname || hostname === "localhost" || PLATFORM_HOST_SUFFIXES.some((suffix) => hostname.endsWith(suffix))) {
+  if (
+    !hostname ||
+    hostname === "localhost" ||
+    isIpAddress(hostname) ||
+    !hostname.includes(".") ||
+    PLATFORM_HOST_SUFFIXES.some((suffix) => hostname.endsWith(suffix))
+  ) {
     return "";
   }
 
