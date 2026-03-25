@@ -75,32 +75,11 @@ export async function getTenantBySlug(slug: string) {
   });
 }
 
-async function getDefaultTenant() {
-  return db.tenant.findFirst({
-    where: { isActive: true },
-    orderBy: { createdAt: "asc" },
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      logoUrl: true,
-      themeColor: true,
-      region: true,
-      bio: true,
-      subjects: true,
-      plan: true,
-      phone: true,
-      isActive: true,
-      accountType: true,
-    },
-  });
-}
-
 export async function getTenantFromHost(host: string) {
   const slug = getTenantSlugFromHost(host);
 
-  if (!slug || slug === "www" || slug === "app" || slug === "localhost") {
-    return getDefaultTenant();
+  if (!slug) {
+    return null;
   }
 
   return getTenantBySlug(slug);

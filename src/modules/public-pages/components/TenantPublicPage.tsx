@@ -1,23 +1,40 @@
-export const dynamic = "force-dynamic";
-
-import { notFound, redirect } from "next/navigation";
-
-import { requireTenant } from "@/lib/tenant";
+import type { ResolvedTenant } from "@/lib/tenant";
 import { TeacherLanding } from "@/modules/public-pages/components/TeacherLanding";
-import { getOpenGroups, getTeacherPublicProfile } from "@/modules/public-pages/queries";
 
-export default async function TenantPublicPage() {
-  const tenant = await requireTenant();
+type TenantPublicPageProps = {
+  tenant: ResolvedTenant;
+  teacher: {
+    id: string;
+    name: string;
+    logoUrl: string | null;
+    themeColor: string;
+    region: string | null;
+    bio: string | null;
+    subjects: string[];
+  };
+  groups: Array<{
+    id: string;
+    name: string;
+    subject: string;
+    gradeLevel: string;
+    room: string | null;
+    days: string[];
+    timeStart: string;
+    timeEnd: string;
+    monthlyFee: number;
+    maxCapacity: number;
+    enrolledCount: number;
+    remainingCapacity: number;
+    color: string | null;
+    isFull: boolean;
+  }>;
+};
 
-  if (tenant.accountType === "PARENT") {
-    redirect("/login?portal=parent");
-  }
+export default async function TenantPublicPage(props: TenantPublicPageProps) {
+  const groups = props.groups.map((group) => ({
+    ...group,
+    color: group.color ?? undefined,
+  }));
 
-  const [teacher, groups] = await Promise.all([getTeacherPublicProfile(tenant.id), getOpenGroups(tenant.id)]);
-
-  if (!teacher) {
-    notFound();
-  }
-
-  return <TeacherLanding groups={groups} teacher={teacher} />;
+  return <TeacherLanding groups={groups} teacher={props.teacher} />;
 }
