@@ -1,4 +1,5 @@
 const RESERVED_SUBDOMAINS = new Set(["", "www", "app", "localhost"]);
+const PLATFORM_HOST_SUFFIXES = [".vercel.app", ".vercel.sh"];
 
 export function normalizeHost(host: string) {
   return (
@@ -15,6 +16,10 @@ export function normalizeHost(host: string) {
 export function extractSubdomain(host: string) {
   const hostname = normalizeHost(host).split(":")[0];
   const parts = hostname.split(".");
+
+  if (!hostname || hostname === "localhost" || PLATFORM_HOST_SUFFIXES.some((suffix) => hostname.endsWith(suffix))) {
+    return "";
+  }
 
   if (hostname.endsWith(".localhost")) {
     return parts[0] ?? "";
