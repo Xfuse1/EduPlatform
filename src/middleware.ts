@@ -86,7 +86,6 @@ export function middleware(request: NextRequest) {
         : rewriteToGroup(request, '/(marketing)')
     }
 
-    // `app.` is reserved for a future admin surface; until then keep it on the public app.
     if (subdomain === 'app') {
       return request.nextUrl.pathname === '/'
         ? NextResponse.next()
