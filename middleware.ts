@@ -1,17 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import { extractSubdomain, extractTenantSlug } from '@/lib/tenant'
-
-function normalizeHost(host: string) {
-  return host
-    .trim()
-    .toLowerCase()
-    .split(',')[0]
-    ?.trim()
-    .replace(/^https?:\/\//, '')
-    .split('/')[0]
-}
+import { extractSubdomain, extractTenantSlug, normalizeHost } from '@/lib/tenant-host'
 
 function buildRewritePath(group: string, pathname: string) {
   return pathname === '/' ? group : `${group}${pathname}`
