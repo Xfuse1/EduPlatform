@@ -1,7 +1,39 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import { extractSubdomain, extractTenantSlug, normalizeHost } from '@/lib/tenant-host'
+const RESERVED_SUBDOMAINS = new Set(['', 'www', 'app', 'localhost'])
+
+function normalizeHost(host: string) {
+  return (
+    host
+      .trim()
+      .toLowerCase()
+      .split(',')[0]
+      ?.trim()
+      .replace(/^https?:\/\//, '')
+      .split('/')[0] ?? ''
+  )
+}
+
+function extractSubdomain(host: string) {
+  const hostname = normalizeHost(host).split(':')[0]
+  const parts = hostname.split('.')
+
+  if (hostname.endsWith('.localhost')) {
+    return parts[0] ?? ''
+  }
+
+  if (parts.length > 2) {
+    return parts[0] ?? ''
+  }
+
+  return ''
+}
+
+function extractTenantSlug(host: string) {
+  const subdomain = extractSubdomain(host)
+  return RESERVED_SUBDOMAINS.has(subdomain) ? '' : subdomain
+}
 
 function buildRewritePath(group: string, pathname: string) {
   return pathname === '/' ? group : `${group}${pathname}`
