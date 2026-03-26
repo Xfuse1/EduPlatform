@@ -25,7 +25,8 @@ type FormState = {
 };
 
 type SuccessState = {
-  loginUrl: string;
+  accessUrl: string;
+  redirectTo: string;
   message: string;
   tenantName: string;
   tenantSlug: string;
@@ -185,6 +186,18 @@ export default function TeacherSignupPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!success) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      window.location.assign(success.redirectTo);
+    }, 1200);
+
+    return () => window.clearTimeout(timer);
+  }, [success]);
+
   const resetPhoneVerificationState = () => {
     setOtpCode("");
     setOtpMessage("");
@@ -328,13 +341,14 @@ export default function TeacherSignupPage() {
         idToken: verifiedIdToken,
       });
 
-      if (!result.success || !result.loginUrl || !result.tenantName || !result.tenantSlug || !result.accountType) {
+      if (!result.success || !result.accessUrl || !result.redirectTo || !result.tenantName || !result.tenantSlug || !result.accountType) {
         setPageError(result.message ?? "تعذر إنشاء الحساب");
         return;
       }
 
       setSuccess({
-        loginUrl: result.loginUrl,
+        accessUrl: result.accessUrl,
+        redirectTo: result.redirectTo,
         message: result.message,
         tenantName: result.tenantName,
         tenantSlug: result.tenantSlug,
@@ -399,14 +413,14 @@ export default function TeacherSignupPage() {
                   رابط الدخول:
                   <br />
                   <span dir="ltr" className="font-bold text-sky-300">
-                    {success.loginUrl}
+                    {success.accessUrl}
                   </span>
                 </p>
               </div>
 
               <a
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-base font-bold text-white transition hover:bg-secondary"
-                href={success.loginUrl}
+                href={success.redirectTo}
               >
                 الانتقال إلى صفحة الدخول
               </a>

@@ -1,23 +1,37 @@
-const DEFAULT_APP_URL = "http://localhost:3000";
+import { headers } from "next/headers";
 
-function getBaseAppUrl() {
-  return process.env.NEXT_PUBLIC_APP_URL ?? DEFAULT_APP_URL;
+import { normalizeHost } from "@/lib/tenant-host";
+
+const DEFAULT_APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+function shouldUseHttpProtocol(host: string) {
+  const hostname = host.split(":")[0]?.toLowerCase() ?? "";
+
+  return (
+    hostname === "localhost" ||
+    hostname.endsWith(".localhost") ||
+    hostname === "::1" ||
+    hostname === "[::1]" ||
+    /^\d{1,3}(?:\.\d{1,3}){3}$/.test(hostname)
+  );
 }
 
-export function buildTenantAbsoluteUrl(
-  slug: string,
-  pathname: string,
-  searchParams?: Record<string, string | undefined>,
-) {
-  const url = new URL(getBaseAppUrl());
+async function getRequestOrigin() {
+  try {
+    const headerStore = await headers();
+    const host = normalizeHost(headerStore.get("x-forwarded-host") ?? headerStore.get("host") ?? "");
 
-  if (url.hostname === "localhost" || url.hostname.endsWith(".localhost")) {
-    url.hostname = `${slug}.localhost`;
-  } else {
-    url.hostname = `${slug}.${url.hostname.replace(/^www\./, "")}`;
-  }
+    if (host) {
+      const protocol = headerStore.get("x-forwarded-proto") ?? (shouldUseHttpProtocol(host) ? "http" : "https");
+      return `${protocol}://${host}`;
+    }
+  } catch {}
 
-  url.pathname = pathname;
+  return DEFAULT_APP_URL;
+}
+
+export async function buildAbsoluteAppUrl(pathname: string, searchParams?: Record<string, string | undefined>) {
+  const url = new URL(pathname, await getRequestOrigin());
   url.search = "";
   url.hash = "";
 
@@ -32,13 +46,23 @@ export function buildTenantAbsoluteUrl(
   return url.toString();
 }
 
-export function buildTenantLoginUrl(slug: string) {
+export async function buildTenantAbsoluteUrl(
+  slug: string,
+  pathname: string,
+  searchParams?: Record<string, string | undefined>,
+) {
+  return buildAbsoluteAppUrl(pathname, {
+    ...searchParams,
+    tenantSlug: slug,
+  });
+}
+
+export async function buildTenantLoginUrl(slug: string) {
   return buildTenantAbsoluteUrl(slug, "/login");
 }
 
-export function buildTenantVerifyUrl(slug: string, phone: string) {
+export async function buildTenantVerifyUrl(slug: string, phone: string) {
   return buildTenantAbsoluteUrl(slug, "/verify", {
     phone,
-    tenantSlug: slug,
   });
 }

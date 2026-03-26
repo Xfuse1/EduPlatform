@@ -8,6 +8,7 @@ import { createAuthSession, setAuthSessionCookie, UnauthorizedError } from "@/li
 import { db } from "@/lib/db";
 import { verifyFirebasePhoneIdToken } from "@/lib/firebase-admin";
 import { normalizeEgyptPhone } from "@/lib/phone";
+import { setTenantContextCookie } from "@/lib/tenant-context";
 import { getOptionalTenant, getTenantBySlug } from "@/lib/tenant";
 import { buildTenantVerifyUrl } from "@/lib/tenant-url";
 import { getDashboardRouteForRole } from "@/modules/auth/queries";
@@ -367,6 +368,7 @@ export async function completePhoneLogin(input: { idToken: string; tenantSlug?: 
     });
 
     setAuthSessionCookie(cookieStore, session.token, session.expiresAt);
+    setTenantContextCookie(cookieStore, target.tenant.slug, session.expiresAt);
 
     revalidatePath("/verify");
     revalidatePath("/teacher");
@@ -407,7 +409,7 @@ export async function preparePhoneLogin(input: { phone: string; tenantSlug?: str
 
     return {
       success: true,
-      redirectTo: buildTenantVerifyUrl(target.tenant.slug, phone),
+      redirectTo: await buildTenantVerifyUrl(target.tenant.slug, phone),
     };
   } catch (error) {
     if (error instanceof UnauthorizedError) {

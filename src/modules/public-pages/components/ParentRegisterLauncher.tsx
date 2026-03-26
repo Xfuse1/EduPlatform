@@ -23,7 +23,8 @@ type FormErrors = {
 
 type ResolvedAccount = {
   kind: "created" | "existing";
-  loginUrl: string;
+  accessUrl: string;
+  redirectTo: string;
   message: string;
   tenantName: string;
 };
@@ -84,6 +85,18 @@ export function ParentRegisterLauncher() {
       void resetFirebasePhoneOtp();
     };
   }, []);
+
+  useEffect(() => {
+    if (!resolvedAccount) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      window.location.assign(resolvedAccount.redirectTo);
+    }, 1200);
+
+    return () => window.clearTimeout(timer);
+  }, [resolvedAccount]);
 
   const resetPhoneVerificationState = () => {
     setOtpCode("");
@@ -197,10 +210,11 @@ export function ParentRegisterLauncher() {
         idToken: verifiedIdToken,
       });
 
-      if (result.loginUrl && result.tenantName) {
+      if (result.redirectTo && result.accessUrl && result.tenantName) {
         setResolvedAccount({
           kind: result.success ? "created" : "existing",
-          loginUrl: result.loginUrl,
+          accessUrl: result.accessUrl,
+          redirectTo: result.redirectTo,
           message: result.message ?? (result.success ? "تم إنشاء الحساب بنجاح." : "يوجد حساب بالفعل."),
           tenantName: result.tenantName,
         });
@@ -236,14 +250,14 @@ export function ParentRegisterLauncher() {
               رابط الدخول:
               <br />
               <span className="font-bold text-sky-700 dark:text-sky-300" dir="ltr">
-                {resolvedAccount.loginUrl}
+                {resolvedAccount.accessUrl}
               </span>
             </p>
           </div>
 
           <a
             className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-base font-bold text-white transition hover:bg-secondary"
-            href={resolvedAccount.loginUrl}
+            href={resolvedAccount.redirectTo}
           >
             الذهاب إلى صفحة الدخول
           </a>

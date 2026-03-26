@@ -2,11 +2,15 @@
 
 import { randomUUID } from "crypto";
 
+import { cookies } from "next/headers";
 import { z } from "zod";
 
+import { createAuthSession, setAuthSessionCookie } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { verifyFirebasePhoneIdToken } from "@/lib/firebase-admin";
-import { buildTenantLoginUrl } from "@/lib/tenant-url";
+import { setTenantContextCookie } from "@/lib/tenant-context";
+import { buildAbsoluteAppUrl, buildTenantLoginUrl } from "@/lib/tenant-url";
+import { getDashboardRouteForRole } from "@/modules/auth/queries";
 
 const RESERVED_SUBDOMAINS = new Set(["ahmed", "noor", "test", "admin", "www", "app"]);
 const accountTypeSchema = z.enum(["CENTER", "TEACHER"]);
@@ -59,7 +63,8 @@ type TeacherSignupActionResult =
   | {
       success: false;
       message: string;
-      loginUrl?: undefined;
+      accessUrl?: undefined;
+      redirectTo?: undefined;
       tenantName?: undefined;
       tenantSlug?: undefined;
       accountType?: undefined;
@@ -67,7 +72,8 @@ type TeacherSignupActionResult =
   | {
       success: true;
       message: string;
-      loginUrl: string;
+      accessUrl: string;
+      redirectTo: string;
       tenantName: string;
       tenantSlug: string;
       accountType: TeacherAccountType;
@@ -77,7 +83,8 @@ type ParentSignupActionResult =
   | {
       success: false;
       message: string;
-      loginUrl?: string;
+      accessUrl?: string;
+      redirectTo?: string;
       tenantName?: string;
       tenantSlug?: string;
       accountType?: "PARENT";
@@ -85,7 +92,8 @@ type ParentSignupActionResult =
   | {
       success: true;
       message: string;
-      loginUrl: string;
+      accessUrl: string;
+      redirectTo: string;
       tenantName: string;
       tenantSlug: string;
       accountType: "PARENT";
@@ -160,7 +168,7 @@ export async function createTeacherSignup(input: CreateTeacherSignupInput): Prom
 
     const tenantDisplayName = payload.accountType === "CENTER" ? payload.centerName!.trim() : payload.teacherName;
 
-    const tenant = await db.$transaction(async (tx) => {
+    const account = await db.$transaction(async (tx) => {
       const createdTenant = await tx.tenant.create({
         data: {
           slug: payload.subdomain,
@@ -179,7 +187,7 @@ export async function createTeacherSignup(input: CreateTeacherSignupInput): Prom
         },
       });
 
-      await tx.user.create({
+      const createdUser = await tx.user.create({
         data: {
           tenantId: createdTenant.id,
           phone: payload.phone,
@@ -187,10 +195,27 @@ export async function createTeacherSignup(input: CreateTeacherSignupInput): Prom
           role: "TEACHER",
           isActive: true,
         },
+        select: {
+          id: true,
+          tenantId: true,
+          role: true,
+        },
       });
 
-      return createdTenant;
+      return {
+        tenant: createdTenant,
+        user: createdUser,
+      };
     });
+
+    const cookieStore = await cookies();
+    const session = await createAuthSession({
+      id: account.user.id,
+      tenantId: account.user.tenantId,
+    });
+
+    setAuthSessionCookie(cookieStore, session.token, session.expiresAt);
+    setTenantContextCookie(cookieStore, account.tenant.slug, session.expiresAt);
 
     return {
       success: true,
@@ -198,9 +223,10 @@ export async function createTeacherSignup(input: CreateTeacherSignupInput): Prom
         payload.accountType === "CENTER"
           ? "تم إنشاء حساب السنتر وحساب المدرس المسؤول بنجاح."
           : "تم إنشاء حساب المدرس بنجاح.",
-      loginUrl: buildTenantLoginUrl(tenant.slug),
-      tenantName: tenant.name,
-      tenantSlug: tenant.slug,
+      accessUrl: await buildTenantLoginUrl(account.tenant.slug),
+      redirectTo: await buildAbsoluteAppUrl(getDashboardRouteForRole(account.user.role)),
+      tenantName: account.tenant.name,
+      tenantSlug: account.tenant.slug,
       accountType: payload.accountType,
     };
   } catch (error) {
@@ -246,6 +272,8 @@ export async function createParentSignup(input: CreateParentSignupInput): Promis
         },
       },
       select: {
+        id: true,
+        tenantId: true,
         tenant: {
           select: {
             slug: true,
@@ -256,16 +284,27 @@ export async function createParentSignup(input: CreateParentSignupInput): Promis
     });
 
     if (existingParentAccount) {
+      const cookieStore = await cookies();
+      const session = await createAuthSession({
+        id: existingParentAccount.id,
+        tenantId: existingParentAccount.tenantId,
+      });
+
+      setAuthSessionCookie(cookieStore, session.token, session.expiresAt);
+      setTenantContextCookie(cookieStore, existingParentAccount.tenant.slug, session.expiresAt);
+
       return {
         success: false,
         message: "يوجد حساب ولي أمر مستقل بالفعل لهذا الرقم. استخدم رابط الدخول الحالي.",
-        loginUrl: buildTenantLoginUrl(existingParentAccount.tenant.slug),
+        accessUrl: await buildTenantLoginUrl(existingParentAccount.tenant.slug),
+        redirectTo: await buildAbsoluteAppUrl(getDashboardRouteForRole("PARENT")),
         tenantName: existingParentAccount.tenant.name,
         tenantSlug: existingParentAccount.tenant.slug,
+        accountType: "PARENT",
       };
     }
 
-    const tenant = await db.$transaction(async (tx) => {
+    const account = await db.$transaction(async (tx) => {
       const createdTenant = await tx.tenant.create({
         data: {
           slug: buildStandaloneParentSlug(payload.phone),
@@ -283,7 +322,7 @@ export async function createParentSignup(input: CreateParentSignupInput): Promis
         },
       });
 
-      await tx.user.create({
+      const createdUser = await tx.user.create({
         data: {
           tenantId: createdTenant.id,
           phone: payload.phone,
@@ -293,17 +332,35 @@ export async function createParentSignup(input: CreateParentSignupInput): Promis
           parentPhone: payload.phone,
           isActive: true,
         },
+        select: {
+          id: true,
+          tenantId: true,
+          role: true,
+        },
       });
 
-      return createdTenant;
+      return {
+        tenant: createdTenant,
+        user: createdUser,
+      };
     });
+
+    const cookieStore = await cookies();
+    const session = await createAuthSession({
+      id: account.user.id,
+      tenantId: account.user.tenantId,
+    });
+
+    setAuthSessionCookie(cookieStore, session.token, session.expiresAt);
+    setTenantContextCookie(cookieStore, account.tenant.slug, session.expiresAt);
 
     return {
       success: true,
       message: "تم إنشاء حساب ولي الأمر المستقل بنجاح.",
-      loginUrl: buildTenantLoginUrl(tenant.slug),
-      tenantName: tenant.name,
-      tenantSlug: tenant.slug,
+      accessUrl: await buildTenantLoginUrl(account.tenant.slug),
+      redirectTo: await buildAbsoluteAppUrl(getDashboardRouteForRole(account.user.role)),
+      tenantName: account.tenant.name,
+      tenantSlug: account.tenant.slug,
       accountType: "PARENT",
     };
   } catch (error) {

@@ -6,6 +6,7 @@ import {
   UnauthorizedError,
 } from '@/lib/auth'
 import { errorResponse, successResponse, validationError } from '@/lib/api-response'
+import { applyTenantContextCookie } from '@/lib/tenant-context'
 import {
   InactiveTenantError,
   TenantNotFoundError,
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
     })
 
     applySessionCookie(response, result.session)
+    applyTenantContextCookie(response, tenant.slug, result.session.expiresAt)
 
     return response
   } catch (error) {

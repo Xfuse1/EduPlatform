@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { getOptionalTenant } from "@/lib/tenant";
+import { getOptionalTenant, getTenantBySlug } from "@/lib/tenant";
 import { LoginForm } from "@/modules/auth/components/LoginForm";
 
 const portalNoticeMap: Record<string, string> = {
@@ -34,10 +34,11 @@ function getLoginIntro(
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ portal?: string }>;
+  searchParams: Promise<{ portal?: string; tenantSlug?: string }>;
 }) {
   const params = await searchParams;
-  const tenant = await getOptionalTenant();
+  const requestedTenantSlug = params.tenantSlug?.trim().toLowerCase();
+  const tenant = requestedTenantSlug ? await getTenantBySlug(requestedTenantSlug) : await getOptionalTenant();
   const portalNotice = params.portal ? portalNoticeMap[params.portal.trim().toLowerCase()] : undefined;
   const tenantSummary = tenant ?? {
     slug: null,

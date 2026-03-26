@@ -1,7 +1,8 @@
 import { Plan, TenantAccountType } from "@prisma/client";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 
+import { TENANT_CONTEXT_COOKIE_NAME } from "@/lib/tenant-context";
 import { db } from "@/lib/db";
 import { extractTenantSlug } from "@/lib/tenant-host";
 
@@ -9,8 +10,13 @@ type HeaderReader = {
   get(name: string): string | null | undefined;
 };
 
+type CookieReader = {
+  get(name: string): { value: string } | undefined;
+};
+
 type TenantRequestLike = {
   headers?: HeaderReader;
+  cookies?: CookieReader;
 };
 
 export type ResolvedTenant = {
@@ -55,6 +61,35 @@ async function getHeaderValue(request: TenantRequestLike | undefined, name: stri
   return headerStore.get(name)?.trim() ?? null;
 }
 
+async function getCookieValue(request: TenantRequestLike | undefined, name: string) {
+  if (request?.cookies) {
+    return request.cookies.get(name)?.value?.trim() ?? null;
+  }
+
+  const cookieStore = await cookies();
+  return cookieStore.get(name)?.value?.trim() ?? null;
+}
+
+async function resolveTenantSlug(request?: TenantRequestLike) {
+  const forcedSlug = (await getHeaderValue(request, "x-tenant-slug"))?.toLowerCase();
+
+  if (forcedSlug) {
+    return forcedSlug;
+  }
+
+  const host =
+    (await getHeaderValue(request, "x-forwarded-host")) ??
+    (await getHeaderValue(request, "host")) ??
+    "localhost:3000";
+  const hostSlug = getTenantSlugFromHost(host);
+
+  if (hostSlug) {
+    return hostSlug;
+  }
+
+  return (await getCookieValue(request, TENANT_CONTEXT_COOKIE_NAME))?.toLowerCase() ?? "";
+}
+
 export async function getTenantBySlug(slug: string) {
   return db.tenant.findUnique({
     where: { slug },
@@ -86,17 +121,7 @@ export async function getTenantFromHost(host: string) {
 }
 
 export async function getOptionalTenant(request?: TenantRequestLike) {
-  const forcedSlug = (await getHeaderValue(request, "x-tenant-slug"))?.toLowerCase();
-
-  if (forcedSlug) {
-    return getTenantBySlug(forcedSlug);
-  }
-
-  const host =
-    (await getHeaderValue(request, "x-forwarded-host")) ??
-    (await getHeaderValue(request, "host")) ??
-    "localhost:3000";
-  const slug = getTenantSlugFromHost(host);
+  const slug = await resolveTenantSlug(request);
 
   if (!slug) {
     return null;
@@ -106,12 +131,8 @@ export async function getOptionalTenant(request?: TenantRequestLike) {
 }
 
 export async function requireTenant(request?: TenantRequestLike) {
-  const host =
-    (await getHeaderValue(request, "x-forwarded-host")) ??
-    (await getHeaderValue(request, "host")) ??
-    "localhost:3000";
-  const forcedSlug = (await getHeaderValue(request, "x-tenant-slug"))?.toLowerCase();
-  const tenant = forcedSlug ? await getTenantBySlug(forcedSlug) : await getTenantFromHost(host);
+  const slug = await resolveTenantSlug(request);
+  const tenant = slug ? await getTenantBySlug(slug) : null;
 
   if (!tenant) {
     if (request) {

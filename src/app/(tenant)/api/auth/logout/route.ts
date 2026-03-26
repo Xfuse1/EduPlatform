@@ -7,6 +7,7 @@ import {
 } from '@/lib/auth'
 import { successResponse } from '@/lib/api-response'
 import { ROUTES } from '@/config/routes'
+import { clearTenantContextCookie } from '@/lib/tenant-context'
 import { logout } from '@/modules/auth/actions'
 
 async function buildLogoutResponse(request: NextRequest, redirectToLogin: boolean) {
@@ -16,11 +17,13 @@ async function buildLogoutResponse(request: NextRequest, redirectToLogin: boolea
   if (redirectToLogin) {
     const response = NextResponse.redirect(new URL(ROUTES.auth.login, request.url))
     clearSessionCookie(response)
+    clearTenantContextCookie(response)
     return response
   }
 
   const response = successResponse({ success: true })
   clearSessionCookie(response)
+  clearTenantContextCookie(response)
   return response
 }
 
