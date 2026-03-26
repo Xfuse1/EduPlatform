@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 
 import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
+import { buildPhoneConflictMessage, findUserByPhone, isPhoneUniqueConstraintError } from "@/lib/user-phone";
 import { publicRegistrationSchema } from "@/modules/public-pages/validations";
 
 type RegistrationResult = {
@@ -73,85 +74,83 @@ export async function registerStudent(formData: FormData): Promise<RegistrationR
     };
   }
 
-  const conflictingUser = await db.user.findUnique({
-    where: {
-      tenantId_phone: {
-        tenantId: tenant.id,
-        phone: parentPhone,
-      },
-    },
-    select: {
-      id: true,
-      role: true,
-    },
-  });
+  const existingUser = await findUserByPhone(parentPhone);
 
-  if (conflictingUser && conflictingUser.role !== "PARENT") {
+  if (existingUser && (existingUser.tenantId !== tenant.id || existingUser.role !== "PARENT")) {
     return {
       success: false,
-      message: "هذا الرقم مرتبط بحساب آخر داخل هذا السنتر",
+      message: buildPhoneConflictMessage(existingUser.role),
     };
   }
 
-  await db.$transaction(async (transaction) => {
-    const parent = await transaction.user.upsert({
-      where: {
-        tenantId_phone: {
+  try {
+    await db.$transaction(async (transaction) => {
+      const parent = await transaction.user.upsert({
+        where: {
+          tenantId_phone: {
+            tenantId: tenant.id,
+            phone: parentPhone,
+          },
+        },
+        update: {
+          name: parentName,
+          parentName,
+          parentPhone,
+          isActive: true,
+        },
+        create: {
           tenantId: tenant.id,
           phone: parentPhone,
+          name: parentName,
+          role: "PARENT",
+          parentName,
+          parentPhone,
+          isActive: true,
         },
-      },
-      update: {
-        name: parentName,
-        parentName,
-        parentPhone,
-        isActive: true,
-      },
-      create: {
-        tenantId: tenant.id,
-        phone: parentPhone,
-        name: parentName,
-        role: "PARENT",
-        parentName,
-        parentPhone,
-        isActive: true,
-      },
-      select: {
-        id: true,
-      },
-    });
+        select: {
+          id: true,
+        },
+      });
 
-    const student = await transaction.user.create({
-      data: {
-        tenantId: tenant.id,
-        phone: createInternalStudentPhone(),
-        name: studentName,
-        role: "STUDENT",
-        gradeLevel: grade,
-        parentName,
-        parentPhone,
-        isActive: true,
-      },
-      select: {
-        id: true,
-      },
-    });
+      const student = await transaction.user.create({
+        data: {
+          tenantId: tenant.id,
+          phone: createInternalStudentPhone(),
+          name: studentName,
+          role: "STUDENT",
+          gradeLevel: grade,
+          parentName,
+          parentPhone,
+          isActive: true,
+        },
+        select: {
+          id: true,
+        },
+      });
 
-    await transaction.parentStudent.create({
-      data: {
-        parentId: parent.id,
-        studentId: student.id,
-      },
-    });
+      await transaction.parentStudent.create({
+        data: {
+          parentId: parent.id,
+          studentId: student.id,
+        },
+      });
 
-    await transaction.groupStudent.create({
-      data: {
-        groupId: group.id,
-        studentId: student.id,
-        status: "ACTIVE",
-      },
+      await transaction.groupStudent.create({
+        data: {
+          groupId: group.id,
+          studentId: student.id,
+          status: "ACTIVE",
+        },
+      });
     });
-  });
+  } catch (error) {
+    return {
+      success: false,
+      message: isPhoneUniqueConstraintError(error)
+        ? buildPhoneConflictMessage()
+        : "تعذر حفظ طلب التسجيل الآن",
+    };
+  }
 
   revalidatePath("/");
   revalidatePath("/register");

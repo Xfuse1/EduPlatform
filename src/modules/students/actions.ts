@@ -7,6 +7,7 @@ import { ROUTES } from '@/config/routes'
 import { requireAuth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { requireTenant } from '@/lib/tenant'
+import { buildPhoneConflictMessage, findUserByPhone, isPhoneUniqueConstraintError } from '@/lib/user-phone'
 
 import { parseStudentFormData, parseStudentImportRecord } from './validations'
 
@@ -46,30 +47,11 @@ async function getScopedStudent(tenantId: string, studentId: string) {
   })
 }
 
-async function ensureUniqueStudentPhone(
-  tenantId: string,
-  phone: string,
-  currentStudentId?: string,
-) {
-  const existingUser = await db.user.findFirst({
-    where: {
-      tenantId,
-      phone,
-      ...(currentStudentId
-        ? {
-            id: {
-              not: currentStudentId,
-            },
-          }
-        : {}),
-    },
-    select: {
-      id: true,
-    },
-  })
+async function ensureUniqueStudentPhone(phone: string, currentStudentId?: string) {
+  const existingUser = await findUserByPhone(phone, currentStudentId)
 
   if (existingUser) {
-    throw new Error('رقم الهاتف مستخدم بالفعل داخل نفس المؤسسة')
+    throw new Error(buildPhoneConflictMessage(existingUser.role))
   }
 }
 
@@ -214,6 +196,10 @@ async function syncStudentEnrollments(
 }
 
 function getImportErrorMessage(error: unknown) {
+  if (isPhoneUniqueConstraintError(error)) {
+    return buildPhoneConflictMessage()
+  }
+
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     if (error.code === 'P2002') {
       return 'فشل الحفظ بسبب بيانات مكررة'
@@ -235,27 +221,37 @@ export async function createStudent(formData: FormData) {
 
   const data = parseStudentFormData(formData)
 
-  await ensureUniqueStudentPhone(tenant.id, data.phone)
+  await ensureUniqueStudentPhone(data.phone)
 
-  const result = await db.$transaction(async (tx) => {
-    const student = await tx.user.create({
-      data: {
-        tenantId: tenant.id,
-        role: PrismaUserRole.STUDENT,
-        name: data.name,
-        phone: data.phone,
-        parentName: data.parentName,
-        parentPhone: data.parentPhone,
-        gradeLevel: data.gradeLevel,
-      },
+  let result
+
+  try {
+    result = await db.$transaction(async (tx) => {
+      const student = await tx.user.create({
+        data: {
+          tenantId: tenant.id,
+          role: PrismaUserRole.STUDENT,
+          name: data.name,
+          phone: data.phone,
+          parentName: data.parentName,
+          parentPhone: data.parentPhone,
+          gradeLevel: data.gradeLevel,
+        },
+      })
+
+      if (data.syncGroups) {
+        await syncStudentEnrollments(tx, tenant.id, student.id, data.groupIds)
+      }
+
+      return student
     })
-
-    if (data.syncGroups) {
-      await syncStudentEnrollments(tx, tenant.id, student.id, data.groupIds)
+  } catch (error) {
+    if (isPhoneUniqueConstraintError(error)) {
+      throw new Error(buildPhoneConflictMessage())
     }
 
-    return student
-  })
+    throw error
+  }
 
   revalidateStudentPages(result.id, data.groupIds)
 
@@ -280,28 +276,38 @@ export async function updateStudent(studentId: string, formData: FormData) {
   const currentGroupIds = await getActiveEnrollmentGroupIds(tenant.id, existingStudent.id)
   const data = parseStudentFormData(formData)
 
-  await ensureUniqueStudentPhone(tenant.id, data.phone, existingStudent.id)
+  await ensureUniqueStudentPhone(data.phone, existingStudent.id)
 
-  const result = await db.$transaction(async (tx) => {
-    const student = await tx.user.update({
-      where: {
-        id: existingStudent.id,
-      },
-      data: {
-        name: data.name,
-        phone: data.phone,
-        parentName: data.parentName,
-        parentPhone: data.parentPhone,
-        gradeLevel: data.gradeLevel,
-      },
+  let result
+
+  try {
+    result = await db.$transaction(async (tx) => {
+      const student = await tx.user.update({
+        where: {
+          id: existingStudent.id,
+        },
+        data: {
+          name: data.name,
+          phone: data.phone,
+          parentName: data.parentName,
+          parentPhone: data.parentPhone,
+          gradeLevel: data.gradeLevel,
+        },
+      })
+
+      if (data.syncGroups) {
+        await syncStudentEnrollments(tx, tenant.id, student.id, data.groupIds)
+      }
+
+      return student
     })
-
-    if (data.syncGroups) {
-      await syncStudentEnrollments(tx, tenant.id, student.id, data.groupIds)
+  } catch (error) {
+    if (isPhoneUniqueConstraintError(error)) {
+      throw new Error(buildPhoneConflictMessage())
     }
 
-    return student
-  })
+    throw error
+  }
 
   revalidateStudentPages(
     existingStudent.id,
@@ -391,7 +397,7 @@ export async function bulkImport(
   for (const [index, record] of records.entries()) {
     try {
       const parsedRecord = parseStudentImportRecord(record)
-      await ensureUniqueStudentPhone(tenant.id, parsedRecord.phone)
+      await ensureUniqueStudentPhone(parsedRecord.phone)
 
       const createdStudent = await db.$transaction(async (tx) => {
         const student = await tx.user.create({

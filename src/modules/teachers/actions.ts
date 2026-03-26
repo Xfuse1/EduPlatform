@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
+import { buildPhoneConflictMessage, findUserByPhone, isPhoneUniqueConstraintError } from "@/lib/user-phone";
 import { phoneSchema } from "@/modules/auth/validations";
 
 const optionalEmailSchema = z.preprocess(
@@ -73,102 +74,92 @@ export async function createTeacher(input: z.infer<typeof createTeacherSchema>) 
   }
 
   const payload = parsed.data;
-  const existingUser = await db.user.findUnique({
-    where: {
-      tenantId_phone: {
-        tenantId: tenant.id,
-        phone: payload.phone,
+  const existingUser = await findUserByPhone(payload.phone);
+
+  if (existingUser && (existingUser.isActive || existingUser.role !== "TEACHER" || existingUser.tenantId !== tenant.id)) {
+    return {
+      success: false,
+      message: buildPhoneConflictMessage(existingUser.role),
+    };
+  }
+
+  try {
+    const teacher = existingUser
+      ? await db.user.update({
+          where: {
+            id: existingUser.id,
+          },
+          data: {
+            name: payload.name,
+            role: "TEACHER",
+            email: payload.email ?? null,
+            subject: payload.subject,
+            bio: payload.bio ?? null,
+            isActive: true,
+          },
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            email: true,
+            subject: true,
+            bio: true,
+            createdAt: true,
+            lastLoginAt: true,
+          },
+        })
+      : await db.user.create({
+          data: {
+            tenantId: tenant.id,
+            name: payload.name,
+            phone: payload.phone,
+            role: "TEACHER",
+            email: payload.email ?? null,
+            subject: payload.subject,
+            bio: payload.bio ?? null,
+            isActive: true,
+          },
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            email: true,
+            subject: true,
+            bio: true,
+            createdAt: true,
+            lastLoginAt: true,
+          },
+        });
+
+    revalidatePath("/teacher/teachers");
+    revalidatePath("/teacher");
+
+    return {
+      success: true,
+      message: "تم إضافة المدرس وإنشاء حسابه تلقائيًا ويمكنه تسجيل الدخول برقم الهاتف.",
+      teacher: {
+        id: teacher.id,
+        name: teacher.name,
+        phone: teacher.phone,
+        email: teacher.email,
+        subject: teacher.subject,
+        bio: teacher.bio,
+        createdAt: teacher.createdAt.toISOString(),
+        lastLoginAt: teacher.lastLoginAt?.toISOString() ?? null,
+        groupsCount: 0,
+        studentsCount: 0,
       },
-    },
-    select: {
-      id: true,
-      role: true,
-      isActive: true,
-      createdAt: true,
-      lastLoginAt: true,
-    },
-  });
-
-  if (existingUser?.isActive) {
-    return {
-      success: false,
-      message: "رقم الهاتف مسجل بالفعل داخل السنتر",
     };
+  } catch (error) {
+    if (isPhoneUniqueConstraintError(error)) {
+      return {
+        success: false,
+        message: buildPhoneConflictMessage(),
+      };
+    }
+
+    throw error;
   }
-
-  if (existingUser && existingUser.role !== "TEACHER") {
-    return {
-      success: false,
-      message: "هذا الرقم مرتبط بحساب آخر داخل السنتر",
-    };
-  }
-
-  const teacher = existingUser
-    ? await db.user.update({
-        where: {
-          id: existingUser.id,
-        },
-        data: {
-          name: payload.name,
-          role: "TEACHER",
-          email: payload.email ?? null,
-          subject: payload.subject,
-          bio: payload.bio ?? null,
-          isActive: true,
-        },
-        select: {
-          id: true,
-          name: true,
-          phone: true,
-          email: true,
-          subject: true,
-          bio: true,
-          createdAt: true,
-          lastLoginAt: true,
-        },
-      })
-    : await db.user.create({
-        data: {
-          tenantId: tenant.id,
-          name: payload.name,
-          phone: payload.phone,
-          role: "TEACHER",
-          email: payload.email ?? null,
-          subject: payload.subject,
-          bio: payload.bio ?? null,
-          isActive: true,
-        },
-        select: {
-          id: true,
-          name: true,
-          phone: true,
-          email: true,
-          subject: true,
-          bio: true,
-          createdAt: true,
-          lastLoginAt: true,
-        },
-      });
-
-  revalidatePath("/teacher/teachers");
-  revalidatePath("/teacher");
-
-  return {
-    success: true,
-    message: "تم إضافة المدرس وإنشاء حسابه تلقائيًا ويمكنه تسجيل الدخول برقم الهاتف.",
-    teacher: {
-      id: teacher.id,
-      name: teacher.name,
-      phone: teacher.phone,
-      email: teacher.email,
-      subject: teacher.subject,
-      bio: teacher.bio,
-      createdAt: teacher.createdAt.toISOString(),
-      lastLoginAt: teacher.lastLoginAt?.toISOString() ?? null,
-      groupsCount: 0,
-      studentsCount: 0,
-    },
-  };
 }
 
 export async function deleteTeacher(input: z.infer<typeof deleteTeacherSchema>) {

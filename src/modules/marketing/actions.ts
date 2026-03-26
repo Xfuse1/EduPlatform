@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { verifyFirebasePhoneIdToken } from "@/lib/firebase-admin";
 import { setTenantContextCookie } from "@/lib/tenant-context";
 import { buildAbsoluteAppUrl, buildTenantLoginUrl } from "@/lib/tenant-url";
+import { buildPhoneConflictMessage, findUserByPhone, hasUniqueConstraintTarget } from "@/lib/user-phone";
 import { getDashboardRouteForRole } from "@/modules/auth/queries";
 
 const RESERVED_SUBDOMAINS = new Set(["ahmed", "noor", "test", "admin", "www", "app"]);
@@ -113,25 +114,17 @@ function isPrismaInitializationError(error: unknown): error is { name: string } 
   );
 }
 
-function isPrismaKnownRequestError(error: unknown): error is { code: string; name: string } {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "name" in error &&
-    typeof error.name === "string" &&
-    error.name === "PrismaClientKnownRequestError" &&
-    "code" in error &&
-    typeof error.code === "string"
-  );
-}
-
 function buildActionErrorMessage(error: unknown) {
   if (isPrismaInitializationError(error)) {
     return "قاعدة البيانات غير متاحة الآن. السبب الحقيقي ليس رفض البيانات، بل أن PostgreSQL غير متاح أو غير قابل للوصول.";
   }
 
-  if (isPrismaKnownRequestError(error)) {
-    return error.code === "P2002" ? "هذا الرابط مستخدم بالفعل" : "تعذر حفظ البيانات في قاعدة البيانات الآن.";
+  if (hasUniqueConstraintTarget(error, "phone")) {
+    return buildPhoneConflictMessage();
+  }
+
+  if (hasUniqueConstraintTarget(error, "slug")) {
+    return "هذا الرابط مستخدم بالفعل";
   }
 
   return "تعذر إنشاء الحساب الآن. حاول مرة أخرى بعد قليل.";
@@ -163,6 +156,15 @@ export async function createTeacherSignup(input: CreateTeacherSignupInput): Prom
       return {
         success: false,
         message: "رقم الهاتف الموثق لا يطابق الرقم المدخل",
+      };
+    }
+
+    const existingUser = await findUserByPhone(payload.phone);
+
+    if (existingUser) {
+      return {
+        success: false,
+        message: buildPhoneConflictMessage(existingUser.role),
       };
     }
 
@@ -261,46 +263,39 @@ export async function createParentSignup(input: CreateParentSignupInput): Promis
       };
     }
 
-    const existingParentAccount = await db.user.findFirst({
-      where: {
-        phone: payload.phone,
-        role: "PARENT",
-        isActive: true,
-        tenant: {
-          isActive: true,
+    const existingUser = await findUserByPhone(payload.phone);
+
+    if (existingUser) {
+      const canReuseExistingStandaloneParent =
+        existingUser.role === "PARENT" &&
+        existingUser.isActive &&
+        existingUser.tenant.isActive &&
+        existingUser.tenant.accountType === "PARENT";
+
+      if (canReuseExistingStandaloneParent) {
+        const cookieStore = await cookies();
+        const session = await createAuthSession({
+          id: existingUser.id,
+          tenantId: existingUser.tenantId,
+        });
+
+        setAuthSessionCookie(cookieStore, session.token, session.expiresAt);
+        setTenantContextCookie(cookieStore, existingUser.tenant.slug, session.expiresAt);
+
+        return {
+          success: false,
+          message: "يوجد حساب ولي أمر مستقل بالفعل لهذا الرقم. استخدم الحساب الحالي بدل إنشاء حساب جديد.",
+          accessUrl: await buildTenantLoginUrl(existingUser.tenant.slug),
+          redirectTo: await buildAbsoluteAppUrl(getDashboardRouteForRole("PARENT")),
+          tenantName: existingUser.tenant.name,
+          tenantSlug: existingUser.tenant.slug,
           accountType: "PARENT",
-        },
-      },
-      select: {
-        id: true,
-        tenantId: true,
-        tenant: {
-          select: {
-            slug: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    if (existingParentAccount) {
-      const cookieStore = await cookies();
-      const session = await createAuthSession({
-        id: existingParentAccount.id,
-        tenantId: existingParentAccount.tenantId,
-      });
-
-      setAuthSessionCookie(cookieStore, session.token, session.expiresAt);
-      setTenantContextCookie(cookieStore, existingParentAccount.tenant.slug, session.expiresAt);
+        };
+      }
 
       return {
         success: false,
-        message: "يوجد حساب ولي أمر مستقل بالفعل لهذا الرقم. استخدم رابط الدخول الحالي.",
-        accessUrl: await buildTenantLoginUrl(existingParentAccount.tenant.slug),
-        redirectTo: await buildAbsoluteAppUrl(getDashboardRouteForRole("PARENT")),
-        tenantName: existingParentAccount.tenant.name,
-        tenantSlug: existingParentAccount.tenant.slug,
-        accountType: "PARENT",
+        message: buildPhoneConflictMessage(existingUser.role),
       };
     }
 

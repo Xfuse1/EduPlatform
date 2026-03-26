@@ -8,6 +8,7 @@ import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { normalizeEgyptPhone } from "@/lib/phone";
 import { getTenantBySlug, requireTenant } from "@/lib/tenant";
+import { buildPhoneConflictMessage, findUserByPhone, isPhoneUniqueConstraintError } from "@/lib/user-phone";
 
 const linkChildSchema = z.object({
   studentName: z.string().trim().min(2, "اسم الابن مطلوب"),
@@ -231,24 +232,12 @@ export async function linkChildToParent(input: {
       };
     }
 
-    const conflictingUser = await db.user.findFirst({
-      where: {
-        tenantId: targetTenant.id,
-        phone: studentPhone,
-      },
-      select: {
-        id: true,
-        role: true,
-      },
-    });
+    const conflictingUser = await findUserByPhone(studentPhone);
 
     if (conflictingUser) {
       return {
         success: false,
-        message:
-          conflictingUser.role === "STUDENT"
-            ? "رقم الهاتف مستخدم بالفعل داخل هذا الحساب، لكن بيانات الطالب الحالية لا تطابق ما أدخلته."
-            : "رقم الهاتف مستخدم بالفعل داخل هذا الحساب بحساب آخر، اختر رقمًا مختلفًا للابن.",
+        message: buildPhoneConflictMessage(conflictingUser.role),
       };
     }
 
@@ -302,7 +291,12 @@ export async function linkChildToParent(input: {
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "تعذر إضافة الابن الآن",
+      message:
+        isPhoneUniqueConstraintError(error)
+          ? buildPhoneConflictMessage()
+          : error instanceof Error
+            ? error.message
+            : "تعذر إضافة الابن الآن",
     };
   }
 }
