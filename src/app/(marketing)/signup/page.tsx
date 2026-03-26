@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -136,14 +136,28 @@ export default function TeacherSignupPage() {
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [verifiedIdToken, setVerifiedIdToken] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [runtimeOrigin, setRuntimeOrigin] = useState("");
 
   const [isSendingOtp, startSendingOtp] = useTransition();
   const [isVerifyingOtp, startVerifyingOtp] = useTransition();
   const [isCreating, startCreating] = useTransition();
+  const autoSendOtpKeyRef = useRef("");
 
   const isCenterAccount = form.accountType === "CENTER";
   const normalizedSubdomain = form.subdomain.trim().toLowerCase();
   const helperSubdomain = normalizedSubdomain || "your-center";
+  const expectedLoginUrl = useMemo(() => {
+    const baseOrigin =
+      runtimeOrigin ||
+      (typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
+    const url = new URL("/login", baseOrigin);
+
+    if (helperSubdomain !== "your-center") {
+      url.searchParams.set("tenantSlug", helperSubdomain);
+    }
+
+    return url.toString();
+  }, [helperSubdomain, runtimeOrigin]);
   const liveSubdomainError =
     normalizedSubdomain.length > 0 && !RESERVED_SUBDOMAINS.has(normalizedSubdomain) ? getSubdomainError(normalizedSubdomain) : "";
   const subdomainStatus =
@@ -163,10 +177,14 @@ export default function TeacherSignupPage() {
       { label: "رقم الهاتف", value: form.phone },
       ...(!isCenterAccount ? [{ label: "المادة", value: form.subject }] : []),
       { label: "المحافظة", value: form.governorate },
-      { label: "رابط الدخول", value: `${helperSubdomain}.localhost` },
+      { label: "رابط الدخول", value: expectedLoginUrl },
     ],
-    [form.centerName, form.governorate, form.phone, form.subject, form.teacherName, helperSubdomain, isCenterAccount],
+    [expectedLoginUrl, form.centerName, form.governorate, form.phone, form.subject, form.teacherName, isCenterAccount],
   );
+
+  useEffect(() => {
+    setRuntimeOrigin(window.location.origin);
+  }, []);
 
   useEffect(() => {
     if (!otpSent || secondsLeft <= 0) {
@@ -198,7 +216,19 @@ export default function TeacherSignupPage() {
     return () => window.clearTimeout(timer);
   }, [success]);
 
+  useEffect(() => {
+    const autoSendKey = `${form.phone}:${normalizedSubdomain}`;
+
+    if (currentStep !== 3 || !form.phone || otpSent || phoneVerified || autoSendOtpKeyRef.current === autoSendKey) {
+      return;
+    }
+
+    autoSendOtpKeyRef.current = autoSendKey;
+    handleSendOtp();
+  }, [currentStep, form.phone, normalizedSubdomain, otpSent, phoneVerified]);
+
   const resetPhoneVerificationState = () => {
+    autoSendOtpKeyRef.current = "";
     setOtpCode("");
     setOtpMessage("");
     setOtpError("");
@@ -265,8 +295,8 @@ export default function TeacherSignupPage() {
     setCurrentStep(3);
   };
 
-  const handleSendOtp = () => {
-    if (secondsLeft > 0 && otpSent) {
+  const handleSendOtp = (ignoreCooldown = false) => {
+    if (secondsLeft > 0 && otpSent && !ignoreCooldown) {
       return;
     }
 
@@ -561,7 +591,7 @@ export default function TeacherSignupPage() {
                   className="min-h-11 border-white/10 bg-slate-900/80 text-base font-semibold text-white placeholder:text-slate-500"
                 />
                 <p className="text-start text-sm text-slate-400">
-                  رابط الدخول المتوقع: <span dir="ltr" className="font-bold text-sky-300">{helperSubdomain}.localhost</span>
+                  رابط الدخول المتوقع: <span dir="ltr" className="font-bold text-sky-300">{expectedLoginUrl}</span>
                 </p>
                 {subdomainStatus === "available" ? <p className="text-sm font-semibold text-emerald-300">متاح</p> : null}
                 {subdomainStatus === "unavailable" ? <p className="text-sm font-semibold text-rose-300">غير متاح</p> : null}
@@ -614,29 +644,34 @@ export default function TeacherSignupPage() {
                     <p className="text-sm leading-6 text-slate-300">
                       {phoneVerified
                         ? "يمكنك الآن إنشاء الحساب بأمان."
-                        : `أرسل كود التحقق، ثم أدخله هنا قبل إنشاء ${isCenterAccount ? "حساب السنتر" : "الحساب"}.`}
+                        : `سيتم إرسال كود التحقق تلقائيًا، ثم أدخله هنا قبل إنشاء ${isCenterAccount ? "حساب السنتر" : "الحساب"}.`}
                     </p>
                   </div>
                 </div>
 
                 {!phoneVerified ? (
                   <>
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                      <Button className="sm:w-auto" disabled={isSendingOtp || (otpSent && secondsLeft > 0)} onClick={handleSendOtp} type="button">
-                        {isSendingOtp ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            جارٍ الإرسال...
-                          </>
-                        ) : otpSent ? (
-                          <>
-                            <RefreshCw className="h-4 w-4" />
-                            {secondsLeft > 0 ? `إعادة الإرسال بعد ${secondsLeft}ث` : "إعادة إرسال الكود"}
-                          </>
-                        ) : (
-                          "إرسال كود التحقق"
-                        )}
-                      </Button>
+                    <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
+                      {isSendingOtp && !otpSent ? (
+                        <span className="inline-flex items-center gap-2 font-semibold text-sky-200">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          جارٍ إرسال كود التحقق تلقائيًا...
+                        </span>
+                      ) : otpSent && secondsLeft > 0 ? (
+                        <span className="font-semibold">
+                          يمكنك إعادة الإرسال بعد <span dir="ltr">{secondsLeft}</span> ثانية
+                        </span>
+                      ) : (
+                        <button
+                          className="inline-flex items-center gap-2 font-bold text-sky-300 transition hover:text-sky-200 disabled:cursor-not-allowed disabled:opacity-60"
+                          disabled={isSendingOtp}
+                          onClick={() => handleSendOtp(true)}
+                          type="button"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                          {otpSent ? "إعادة إرسال الكود" : "إعادة المحاولة"}
+                        </button>
+                      )}
                     </div>
 
                     {otpMessage ? <p className="text-sm text-emerald-300">{otpMessage}</p> : null}
@@ -705,3 +740,4 @@ export default function TeacherSignupPage() {
     </main>
   );
 }
+

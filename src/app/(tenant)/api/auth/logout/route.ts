@@ -6,7 +6,6 @@ import {
   getSessionToken,
 } from '@/lib/auth'
 import { successResponse } from '@/lib/api-response'
-import { ROUTES } from '@/config/routes'
 import { clearTenantContextCookie } from '@/lib/tenant-context'
 import { logout } from '@/modules/auth/actions'
 
@@ -15,7 +14,7 @@ async function buildLogoutResponse(request: NextRequest, redirectToLogin: boolea
   await logout(token)
 
   if (redirectToLogin) {
-    const response = NextResponse.redirect(new URL(ROUTES.auth.login, request.url))
+    const response = NextResponse.redirect(new URL('/', request.url))
     clearSessionCookie(response)
     clearTenantContextCookie(response)
     return response

@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, Loader2, RefreshCw, Send, TimerReset } from "lucide-react";
+import { CheckCircle2, Loader2, RefreshCw, TimerReset } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ export function OTPInput({ phone, tenantName, tenantSlug }: { phone: string; ten
   const [isSendingCode, startSendingCode] = useTransition();
   const [isVerifyingCode, startVerifyingCode] = useTransition();
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+  const autoSendKeyRef = useRef("");
 
   useEffect(() => {
     void resetFirebasePhoneOtp();
@@ -44,7 +45,11 @@ export function OTPInput({ phone, tenantName, tenantSlug }: { phone: string; ten
 
   const code = useMemo(() => digits.join(""), [digits]);
 
-  const handleSendCode = () => {
+  const sendCode = (ignoreCooldown = false) => {
+    if (!phone || (secondsLeft > 0 && hasSentCode && !ignoreCooldown)) {
+      return;
+    }
+
     setError("");
     setInfo("");
 
@@ -63,6 +68,17 @@ export function OTPInput({ phone, tenantName, tenantSlug }: { phone: string; ten
       inputsRef.current[0]?.focus();
     });
   };
+
+  useEffect(() => {
+    const autoSendKey = `${tenantSlug ?? ""}:${phone}`;
+
+    if (!phone || hasSentCode || autoSendKeyRef.current === autoSendKey) {
+      return;
+    }
+
+    autoSendKeyRef.current = autoSendKey;
+    sendCode();
+  }, [hasSentCode, phone, tenantSlug]);
 
   const handleVerifyCode = () => {
     setError("");
@@ -121,7 +137,7 @@ export function OTPInput({ phone, tenantName, tenantSlug }: { phone: string; ten
       return;
     }
 
-    handleSendCode();
+    sendCode(true);
   };
 
   return (
@@ -144,7 +160,7 @@ export function OTPInput({ phone, tenantName, tenantSlug }: { phone: string; ten
           <div className="text-start">
             <p className="text-sm font-bold text-slate-800 dark:text-slate-100">مدة صلاحية الكود</p>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              {hasSentCode ? "يرجى إدخال الرمز قبل انتهاء العد التنازلي" : "أرسل الكود أولًا ثم أدخله هنا"}
+              {hasSentCode ? "يرجى إدخال الرمز قبل انتهاء العد التنازلي" : "يتم إرسال الكود تلقائيًا عند فتح الصفحة"}
             </p>
           </div>
           <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-primary shadow-sm dark:bg-slate-800">
@@ -153,22 +169,6 @@ export function OTPInput({ phone, tenantName, tenantSlug }: { phone: string; ten
           </div>
         </div>
 
-        {!hasSentCode ? (
-          <Button className="w-full gap-2 text-base" disabled={isSendingCode} onClick={handleSendCode} type="button">
-            {isSendingCode ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                جارٍ إرسال الكود...
-              </>
-            ) : (
-              <>
-                <Send className="h-4 w-4" />
-                إرسال كود التحقق
-              </>
-            )}
-          </Button>
-        ) : null}
-
         <div className="flex items-center justify-between gap-2" dir="ltr">
           {digits.map((digit, index) => (
             <input
@@ -176,7 +176,8 @@ export function OTPInput({ phone, tenantName, tenantSlug }: { phone: string; ten
               ref={(element) => {
                 inputsRef.current[index] = element;
               }}
-              className="touch-target h-14 w-14 rounded-xl border border-slate-300 bg-white text-center text-2xl font-extrabold text-slate-900 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15 dark:border-slate-700 dark:bg-slate-900 dark:text-white sm:h-14 sm:w-14"
+              className="touch-target h-14 w-14 rounded-xl border border-slate-300 bg-white text-center text-2xl font-extrabold text-slate-900 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white sm:h-14 sm:w-14"
+              disabled={!hasSentCode}
               inputMode="numeric"
               maxLength={1}
               onChange={(event) => handleChange(index, event.target.value)}
@@ -194,23 +195,28 @@ export function OTPInput({ phone, tenantName, tenantSlug }: { phone: string; ten
           </p>
         ) : null}
 
-        {hasSentCode ? (
-          <div className="rounded-[16px] border border-slate-200 bg-white px-4 py-4 text-center dark:border-slate-800 dark:bg-slate-900">
-            {secondsLeft > 0 ? (
-              <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-                يمكنك إعادة الإرسال بعد <span dir="ltr">{secondsLeft}</span> ثانية
-              </p>
-            ) : (
-              <button
-                className="touch-target inline-flex min-h-11 items-center justify-center rounded-xl bg-primary/10 px-5 py-3 text-sm font-bold text-primary transition hover:bg-primary/15 dark:bg-sky-400/10 dark:text-sky-300"
-                onClick={handleResend}
-                type="button"
-              >
-                إعادة إرسال الكود
-              </button>
-            )}
-          </div>
-        ) : null}
+        <div className="rounded-[16px] border border-slate-200 bg-white px-4 py-4 text-center dark:border-slate-800 dark:bg-slate-900">
+          {isSendingCode && !hasSentCode ? (
+            <p className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              يجري إرسال كود التحقق تلقائيًا...
+            </p>
+          ) : hasSentCode && secondsLeft > 0 ? (
+            <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+              يمكنك إعادة الإرسال بعد <span dir="ltr">{secondsLeft}</span> ثانية
+            </p>
+          ) : (
+            <button
+              className="touch-target inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary/10 px-5 py-3 text-sm font-bold text-primary transition hover:bg-primary/15 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-400/10 dark:text-sky-300"
+              disabled={isSendingCode || !phone}
+              onClick={handleResend}
+              type="button"
+            >
+              <RefreshCw className="h-4 w-4" />
+              {hasSentCode ? "إعادة إرسال الكود" : "إعادة المحاولة"}
+            </button>
+          )}
+        </div>
 
         <Button className="w-full text-base" disabled={isVerifyingCode || !hasSentCode || code.length !== OTP_LENGTH} onClick={handleVerifyCode} type="button">
           {isVerifyingCode ? (

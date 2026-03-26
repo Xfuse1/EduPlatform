@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Loader2, RefreshCw, ShieldCheck, UserRound } from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,6 +67,7 @@ export function ParentRegisterLauncher() {
   const [isSendingOtp, startSendingOtp] = useTransition();
   const [isVerifyingOtp, startVerifyingOtp] = useTransition();
   const [isCreating, startCreating] = useTransition();
+  const autoSendOtpKeyRef = useRef("");
 
   useEffect(() => {
     if (!otpSent || secondsLeft <= 0) {
@@ -98,7 +99,20 @@ export function ParentRegisterLauncher() {
     return () => window.clearTimeout(timer);
   }, [resolvedAccount]);
 
+  useEffect(() => {
+    const nextErrors = validateForm(form);
+    const autoSendKey = form.phone;
+
+    if (nextErrors.phone || nextErrors.parentName || !form.phone || otpSent || phoneVerified || autoSendOtpKeyRef.current === autoSendKey) {
+      return;
+    }
+
+    autoSendOtpKeyRef.current = autoSendKey;
+    handleSendOtp();
+  }, [form, otpSent, phoneVerified]);
+
   const resetPhoneVerificationState = () => {
+    autoSendOtpKeyRef.current = "";
     setOtpCode("");
     setOtpMessage("");
     setOtpError("");
@@ -127,7 +141,7 @@ export function ParentRegisterLauncher() {
     }
   };
 
-  const handleSendOtp = () => {
+  const handleSendOtp = (ignoreCooldown = false) => {
     const nextErrors = validateForm(form);
     setErrors(nextErrors);
     setPageError("");
@@ -138,7 +152,7 @@ export function ParentRegisterLauncher() {
       return;
     }
 
-    if (secondsLeft > 0 && otpSent) {
+    if (secondsLeft > 0 && otpSent && !ignoreCooldown) {
       return;
     }
 
@@ -338,29 +352,34 @@ export function ParentRegisterLauncher() {
                     {phoneVerified ? "تم التحقق من رقم الهاتف" : "التحقق من رقم الهاتف"}
                   </p>
                   <p className="text-sm leading-6 text-slate-500 dark:text-slate-300">
-                    {phoneVerified ? "يمكنك الآن إنشاء الحساب بأمان." : "أرسل كود التحقق ثم أدخله هنا لإكمال إنشاء الحساب."}
+                    {phoneVerified ? "يمكنك الآن إنشاء الحساب بأمان." : "سيتم إرسال كود التحقق تلقائيًا، ثم أدخله هنا لإكمال إنشاء الحساب."}
                   </p>
                 </div>
               </div>
 
               {!phoneVerified ? (
                 <>
-                  <div className="flex flex-col gap-3 sm:flex-row">
-                    <Button className="sm:w-auto" disabled={isSendingOtp || (otpSent && secondsLeft > 0)} onClick={handleSendOtp} type="button">
-                      {isSendingOtp ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          جارٍ الإرسال...
-                        </>
-                      ) : otpSent ? (
-                        <>
-                          <RefreshCw className="h-4 w-4" />
-                          {secondsLeft > 0 ? `إعادة الإرسال بعد ${secondsLeft}ث` : "إعادة إرسال الكود"}
-                        </>
-                      ) : (
-                        "إرسال كود التحقق"
-                      )}
-                    </Button>
+                  <div className="rounded-xl border border-slate-200/70 bg-white/70 px-4 py-3 text-sm text-slate-600 dark:border-slate-800/80 dark:bg-slate-950/30 dark:text-slate-300">
+                    {isSendingOtp && !otpSent ? (
+                      <span className="inline-flex items-center gap-2 font-semibold text-sky-700 dark:text-sky-300">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        جارٍ إرسال كود التحقق تلقائيًا...
+                      </span>
+                    ) : otpSent && secondsLeft > 0 ? (
+                      <span className="font-semibold">
+                        يمكنك إعادة الإرسال بعد <span dir="ltr">{secondsLeft}</span> ثانية
+                      </span>
+                    ) : (
+                      <button
+                        className="inline-flex items-center gap-2 font-bold text-sky-700 transition hover:text-sky-600 disabled:cursor-not-allowed disabled:opacity-60 dark:text-sky-300 dark:hover:text-sky-200"
+                        disabled={isSendingOtp}
+                        onClick={() => handleSendOtp(true)}
+                        type="button"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                        {otpSent ? "إعادة إرسال الكود" : "إعادة المحاولة"}
+                      </button>
+                    )}
                   </div>
 
                   {otpMessage ? <p className="text-sm text-emerald-600 dark:text-emerald-300">{otpMessage}</p> : null}
@@ -444,3 +463,4 @@ export function ParentRegisterLauncher() {
     </Card>
   );
 }
+
