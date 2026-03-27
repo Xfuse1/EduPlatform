@@ -1,0 +1,1 @@
+ALTER TYPE "TenantAccountType" ADD VALUE IF NOT EXISTS 'PARENT';
