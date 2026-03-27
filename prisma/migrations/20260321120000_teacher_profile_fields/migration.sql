@@ -1,0 +1,4 @@
+ALTER TABLE "User"
+ADD COLUMN "email" TEXT,
+ADD COLUMN "subject" TEXT,
+ADD COLUMN "bio" TEXT;
