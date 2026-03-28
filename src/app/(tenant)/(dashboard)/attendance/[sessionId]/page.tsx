@@ -6,9 +6,9 @@ import { requireAuth } from "@/lib/auth";
 import { getSessionWithStudents } from "@/modules/attendance/queries";
 import { SessionManagement } from "@/modules/attendance/components/SessionManagement";
 
-export default async function SessionPage({ params }: { params: { sessionId: string } }) {
+export default async function SessionPage({ params }: { params: Promise<{ sessionId: string }> }) {
   const user = await requireAuth();
-  const { sessionId } = params;
+  const { sessionId } = await params;
 
   if (!["TEACHER", "ASSISTANT", "MANAGER", "ADMIN"].includes(user.role)) {
     redirect("/attendance");

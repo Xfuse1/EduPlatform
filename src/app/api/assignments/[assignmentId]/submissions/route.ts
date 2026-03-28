@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/auth";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { assignmentId: string } }
+  { params }: { params: Promise<{ assignmentId: string }> }
 ) {
   try {
     const user = await requireAuth();
@@ -12,7 +12,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { assignmentId } = params;
+    const { assignmentId } = await params;
     const body = await req.json();
     const { fileUrl, note } = body;
 

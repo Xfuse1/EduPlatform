@@ -15,7 +15,7 @@ export default async function ParentAssignmentsPage() {
     redirect("/login");
   }
 
-  const data = await getParentDashboardData(MOCK_TENANT.id, session.userId);
+  const data = await getParentDashboardData(MOCK_TENANT.id, session.id);
 
   return (
     <div className="space-y-6" dir="rtl">

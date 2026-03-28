@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/auth";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { submissionId: string } }
+  { params }: { params: Promise<{ submissionId: string }> }
 ) {
   try {
     const user = await requireAuth();
@@ -12,7 +12,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { submissionId } = params;
+    const { submissionId } = await params;
     const body = await req.json();
     const { grade, note } = body;
 

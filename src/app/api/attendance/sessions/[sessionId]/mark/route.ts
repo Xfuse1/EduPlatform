@@ -11,7 +11,7 @@ const markSchema = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { sessionId: string } },
+  { params }: { params: Promise<{ sessionId: string }> },
 ) {
   try {
     const user = await requireAuth();
@@ -20,7 +20,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { sessionId } = params;
+    const { sessionId } = await params;
     const body = await req.json();
     const result = markSchema.safeParse(body);
 
