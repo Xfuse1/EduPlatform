@@ -1,12 +1,13 @@
 'use client';
 
-import { Pencil, Plus, Search, X } from "lucide-react";
+import { FileText, Pencil, Plus, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
+import { InvoiceView } from "@/components/payments/InvoiceView";
 
 type PaymentStatus = "PAID" | "OVERDUE" | "PENDING";
 type PaymentFilter = PaymentStatus | "ALL";
@@ -55,6 +56,7 @@ export function PaymentsPageClient({
 }) {
   const [payments, setPayments] = useState(initialPayments);
   const [isOpen, setIsOpen] = useState(false);
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
   const [studentName, setStudentName] = useState("");
   const [month, setMonth] = useState("");
@@ -260,10 +262,21 @@ export function PaymentsPageClient({
 
                 <p className="text-start text-3xl font-extrabold text-primary dark:text-sky-300">{formatCurrency(payment.amount)}</p>
 
-                <Button className="w-full gap-2" onClick={() => openEditDialog(payment)} type="button" variant="outline">
-                  <Pencil className="h-4 w-4" />
-                  تعديل
-                </Button>
+                <div className="flex gap-2">
+                  <Button className="flex-1 gap-2" onClick={() => openEditDialog(payment)} type="button" variant="outline">
+                    <Pencil className="h-4 w-4" />
+                    تعديل
+                  </Button>
+                  <Button 
+                    className="flex-1 gap-2 border-primary/20 text-primary hover:bg-primary/5" 
+                    onClick={() => setIsInvoiceOpen(true)} 
+                    type="button" 
+                    variant="outline"
+                  >
+                    <FileText className="h-4 w-4" />
+                    الفاتورة
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -347,6 +360,22 @@ export function PaymentsPageClient({
           </div>
         </div>
       ) : null}
+
+      {isInvoiceOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[32px] bg-slate-50 dark:bg-slate-900 shadow-2xl relative">
+            <button 
+              className="absolute top-6 left-6 z-10 h-10 w-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center border shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+              onClick={() => setIsInvoiceOpen(false)}
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="p-4 sm:p-10 pb-20">
+              <InvoiceView />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

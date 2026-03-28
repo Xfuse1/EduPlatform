@@ -25,3 +25,11 @@ export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElemen
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return <h2 className={cn("text-xl font-bold text-slate-900 dark:text-white", className)} {...props} />;
 }
+
+export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
+  return <p className={cn("text-sm text-slate-500 dark:text-slate-400", className)} {...props} />;
+}
+
+export function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn("flex flex-col gap-3 px-6 py-5 sm:flex-row", className)} {...props} />;
+}

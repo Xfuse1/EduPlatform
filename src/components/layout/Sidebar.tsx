@@ -9,6 +9,9 @@ import {
   Settings,
   Users,
   Wallet,
+  ClipboardList,
+  PenTool,
+  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -29,17 +32,23 @@ const navigation: Record<Role, NavigationItem[]> = {
     { href: "/teacher/groups", label: "المجموعات", icon: Users },
     { href: "/teacher/students", label: "الطلاب", icon: GraduationCap },
     { href: "/attendance", label: "الحضور", icon: CheckSquare },
+    { href: "/teacher/assignments", label: "الواجبات", icon: ClipboardList },
+    { href: "/teacher/exams", label: "الامتحانات", icon: PenTool },
     { href: "/payments", label: "المصاريف", icon: Wallet },
     { href: "/teacher/schedule", label: "الجدول", icon: Calendar },
+    { href: "/teacher/assistants", label: "المساعدين", icon: ShieldCheck },
     { href: "/teacher/settings", label: "الإعدادات", icon: Settings },
   ],
   student: [
     { href: "/student", label: "لوحة التحكم", icon: LayoutDashboard },
     { href: "/student/schedule", label: "جدولي", icon: Calendar },
+    { href: "/student/assignments", label: "الواجبات", icon: ClipboardList },
+    { href: "/student/exams", label: "الامتحانات", icon: PenTool },
   ],
   parent: [
     { href: "/parent", label: "لوحة التحكم", icon: LayoutDashboard },
-    { href: "/parent", label: "أبنائي", icon: Heart },
+    { href: "/parent/assignments", label: "الواجبات", icon: ClipboardList },
+    { href: "/parent/exams", label: "الامتحانات", icon: PenTool },
   ],
 };
 

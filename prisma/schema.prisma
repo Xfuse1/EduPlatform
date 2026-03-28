@@ -31,6 +31,7 @@ model Tenant {
   attendance    Attendance[]
   payments      Payment[]
   notifications Notification[]
+  messages      Message[]
 
   @@index([slug])
 }
@@ -66,6 +67,10 @@ model User {
   parentOf          ParentStudent[]   @relation("ParentUser")
   childOf           ParentStudent[]   @relation("StudentUser")
   sessions          AuthSession[]
+  assignmentSubmissions AssignmentSubmission[]
+  sessionRatings    SessionRating[]
+  sentMessages      Message[]         @relation("SentMessages")
+  receivedMessages  Message[]         @relation("ReceivedMessages")
 
   @@unique([tenantId, phone])
   @@index([tenantId])
@@ -112,6 +117,7 @@ model Group {
   students    GroupStudent[]
   sessions    Session[]
   attendance  Attendance[]
+  assignments Assignment[]
 
   @@index([tenantId])
   @@index([tenantId, isActive])
@@ -151,8 +157,15 @@ model Session {
   status     SessionStatus @default(SCHEDULED)
   type       SessionType   @default(REGULAR)
   notes      String?
+
+  // QR Attendance Fields
+  qrToken     String?   @unique
+  qrExpiresAt DateTime?
+
   createdAt  DateTime      @default(now())
   attendance Attendance[]
+  assignments Assignment[]
+  ratings     SessionRating[]
 
   @@unique([groupId, date])
   @@index([tenantId, date])
@@ -319,4 +332,66 @@ model AuthSession {
   @@index([token])
   @@index([refreshToken])
   @@index([expiresAt])
+}
+
+model Assignment {
+  id          String   @id @default(cuid())
+  sessionId   String?
+  session     Session? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  groupId     String
+  group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  dueDate     DateTime
+  createdAt   DateTime @default(now())
+  submissions AssignmentSubmission[]
+
+  @@index([sessionId])
+  @@index([groupId])
+}
+
+model AssignmentSubmission {
+  id           String     @id @default(cuid())
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  fileUrl      String?
+  note         String?
+  grade        Int?
+  submittedAt  DateTime   @default(now())
+
+  @@unique([assignmentId, studentId])
+}
+
+model SessionRating {
+  id        String @id @default(cuid())
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  studentId String
+  student   User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([studentId])
+}
+
+model Message {
+  id         String    @id @default(cuid())
+  tenantId   String
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  senderId   String
+  sender     User      @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User      @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  text       String
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([tenantId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
 }

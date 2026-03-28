@@ -10,6 +10,9 @@ type StudentDashboardProps = {
 
 const groupColors = ["#1A5276", "#2E86C1", "#27AE60"];
 
+import { StudentScanner } from "@/modules/attendance/components/StudentScanner";
+import { StudentAssignments } from "./StudentAssignments";
+
 export function StudentDashboard({ data }: StudentDashboardProps) {
   const nextSessionDate = data.nextSession
     ? data.nextSession.date.toLocaleDateString("ar-EG", {
@@ -21,7 +24,13 @@ export function StudentDashboard({ data }: StudentDashboardProps) {
     : "";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
+      {/* Attendance QR Scanner */}
+      <StudentScanner />
+
+      {/* Assignments Section */}
+      <StudentAssignments />
+
       <Card className="overflow-hidden bg-[linear-gradient(135deg,_#163b54,_#1A5276_45%,_#2E86C1)] text-white">
         <CardContent className="p-6">
           <p className="text-sm font-semibold text-white/75">الحصة القادمة</p>
