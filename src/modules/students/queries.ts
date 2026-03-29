@@ -53,7 +53,7 @@ export const getStudentProfile = cache(async (tenantId: string, studentId: strin
         role: "STUDENT",
       },
       include: {
-        enrollments: {
+        groupStudents: {
           where: {
             status: "ACTIVE",
           },
@@ -69,7 +69,7 @@ export const getStudentProfile = cache(async (tenantId: string, studentId: strin
         id: student.id,
         name: student.name,
         gradeLevel: student.gradeLevel,
-        enrollments: student.enrollments.map((enrollment) => ({
+        enrollments: student.groupStudents.map((enrollment) => ({
           group: {
             id: enrollment.group.id,
             name: enrollment.group.name,
@@ -102,7 +102,7 @@ export const getParentChildren = cache(async (tenantId: string, parentId: string
       include: {
         student: {
           include: {
-            enrollments: {
+            groupStudents: {
               where: {
                 status: "ACTIVE",
               },
@@ -131,7 +131,7 @@ export const getStudentsList = cache(async (tenantId: string) => {
         role: "STUDENT",
       },
       include: {
-        enrollments: {
+        groupStudents: {
           where: {
             status: "ACTIVE",
           },
@@ -144,7 +144,7 @@ export const getStudentsList = cache(async (tenantId: string) => {
             },
           },
         },
-        childOf: {
+        childStudents: {
           include: {
             parent: {
               select: {
@@ -154,7 +154,7 @@ export const getStudentsList = cache(async (tenantId: string) => {
             },
           },
         },
-        attendanceRecords: {
+        attendances: {
           where: {
             tenantId,
           },
@@ -162,7 +162,7 @@ export const getStudentsList = cache(async (tenantId: string) => {
             status: true,
           },
         },
-        studentPayments: {
+        payments: {
           where: {
             tenantId,
           },
@@ -181,13 +181,13 @@ export const getStudentsList = cache(async (tenantId: string) => {
     });
 
     return students.map((student) => {
-      const attendanceCount = student.attendanceRecords.length;
-      const attendedCount = student.attendanceRecords.filter(
+      const attendanceCount = student.attendances.length;
+      const attendedCount = student.attendances.filter(
         (record) => record.status === "PRESENT" || record.status === "LATE",
       ).length;
-      const latestPayment = student.studentPayments[0];
-      const parentLink = student.childOf[0];
-      const activeGroup = student.enrollments[0];
+      const latestPayment = student.payments[0];
+      const parentLink = student.childStudents[0];
+      const activeGroup = student.groupStudents[0];
 
       return {
         id: student.id,
@@ -197,7 +197,7 @@ export const getStudentsList = cache(async (tenantId: string) => {
         parentPhone: parentLink?.parent.phone ?? student.parentPhone ?? "",
         grade: student.gradeLevel ?? "غير محدد",
         gradeLevel: student.gradeLevel ?? "",
-        group: student.enrollments.map((enrollment) => enrollment.group.name).join(" - ") || "غير محدد",
+        group: student.groupStudents.map((enrollment) => enrollment.group.name).join(" - ") || "غير محدد",
         groupId: activeGroup?.group.id ?? "",
         paymentStatus: latestPayment?.status === "PARTIAL" ? "PENDING" : latestPayment?.status ?? "PENDING",
         attendance: attendanceCount > 0 ? Math.round((attendedCount / attendanceCount) * 100) : 0,

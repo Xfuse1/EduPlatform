@@ -1,7 +1,10 @@
 'use client';
 
-import { Calendar, Save, X, Plus, Clock, Link as LinkIcon } from "lucide-react";
+import { Calendar, Save, X, Plus, Clock, Link as LinkIcon, Lock, FileText } from "lucide-react";
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+
+const supabase = createClient();
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -30,16 +33,50 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd }: AddAssign
     dueDate: "",
     fileLink: "",
     file: null as File | null,
+    answerKeyFile: null as File | null,
   });
+
+  const uploadFile = async (file: File, folder: string) => {
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${folder}/${Date.now()}.${fileExt}`
+    const { data, error } = await supabase.storage
+      .from("assignments")
+      .upload(fileName, file)
+    
+    if (error) throw error
+    
+    const { data: urlData } = supabase.storage
+      .from("assignments")
+      .getPublicUrl(fileName)
+    
+    return urlData.publicUrl
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      let fileUrl = formData.fileLink;
+      let answerKeyUrl = "";
+
+      if (formData.file) {
+        fileUrl = await uploadFile(formData.file, "questions");
+      }
+
+      if (formData.answerKeyFile) {
+        answerKeyUrl = await uploadFile(formData.answerKeyFile, "answer-keys");
+      }
+
       // Note: Backend engineer will update this to use FormData if handling actual files
       // Currently kept as JSON for mock/compatibility until backend is ready.
-      const payload = { ...formData, file: undefined }; 
+      const payload = { 
+        ...formData, 
+        file: undefined, 
+        answerKeyFile: undefined,
+        fileUrl,
+        answerKeyUrl 
+      }; 
       
       const res = await fetch("/api/assignments", {
         method: "POST",
@@ -51,7 +88,7 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd }: AddAssign
         const result = await res.json();
         onAdd(result.assignment);
         onClose();
-        setFormData({ title: "", description: "", groupId: groups[0]?.id || "", dueDate: "", fileLink: "", file: null });
+        setFormData({ title: "", description: "", groupId: groups[0]?.id || "", dueDate: "", fileLink: "", file: null, answerKeyFile: null });
       }
     } catch (error) {
       console.error("Failed to add assignment:", error);
@@ -147,7 +184,10 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd }: AddAssign
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="file" className="text-xs text-slate-500 font-bold">رفع ملف التكليف (PDF, Word, صور)</Label>
+                <Label htmlFor="file" className="text-xs text-slate-500 font-bold flex items-center gap-1">
+                  <FileText className="h-3 w-3" />
+                  ملف الأسئلة (يراه الطالب)
+                </Label>
                 <div className="relative">
                     <Input
                       id="file"
@@ -157,6 +197,29 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd }: AddAssign
                         const file = e.target.files?.[0];
                         if (file) {
                           setFormData({ ...formData, file });
+                        }
+                      }}
+                    />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="answerKeyFile" className="text-xs text-slate-500 font-bold flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <Lock className="h-3 w-3 text-amber-500" />
+                    ملف الإجابات النموذجية
+                  </span>
+                  <span className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider">سري - لن يراه الطالب</span>
+                </Label>
+                <div className="relative">
+                    <Input
+                      id="answerKeyFile"
+                      type="file"
+                      className="file:me-4 file:py-1 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200 text-sm cursor-pointer min-h-11 pt-2.5 bg-white dark:bg-slate-900 border-amber-200 dark:border-amber-900/50"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setFormData({ ...formData, answerKeyFile: file });
                         }
                       }}
                     />

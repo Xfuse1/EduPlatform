@@ -56,7 +56,7 @@ export async function registerStudent(formData: FormData): Promise<RegistrationR
         role: "STUDENT",
         name: studentName,
         parentPhone,
-        enrollments: {
+        groupStudents: {
           some: {
             groupId,
           },

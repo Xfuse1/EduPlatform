@@ -254,7 +254,7 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
           payment,
           todayStatus: attendance.records?.[0]?.status ?? "NO_SESSION",
           nextSession: getNextSessionFromEnrollments(
-            student.enrollments.map((enrollment) => ({
+            student.groupStudents.map((enrollment) => ({
               group: {
                 name: enrollment.group.name,
                 days: enrollment.group.days,

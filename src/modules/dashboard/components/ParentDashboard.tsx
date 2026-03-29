@@ -1,6 +1,6 @@
 'use client';
 
-import { CalendarClock, CheckCircle2, CreditCard, UserRound, Bell, MessageSquare, Clock, BookOpen, AlertTriangle, X } from "lucide-react";
+import { CalendarClock, CheckCircle2, CreditCard, UserRound, Bell, MessageSquare, Clock, BookOpen, AlertTriangle, X, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Button } from "@/components/ui/button";
@@ -34,9 +34,9 @@ const MOCK_ATTENDANCE_DATA = [
 ]
 
 const MOCK_ASSIGNMENT_GRADES = [
-  { id: "g1", title: "واجب الجبر 1", grade: 18, maxGrade: 20 },
-  { id: "g2", title: "نصوص العصر الأموي", grade: 10, maxGrade: 10 },
-  { id: "g3", title: "تطبيقات الحركة", grade: 14, maxGrade: 15 },
+  { id: "g1", title: "واجب الجبر 1", grade: 18, maxGrade: 20, gradedByAi: true },
+  { id: "g2", title: "نصوص العصر الأموي", grade: 10, maxGrade: 10, gradedByAi: false },
+  { id: "g3", title: "تطبيقات الحركة", grade: 14, maxGrade: 15, gradedByAi: true },
 ]
 
 function todayStatusLabel(status: string) {
@@ -243,6 +243,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                   <div key={grade.id} className="flex items-center justify-between p-2 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
                     <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{grade.title}</span>
                     <div className="flex items-center gap-2">
+                       {grade.gradedByAi && <Sparkles className="h-3 w-3 text-purple-500 animate-pulse" />}
                       <span className="text-[11px] font-extrabold text-primary">{toArabicDigits(grade.grade)}/{toArabicDigits(grade.maxGrade)}</span>
                       <div className="h-1.5 w-16 bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden">
                         <div className="h-full bg-primary" style={{ width: `${(grade.grade/grade.maxGrade)*100}%` }} />
