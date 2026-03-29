@@ -25,7 +25,7 @@ export const getTodaySessions = cache(async (tenantId: string) => {
         isActive: true,
       },
       include: {
-        students: {
+        groupStudents: {
           where: {
             status: "ACTIVE",
           },
@@ -65,7 +65,7 @@ export const getTodaySessions = cache(async (tenantId: string) => {
                 name: true,
               },
             },
-            attendance: {
+            attendances: {
               select: {
                 id: true,
               },
@@ -79,8 +79,8 @@ export const getTodaySessions = cache(async (tenantId: string) => {
           timeEnd: session.timeEnd,
           status: session.status,
           group: session.group,
-          attendanceCount: session.attendance.length,
-          totalStudents: group.students.length,
+          attendanceCount: session.attendances.length,
+          totalStudents: group.groupStudents.length,
         };
       }),
     );
@@ -214,7 +214,7 @@ export const getSessionWithStudents = cache(async (sessionId: string) => {
       include: {
         group: {
           include: {
-            students: {
+            groupStudents: {
               where: { status: "ACTIVE" },
               include: {
                 student: {
@@ -224,14 +224,14 @@ export const getSessionWithStudents = cache(async (sessionId: string) => {
             },
           },
         },
-        attendance: true,
+        attendances: true,
       },
     });
 
     if (!session) return null;
 
-    const students = session.group.students.map((gs) => {
-      const record = session.attendance.find((a) => a.studentId === gs.studentId);
+    const students = session.group.groupStudents.map((gs) => {
+      const record = session.attendances.find((a) => a.studentId === gs.studentId);
 
       return {
         id: gs.student.id,

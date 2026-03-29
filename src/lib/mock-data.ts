@@ -222,7 +222,7 @@ export const MOCK_PARENT_CHILDREN = [
       id: MOCK_USERS.STUDENT.id,
       name: MOCK_USERS.STUDENT.name,
       gradeLevel: "الصف الثالث الثانوي",
-      enrollments: [
+      groupStudents: [
         {
           group: {
             name: MOCK_GROUPS[0].name,

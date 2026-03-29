@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       include: {
         group: {
           include: {
-            students: {
+            groupStudents: {
               where: {
                 studentId: user.id,
                 status: "ACTIVE",
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check enrollment
-    if (session.group.students.length === 0) {
+    if (session.group.groupStudents.length === 0) {
       return NextResponse.json({ error: "Not enrolled in this group" }, { status: 403 });
     }
 

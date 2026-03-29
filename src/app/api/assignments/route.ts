@@ -10,15 +10,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, description, groupId, dueDate, sessionId } = body;
+    const { title, description, groupId, dueDate, fileUrl, answerKeyUrl } = body;
 
     const assignment = await db.assignment.create({
       data: {
+        tenantId: user.tenantId,
         title,
         description,
         groupId,
-        dueDate: new Date(dueDate),
-        sessionId: sessionId || null,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        fileUrl,
+        answerKeyUrl,
       },
       include: {
         group: { select: { name: true } },
@@ -28,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, assignment });
   } catch (error) {
-    console.error("Failed to create assignment:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("Assignment error:", error);
+    return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }

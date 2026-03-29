@@ -49,7 +49,7 @@ export const getOpenGroups = cache(async (tenantId: string) => {
       include: {
         _count: {
           select: {
-            students: true,
+            groupStudents: true,
           },
         },
       },
@@ -59,7 +59,7 @@ export const getOpenGroups = cache(async (tenantId: string) => {
     });
 
     return groups.map((group) => {
-      const enrolledCount = group._count.students;
+      const enrolledCount = group._count.groupStudents;
       const remainingCapacity = Math.max(group.maxCapacity - enrolledCount, 0);
 
       return {

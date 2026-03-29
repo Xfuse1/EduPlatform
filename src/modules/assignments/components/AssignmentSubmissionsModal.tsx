@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Loader2, X } from "lucide-react";
+import { Check, Loader2, X, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { fetchSubmissions, gradeSubmission } from "../actions";
 import { showToast } from "@/components/ui/Toast";
 import { Badge } from "@/components/ui/badge";
+import { AIGradingModal } from "./AIGradingModal";
 
 interface AssignmentSubmissionsModalProps {
     assignmentId: string | null;
@@ -20,6 +21,7 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
     const [loading, setLoading] = useState(false);
     const [gradingId, setGradingId] = useState<string | null>(null);
     const [gradeValue, setGradeValue] = useState<string>("");
+    const [aiGradingSub, setAiGradingSub] = useState<any>(null);
 
     useEffect(() => {
         if (!assignmentId) return;
@@ -59,6 +61,29 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
         }
     };
 
+    const handleAIGraded = async (grade: number, feedback: string) => {
+        if (!aiGradingSub) return;
+        
+        const res = await gradeSubmission(aiGradingSub.id, grade, {
+            aiGrade: grade,
+            aiFeedback: feedback,
+            gradedByAi: true
+        });
+
+        if (res.success) {
+            showToast.success("تم اعتماد تصحيح الذكاء الاصطناعي");
+            setAssignment((prev: any) => ({
+                ...prev,
+                submissions: prev.submissions.map((sub: any) => 
+                    sub.id === aiGradingSub.id ? { ...sub, grade, gradedByAi: true, aiGrade: grade, aiFeedback: feedback } : sub
+                )
+            }));
+        } else {
+            showToast.error("حدث خطأ أثناء حفظ نتيجة الذكاء الاصطناعي");
+        }
+        setAiGradingSub(null);
+    };
+
     return (
         <Dialog open={!!assignmentId} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="max-w-2xl" dir="rtl">
@@ -93,42 +118,62 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
                                         )}
                                     </div>
 
-                                    <div className="flex items-center gap-3 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-100 dark:border-slate-700 shrink-0">
-                                        {gradingId === sub.id ? (
-                                            <div className="flex items-center gap-2">
-                                                <Input 
-                                                    type="number" 
-                                                    className="w-20 text-center font-bold" 
-                                                    placeholder="الدرجة"
-                                                    value={gradeValue}
-                                                    onChange={(e) => setGradeValue(e.target.value)}
-                                                    autoFocus
-                                                />
-                                                <Button className="h-9 w-9 bg-emerald-500 hover:bg-emerald-600 text-white p-0" onClick={() => handleSaveGrade(sub.id)}>
-                                                    <Check className="h-4 w-4" />
-                                                </Button>
-                                                <Button variant="ghost" className="h-9 w-9 text-slate-400 hover:text-slate-600 p-0" onClick={() => setGradingId(null)}>
-                                                    <X className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                {sub.grade !== null ? (
-                                                    <Badge variant="success" className="font-bold cursor-pointer hover:bg-emerald-200" onClick={() => {
-                                                        setGradeValue(sub.grade.toString());
-                                                        setGradingId(sub.id);
-                                                    }}>
-                                                        {sub.grade} درجة
-                                                    </Badge>
-                                                ) : (
-                                                    <Button variant="outline" className="font-bold text-xs h-8 px-3" onClick={() => {
-                                                        setGradeValue("");
-                                                        setGradingId(sub.id);
-                                                    }}>
-                                                        إضافة درجة
+                                    <div className="flex flex-col items-end gap-2 shrink-0">
+                                        <div className="flex items-center gap-3 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-100 dark:border-slate-700">
+                                            {gradingId === sub.id ? (
+                                                <div className="flex items-center gap-2">
+                                                    <Input 
+                                                        type="number" 
+                                                        className="w-20 text-center font-bold" 
+                                                        placeholder="الدرجة"
+                                                        value={gradeValue}
+                                                        onChange={(e) => setGradeValue(e.target.value)}
+                                                        autoFocus
+                                                    />
+                                                    <Button className="h-9 w-9 bg-emerald-500 hover:bg-emerald-600 !p-0" onClick={() => handleSaveGrade(sub.id)}>
+                                                        <Check className="h-4 w-4 text-white" />
                                                     </Button>
-                                                )}
-                                            </>
+                                                    <Button variant="outline" className="h-9 w-9 text-slate-400 hover:text-slate-600 !p-0" onClick={() => setGradingId(null)}>
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    {sub.grade !== null ? (
+                                                        <div className="flex items-center gap-2">
+                                                            {sub.gradedByAi && (
+                                                                <div className="h-6 w-6 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                                                    <Sparkles className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                                                                </div>
+                                                            )}
+                                                            <Badge variant={sub.grade >= 70 ? "success" : sub.grade >= 50 ? "warning" : "destructive"} className="font-bold cursor-pointer" onClick={() => {
+                                                                setGradeValue(sub.grade.toString());
+                                                                setGradingId(sub.id);
+                                                            }}>
+                                                                {sub.grade} درجة
+                                                            </Badge>
+                                                        </div>
+                                                    ) : (
+                                                        <Button variant="outline" className="font-bold text-xs h-8 px-3" onClick={() => {
+                                                            setGradeValue("");
+                                                            setGradingId(sub.id);
+                                                        }}>
+                                                            إضافة درجة
+                                                        </Button>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+                                        
+                                        {assignment?.answerKeyUrl && !sub.grade && (
+                                            <Button 
+                                                variant="outline" 
+                                                className="h-8 px-3 text-[10px] bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 gap-1 font-bold"
+                                                onClick={() => setAiGradingSub(sub)}
+                                            >
+                                                <Sparkles className="h-3 w-3" />
+                                                تصحيح ذكي
+                                            </Button>
                                         )}
                                     </div>
                                 </div>
@@ -141,6 +186,16 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
                     ) : null}
                 </div>
             </DialogContent>
+            
+            {aiGradingSub && (
+                <AIGradingModal 
+                    isOpen={!!aiGradingSub}
+                    onClose={() => setAiGradingSub(null)}
+                    assignment={assignment}
+                    submission={aiGradingSub}
+                    onGraded={handleAIGraded}
+                />
+            )}
         </Dialog>
     );
 }

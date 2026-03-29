@@ -85,7 +85,7 @@ export async function createStudent(formData: FormData): Promise<CreateStudentRe
         include: {
           _count: {
             select: {
-              students: true,
+              groupStudents: true,
             },
           },
         },
@@ -98,7 +98,7 @@ export async function createStudent(formData: FormData): Promise<CreateStudentRe
         };
       }
 
-      if (group._count.students >= group.maxCapacity) {
+      if (group._count.groupStudents >= group.maxCapacity) {
         return {
           success: false,
           message: "لا توجد أماكن متاحة في هذه المجموعة",
@@ -215,7 +215,7 @@ export async function updateStudent(formData: FormData): Promise<UpdateStudentRe
         role: "STUDENT",
       },
       include: {
-        childOf: {
+        childStudents: {
           include: {
             parent: {
               select: {
@@ -225,7 +225,7 @@ export async function updateStudent(formData: FormData): Promise<UpdateStudentRe
             },
           },
         },
-        enrollments: {
+        groupStudents: {
           where: {
             status: "ACTIVE",
           },
@@ -244,7 +244,7 @@ export async function updateStudent(formData: FormData): Promise<UpdateStudentRe
       };
     }
 
-    const currentParentLink = existingStudent.childOf[0];
+    const currentParentLink = existingStudent.childStudents[0];
 
     if (!currentParentLink) {
       return {
@@ -307,7 +307,7 @@ export async function updateStudent(formData: FormData): Promise<UpdateStudentRe
         include: {
           _count: {
             select: {
-              students: {
+              groupStudents: {
                 where: {
                   status: "ACTIVE",
                 },
@@ -324,9 +324,9 @@ export async function updateStudent(formData: FormData): Promise<UpdateStudentRe
         };
       }
 
-      const alreadyEnrolled = existingStudent.enrollments.some((enrollment) => enrollment.groupId === normalizedGroupId);
+      const alreadyEnrolled = existingStudent.groupStudents.some((enrollment) => enrollment.groupId === normalizedGroupId);
 
-      if (!alreadyEnrolled && group._count.students >= group.maxCapacity) {
+      if (!alreadyEnrolled && group._count.groupStudents >= group.maxCapacity) {
         return {
           success: false,
           message: "لا توجد أماكن متاحة في هذه المجموعة",
@@ -357,8 +357,8 @@ export async function updateStudent(formData: FormData): Promise<UpdateStudentRe
       },
     });
 
-    const currentEnrollmentIds = existingStudent.enrollments.map((enrollment) => enrollment.id);
-    const currentEnrollment = existingStudent.enrollments[0];
+    const currentEnrollmentIds = existingStudent.groupStudents.map((enrollment) => enrollment.id);
+    const currentEnrollment = existingStudent.groupStudents[0];
 
     if (!normalizedGroupId && currentEnrollmentIds.length > 0) {
       await db.groupStudent.updateMany({

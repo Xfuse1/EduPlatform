@@ -1,8 +1,11 @@
 "use client"
 
 import React, { useState } from "react"
-import { BookOpen, CheckCircle2, Clock, AlertCircle, Upload, X } from "lucide-react"
+import { BookOpen, CheckCircle2, Clock, AlertCircle, Upload, X, Sparkles } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { createClient } from "@/lib/supabase/client"
+
+const supabase = createClient()
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,7 +21,13 @@ interface StudentAssignment {
   dueDate: string | Date
   group: { name: string, subject?: string }
   status: "pending" | "submitted" | "graded" | "overdue"
-  submission?: { grade?: number | null, fileUrl?: string | null, note?: string | null }
+  submission?: {
+    grade?: number | null,
+    fileUrl?: string | null,
+    note?: string | null,
+    aiFeedback?: string | null,
+    gradedByAi?: boolean
+  }
   maxGrade?: number
 }
 
@@ -26,20 +35,90 @@ export function StudentAssignments({ initialAssignments = [] }: { initialAssignm
   const [assignments, setAssignments] = useState(initialAssignments)
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false)
   const [selectedAssignment, setSelectedAssignment] = useState<StudentAssignment | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submissionFile, setSubmissionFile] = useState<File | null>(null)
+  const [submissionNote, setSubmissionNote] = useState("")
+
+  const uploadFile = async (file: File, folder: string) => {
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${folder}/${Date.now()}.${fileExt}`
+    const { data, error } = await supabase.storage
+      .from("assignments")
+      .upload(fileName, file)
+    
+    if (error) throw error
+    
+    const { data: urlData } = supabase.storage
+      .from("assignments")
+      .getPublicUrl(fileName)
+    
+    return urlData.publicUrl
+  }
 
   const pendingCount = assignments.filter(a => a.status === "pending" || a.status === "overdue").length
 
   const handleOpenSubmit = (assignment: StudentAssignment) => {
     setSelectedAssignment(assignment)
     setIsSubmitModalOpen(true)
+    setSubmissionFile(null)
+    setSubmissionNote("")
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    // Mocking submission
-    showToast.success("تم تسليم الواجب بنجاح")
-    setAssignments(assignments.map(a => a.id === selectedAssignment?.id ? { ...a, status: "submitted", submission: { note: "تم التسليم" } } : a))
-    setIsSubmitModalOpen(false)
+    if (!submissionFile) return;
+    
+    setIsSubmitting(true)
+    try {
+      const fileUrl = await uploadFile(submissionFile, "submissions")
+      
+      const response = await fetch(`/api/assignments/${selectedAssignment?.id}/submissions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          fileUrl,
+          note: submissionNote
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit assignment");
+      }
+
+      const { submission } = await response.json();
+      
+      setAssignments(assignments.map(a => a.id === selectedAssignment?.id ? { 
+        ...a, 
+        status: "submitted", 
+        submission: submission 
+      } : a))
+      
+      showToast.success("تم تسليم الواجب بنجاح")
+      setIsSubmitModalOpen(false)
+    } catch (error) {
+      console.error("Submission failed:", error)
+      showToast.error("فشل تسليم الواجب، يرجى المحاولة مرة أخرى")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
+  const [currentFeedback, setCurrentFeedback] = useState<any>(null)
+
+  const handleOpenFeedback = (assignment: StudentAssignment) => {
+    if (assignment.submission?.aiFeedback) {
+      try {
+        const parsed = JSON.parse(assignment.submission.aiFeedback)
+        setCurrentFeedback(parsed)
+        setFeedbackModalOpen(true)
+      } catch (e) {
+        setCurrentFeedback(assignment.submission.aiFeedback)
+        setFeedbackModalOpen(true)
+      }
+    }
   }
 
   return (
@@ -64,14 +143,72 @@ export function StudentAssignments({ initialAssignments = [] }: { initialAssignm
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {assignments.map((assignment) => (
-            <AssignmentCard 
-              key={assignment.id} 
-              assignment={assignment} 
-              onSubmit={() => handleOpenSubmit(assignment)} 
+            <AssignmentCard
+              key={assignment.id}
+              assignment={assignment}
+              onSubmit={() => handleOpenSubmit(assignment)}
+              onViewFeedback={() => handleOpenFeedback(assignment)}
             />
           ))}
         </div>
       )}
+
+      {/* Feedback Modal */}
+      <Dialog open={feedbackModalOpen} onOpenChange={setFeedbackModalOpen}>
+        <DialogContent className="max-w-2xl" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-purple-600" />
+              تعليق المعلم (الذكاء الاصطناعي)
+            </DialogTitle>
+          </DialogHeader>
+
+          {currentFeedback && (
+            <div className="space-y-6 overflow-y-auto max-h-[70vh] p-2">
+              {typeof currentFeedback === 'string' ? (
+                <p className="text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                  {currentFeedback}
+                </p>
+              ) : (
+                <>
+                  <div className="bg-purple-50 dark:bg-purple-900/20 p-5 rounded-2xl border border-purple-100 dark:border-purple-800/50">
+                    <h4 className="font-bold text-purple-900 dark:text-purple-300 mb-2 flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4" />
+                      التقييم العام
+                    </h4>
+                    <p className="text-sm text-purple-800 dark:text-purple-400 leading-relaxed">
+                      {currentFeedback.summary}
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h4 className="font-bold text-sm text-slate-500">تفاصيل الإجابات</h4>
+                    {currentFeedback.feedback?.map((item: any, idx: number) => (
+                      <div key={idx} className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex items-start gap-4">
+                        <div className="h-8 w-8 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs">
+                          {item.question}
+                        </div>
+                        <div className="flex-grow">
+                          <div className="flex justify-between items-center mb-1">
+                            <p className="text-sm font-bold">{item.comment}</p>
+                            <Badge variant={item.score > 70 ? "success" : "warning"} className="text-[10px] h-5">
+                              {item.score} درجة
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          <div className="pt-4 border-t mt-4">
+            <Button onClick={() => setFeedbackModalOpen(false)} className="w-full">إغلاق</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Submit Modal */}
       <Dialog open={isSubmitModalOpen} onOpenChange={setIsSubmitModalOpen}>
@@ -87,15 +224,26 @@ export function StudentAssignments({ initialAssignments = [] }: { initialAssignm
               </div>
               <div className="space-y-2">
                 <Label htmlFor="file">رفع الملف</Label>
-                <Input id="file" type="file" required />
+                <Input 
+                  id="file" 
+                  type="file" 
+                  required 
+                  onChange={(e) => setSubmissionFile(e.target.files?.[0] || null)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="note">ملاحظة</Label>
-                <Textarea id="note" placeholder="أضف ملاحظة للمدرس (اختياري)" rows={3} />
+                <Textarea 
+                  id="note" 
+                  placeholder="أضف ملاحظة للمدرس (اختياري)" 
+                  rows={3} 
+                  value={submissionNote}
+                  onChange={(e) => setSubmissionNote(e.target.value)}
+                />
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
                 <Upload className="h-4 w-4 ml-2" />
-                تأكيد التسليم
+                {isSubmitting ? "جاري الرفع والتسليم..." : "تأكيد التسليم"}
               </Button>
             </form>
           )}
@@ -105,7 +253,7 @@ export function StudentAssignments({ initialAssignments = [] }: { initialAssignm
   )
 }
 
-function AssignmentCard({ assignment, onSubmit }: { assignment: StudentAssignment, onSubmit: () => void }) {
+function AssignmentCard({ assignment, onSubmit, onViewFeedback }: { assignment: StudentAssignment, onSubmit: () => void, onViewFeedback: () => void }) {
   const getDueStatus = (dateStr: string | Date) => {
     const dueDate = new Date(dateStr)
     const today = new Date()
@@ -130,17 +278,27 @@ function AssignmentCard({ assignment, onSubmit }: { assignment: StudentAssignmen
           <p className="text-sm text-slate-500 dark:text-slate-400">{assignment.group?.name || assignment.group?.subject}</p>
         </div>
 
-        <div className="flex items-center justify-between">
-          <StatusBadge 
-            status={assignment.status} 
-            grade={assignment.submission?.grade} 
-            maxGrade={assignment.maxGrade || 20} 
-          />
-          {(assignment.status === "pending" || assignment.status === "overdue") && (
-            <div className={cn("flex items-center gap-1 text-[11px] font-bold", dueInfo.color)}>
-              <dueInfo.icon className="h-3 w-3" />
-              {dueInfo.label}
-            </div>
+        <div className="flex flex-col space-y-3">
+          <div className="flex items-center justify-between">
+            <StatusBadge
+              status={assignment.status}
+              grade={assignment.submission?.grade}
+              maxGrade={assignment.maxGrade || 100}
+              gradedByAi={assignment.submission?.gradedByAi}
+            />
+            {(assignment.status === "pending" || assignment.status === "overdue") && (
+              <div className={cn("flex items-center gap-1 text-[11px] font-bold", dueInfo.color)}>
+                <dueInfo.icon className="h-3 w-3" />
+                {dueInfo.label}
+              </div>
+            )}
+          </div>
+
+          {assignment.status === "graded" && assignment.submission?.aiFeedback && (
+            <Button variant="outline" className="w-full text-xs h-9 bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 font-bold gap-2" onClick={onViewFeedback}>
+              <Sparkles className="h-3 w-3" />
+              عرض ملاحظات المعلم الذكي
+            </Button>
           )}
         </div>
 
@@ -154,17 +312,21 @@ function AssignmentCard({ assignment, onSubmit }: { assignment: StudentAssignmen
   )
 }
 
-function StatusBadge({ status, grade, maxGrade }: { status: StudentAssignment["status"], grade?: number | null, maxGrade?: number }) {
+function StatusBadge({ status, grade, maxGrade, gradedByAi }: { status: StudentAssignment["status"], grade?: number | null, maxGrade?: number, gradedByAi?: boolean }) {
   switch (status) {
     case "graded":
+      const gradeColor = (grade || 0) >= 70 ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300"
+        : (grade || 0) >= 50 ? "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300"
+          : "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-300";
+
       return (
         <div className="flex flex-col">
-          <Badge variant="info" className="gap-1 bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-300">
-            <CheckCircle2 className="h-3 w-3" />
-            تم التصحيح
-          </Badge>
-          <span className="text-sm font-bold mt-1 text-blue-700 dark:text-blue-400">
+          <Badge variant="outline" className={cn("gap-1 font-black", gradeColor)}>
+            {gradedByAi && <Sparkles className="h-3 w-3" />}
             {grade} / {maxGrade}
+          </Badge>
+          <span className="text-[10px] font-bold mt-1 text-slate-400 text-center">
+            تم التصحيح {gradedByAi ? "آلياً" : "يدوياً"}
           </span>
         </div>
       )
