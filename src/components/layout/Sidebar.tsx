@@ -12,6 +12,7 @@ import {
   ClipboardList,
   PenTool,
   ShieldCheck,
+  MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -37,6 +38,7 @@ const navigation: Record<Role, NavigationItem[]> = {
     { href: "/payments", label: "المصاريف", icon: Wallet },
     { href: "/teacher/schedule", label: "الجدول", icon: Calendar },
     { href: "/teacher/assistants", label: "المساعدين", icon: ShieldCheck },
+    { href: "/messages", label: "الرسائل", icon: MessageSquare },
     { href: "/teacher/settings", label: "الإعدادات", icon: Settings },
   ],
   student: [
@@ -44,11 +46,13 @@ const navigation: Record<Role, NavigationItem[]> = {
     { href: "/student/schedule", label: "جدولي", icon: Calendar },
     { href: "/student/assignments", label: "الواجبات", icon: ClipboardList },
     { href: "/student/exams", label: "الامتحانات", icon: PenTool },
+    { href: "/messages", label: "الرسائل", icon: MessageSquare },
   ],
   parent: [
     { href: "/parent", label: "لوحة التحكم", icon: LayoutDashboard },
     { href: "/parent/assignments", label: "الواجبات", icon: ClipboardList },
     { href: "/parent/exams", label: "الامتحانات", icon: PenTool },
+    { href: "/messages", label: "الرسائل", icon: MessageSquare },
   ],
 };
 
@@ -108,11 +112,6 @@ export function Sidebar({ role }: { role: Role; currentPath: string }) {
                       : "text-white/84 hover:bg-white/[0.045] hover:text-white",
                   )}
                 >
-                  {isActive ? (
-                    <>
-                      <div className="pointer-events-none absolute inset-y-3 end-3 w-1 rounded-full bg-secondary/90" />
-                    </>
-                  ) : null}
 
                   <span
                     className={cn(

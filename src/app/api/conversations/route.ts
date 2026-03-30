@@ -63,3 +63,24 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const user = await requireAuth();
+    const { contactId } = await request.json();
+
+    await db.message.updateMany({
+      where: {
+        tenantId: user.tenantId,
+        senderId: contactId,
+        receiverId: user.id,
+        readAt: null
+      },
+      data: { readAt: new Date() }
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

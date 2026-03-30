@@ -1,6 +1,10 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from "react"
+import { useSession } from "@/modules/auth/hooks/useSession"
+import { createBrowserClient } from "@supabase/ssr"
+
+
 import { Search, Send, Plus, User, MoreVertical, X, MessageSquare, ArrowRight } from "lucide-react"
 import { cn, getInitials } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -50,6 +54,7 @@ interface Contact {
 // --- Real API Data Instead of Mocks ---
 
 export default function MessagesPage() {
+  const { data: session } = useSession()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [loading, setLoading] = useState(true)
@@ -59,6 +64,43 @@ export default function MessagesPage() {
   const [searchContact, setSearchContact] = useState("")
   const [newMessageText, setNewMessageText] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  useEffect(() => {
+    if (!activeId) return
+    const channel = supabase
+      .channel(`messages-${activeId}`)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "Message",
+      }, (payload) => {
+        const newMsg = payload.new as any
+        
+        // تجاهل الرسائل اللي أنا بعتها (عشان مش تتضاف مرتين)
+        if (newMsg.senderId === (session?.user as any)?.id) return
+
+        setConversations(prev => prev.map(c =>
+          c.id === activeId ? {
+            ...c,
+            messages: [...c.messages, {
+              id: newMsg.id,
+              text: newMsg.text,
+              senderId: newMsg.senderId,
+              createdAt: new Date(newMsg.createdAt),
+            }],
+            lastMessage: newMsg.text,
+            lastMessageTime: new Date(newMsg.createdAt),
+          } : c
+        ))
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [activeId])
+
 
   const activeConversation = conversations.find(c => c.id === activeId)
   
@@ -136,10 +178,24 @@ export default function MessagesPage() {
     }
   }
 
+  const handleSelectConversation = (contactId: string | null) => {
+    setActiveId(contactId);
+    if (!contactId) return;
+    fetch('/api/conversations', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contactId })
+    }).then(() => {
+      setConversations(prev => prev.map(c =>
+        c.id === contactId ? { ...c, unreadCount: 0 } : c
+      ));
+    });
+  };
+
   const handleCreateConversation = (contact: Contact) => {
     const existing = conversations.find(c => c.participant.id === contact.id)
     if (existing) {
-      setActiveId(existing.id)
+      handleSelectConversation(existing.id)
     } else {
       const newConv: Conversation = {
         id: Math.random().toString(36).substr(2, 9),
@@ -150,7 +206,7 @@ export default function MessagesPage() {
         messages: [],
       }
       setConversations([newConv, ...conversations])
-      setActiveId(newConv.id)
+      handleSelectConversation(newConv.id)
     }
     setIsNewModalOpen(false)
   }
@@ -203,7 +259,7 @@ export default function MessagesPage() {
               {conversations.map((c) => (
                 <div
                   key={c.id}
-                  onClick={() => setActiveId(c.id)}
+                  onClick={() => handleSelectConversation(c.id)}
                   className={cn(
                     "p-4 flex gap-3 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/50 relative",
                     activeId === c.id && "bg-primary/5 dark:bg-sky-400/5"
@@ -249,7 +305,7 @@ export default function MessagesPage() {
             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-950 z-10">
               <div className="flex items-center gap-3">
                 {isMobileView && (
-                  <Button variant="ghost" className="p-0 h-8 w-8" onClick={() => setActiveId(null)}>
+                  <Button variant="ghost" className="p-0 h-8 w-8" onClick={() => handleSelectConversation(null)}>
                     <ArrowRight className="h-5 w-5" />
                   </Button>
                 )}
