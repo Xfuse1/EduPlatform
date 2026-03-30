@@ -24,12 +24,17 @@ export function AppShell({
       { href: "/teacher/students", label: "الطلاب" },
       { href: "/attendance", label: "الحضور" },
       { href: "/payments", label: "المصاريف" },
+      { href: "/messages", label: "الرسائل" },
     ],
     student: [
       { href: "/student", label: "الرئيسية" },
       { href: "/student/schedule", label: "جدولي" },
+      { href: "/messages", label: "الرسائل" },
     ],
-    parent: [{ href: "/parent", label: "أبنائي" }],
+    parent: [
+      { href: "/parent", label: "أبنائي" },
+      { href: "/messages", label: "الرسائل" },
+    ],
   } as const;
 
   return (
