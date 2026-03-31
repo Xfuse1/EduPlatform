@@ -110,7 +110,7 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
             <div className="space-y-6">
               <div className="mx-auto flex aspect-square w-full max-w-[200px] items-center justify-center rounded-2xl bg-white p-4 shadow-inner ring-1 ring-slate-200">
                 {session.qrToken ? (
-                  <QRCodeSVG size={180} value={session.qrToken} />
+                  <QRCodeSVG size={180} value={`${typeof window !== "undefined" ? window.location.origin : ""}/checkin?token=${session.qrToken}`} />
                 ) : (
                   <p className="text-sm text-slate-400">انتهت صلاحية الـ QR</p>
                 )}
