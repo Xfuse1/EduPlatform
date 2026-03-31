@@ -43,6 +43,7 @@ export async function sendOTP(formData: FormData): Promise<ActionResult> {
       httpOnly: true,
       sameSite: "lax",
       path: "/",
+      secure: process.env.NODE_ENV === "production",
       expires: new Date(Date.now() + 10 * 60 * 1000),
     });
 
@@ -88,6 +89,7 @@ export async function verifyOTPAction(formData: FormData): Promise<ActionResult>
       httpOnly: true,
       sameSite: "lax",
       path: "/",
+      secure: process.env.NODE_ENV === "production",
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
     cookieStore.delete("otp-phone");
