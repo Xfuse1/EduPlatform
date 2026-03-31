@@ -50,7 +50,7 @@ const findTenantByHost = cache(async (host: string): Promise<ResolvedTenant> => 
     .replace(":3001", "");
 
   try {
-    if (!subdomain || SPECIAL_SUBDOMAINS.has(subdomain)) {
+    if (!subdomain || SPECIAL_SUBDOMAINS.has(subdomain) || subdomain.includes("vercel")) {
       const defaultTenant = await db.tenant.findFirst({
         where: {
           isActive: true,
