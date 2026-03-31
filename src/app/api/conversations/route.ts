@@ -4,8 +4,7 @@ import { requireAuth } from "@/lib/auth";
 
 export async function GET() {
   try {
-    return NextResponse.json({ debug: "success", reach: true });
-    // const user = await requireAuth();
+    const user = await requireAuth();
 
     // Fetch all messages where user is sender or receiver
     const messages = await db.message.findMany({
