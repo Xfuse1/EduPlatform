@@ -80,10 +80,12 @@ export async function sendOTP(phone: string) {
 
     return { success: true as const };
   } catch (error) {
-    console.error("DB sendOTP failed, using mock:", error);
-    console.log(`OTP for ${phone}: ${DEV_OTP_CODE}`);
-
-    return { success: true as const };
+    if (process.env.NODE_ENV !== "production") {
+      console.error("DB sendOTP failed, using mock:", error);
+      console.log(`OTP for ${phone}: ${DEV_OTP_CODE}`);
+      return { success: true as const };
+    }
+    throw error;
   }
 }
 
@@ -183,19 +185,22 @@ export async function verifyOTP(phone: string, code: string): Promise<VerifyOTPR
       token,
     };
   } catch (error) {
-    console.error("DB verifyOTP failed, using mock:", error);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("DB verifyOTP failed, using mock:", error);
 
-    if (code !== DEV_OTP_CODE) {
-      throw new Error("OTP_INVALID");
+      if (code !== DEV_OTP_CODE) {
+        throw new Error("OTP_INVALID");
+      }
+
+      const mockUser = getMockUserByPhone(phone);
+      const fallbackToken = `mock-session-${mockUser.role}`;
+
+      return {
+        user: mockUser,
+        token: fallbackToken,
+      };
     }
-
-    const mockUser = getMockUserByPhone(phone);
-    const fallbackToken = `mock-session-${mockUser.role}`;
-
-    return {
-      user: mockUser,
-      token: fallbackToken,
-    };
+    throw error;
   }
 }
 
@@ -237,8 +242,12 @@ export async function getCurrentUser() {
 
     return toSessionUser(session.user);
   } catch (error) {
-    console.error("DB getCurrentUser failed, using mock:", error);
-    return getFallbackUserByToken(token);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("DB getCurrentUser failed, using mock:", error);
+      return getFallbackUserByToken(token);
+    }
+    console.error("DB getCurrentUser failed:", error);
+    return null;
   }
 }
 
