@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  outputFileTracingRoot: __dirname,
+  output: "standalone",
   experimental: {
     serverActions: {
       bodySizeLimit: "2mb",
