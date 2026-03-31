@@ -1,6 +1,6 @@
 export const MOCK_TENANT = {
-  id: "1",
-  slug: "ahmed",
+  id: "t1",
+  slug: "roaa",
   name: "أ/ أحمد حسن",
   logoUrl: null,
   themeColor: "#1A5276",
@@ -22,28 +22,28 @@ export type MockSessionUser = {
 
 export const MOCK_USERS: Record<MockRole, MockSessionUser> = {
   TEACHER: {
-    id: "teacher-1",
+    id: "u1",
     tenantId: MOCK_TENANT.id,
     name: "أ/ أحمد حسن",
     phone: "01000000000",
     role: "TEACHER",
   },
   STUDENT: {
-    id: "student-1",
+    id: "u2",
     tenantId: MOCK_TENANT.id,
     name: "محمد أحمد",
     phone: "01000000001",
     role: "STUDENT",
   },
   PARENT: {
-    id: "parent-1",
+    id: "u3",
     tenantId: MOCK_TENANT.id,
     name: "ولي أمر محمد",
     phone: "01000000002",
     role: "PARENT",
   },
   ASSISTANT: {
-    id: "assistant-1",
+    id: "u4",
     tenantId: MOCK_TENANT.id,
     name: "الأستاذة سارة",
     phone: "01000000003",
