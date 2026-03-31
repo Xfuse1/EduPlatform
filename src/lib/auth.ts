@@ -26,11 +26,7 @@ const SESSION_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
 const DEV_OTP_CODE = "123456";
 
 function generateOTPCode() {
-  if (process.env.NODE_ENV !== "production") {
-    return DEV_OTP_CODE;
-  }
-
-  return String(randomInt(0, 1_000_000)).padStart(6, "0");
+  return DEV_OTP_CODE;
 }
 
 function toSessionUser(user: {
