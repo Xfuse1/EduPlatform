@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "2mb",
     },
   },
+  outputFileTracingIncludes: {
+    "/*": ["./src/app/(tenant)/**/*"],
+  },
 };
 
 export default nextConfig;
