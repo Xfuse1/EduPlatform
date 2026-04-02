@@ -25,6 +25,7 @@ type StudentItem = {
   studentPhone: string;
   parentName: string;
   parentPhone: string;
+  parentId?: string;
   grade: string;
   gradeLevel: string;
   group: string;
@@ -177,7 +178,10 @@ export function StudentsPageClient({ students, groups }: { students: StudentItem
                 <Button 
                   variant="outline" 
                   className="flex-1 gap-2 rounded-xl text-xs font-bold border-slate-200 dark:border-slate-800"
-                  onClick={() => window.location.href = `/messages?contact=${student.id}`}
+                  onClick={() => {
+                   const targetId = student.parentId ?? student.parentPhone;
+                   window.location.href = `/messages?contact=${targetId}`;
+                  }}
                 >
                   <MessageSquare className="h-3.5 w-3.5" />
                   راسل ولي الأمر
