@@ -148,6 +148,7 @@ export const getStudentsList = cache(async (tenantId: string) => {
           include: {
             parent: {
               select: {
+                id: true,
                 name: true,
                 phone: true,
               },
@@ -195,6 +196,7 @@ export const getStudentsList = cache(async (tenantId: string) => {
         studentPhone: student.phone.startsWith("student-") ? "" : student.phone,
         parentName: parentLink?.parent.name ?? student.parentName ?? "",
         parentPhone: parentLink?.parent.phone ?? student.parentPhone ?? "",
+        parentId: parentLink?.parent.id ?? undefined,
         grade: student.gradeLevel ?? "غير محدد",
         gradeLevel: student.gradeLevel ?? "",
         group: student.groupStudents.map((enrollment) => enrollment.group.name).join(" - ") || "غير محدد",

@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from "react"
+import { useSearchParams } from "next/navigation"
 import { useSession } from "@/modules/auth/hooks/useSession"
 import { createBrowserClient } from "@supabase/ssr"
 
@@ -55,6 +56,8 @@ interface Contact {
 
 export default function MessagesPage() {
   const { data: session } = useSession()
+  const searchParams = useSearchParams()
+  const contactParam = searchParams.get("contact")
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [loading, setLoading] = useState(true)
@@ -124,6 +127,25 @@ export default function MessagesPage() {
       setLoading(false);
     });
   }, []);
+
+  useEffect(() => {
+    if (!contactParam || loading || contacts.length === 0) return;
+
+    // دور لو في محادثة موجودة مع الـ contact ده
+    const existing = conversations.find(
+      c => c.participant.id === contactParam
+    );
+
+    if (existing) {
+      setActiveId(existing.id);
+    } else {
+      // دور على الـ contact في قائمة جهات الاتصال
+      const contact = contacts.find(c => c.id === contactParam);
+      if (contact) {
+        handleCreateConversation(contact);
+      }
+    }
+  }, [contactParam, loading, contacts]);
 
   useEffect(() => {
     const handleResize = () => setIsMobileView(window.innerWidth < 768)
