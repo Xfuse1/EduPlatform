@@ -26,7 +26,11 @@ export default function CheckinPage() {
 
       if (data.success) {
         setStatus("success");
-        setMessage(`✅ تم تسجيل حضور ${data.studentName} بنجاح`);
+        setMessage(
+          data.isGuest 
+            ? `✅ تم تسجيل حضور ${data.studentName} كزائر`
+            : `✅ تم تسجيل حضور ${data.studentName} بنجاح`
+        );
       } else if (data.code === "PHONE_REQUIRED") {
         setStatus("phone-required");
       } else {

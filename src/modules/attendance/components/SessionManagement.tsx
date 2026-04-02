@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Clock, QrCode, RefreshCcw, X } from "lucide-react";
+import { Check, Clock, QrCode, RefreshCcw, User, X } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
 
@@ -13,7 +13,7 @@ type Student = {
   name: string;
   phone: string;
   status: "PRESENT" | "ABSENT" | "LATE";
-  method: "QR" | "MANUAL" | "GPS" | "CODE";
+  method: "QR" | "MANUAL" | "GPS" | "CODE" | "QR_GUEST";
   markedAt: Date | string | null;
 };
 
@@ -142,9 +142,16 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
           <div className="space-y-3">
             {session.students.map((student) => (
               <div key={student.id} className="flex items-center justify-between rounded-xl border p-3 dark:border-slate-800">
-                <div>
-                  <p className="font-bold">{student.name}</p>
-                  <p className="text-xs text-slate-500">{student.phone}</p>
+                <div className="flex items-center gap-2">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-bold">{student.name}</p>
+                      {student.method === 'QR_GUEST' && (
+                        <User className="h-4 w-4 text-amber-500" />
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500">{student.phone}</p>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-1.5 sm:gap-2">
@@ -186,7 +193,7 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
                   </Button>
                   {(student.status === "PRESENT" || student.status === "LATE") && (
                     <span className="text-[9px] sm:text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
-                      {student.method === 'QR' ? 'تلقائي' : 'يدوي'}
+                      {student.method === 'QR' ? 'تلقائي' : student.method === 'QR_GUEST' ? 'زائر' : 'يدوي'}
                     </span>
                   )}
                 </div>

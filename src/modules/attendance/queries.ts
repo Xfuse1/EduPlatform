@@ -230,13 +230,30 @@ export const getSessionWithStudents = cache(async (sessionId: string) => {
 
     if (!session) return null;
 
-    const students = session.group.groupStudents.map((gs) => {
-      const record = session.attendances.find((a) => a.studentId === gs.studentId);
+    // Get all student IDs involved (either in group or in attendance)
+    const groupStudentIds = new Set(session.group.groupStudents.map((gs) => gs.studentId));
+    const attendanceStudentIds = new Set(session.attendances.map((a) => a.studentId));
+    const allStudentIds = new Set([...groupStudentIds, ...attendanceStudentIds]);
+
+    // Fetch details for students who are not in the group but are in attendance (guests)
+    const guestIds = [...attendanceStudentIds].filter(id => !groupStudentIds.has(id));
+    const guestStudents = guestIds.length > 0 
+      ? await db.user.findMany({
+          where: { id: { in: guestIds } },
+          select: { id: true, name: true, phone: true }
+        })
+      : [];
+
+    // Map all students
+    const students = [...allStudentIds].map((id) => {
+      const gs = session.group.groupStudents.find((s) => s.studentId === id);
+      const record = session.attendances.find((a) => a.studentId === id);
+      const guestInfo = guestStudents.find((s) => s.id === id);
 
       return {
-        id: gs.student.id,
-        name: gs.student.name,
-        phone: gs.student.phone,
+        id: id,
+        name: gs ? gs.student.name : (guestInfo ? guestInfo.name : "طالب غير معروف"),
+        phone: gs ? gs.student.phone : (guestInfo ? guestInfo.phone : ""),
         status: record ? record.status : "ABSENT",
         method: record ? record.method : "MANUAL",
         markedAt: record ? record.markedAt : null,
