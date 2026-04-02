@@ -60,21 +60,20 @@ export async function POST(req: NextRequest) {
     if (session.qrExpiresAt && session.qrExpiresAt < now) {
       return NextResponse.json({ error: "انتهت صلاحية رمز QR" }, { status: 400 });
     }
-    if (session.group.groupStudents.length === 0) {
-      return NextResponse.json({ error: "أنت غير مسجل في هذه المجموعة" }, { status: 403 });
-    }
+    const isEnrolled = session.group.groupStudents.length > 0;
+    const attendanceMethod = isEnrolled ? "QR" : "QR_GUEST";
 
     // تسجيل الحضور
     await db.attendance.upsert({
       where: { sessionId_studentId: { sessionId: session.id, studentId: student.id } },
-      update: { status: "PRESENT", method: "QR", markedAt: now },
+      update: { status: "PRESENT", method: attendanceMethod, markedAt: now },
       create: {
         tenantId: session.tenantId,
         sessionId: session.id,
         groupId: session.groupId,
         studentId: student.id,
         status: "PRESENT",
-        method: "QR",
+        method: attendanceMethod,
         markedAt: now,
       },
     });
@@ -98,7 +97,11 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ success: true, studentName: student.name });
+    return NextResponse.json({ 
+      success: true, 
+      studentName: student.name,
+      isGuest: !isEnrolled 
+    });
 
   } catch (error) {
     console.error("QR Check-in failed:", error);
