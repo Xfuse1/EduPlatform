@@ -56,6 +56,7 @@ enum AttendanceMethod {
   QR
   GPS
   CODE
+  QR_GUEST
 }
 
 enum PaymentStatus {
