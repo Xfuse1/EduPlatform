@@ -26,6 +26,7 @@ interface StudentAssignment {
     fileUrl?: string | null,
     note?: string | null,
     aiFeedback?: string | null,
+    teacherComment?: string | null,
     gradedByAi?: boolean
   }
   maxGrade?: number
@@ -294,11 +295,28 @@ function AssignmentCard({ assignment, onSubmit, onViewFeedback }: { assignment: 
             )}
           </div>
 
-          {assignment.status === "graded" && assignment.submission?.aiFeedback && (
-            <Button variant="outline" className="w-full text-xs h-9 bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 font-bold gap-2" onClick={onViewFeedback}>
-              <Sparkles className="h-3 w-3" />
-              عرض ملاحظات المعلم الذكي
-            </Button>
+          {assignment.status === "graded" && (
+            <div className="space-y-2">
+              {/* تعليق المعلم */}
+              {assignment.submission?.teacherComment && (
+                <div className="mt-2 p-3 bg-green-950 border border-green-700 rounded-xl">
+                  <p className="text-xs text-green-400 font-bold mb-1">💬 تعليق المعلم:</p>
+                  <p className="text-sm text-green-200">{assignment.submission.teacherComment}</p>
+                </div>
+              )}
+
+              {/* تعليق الذكاء الاصطناعي */}
+              {assignment.submission?.aiFeedback && (
+                <Button 
+                  variant="outline" 
+                  className="w-full text-xs h-9 bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 font-bold gap-2" 
+                  onClick={onViewFeedback}
+                >
+                  <Sparkles className="h-3 w-3" />
+                  عرض ملاحظات المعلم الذكي ✨
+                </Button>
+              )}
+            </div>
           )}
         </div>
 

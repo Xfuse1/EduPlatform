@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
 import { StudentExamsPageClient } from "@/modules/exams/components/StudentExamsPageClient";
+import { getExamsByStudent } from "@/modules/exams/queries";
 
 export default async function StudentExamsPage() {
   const tenant = await requireTenant();
@@ -15,6 +16,6 @@ export default async function StudentExamsPage() {
     redirect(user.role === "TEACHER" ? "/teacher" : "/parent");
   }
 
-  // Pass empty mock data until backend is ready
-  return <StudentExamsPageClient initialExams={[]} />;
+  const exams = await getExamsByStudent(tenant.id, user.id);
+  return <StudentExamsPageClient initialExams={exams} />;
 }

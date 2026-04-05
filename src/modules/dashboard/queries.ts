@@ -2,7 +2,7 @@ import { cache } from "react";
 
 import { db } from "@/lib/db";
 import { MOCK_PARENT_NEXT_SESSION, MOCK_STUDENT_NEXT_SESSION, MOCK_TENANT } from "@/lib/mock-data";
-import { getAssignmentsByParent } from "@/modules/assignments/queries";
+import { getAssignmentsByParent, getAssignmentsByStudent } from "@/modules/assignments/queries";
 import { getAttendanceOverview, getStudentAttendanceSnapshot, getTodaySessions } from "@/modules/attendance/queries";
 import { getRevenueSummary, getStudentPaymentSnapshot } from "@/modules/payments/queries";
 import { getParentChildren, getStudentCountSummary, getStudentProfile } from "@/modules/students/queries";
@@ -202,29 +202,32 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
 
 export const getStudentDashboardData = cache(async (tenantId: string, studentId: string) => {
   try {
-    const [profile, attendance, payment] = await Promise.all([
+    const [profile, attendance, payment, assignments] = await Promise.all([
       getStudentProfile(tenantId, studentId),
       getStudentAttendanceSnapshot(tenantId, studentId),
       getStudentPaymentSnapshot(tenantId, studentId),
+      getAssignmentsByStudent(studentId),
     ]);
 
     return {
       profile,
       attendance,
       payment,
+      assignments,
       nextSession: getNextSessionFromEnrollments(profile?.enrollments ?? []) ?? MOCK_STUDENT_NEXT_SESSION,
     };
   } catch (error) {
     console.error("DB getStudentDashboardData failed, using fallback:", error);
   }
 
-  const [profile, attendance, payment] = await Promise.all([
+  const [profile, attendance, payment, assignments] = await Promise.all([
     getStudentProfile(tenantId, studentId),
     getStudentAttendanceSnapshot(tenantId, studentId),
     getStudentPaymentSnapshot(tenantId, studentId),
+    getAssignmentsByStudent(studentId),
   ]);
 
-  return { profile, attendance, payment, nextSession: MOCK_STUDENT_NEXT_SESSION };
+  return { profile, attendance, payment, assignments, nextSession: MOCK_STUDENT_NEXT_SESSION };
 });
 
 export const getParentDashboardData = cache(async (tenantId: string, parentId: string) => {

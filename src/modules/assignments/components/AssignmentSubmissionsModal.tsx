@@ -21,6 +21,7 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
     const [loading, setLoading] = useState(false);
     const [gradingId, setGradingId] = useState<string | null>(null);
     const [gradeValue, setGradeValue] = useState<string>("");
+    const [teacherComment, setTeacherComment] = useState<string>("");
     const [aiGradingSub, setAiGradingSub] = useState<any>(null);
 
     useEffect(() => {
@@ -42,22 +43,23 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
             return;
         }
 
-        const res = await gradeSubmission(submissionId, numGrade);
+        const res = await gradeSubmission(submissionId, numGrade, undefined, teacherComment);
         if (res.success) {
-            showToast.success("تم تحديث الدرجة بنجاح");
+            showToast.success("تم التحديث بنجاح");
             
             // update local state
             setAssignment((prev: any) => ({
                 ...prev,
                 submissions: prev.submissions.map((sub: any) => 
-                    sub.id === submissionId ? { ...sub, grade: numGrade } : sub
+                    sub.id === submissionId ? { ...sub, grade: numGrade, teacherComment } : sub
                 )
             }));
             
             setGradingId(null);
             setGradeValue("");
+            setTeacherComment("");
         } else {
-            showToast.error("حدث خطأ أثناء تحديث الدرجة");
+            showToast.error("حدث خطأ أثناء التحديث");
         }
     };
 
@@ -110,32 +112,45 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
                                                 {sub.note}
                                             </p>
                                         )}
-                                        {/* File url mockup since it's just a string */}
                                         {sub.fileUrl && (
-                                            <a href={sub.fileUrl} target="_blank" rel="noreferrer" className="block text-xs text-primary hover:underline font-bold">
+                                            <a href={sub.fileUrl} target="_blank" rel="noreferrer" className="block text-xs text-primary hover:underline font-bold mb-2">
                                                 عرض المرفق
                                             </a>
+                                        )}
+                                        {sub.teacherComment && (
+                                            <p className="text-sm text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800/50 inline-block">
+                                                <span className="font-bold text-emerald-400 text-xs ml-1">تعليق المعلم:</span>
+                                                {sub.teacherComment}
+                                            </p>
                                         )}
                                     </div>
 
                                     <div className="flex flex-col items-end gap-2 shrink-0">
                                         <div className="flex items-center gap-3 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-100 dark:border-slate-700">
                                             {gradingId === sub.id ? (
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex flex-col gap-2 items-end">
+                                                    <div className="flex items-center gap-2">
+                                                        <Input 
+                                                            type="number" 
+                                                            className="w-20 text-center font-bold" 
+                                                            placeholder="الدرجة"
+                                                            value={gradeValue}
+                                                            onChange={(e) => setGradeValue(e.target.value)}
+                                                            autoFocus
+                                                        />
+                                                        <Button className="h-9 w-9 bg-emerald-500 hover:bg-emerald-600 !p-0" onClick={() => handleSaveGrade(sub.id)}>
+                                                            <Check className="h-4 w-4 text-white" />
+                                                        </Button>
+                                                        <Button variant="outline" className="h-9 w-9 text-slate-400 hover:text-slate-600 !p-0" onClick={() => setGradingId(null)}>
+                                                            <X className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
                                                     <Input 
-                                                        type="number" 
-                                                        className="w-20 text-center font-bold" 
-                                                        placeholder="الدرجة"
-                                                        value={gradeValue}
-                                                        onChange={(e) => setGradeValue(e.target.value)}
-                                                        autoFocus
+                                                        className="w-full text-xs font-medium" 
+                                                        placeholder="أضف تعليقاً للمعلم..."
+                                                        value={teacherComment}
+                                                        onChange={(e) => setTeacherComment(e.target.value)}
                                                     />
-                                                    <Button className="h-9 w-9 bg-emerald-500 hover:bg-emerald-600 !p-0" onClick={() => handleSaveGrade(sub.id)}>
-                                                        <Check className="h-4 w-4 text-white" />
-                                                    </Button>
-                                                    <Button variant="outline" className="h-9 w-9 text-slate-400 hover:text-slate-600 !p-0" onClick={() => setGradingId(null)}>
-                                                        <X className="h-4 w-4" />
-                                                    </Button>
                                                 </div>
                                             ) : (
                                                 <>
@@ -148,6 +163,7 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
                                                             )}
                                                             <Badge variant={sub.grade >= 70 ? "success" : sub.grade >= 50 ? "warning" : "destructive"} className="font-bold cursor-pointer" onClick={() => {
                                                                 setGradeValue(sub.grade.toString());
+                                                                setTeacherComment(sub.teacherComment || "");
                                                                 setGradingId(sub.id);
                                                             }}>
                                                                 {sub.grade} درجة
@@ -156,6 +172,7 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
                                                     ) : (
                                                         <Button variant="outline" className="font-bold text-xs h-8 px-3" onClick={() => {
                                                             setGradeValue("");
+                                                            setTeacherComment(sub.teacherComment || "");
                                                             setGradingId(sub.id);
                                                         }}>
                                                             إضافة درجة

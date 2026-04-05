@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Plus, Users, Search, ClipboardCheck, Clock, CheckCircle } from "lucide-react";
+import { Calendar, Plus, Users, Search, ClipboardCheck, Clock, CheckCircle, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ interface Exam {
   group: { name: string };
   status: "upcoming" | "active" | "completed";
   _count: { submissions: number };
+  questions?: any[];
 }
 
 interface ExamsPageClientProps {
@@ -33,6 +34,7 @@ export function ExamsPageClient({ initialExams = [], groups }: ExamsPageClientPr
   const [filterGroupId, setFilterGroupId] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [examToEdit, setExamToEdit] = useState<any>(null);
 
   const filtered = exams.filter((a) => {
     const matchesGroup = filterGroupId === "all" || a.groupId === filterGroupId;
@@ -40,8 +42,36 @@ export function ExamsPageClient({ initialExams = [], groups }: ExamsPageClientPr
     return matchesGroup && matchesSearch;
   });
 
-  const handleAdd = (newExam: any) => {
-      setExams([newExam, ...exams]);
+  const handleSuccess = (exam: any) => {
+      if (examToEdit) {
+          setExams(exams.map(e => e.id === exam.id ? exam : e));
+      } else {
+          setExams([exam, ...exams]);
+      }
+      setExamToEdit(null);
+  };
+
+  const openEdit = (exam: any) => {
+      setExamToEdit(exam);
+      setIsModalOpen(true);
+  };
+
+  const openAdd = () => {
+      setExamToEdit(null);
+      setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("هل أنت متأكد من حذف هذا الامتحان؟")) return;
+    
+    try {
+        const res = await fetch(`/api/exams/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            setExams(exams.filter(e => e.id !== id));
+        }
+    } catch (error) {
+        console.error("Failed to delete exam:", error);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -64,7 +94,7 @@ export function ExamsPageClient({ initialExams = [], groups }: ExamsPageClientPr
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">إدارة الامتحانات</h1>
           <p className="mt-2 text-slate-600 dark:text-slate-300">قم بتنظيم وجدولة اختبارات المجموعات وتقييم أداء الطلاب.</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} className="min-h-12 px-6">
+        <Button onClick={openAdd} className="min-h-12 px-6">
           <Plus className="me-2 h-5 w-5" />
           إضافة امتحان جديد
         </Button>
@@ -114,6 +144,14 @@ export function ExamsPageClient({ initialExams = [], groups }: ExamsPageClientPr
                       {exam.group.name}
                   </div>
                 </div>
+                <div className="flex gap-2">
+                   <Button variant="ghost" className="h-8 w-8 p-0 text-slate-400 hover:text-primary" onClick={() => openEdit(exam)}>
+                      <Pencil className="h-4 w-4" />
+                   </Button>
+                   <Button variant="ghost" className="h-8 w-8 p-0 text-slate-400 hover:text-red-500" onClick={() => handleDelete(exam.id)}>
+                      <Trash2 className="h-4 w-4" />
+                   </Button>
+                </div>
               </div>
 
               <div className="flex flex-wrap gap-3 text-sm font-medium pt-2">
@@ -156,9 +194,13 @@ export function ExamsPageClient({ initialExams = [], groups }: ExamsPageClientPr
 
       <AddExamModal 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        onClose={() => {
+            setIsModalOpen(false);
+            setExamToEdit(null);
+        }} 
         groups={groups}
-        onAdd={handleAdd}
+        onAdd={handleSuccess}
+        examToEdit={examToEdit}
       />
     </div>
   );
