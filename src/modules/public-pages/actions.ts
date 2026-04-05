@@ -1,22 +1,15 @@
 'use server';
 
-import { randomUUID } from "crypto";
-
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
-import { buildPhoneConflictMessage, findUserByPhone, isPhoneUniqueConstraintError } from "@/lib/user-phone";
 import { publicRegistrationSchema } from "@/modules/public-pages/validations";
 
 type RegistrationResult = {
   success: boolean;
   message: string;
 };
-
-function createInternalStudentPhone() {
-  return `student-${randomUUID()}`;
-}
 
 export async function registerStudent(formData: FormData): Promise<RegistrationResult> {
   const tenant = await requireTenant();
@@ -38,128 +31,121 @@ export async function registerStudent(formData: FormData): Promise<RegistrationR
 
   const { studentName, parentName, parentPhone, grade, groupId } = parsed.data;
 
-  const group = await db.group.findFirst({
-    where: {
-      id: groupId,
-      tenantId: tenant.id,
-      isActive: true,
-    },
-    select: {
-      id: true,
-      maxCapacity: true,
-      students: {
-        where: {
-          status: {
-            in: ["ACTIVE", "WAITLIST"],
+  try {
+    const group = await db.group.findFirst({
+      where: {
+        id: groupId,
+        tenantId: tenant.id,
+        isActive: true,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!group) {
+      return {
+        success: false,
+        message: "المجموعة المختارة غير متاحة",
+      };
+    }
+
+    const duplicateRegistration = await db.user.findFirst({
+      where: {
+        tenantId: tenant.id,
+        role: "STUDENT",
+        name: studentName,
+        parentPhone,
+        groupStudents: {
+          some: {
+            groupId,
           },
-        },
-        select: {
-          id: true,
         },
       },
-    },
-  });
+      select: {
+        id: true,
+      },
+    });
 
-  if (!group) {
-    return {
-      success: false,
-      message: "المجموعة المختارة غير متاحة",
-    };
-  }
+    if (duplicateRegistration) {
+      return {
+        success: false,
+        message: "هذا الطالب مسجل بالفعل في هذه المجموعة",
+      };
+    }
 
-  if (group.students.length >= group.maxCapacity) {
-    return {
-      success: false,
-      message: "المجموعة المختارة ممتلئة حاليًا",
-    };
-  }
-
-  const existingUser = await findUserByPhone(parentPhone);
-
-  if (existingUser && (existingUser.tenantId !== tenant.id || existingUser.role !== "PARENT")) {
-    return {
-      success: false,
-      message: buildPhoneConflictMessage(existingUser.role),
-    };
-  }
-
-  try {
-    await db.$transaction(async (transaction) => {
-      const parent = await transaction.user.upsert({
-        where: {
-          tenantId_phone: {
-            tenantId: tenant.id,
-            phone: parentPhone,
-          },
-        },
-        update: {
-          name: parentName,
-          parentName,
-          parentPhone,
-          isActive: true,
-        },
-        create: {
+    const parent = await db.user.upsert({
+      where: {
+        tenantId_phone: {
           tenantId: tenant.id,
           phone: parentPhone,
-          name: parentName,
-          role: "PARENT",
-          parentName,
-          parentPhone,
-          isActive: true,
         },
-        select: {
-          id: true,
-        },
-      });
-
-      const student = await transaction.user.create({
-        data: {
-          tenantId: tenant.id,
-          phone: createInternalStudentPhone(),
-          name: studentName,
-          role: "STUDENT",
-          gradeLevel: grade,
-          parentName,
-          parentPhone,
-          isActive: true,
-        },
-        select: {
-          id: true,
-        },
-      });
-
-      await transaction.parentStudent.create({
-        data: {
-          parentId: parent.id,
-          studentId: student.id,
-        },
-      });
-
-      await transaction.groupStudent.create({
-        data: {
-          groupId: group.id,
-          studentId: student.id,
-          status: "ACTIVE",
-        },
-      });
+      },
+      update: {
+        name: parentName,
+        role: "PARENT",
+        parentName,
+        parentPhone,
+        isActive: true,
+      },
+      create: {
+        tenantId: tenant.id,
+        phone: parentPhone,
+        name: parentName,
+        role: "PARENT",
+        parentName,
+        parentPhone,
+        isActive: true,
+      },
+      select: {
+        id: true,
+      },
     });
+
+    const student = await db.user.create({
+      data: {
+        tenantId: tenant.id,
+        phone: `${parentPhone}-${Date.now()}`,
+        name: studentName,
+        role: "STUDENT",
+        gradeLevel: grade,
+        parentName,
+        parentPhone,
+        isActive: true,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    await db.groupStudent.create({
+      data: {
+        groupId: group.id,
+        studentId: student.id,
+        status: "ACTIVE",
+      },
+    });
+
+    await db.parentStudent.create({
+      data: {
+        parentId: parent.id,
+        studentId: student.id,
+      },
+    });
+
+    revalidatePath("/");
+    revalidatePath("/register");
+
+    return {
+      success: true,
+      message: "تم التسجيل بنجاح! ✅",
+    };
   } catch (error) {
+    console.error("DB registerStudent failed:", error);
+
     return {
       success: false,
-      message: isPhoneUniqueConstraintError(error)
-        ? buildPhoneConflictMessage()
-        : "تعذر حفظ طلب التسجيل الآن",
+      message: "تعذر إتمام التسجيل حاليًا",
     };
   }
-
-  revalidatePath("/");
-  revalidatePath("/register");
-  revalidatePath("/teacher");
-  revalidatePath("/student");
-  revalidatePath("/parent");
-
-  return {
-    success: true,
-    message: "تم حفظ طلب التسجيل بنجاح وربطه ببيانات السنتر.",
-  };
 }

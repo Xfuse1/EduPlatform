@@ -1,6 +1,7 @@
 node_modules
 .next
 .env
+.env.local
 .codex-dev.err
 .codex-dev.log
 tsconfig.tsbuildinfo

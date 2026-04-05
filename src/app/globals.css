@@ -6,13 +6,6 @@
 
 :root {
   color-scheme: light;
-  --brand-ink: #132238;
-  --brand-petrol: #1a5276;
-  --brand-sky: #2e86c1;
-  --brand-teal: #0f766e;
-  --brand-amber: #d39b21;
-  --surface-base: #f6f8fb;
-  --surface-panel: rgba(255, 255, 255, 0.88);
   --chart-card-bg: #ffffff;
   --chart-grid: #cbd5e1;
   --chart-text: #334155;
@@ -28,15 +21,8 @@ html {
 }
 
 body {
-  @apply min-h-screen antialiased transition-colors duration-300;
+  @apply min-h-screen bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100;
   font-family: "Cairo", "Tajawal", sans-serif;
-  background:
-    radial-gradient(circle at top, rgba(46, 134, 193, 0.12), transparent 24%),
-    linear-gradient(180deg, #f8fbff 0%, #eef5fb 40%, #f8fafc 100%);
-}
-
-body::selection {
-  background: rgba(46, 134, 193, 0.2);
 }
 
 * {
@@ -45,7 +31,6 @@ body::selection {
 
 .dark {
   color-scheme: dark;
-  --surface-panel: rgba(15, 23, 42, 0.82);
   --chart-card-bg: #1e293b;
   --chart-grid: #334155;
   --chart-text: #e2e8f0;
@@ -54,13 +39,6 @@ body::selection {
   --chart-primary: #5dade2;
   --chart-primary-fill: rgba(93, 173, 226, 0.18);
   --chart-success: #58d68d;
-}
-
-.dark body {
-  background:
-    radial-gradient(circle at top, rgba(46, 134, 193, 0.12), transparent 20%),
-    radial-gradient(circle at 85% 18%, rgba(15, 118, 110, 0.12), transparent 16%),
-    linear-gradient(180deg, #07101d 0%, #0d1727 42%, #111827 100%);
 }
 
 a,

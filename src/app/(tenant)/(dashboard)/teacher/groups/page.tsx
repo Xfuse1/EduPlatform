@@ -3,10 +3,9 @@ export const dynamic = "force-dynamic";
 import { redirect } from "next/navigation";
 
 import { requireAuth } from "@/lib/auth";
-import { getTeacherScopeUserId } from "@/lib/teacher-access";
 import { requireTenant } from "@/lib/tenant";
 import { GroupsPageClient } from "@/modules/groups/components/GroupsPageClient";
-import { getGroupsList } from "@/modules/groups/queries";
+import { getOpenGroups } from "@/modules/public-pages/queries";
 
 export default async function TeacherGroupsPage() {
   const tenant = await requireTenant();
@@ -16,8 +15,7 @@ export default async function TeacherGroupsPage() {
     redirect(user.role === "STUDENT" ? "/student" : "/parent");
   }
 
-  const teacherScopeUserId = getTeacherScopeUserId(tenant, user);
-  const groups = await getGroupsList(tenant.id, teacherScopeUserId ?? undefined);
+  const groups = await getOpenGroups(tenant.id);
 
   return <GroupsPageClient initialGroups={groups} />;
 }

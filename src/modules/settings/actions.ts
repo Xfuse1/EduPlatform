@@ -1,55 +1,78 @@
-'use server'
+'use server';
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
-import { ROUTES } from '@/config/routes'
-import { requireAuth } from '@/lib/auth'
-import { db } from '@/lib/db'
-import { requireTenant } from '@/lib/tenant'
+import { db } from "@/lib/db";
+import { requireTenant } from "@/lib/tenant";
 
-import { parseTenantSettingsFormData } from './validations'
+const settingsSchema = z.object({
+  name: z.string().trim().min(2, "الاسم يجب أن يكون حرفين على الأقل"),
+  themeColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "لون غير صحيح").default("#1A5276"),
+  phone: z.union([z.string().trim().regex(/^01[0-9]{9}$/, "رقم الهاتف غير صحيح"), z.literal("")]).optional(),
+  region: z.string().trim().optional(),
+  bio: z.string().trim().max(300, "النبذة يجب ألا تتجاوز 300 حرف").optional(),
+  subjects: z.array(z.string().trim().min(1)).optional(),
+});
 
-function assertCanManageSettings(role: string) {
-  if (role !== 'TEACHER' && role !== 'CENTER_ADMIN') {
-    throw new Error('ليس لديك صلاحية لتعديل إعدادات المؤسسة')
+type SettingsPayload = {
+  name: string;
+  themeColor: string;
+  phone?: string;
+  region?: string;
+  bio?: string;
+  subjects?: string[];
+};
+
+type UpdateTenantSettingsResult = {
+  success: boolean;
+  message?: string;
+};
+
+export async function updateTenantSettings(data: SettingsPayload): Promise<UpdateTenantSettingsResult> {
+  const tenant = await requireTenant();
+  const parsed = settingsSchema.safeParse(data);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: parsed.error.issues[0]?.message ?? "تعذر حفظ الإعدادات",
+    };
   }
-}
 
-function revalidateTenantSettingsPaths() {
-  revalidatePath(ROUTES.center.dashboard)
-  revalidatePath(ROUTES.center.settings)
-  revalidatePath(ROUTES.center.schedule)
-  revalidatePath(ROUTES.center.payments)
-  revalidatePath(ROUTES.teacher.dashboard)
-  revalidatePath(ROUTES.teacher.settings)
-  revalidatePath(ROUTES.teacher.schedule)
-  revalidatePath(ROUTES.teacher.groups)
-  revalidatePath(ROUTES.teacher.students)
-}
+  const normalizedSubjects = Array.from(
+    new Set(
+      (parsed.data.subjects ?? [])
+        .map((subject) => subject.trim())
+        .filter(Boolean),
+    ),
+  );
 
-export async function updateTenant(formData: FormData) {
-  const tenant = await requireTenant()
-  const user = await requireAuth()
+  try {
+    await db.tenant.update({
+      where: {
+        id: tenant.id,
+      },
+      data: {
+        name: parsed.data.name,
+        themeColor: parsed.data.themeColor,
+        phone: parsed.data.phone?.trim() ? parsed.data.phone.trim() : null,
+        region: parsed.data.region?.trim() ? parsed.data.region.trim() : null,
+        bio: parsed.data.bio?.trim() ? parsed.data.bio.trim() : null,
+        subjects: normalizedSubjects,
+        updatedAt: new Date(),
+      },
+    });
 
-  assertCanManageSettings(user.role)
+    revalidatePath("/teacher/settings");
 
-  const data = parseTenantSettingsFormData(formData)
+    return { success: true };
+  } catch (error) {
+    console.error("DB updateTenantSettings failed:", error);
 
-  const updatedTenant = await db.tenant.update({
-    where: {
-      id: tenant.id,
-    },
-    data: {
-      name: data.name,
-      logoUrl: data.logoUrl ?? null,
-      themeColor: data.themeColor,
-      bio: data.bio ?? null,
-      subjects: data.subjects,
-      region: data.region ?? null,
-    },
-  })
-
-  revalidateTenantSettingsPaths()
-
-  return updatedTenant
+    return {
+      success: false,
+      message: "حدث خطأ، حاول مرة أخرى",
+    };
+  }
 }

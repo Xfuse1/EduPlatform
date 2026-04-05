@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx prisma:*)",
+      "Bash(DIRECT_URL=\"postgresql://postgres:XQCV9V5vAW6b21d6@db.tbcxiuckxvboppyvmjca.supabase.co:5432/postgres\" DATABASE_URL=\"postgresql://postgres.tbcxiuckxvboppyvmjca:XQCV9V5vAW6b21d6@aws-1-eu-west-1.pooler.supabase.com:5432/postgres\" npx prisma migrate dev --name add_account_type)",
+      "Bash(DIRECT_URL=\"postgresql://postgres.tbcxiuckxvboppyvmjca:XQCV9V5vAW6b21d6@aws-1-eu-west-1.pooler.supabase.com:5432/postgres\" DATABASE_URL=\"postgresql://postgres.tbcxiuckxvboppyvmjca:XQCV9V5vAW6b21d6@aws-1-eu-west-1.pooler.supabase.com:5432/postgres\" npx prisma db push)",
+      "Bash(DIRECT_URL=\"postgresql://postgres.tbcxiuckxvboppyvmjca:XQCV9V5vAW6b21d6@aws-1-eu-west-1.pooler.supabase.com:5432/postgres\" DATABASE_URL=\"postgresql://postgres.tbcxiuckxvboppyvmjca:XQCV9V5vAW6b21d6@aws-1-eu-west-1.pooler.supabase.com:5432/postgres\" npx prisma migrate dev --name add_account_type --create-only)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)"
+    ]
+  }
+}

@@ -25,14 +25,7 @@ type GroupSummary = {
 };
 
 export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
-  const initialGroupId = groups.find((group) => !group.isFull)?.id ?? "";
-  const [selectedGroupId, setSelectedGroupId] = useState(initialGroupId);
-  const [formValues, setFormValues] = useState({
-    studentName: "",
-    grade: "",
-    parentName: "",
-    parentPhone: "",
-  });
+  const [selectedGroupId, setSelectedGroupId] = useState(groups.find((group) => !group.isFull)?.id ?? "");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
@@ -56,14 +49,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
       }
 
       setSuccess(result.message);
-      setFormValues({
-        studentName: "",
-        grade: "",
-        parentName: "",
-        parentPhone: "",
-      });
-      setSelectedGroupId(initialGroupId);
-      setStep(1);
+      form.reset();
     });
   };
 
@@ -144,9 +130,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
                         className="rounded-2xl border-slate-200/80 bg-slate-50/90 ps-10 dark:border-slate-700/80 dark:bg-slate-900/80"
                         id="studentName"
                         name="studentName"
-                        onChange={(event) => setFormValues((current) => ({ ...current, studentName: event.target.value }))}
                         placeholder="اكتب اسم الطالب"
-                        value={formValues.studentName}
                       />
                     </div>
                   </div>
@@ -158,9 +142,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
                       className="rounded-2xl border-slate-200/80 bg-slate-50/90 dark:border-slate-700/80 dark:bg-slate-900/80"
                       id="grade"
                       name="grade"
-                      onChange={(event) => setFormValues((current) => ({ ...current, grade: event.target.value }))}
                       placeholder="مثال: الصف الثالث الثانوي"
-                      value={formValues.grade}
                     />
                   </div>
                 </div>
@@ -174,9 +156,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
                       className="rounded-2xl border-slate-200/80 bg-slate-50/90 dark:border-slate-700/80 dark:bg-slate-900/80"
                       id="parentName"
                       name="parentName"
-                      onChange={(event) => setFormValues((current) => ({ ...current, parentName: event.target.value }))}
                       placeholder="اكتب اسم ولي الأمر"
-                      value={formValues.parentName}
                     />
                   </div>
                   <div>
@@ -189,9 +169,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
                       id="parentPhone"
                       inputMode="numeric"
                       name="parentPhone"
-                      onChange={(event) => setFormValues((current) => ({ ...current, parentPhone: event.target.value }))}
                       placeholder="01XXXXXXXXX"
-                      value={formValues.parentPhone}
                     />
                   </div>
                 </div>
@@ -209,10 +187,6 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
                   <Label className="mb-0 text-base font-bold text-slate-900 dark:text-white">اختر المجموعة</Label>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">اختر الموعد الأنسب لك من حيث الوقت والسعة والرسوم.</p>
                 </div>
-                <input name="studentName" type="hidden" value={formValues.studentName} />
-                <input name="grade" type="hidden" value={formValues.grade} />
-                <input name="parentName" type="hidden" value={formValues.parentName} />
-                <input name="parentPhone" type="hidden" value={formValues.parentPhone} />
                 <input name="groupId" type="hidden" value={selectedGroupId} />
                 <GroupSelector groups={groups} onChange={setSelectedGroupId} selectedGroupId={selectedGroupId} />
               </div>
