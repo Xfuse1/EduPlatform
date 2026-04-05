@@ -6,6 +6,7 @@ import { requireAuth } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
 import { ExamsPageClient } from "@/modules/exams/components/ExamsPageClient";
 import { getTeacherGroups } from "@/modules/assignments/queries";
+import { getExamsByTenant } from "@/modules/exams/queries";
 
 export default async function TeacherExamsPage() {
   const tenant = await requireTenant();
@@ -16,8 +17,10 @@ export default async function TeacherExamsPage() {
     redirect(user.role === "STUDENT" ? "/student" : "/parent");
   }
 
-  const groups = await getTeacherGroups(tenant.id);
+  const [groups, exams] = await Promise.all([
+    getTeacherGroups(tenant.id),
+    getExamsByTenant(tenant.id),
+  ]);
 
-  // Send empty exams array since the database schema for exams isn't ready
-  return <ExamsPageClient initialExams={[]} groups={groups} />;
+  return <ExamsPageClient initialExams={exams} groups={groups} />;
 }

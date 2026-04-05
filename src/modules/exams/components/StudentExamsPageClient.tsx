@@ -25,41 +25,7 @@ interface StudentExamsPageClientProps {
 }
 
 export function StudentExamsPageClient({ initialExams = [] }: StudentExamsPageClientProps) {
-  // Using Mock Data representing the student view 
-  // until actual Backend API for student exams is ready
-  const mockExams: Exam[] = initialExams.length > 0 ? initialExams : [
-      {
-          id: "1",
-          title: "امتحان الشهر الأول - فيزياء",
-          description: "برجاء الاستعداد جيداً ومراجعة الفصلين الأول والثاني، الامتحان سيكون عبر جوجل فورم.",
-          examDate: new Date(Date.now() - 86400000).toISOString(),
-          durationMinutes: 60,
-          maxScore: 100,
-          status: "completed",
-          myScore: 85,
-      },
-      {
-          id: "2",
-          title: "الكويز الأسبوعي - الحركة الموجية",
-          description: "كويز مفاجئ سريع، مدته 15 دقيقة فقط",
-          examDate: new Date(Date.now() + 300000).toISOString(),
-          durationMinutes: 15,
-          maxScore: 20,
-          status: "active",
-          examLink: "https://docs.google.com/forms"
-      },
-      {
-          id: "3",
-          title: "امتحان نصف العام المجمع",
-          description: "الامتحان النصفي على جميع فصول المنهج المكتملة",
-          examDate: new Date(Date.now() + 172800000).toISOString(),
-          durationMinutes: 120,
-          maxScore: 150,
-          status: "upcoming",
-      }
-  ];
-
-  const [exams, setExams] = useState<Exam[]>(mockExams);
+  const [exams, setExams] = useState<Exam[]>(initialExams);
   const [filterStatus, setFilterStatus] = useState("all");
 
   const filteredExams = exams.filter((e) => {

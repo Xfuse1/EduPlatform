@@ -1,18 +1,21 @@
 'use client';
 
-import { Clock3, Pencil, Plus, Users, X } from "lucide-react";
-import { useState } from "react";
+import { Clock3, Pencil, Plus, Users, X, Info } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { formatCapacity, formatCurrency, toArabicDigits } from "@/lib/utils";
+import { createGroup, updateGroup } from "@/modules/groups/actions";
 
 type GroupItem = {
   id: string;
   name: string;
   subject: string;
+  gradeLevel: string;
   days: string[];
   timeStart: string;
   timeEnd: string;
@@ -23,11 +26,19 @@ type GroupItem = {
 };
 
 export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[] }) {
+  const router = useRouter();
   const [groups, setGroups] = useState(initialGroups);
+
+  useEffect(() => {
+    setGroups(initialGroups);
+  }, [initialGroups]);
+
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
+  const [gradeLevel, setGradeLevel] = useState("");
   const [days, setDays] = useState("");
   const [timeStart, setTimeStart] = useState("");
   const [timeEnd, setTimeEnd] = useState("");
@@ -37,6 +48,7 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
   const resetForm = () => {
     setName("");
     setSubject("");
+    setGradeLevel("");
     setDays("");
     setTimeStart("");
     setTimeEnd("");
@@ -49,6 +61,7 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
   const openCreateDialog = () => {
     setName("");
     setSubject("");
+    setGradeLevel("");
     setDays("");
     setTimeStart("");
     setTimeEnd("");
@@ -61,6 +74,7 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
   const openEditDialog = (group: GroupItem) => {
     setName(group.name);
     setSubject(group.subject);
+    setGradeLevel(group.gradeLevel || "");
     setDays(group.days.join(" - "));
     setTimeStart(group.timeStart);
     setTimeEnd(group.timeEnd);
@@ -77,44 +91,49 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
       return;
     }
 
-    if (editingGroupId) {
-      setGroups((current) =>
-        current.map((group) =>
-          group.id === editingGroupId
-            ? {
-                ...group,
-                name: name.trim(),
-                subject: subject.trim(),
-                days: days.split("-").map((day) => day.trim()).filter(Boolean),
-                timeStart: timeStart.trim(),
-                timeEnd: timeEnd.trim(),
-                monthlyFee: Number(monthlyFee),
-                maxCapacity: Number(capacity),
-              }
-            : group,
-        ),
-      );
-      resetForm();
-      return;
-    }
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.set("name", name.trim());
+      formData.set("subject", subject.trim());
+      formData.set("gradeLevel", gradeLevel.trim());
+      formData.set("days", days.trim());
+      formData.set("timeStart", timeStart.trim());
+      formData.set("timeEnd", timeEnd.trim());
+      formData.set("monthlyFee", monthlyFee);
+      formData.set("maxCapacity", capacity);
 
-    setGroups((current) => [
-      {
-        id: `group-${current.length + 1}`,
-        name: name.trim(),
-        subject: subject.trim(),
-        days: days.split("-").map((day) => day.trim()).filter(Boolean),
-        timeStart: timeStart.trim(),
-        timeEnd: timeEnd.trim(),
-        monthlyFee: Number(monthlyFee),
-        maxCapacity: Number(capacity),
-        enrolledCount: 0,
-        color: "#2E86C1",
-      },
-      ...current,
-    ]);
+      if (editingGroupId) {
+        formData.set("groupId", editingGroupId);
+        const result = await updateGroup(formData);
+        if (result.success) {
+          setGroups((current) =>
+            current.map((group) =>
+              group.id === editingGroupId
+                ? {
+                    ...group,
+                    name: name.trim(),
+                    subject: subject.trim(),
+                    gradeLevel: gradeLevel.trim(),
+                    days: days.split("-").map((day) => day.trim()).filter(Boolean),
+                    timeStart: timeStart.trim(),
+                    timeEnd: timeEnd.trim(),
+                    monthlyFee: Number(monthlyFee),
+                    maxCapacity: Number(capacity),
+                  }
+                : group,
+            ),
+          );
+          resetForm();
+        }
+        return;
+      }
 
-    resetForm();
+      const result = await createGroup(formData);
+      if (result.success) {
+        router.refresh();
+        resetForm();
+      }
+    });
   };
 
   return (
@@ -226,6 +245,10 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
                 <Input onChange={(event) => setSubject(event.target.value)} placeholder="رياضيات" value={subject} />
               </div>
               <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">الصف الدراسي</label>
+                <Input onChange={(event) => setGradeLevel(event.target.value)} placeholder="مثال: الأول الثانوي" value={gradeLevel} />
+              </div>
+              <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">الأيام</label>
                 <Input onChange={(event) => setDays(event.target.value)} placeholder="الأحد - الثلاثاء" value={days} />
               </div>
@@ -246,8 +269,8 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
                 <Input dir="ltr" inputMode="numeric" onChange={(event) => setCapacity(event.target.value.replace(/\D/g, ""))} placeholder="24" value={capacity} />
               </div>
               <div className="flex gap-3 md:col-span-2">
-                <Button className="w-full" type="submit">
-                  {editingGroupId ? "حفظ التعديلات" : "حفظ المجموعة"}
+                <Button className="w-full" disabled={isPending} type="submit">
+                  {isPending ? "جارٍ الحفظ..." : editingGroupId ? "حفظ التعديلات" : "حفظ المجموعة"}
                 </Button>
                 <Button className="w-full" onClick={resetForm} type="button" variant="outline">
                   إلغاء

@@ -37,13 +37,15 @@ export async function gradeSubmission(
         aiGrade: number;
         aiFeedback: string;
         gradedByAi: boolean;
-    }
+    },
+    teacherComment?: string
 ) {
     try {
         await db.assignmentSubmission.update({
             where: { id: submissionId },
             data: {
                 grade,
+                teacherComment,
                 ...(aiData ?? {}),
             },
         });

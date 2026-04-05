@@ -147,7 +147,12 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
   return (
     <>
       {isEditMode ? (
-        <Button className="w-full gap-2" onClick={() => setOpen(true)} type="button" variant="outline">
+        <Button 
+          className="flex-1 gap-2 rounded-xl text-xs font-bold border-slate-200 dark:border-slate-800" 
+          onClick={() => setOpen(true)} 
+          type="button" 
+          variant="outline"
+        >
           <Pencil className="h-4 w-4" />
           تعديل
         </Button>

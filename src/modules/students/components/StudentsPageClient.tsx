@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { MessageSquare, Search } from "lucide-react";
+import { useSession } from "@/modules/auth/hooks/useSession";
 import { Button } from "@/components/ui/button";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -56,6 +57,7 @@ const filters: Array<{ label: string; value: FilterValue }> = [
 ];
 
 export function StudentsPageClient({ students, groups }: { students: StudentItem[]; groups: GroupOption[] }) {
+  const { data: session } = useSession();
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterValue>("ALL");
 
@@ -175,17 +177,40 @@ export function StudentsPageClient({ students, groups }: { students: StudentItem
                     groupId: student.groupId,
                   }}
                 />
-                <Button 
-                  variant="outline" 
-                  className="flex-1 gap-2 rounded-xl text-xs font-bold border-slate-200 dark:border-slate-800"
-                  onClick={() => {
-                   const targetId = student.parentId ?? student.parentPhone;
-                   window.location.href = `/messages?contact=${targetId}`;
-                  }}
-                >
-                  <MessageSquare className="h-3.5 w-3.5" />
-                  راسل ولي الأمر
-                </Button>
+                {(() => {
+                  const hasAccount = !!student.parentId;
+                  return (
+                    <Button 
+                      variant="outline" 
+                      className="flex-1 gap-2 rounded-xl text-xs font-bold border-slate-200 dark:border-slate-800"
+                      onClick={() => {
+                        if (hasAccount) {
+                          // ولي الأمر مسجل → فتح شات
+                          window.location.href = `/messages?contact=${student.parentId}`;
+                        } else if (student.parentPhone) {
+                          // ولي الأمر مش مسجل → واتساب
+                          const phone = student.parentPhone.replace(/^0/, '20'); // 01xxxxxxxx → 201xxxxxxxx
+                          const message = encodeURIComponent(
+                            `مرحباً، لديك رسالة على منصة سنتر رؤى التعليمية.\nسجل دخولك هنا: https://edu-platform-sigma-six.vercel.app`
+                          );
+                          window.location.href = `https://wa.me/${phone}?text=${message}`;
+                        }
+                      }}
+                    >
+                      {hasAccount ? (
+                        <>
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          راسل ولي الأمر
+                        </>
+                      ) : (
+                        <>
+                          <span>📩</span>
+                          دعوة واتساب
+                        </>
+                      )}
+                    </Button>
+                  );
+                })()}
               </div>
             </CardContent>
           </Card>
