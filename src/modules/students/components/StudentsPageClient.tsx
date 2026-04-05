@@ -1,38 +1,52 @@
 'use client';
 
-import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
+import { MessageSquare, Search } from "lucide-react";
+import { useSession } from "@/modules/auth/hooks/useSession";
+import { Button } from "@/components/ui/button";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { getInitials, toArabicDigits } from "@/lib/utils";
+import { AddStudentForm } from "@/modules/students/components/AddStudentForm";
 
-type StudentPaymentStatus = "PAID" | "OVERDUE" | "PENDING" | "PARTIAL";
+type StudentPaymentStatus = "PAID" | "OVERDUE" | "PENDING";
 
-export type StudentItem = {
+type GroupOption = {
   id: string;
   name: string;
+  remainingCapacity: number;
+  isFull: boolean;
+};
+
+type StudentItem = {
+  id: string;
+  name: string;
+  studentPhone: string;
+  parentName: string;
+  parentPhone: string;
+  parentId?: string;
   grade: string;
+  gradeLevel: string;
   group: string;
+  groupId: string;
   paymentStatus: StudentPaymentStatus;
   attendance: number;
   amountDue: number;
 };
 
-type FilterValue = "ALL" | "PAID" | "OVERDUE" | "PARTIAL";
+type FilterValue = "ALL" | "PAID" | "OVERDUE";
 
 function paymentBadge(status: StudentPaymentStatus) {
   if (status === "PAID") return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300";
   if (status === "OVERDUE") return "bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300";
-  if (status === "PARTIAL") return "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300";
-  return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200";
+  return "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300";
 }
 
 function paymentLabel(status: StudentPaymentStatus) {
   if (status === "PAID") return "مدفوع";
   if (status === "OVERDUE") return "متأخر";
-  if (status === "PARTIAL") return "مسدد جزئيًا";
   return "معلق";
 }
 
@@ -40,10 +54,10 @@ const filters: Array<{ label: string; value: FilterValue }> = [
   { label: "الكل", value: "ALL" },
   { label: "مدفوع", value: "PAID" },
   { label: "متأخر", value: "OVERDUE" },
-  { label: "جزئي", value: "PARTIAL" },
 ];
 
-export function StudentsPageClient({ students }: { students: StudentItem[] }) {
+export function StudentsPageClient({ students, groups }: { students: StudentItem[]; groups: GroupOption[] }) {
+  const { data: session } = useSession();
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterValue>("ALL");
 
@@ -63,9 +77,14 @@ export function StudentsPageClient({ students }: { students: StudentItem[] }) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">الطلاب</h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">بحث سريع ومؤشرات واضحة للحضور والسداد لكل طالب.</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">الطلاب</h1>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">بحث سريع ومؤشرات واضحة للحضور والسداد لكل طالب.</p>
+        </div>
+        <div className="w-full sm:w-auto">
+          <AddStudentForm groups={groups} />
+        </div>
       </div>
 
       <Card>
@@ -143,6 +162,55 @@ export function StudentsPageClient({ students }: { students: StudentItem[] }) {
                   <p className="text-sm font-bold text-slate-800 dark:text-slate-200">نسبة الحضور</p>
                   <Progress className="mt-2 h-2.5" value={student.attendance} />
                 </div>
+              </div>
+
+              <div className="flex gap-2">
+                <AddStudentForm
+                  groups={groups}
+                  student={{
+                    id: student.id,
+                    name: student.name,
+                    studentPhone: student.studentPhone,
+                    parentName: student.parentName,
+                    parentPhone: student.parentPhone,
+                    gradeLevel: student.gradeLevel,
+                    groupId: student.groupId,
+                  }}
+                />
+                {(() => {
+                  const hasAccount = !!student.parentId;
+                  return (
+                    <Button 
+                      variant="outline" 
+                      className="flex-1 gap-2 rounded-xl text-xs font-bold border-slate-200 dark:border-slate-800"
+                      onClick={() => {
+                        if (hasAccount) {
+                          // ولي الأمر مسجل → فتح شات
+                          window.location.href = `/messages?contact=${student.parentId}`;
+                        } else if (student.parentPhone) {
+                          // ولي الأمر مش مسجل → واتساب
+                          const phone = student.parentPhone.replace(/^0/, '20'); // 01xxxxxxxx → 201xxxxxxxx
+                          const message = encodeURIComponent(
+                            `مرحباً، لديك رسالة على منصة سنتر رؤى التعليمية.\nسجل دخولك هنا: https://edu-platform-sigma-six.vercel.app`
+                          );
+                          window.location.href = `https://wa.me/${phone}?text=${message}`;
+                        }
+                      }}
+                    >
+                      {hasAccount ? (
+                        <>
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          راسل ولي الأمر
+                        </>
+                      ) : (
+                        <>
+                          <span>📩</span>
+                          دعوة واتساب
+                        </>
+                      )}
+                    </Button>
+                  );
+                })()}
               </div>
             </CardContent>
           </Card>

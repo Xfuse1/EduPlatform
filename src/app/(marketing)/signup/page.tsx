@@ -1,22 +1,17 @@
-'use client';
+"use client";
 
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { Check, CheckCircle2, CircleAlert, Loader2, RefreshCw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createTeacherSignup } from "@/modules/marketing/actions";
-import { confirmFirebasePhoneOtp, resetFirebasePhoneOtp, sendFirebasePhoneOtp } from "@/modules/auth/lib/firebasePhoneOtp";
 
 type SignupStep = 1 | 2 | 3;
-type AccountType = "CENTER" | "TEACHER";
 
 type FormState = {
-  accountType: AccountType;
-  centerName: string;
   teacherName: string;
   phone: string;
   subject: string;
@@ -24,59 +19,38 @@ type FormState = {
   subdomain: string;
 };
 
-type SuccessState = {
-  accessUrl: string;
-  redirectTo: string;
-  message: string;
-  tenantName: string;
-  tenantSlug: string;
-  accountType: AccountType;
-};
-
 type StepOneErrors = {
-  centerName?: string;
   teacherName?: string;
   phone?: string;
   subject?: string;
   governorate?: string;
 };
 
-const RESERVED_SUBDOMAINS = new Set(["ahmed", "noor", "test", "admin", "www", "app"]);
+const RESERVED_SUBDOMAINS = new Set(["ahmed", "noor", "test", "admin", "www"]);
 const OTP_LENGTH = 6;
-const OTP_RESEND_SECONDS = 60;
-const RECAPTCHA_CONTAINER_ID = "teacher-signup-firebase-recaptcha";
 
 const progressSteps = [
   { step: 1, number: "١", label: "البيانات" },
-  { step: 2, number: "٢", label: "الرابط" },
+  { step: 2, number: "٢", label: "السنتر" },
   { step: 3, number: "٣", label: "التأكيد" },
 ] as const;
-
-const accountTypeOptions: Array<{ value: AccountType; label: string }> = [
-  { value: "CENTER", label: "سنتر" },
-  { value: "TEACHER", label: "مدرس" },
-];
 
 function validateStepOne(form: FormState): StepOneErrors {
   const errors: StepOneErrors = {};
 
-  if (form.accountType === "CENTER" && form.centerName.trim().length < 3) {
-    errors.centerName = "يرجى إدخال اسم السنتر بحد أدنى 3 أحرف";
-  }
-
   if (form.teacherName.trim().length < 3) {
-    errors.teacherName = "يجب كتابة اسم المدرس كاملًا بحد أدنى 3 أحرف";
+    errors.teacherName = "يجب كتابة اسم المعلم كاملًا بحد أدنى 3 أحرف";
   }
 
   if (!/^01\d{9}$/.test(form.phone)) {
     errors.phone = "يرجى إدخال رقم هاتف مصري صحيح يبدأ بـ 01";
   }
 
-  if (form.accountType === "TEACHER" && form.subject.trim().length < 2) {
+  if (form.subject.trim().length === 0) {
     errors.subject = "يرجى إدخال المادة الدراسية";
   }
 
-  if (form.governorate.trim().length < 2) {
+  if (form.governorate.trim().length === 0) {
     errors.governorate = "يرجى إدخال المحافظة";
   }
 
@@ -87,11 +61,11 @@ function getSubdomainError(subdomain: string) {
   const normalizedValue = subdomain.trim().toLowerCase();
 
   if (normalizedValue.length < 3 || normalizedValue.length > 20) {
-    return "يجب أن يكون رابط الحساب بين 3 و20 حرفًا";
+    return "يجب أن يكون اسم السنتر بين 3 و20 حرفًا";
   }
 
   if (!/^[a-z0-9-]+$/.test(normalizedValue)) {
-    return "يجب أن يحتوي الرابط على حروف إنجليزية وأرقام فقط";
+    return "يجب أن يحتوي على حروف إنجليزية وأرقام فقط";
   }
 
   if (RESERVED_SUBDOMAINS.has(normalizedValue)) {
@@ -101,8 +75,8 @@ function getSubdomainError(subdomain: string) {
   return "";
 }
 
-function getProgressState(currentStep: SignupStep, itemStep: number, isCompleted: boolean) {
-  if (isCompleted || itemStep < currentStep) {
+function getProgressState(currentStep: SignupStep, itemStep: number, isVerified: boolean) {
+  if (isVerified || itemStep < currentStep) {
     return "completed";
   }
 
@@ -114,10 +88,9 @@ function getProgressState(currentStep: SignupStep, itemStep: number, isCompleted
 }
 
 export default function TeacherSignupPage() {
+  const [isReady, setIsReady] = useState(false);
   const [currentStep, setCurrentStep] = useState<SignupStep>(1);
   const [form, setForm] = useState<FormState>({
-    accountType: "TEACHER",
-    centerName: "",
     teacherName: "",
     phone: "",
     subject: "",
@@ -127,37 +100,66 @@ export default function TeacherSignupPage() {
   const [stepOneErrors, setStepOneErrors] = useState<StepOneErrors>({});
   const [subdomainError, setSubdomainError] = useState("");
   const [pageError, setPageError] = useState("");
-  const [success, setSuccess] = useState<SuccessState | null>(null);
-
-  const [otpCode, setOtpCode] = useState("");
-  const [otpMessage, setOtpMessage] = useState("");
+  const [otpDigits, setOtpDigits] = useState<string[]>(Array.from({ length: OTP_LENGTH }, () => ""));
   const [otpError, setOtpError] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const [verifiedIdToken, setVerifiedIdToken] = useState("");
-  const [secondsLeft, setSecondsLeft] = useState(0);
-  const [runtimeOrigin, setRuntimeOrigin] = useState("");
+  const [secondsLeft, setSecondsLeft] = useState(60);
+  const [isResending, setIsResending] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+  const verifyTimerRef = useRef<number | null>(null);
 
-  const [isSendingOtp, startSendingOtp] = useTransition();
-  const [isVerifyingOtp, startVerifyingOtp] = useTransition();
-  const [isCreating, startCreating] = useTransition();
-  const autoSendOtpKeyRef = useRef("");
+  useEffect(() => {
+    setIsReady(true);
 
-  const isCenterAccount = form.accountType === "CENTER";
-  const normalizedSubdomain = form.subdomain.trim().toLowerCase();
-  const helperSubdomain = normalizedSubdomain || "your-center";
-  const expectedLoginUrl = useMemo(() => {
-    const baseOrigin =
-      runtimeOrigin ||
-      (typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
-    const url = new URL("/login", baseOrigin);
+    return () => {
+      if (verifyTimerRef.current !== null) {
+        window.clearTimeout(verifyTimerRef.current);
+      }
+    };
+  }, []);
 
-    if (helperSubdomain !== "your-center") {
-      url.searchParams.set("tenantSlug", helperSubdomain);
+  useEffect(() => {
+    if (currentStep !== 3 || isVerified) {
+      return;
     }
 
-    return url.toString();
-  }, [helperSubdomain, runtimeOrigin]);
+    const timer = window.setInterval(() => {
+      setSecondsLeft((currentValue) => (currentValue > 0 ? currentValue - 1 : 0));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [currentStep, isVerified]);
+
+  useEffect(() => {
+    const otpCode = otpDigits.join("");
+
+    if (currentStep !== 3 || isVerified || isVerifyingOtp) {
+      return;
+    }
+
+    if (otpCode.length === OTP_LENGTH && !otpDigits.includes("")) {
+      setIsVerifyingOtp(true);
+      setOtpError("");
+      setPageError("");
+
+      verifyTimerRef.current = window.setTimeout(() => {
+        if (otpCode === "123456") {
+          setIsVerified(true);
+          setIsVerifyingOtp(false);
+          return;
+        }
+
+        setOtpError("كود التحقق غير صحيح. جرّب مرة أخرى");
+        setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ""));
+        setIsVerifyingOtp(false);
+        inputsRef.current[0]?.focus();
+      }, 500);
+    }
+  }, [currentStep, isVerified, isVerifyingOtp, otpDigits]);
+
+  const normalizedSubdomain = form.subdomain.trim().toLowerCase();
+  const helperSubdomain = normalizedSubdomain || "your-center";
   const liveSubdomainError =
     normalizedSubdomain.length > 0 && !RESERVED_SUBDOMAINS.has(normalizedSubdomain) ? getSubdomainError(normalizedSubdomain) : "";
   const subdomainStatus =
@@ -169,93 +171,14 @@ export default function TeacherSignupPage() {
           : "invalid"
         : "available";
 
-  const reviewItems = useMemo(
-    () => [
-      { label: "نوع الحساب", value: isCenterAccount ? "سنتر" : "مدرس" },
-      ...(isCenterAccount ? [{ label: "اسم السنتر", value: form.centerName }] : []),
-      { label: isCenterAccount ? "اسم المدرس المسؤول" : "اسم المدرس", value: form.teacherName },
-      { label: "رقم الهاتف", value: form.phone },
-      ...(!isCenterAccount ? [{ label: "المادة", value: form.subject }] : []),
-      { label: "المحافظة", value: form.governorate },
-      { label: "رابط الدخول", value: expectedLoginUrl },
-    ],
-    [expectedLoginUrl, form.centerName, form.governorate, form.phone, form.subject, form.teacherName, isCenterAccount],
-  );
-
-  useEffect(() => {
-    setRuntimeOrigin(window.location.origin);
-  }, []);
-
-  useEffect(() => {
-    if (!otpSent || secondsLeft <= 0) {
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      setSecondsLeft((current) => (current > 0 ? current - 1 : 0));
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [otpSent, secondsLeft]);
-
-  useEffect(() => {
-    return () => {
-      void resetFirebasePhoneOtp();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!success) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      window.location.assign(success.redirectTo);
-    }, 1200);
-
-    return () => window.clearTimeout(timer);
-  }, [success]);
-
-  useEffect(() => {
-    const autoSendKey = `${form.phone}:${normalizedSubdomain}`;
-
-    if (currentStep !== 3 || !form.phone || otpSent || phoneVerified || autoSendOtpKeyRef.current === autoSendKey) {
-      return;
-    }
-
-    autoSendOtpKeyRef.current = autoSendKey;
-    handleSendOtp();
-  }, [currentStep, form.phone, normalizedSubdomain, otpSent, phoneVerified]);
-
-  const resetPhoneVerificationState = () => {
-    autoSendOtpKeyRef.current = "";
-    setOtpCode("");
-    setOtpMessage("");
-    setOtpError("");
-    setOtpSent(false);
-    setPhoneVerified(false);
-    setVerifiedIdToken("");
-    setSecondsLeft(0);
-    void resetFirebasePhoneOtp();
-  };
-
   const updateField = (field: keyof FormState, value: string) => {
     setForm((currentValue) => ({
       ...currentValue,
       [field]: value,
     }));
-
     setPageError("");
 
-    if (field === "accountType") {
-      setStepOneErrors((currentValue) => ({
-        ...currentValue,
-        centerName: undefined,
-        subject: undefined,
-      }));
-    }
-
-    if (field === "centerName" || field === "teacherName" || field === "phone" || field === "subject" || field === "governorate") {
+    if (field === "teacherName" || field === "phone" || field === "subject" || field === "governorate") {
       setStepOneErrors((currentValue) => ({
         ...currentValue,
         [field]: undefined,
@@ -264,10 +187,6 @@ export default function TeacherSignupPage() {
 
     if (field === "subdomain") {
       setSubdomainError("");
-    }
-
-    if (field === "phone") {
-      resetPhoneVerificationState();
     }
   };
 
@@ -293,110 +212,96 @@ export default function TeacherSignupPage() {
     }
 
     setCurrentStep(3);
-  };
-
-  const handleSendOtp = (ignoreCooldown = false) => {
-    if (secondsLeft > 0 && otpSent && !ignoreCooldown) {
-      return;
-    }
-
-    setPageError("");
+    setSecondsLeft(60);
+    setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ""));
     setOtpError("");
-    setOtpMessage("");
-
-    startSendingOtp(async () => {
-      const result = await sendFirebasePhoneOtp(form.phone, RECAPTCHA_CONTAINER_ID);
-
-      if (!result.success) {
-        setPageError(result.message ?? "تعذر إرسال كود التحقق");
-        return;
-      }
-
-      setOtpSent(true);
-      setPhoneVerified(false);
-      setVerifiedIdToken("");
-      setOtpCode("");
-      setOtpMessage(result.message ?? "تم إرسال كود التحقق");
-      setSecondsLeft(OTP_RESEND_SECONDS);
-    });
+    setIsVerified(false);
   };
 
-  const handleVerifyOtp = () => {
+  const goBackToStepOne = () => {
+    setCurrentStep(1);
+    setSubdomainError("");
     setPageError("");
+  };
+
+  const goBackToStepTwo = () => {
+    setCurrentStep(2);
     setOtpError("");
-    setOtpMessage("");
+    setPageError("");
+    setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ""));
+    setIsVerifyingOtp(false);
+    if (verifyTimerRef.current !== null) {
+      window.clearTimeout(verifyTimerRef.current);
+    }
+  };
 
-    if (!/^\d{6}$/.test(otpCode)) {
-      setOtpError("يرجى إدخال كود تحقق مكوّن من 6 أرقام");
+  const handleOtpChange = (index: number, value: string) => {
+    const nextValue = value.replace(/\D/g, "").slice(-1);
+    setOtpError("");
+    setPageError("");
+    setOtpDigits((currentValue) => {
+      const nextDigits = [...currentValue];
+      nextDigits[index] = nextValue;
+      return nextDigits;
+    });
+
+    if (nextValue && index < OTP_LENGTH - 1) {
+      inputsRef.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Backspace" && !otpDigits[index] && index > 0) {
+      inputsRef.current[index - 1]?.focus();
+    }
+  };
+
+  const handleResend = () => {
+    if (secondsLeft > 0 || isResending) {
       return;
     }
 
-    startVerifyingOtp(async () => {
-      const result = await confirmFirebasePhoneOtp(otpCode);
-
-      if (!result.success || !result.idToken) {
-        setOtpError(result.message ?? "تعذر التحقق من الكود");
-        return;
-      }
-
-      if (result.normalizedPhone !== form.phone) {
-        setOtpError("رقم الهاتف الموثق لا يطابق الرقم الذي أدخلته");
-        return;
-      }
-
-      setPhoneVerified(true);
-      setVerifiedIdToken(result.idToken);
-      setOtpMessage(result.message ?? "تم التحقق من رقم الهاتف بنجاح");
-      setOtpError("");
-    });
-  };
-
-  const handleCreateAccount = () => {
+    setIsResending(true);
+    setOtpError("");
     setPageError("");
 
-    if (!phoneVerified || !verifiedIdToken) {
-      setPageError("يجب التحقق من رقم الهاتف قبل إنشاء الحساب");
-      return;
-    }
-
-    startCreating(async () => {
-      const result = await createTeacherSignup({
-        accountType: form.accountType,
-        centerName: form.centerName,
-        teacherName: form.teacherName,
-        phone: form.phone,
-        subject: form.subject,
-        governorate: form.governorate,
-        subdomain: normalizedSubdomain,
-        idToken: verifiedIdToken,
-      });
-
-      if (!result.success || !result.accessUrl || !result.redirectTo || !result.tenantName || !result.tenantSlug || !result.accountType) {
-        setPageError(result.message ?? "تعذر إنشاء الحساب");
-        return;
-      }
-
-      setSuccess({
-        accessUrl: result.accessUrl,
-        redirectTo: result.redirectTo,
-        message: result.message,
-        tenantName: result.tenantName,
-        tenantSlug: result.tenantSlug,
-        accountType: result.accountType,
-      });
-    });
+    window.setTimeout(() => {
+      setSecondsLeft(60);
+      setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ""));
+      setIsResending(false);
+      inputsRef.current[0]?.focus();
+    }, 400);
   };
+
+  if (!isReady) {
+    return (
+      <main
+        className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.22),_transparent_30%),linear-gradient(145deg,_#0f2740_0%,_#1A5276_45%,_#dbeafe_120%)] px-4 py-8 sm:px-6"
+        dir="rtl"
+      >
+        <Card className="w-full max-w-[500px] rounded-[28px] border-white/10 bg-slate-950/80 text-white shadow-[0_24px_80px_rgba(15,23,42,0.35)]">
+          <CardContent className="flex min-h-[360px] flex-col items-center justify-center gap-4 p-6 text-center sm:p-8">
+            <Loader2 className="h-10 w-10 animate-spin text-sky-300" />
+            <div className="space-y-2">
+              <h1 className="text-xl font-extrabold">جارٍ تجهيز صفحة التسجيل</h1>
+              <p className="text-sm leading-7 text-slate-300">لحظات وننقلك إلى خطوات إنشاء الحساب</p>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
 
   return (
     <main
       className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.22),_transparent_30%),linear-gradient(145deg,_#0f2740_0%,_#1A5276_45%,_#dbeafe_120%)] px-4 py-8 sm:px-6"
       dir="rtl"
     >
-      <Card className="w-full max-w-[520px] overflow-hidden rounded-[28px] border-white/10 bg-slate-950/85 font-[Cairo] text-white shadow-[0_24px_80px_rgba(15,23,42,0.4)] backdrop-blur">
+      <Card className="w-full max-w-[500px] overflow-hidden rounded-[28px] border-white/10 bg-slate-950/85 font-[Cairo] text-white shadow-[0_24px_80px_rgba(15,23,42,0.4)] backdrop-blur">
         <div className="border-b border-white/10 bg-[linear-gradient(135deg,_rgba(22,59,84,0.96),_rgba(26,82,118,0.98)_45%,_rgba(46,134,193,0.92))] px-5 py-6 sm:px-7">
           <div className="flex items-center justify-between gap-2">
             {progressSteps.map((item, index) => {
-              const state = getProgressState(currentStep, item.step, Boolean(success));
+              const state = getProgressState(currentStep, item.step, isVerified);
 
               return (
                 <div key={item.step} className="flex min-w-0 flex-1 items-center gap-2">
@@ -411,11 +316,13 @@ export default function TeacherSignupPage() {
                             : "border-white/20 bg-white/5 text-slate-400",
                       ].join(" ")}
                     >
-                      {state === "completed" ? <CheckCircle2 className="h-5 w-5" /> : item.number}
+                      {state === "completed" ? <Check className="h-5 w-5" /> : item.number}
                     </span>
                     <span className="min-w-0 text-start text-sm font-bold text-white/90">{item.label}</span>
                   </div>
-                  {index < progressSteps.length - 1 ? <span className="h-px flex-1 bg-white/20" aria-hidden="true" /> : null}
+                  {index < progressSteps.length - 1 ? (
+                    <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
+                  ) : null}
                 </div>
               );
             })}
@@ -424,96 +331,22 @@ export default function TeacherSignupPage() {
 
         <CardContent className="space-y-6 p-5 sm:p-7">
           {pageError ? (
-            <div className="rounded-[18px] border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">{pageError}</div>
-          ) : null}
-
-          {success ? (
-            <div className="space-y-5 text-center">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/15 text-emerald-300">
-                <CheckCircle2 className="h-10 w-10" />
-              </div>
-              <div className="space-y-2">
-                <h1 className="text-2xl font-extrabold sm:text-3xl">تم إنشاء حسابك بنجاح</h1>
-                <p className="text-sm leading-7 text-slate-300">{success.message}</p>
-                <p className="text-sm leading-7 text-slate-300">
-                  {success.accountType === "CENTER" ? "اسم السنتر" : "اسم الحساب"}:{" "}
-                  <span className="font-bold text-sky-300">{success.tenantName}</span>
-                </p>
-                <p className="text-sm leading-7 text-slate-300">
-                  رابط الدخول:
-                  <br />
-                  <span dir="ltr" className="font-bold text-sky-300">
-                    {success.accessUrl}
-                  </span>
-                </p>
-              </div>
-
-              <a
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-base font-bold text-white transition hover:bg-secondary"
-                href={success.redirectTo}
-              >
-                الانتقال إلى صفحة الدخول
-              </a>
-              <Link
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-white/15 bg-transparent px-4 py-3 text-base font-bold text-white transition hover:bg-white/10"
-                href="/"
-              >
-                العودة للرئيسية
-              </Link>
+            <div className="flex items-start gap-3 rounded-[18px] border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+              <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" />
+              <p className="text-start leading-7">{pageError}</p>
             </div>
           ) : null}
 
-          {!success && currentStep === 1 ? (
+          {currentStep === 1 ? (
             <section className="space-y-5">
               <div className="space-y-2 text-start">
-                <h1 className="text-2xl font-extrabold sm:text-3xl">أنشئ حسابك</h1>
-                <p className="text-sm leading-7 text-slate-300">
-                  اختر نوع الحساب أولًا، ثم أدخل بياناتك الأساسية لإنشاء رابط الدخول الخاص بك.
-                </p>
+                <h1 className="text-2xl font-extrabold sm:text-3xl">أنشئ حسابك المجاني</h1>
+                <p className="text-sm leading-7 text-slate-300">ابدأ في أقل من دقيقتين</p>
               </div>
 
               <div className="space-y-4">
-                <div className="space-y-3">
-                  <Label>نوع الحساب</Label>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {accountTypeOptions.map((option) => {
-                      const isActive = form.accountType === option.value;
-
-                      return (
-                        <button
-                          key={option.value}
-                          className={[
-                            "flex min-h-[76px] items-center justify-center rounded-[20px] border px-4 py-4 text-center transition",
-                            isActive
-                              ? "border-sky-300 bg-sky-400/15 text-white shadow-[0_0_0_1px_rgba(125,211,252,0.18)]"
-                              : "border-white/10 bg-slate-900/70 text-slate-200 hover:bg-slate-900",
-                          ].join(" ")}
-                          onClick={() => updateField("accountType", option.value)}
-                          type="button"
-                        >
-                          <p className="text-base font-extrabold">{option.label}</p>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {isCenterAccount ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="centerName">اسم السنتر</Label>
-                    <Input
-                      id="centerName"
-                      onChange={(event) => updateField("centerName", event.target.value)}
-                      placeholder="مثال: سنتر القمة"
-                      value={form.centerName}
-                      className="min-h-11 border-white/10 bg-slate-900/80 text-base text-white placeholder:text-slate-500"
-                    />
-                    {stepOneErrors.centerName ? <p className="text-sm text-rose-300">{stepOneErrors.centerName}</p> : null}
-                  </div>
-                ) : null}
-
                 <div className="space-y-2">
-                  <Label htmlFor="teacherName">{isCenterAccount ? "اسم المدرس المسؤول" : "اسم المدرس"}</Label>
+                  <Label htmlFor="teacherName">اسم المعلم</Label>
                   <Input
                     id="teacherName"
                     onChange={(event) => updateField("teacherName", event.target.value)}
@@ -539,26 +372,24 @@ export default function TeacherSignupPage() {
                   {stepOneErrors.phone ? <p className="text-sm text-rose-300">{stepOneErrors.phone}</p> : null}
                 </div>
 
-                {!isCenterAccount ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">المادة الدراسية</Label>
-                    <Input
-                      id="subject"
-                      onChange={(event) => updateField("subject", event.target.value)}
-                      placeholder="مثال: رياضيات"
-                      value={form.subject}
-                      className="min-h-11 border-white/10 bg-slate-900/80 text-base text-white placeholder:text-slate-500"
-                    />
-                    {stepOneErrors.subject ? <p className="text-sm text-rose-300">{stepOneErrors.subject}</p> : null}
-                  </div>
-                ) : null}
+                <div className="space-y-2">
+                  <Label htmlFor="subject">المادة الدراسية</Label>
+                  <Input
+                    id="subject"
+                    onChange={(event) => updateField("subject", event.target.value)}
+                    placeholder="مثال: رياضيات، فيزياء، لغة عربية"
+                    value={form.subject}
+                    className="min-h-11 border-white/10 bg-slate-900/80 text-base text-white placeholder:text-slate-500"
+                  />
+                  {stepOneErrors.subject ? <p className="text-sm text-rose-300">{stepOneErrors.subject}</p> : null}
+                </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="governorate">المحافظة</Label>
                   <Input
                     id="governorate"
                     onChange={(event) => updateField("governorate", event.target.value)}
-                    placeholder="مثال: الجيزة"
+                    placeholder="مثال: القاهرة، الجيزة، سوهاج"
                     value={form.governorate}
                     className="min-h-11 border-white/10 bg-slate-900/80 text-base text-white placeholder:text-slate-500"
                   />
@@ -567,20 +398,20 @@ export default function TeacherSignupPage() {
               </div>
 
               <Button className="min-h-11 w-full text-base font-bold" onClick={goToStepTwo} type="button">
-                التالي <ArrowLeft className="h-4 w-4" />
+                التالي ←
               </Button>
             </section>
           ) : null}
 
-          {!success && currentStep === 2 ? (
+          {currentStep === 2 ? (
             <section className="space-y-5">
               <div className="space-y-2 text-start">
-                <h1 className="text-2xl font-extrabold sm:text-3xl">{isCenterAccount ? "اختر رابط السنتر" : "اختر رابط حسابك"}</h1>
-                <p className="text-sm leading-7 text-slate-300">هذا سيكون رابط الدخول الرئيسي للمنصة الخاصة بك.</p>
+                <h1 className="text-2xl font-extrabold sm:text-3xl">اختر اسم سنترك</h1>
+                <p className="text-sm leading-7 text-slate-300">هذا سيكون رابطك الخاص على المنصة</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="subdomain">{isCenterAccount ? "رابط السنتر / Subdomain" : "رابط الحساب / Subdomain"}</Label>
+                <Label htmlFor="subdomain">اسم السنتر / الـ Subdomain</Label>
                 <Input
                   dir="ltr"
                   id="subdomain"
@@ -591,10 +422,14 @@ export default function TeacherSignupPage() {
                   className="min-h-11 border-white/10 bg-slate-900/80 text-base font-semibold text-white placeholder:text-slate-500"
                 />
                 <p className="text-start text-sm text-slate-400">
-                  رابط الدخول المتوقع: <span dir="ltr" className="font-bold text-sky-300">{expectedLoginUrl}</span>
+                  رابطك سيكون: <span dir="ltr" className="font-bold text-sky-300">{helperSubdomain}.eduplatform.com</span>
                 </p>
-                {subdomainStatus === "available" ? <p className="text-sm font-semibold text-emerald-300">متاح</p> : null}
-                {subdomainStatus === "unavailable" ? <p className="text-sm font-semibold text-rose-300">غير متاح</p> : null}
+                {subdomainStatus === "available" ? (
+                  <p className="text-sm font-semibold text-emerald-300">متاح ✅</p>
+                ) : null}
+                {subdomainStatus === "unavailable" ? (
+                  <p className="text-sm font-semibold text-rose-300">غير متاح ❌</p>
+                ) : null}
                 {liveSubdomainError ? <p className="text-sm text-rose-300">{liveSubdomainError}</p> : null}
                 {!liveSubdomainError && subdomainError ? <p className="text-sm text-rose-300">{subdomainError}</p> : null}
               </div>
@@ -602,137 +437,129 @@ export default function TeacherSignupPage() {
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
                 <Button
                   className="min-h-11 border-white/15 bg-transparent text-base text-white hover:bg-white/10 sm:w-auto"
-                  onClick={() => setCurrentStep(1)}
+                  onClick={goBackToStepOne}
                   type="button"
                   variant="outline"
                 >
-                  رجوع
+                  ← رجوع
                 </Button>
                 <Button className="min-h-11 text-base font-bold sm:w-auto" onClick={goToStepThree} type="button">
-                  التالي <ArrowLeft className="h-4 w-4" />
+                  التالي ←
                 </Button>
               </div>
             </section>
           ) : null}
 
-          {!success && currentStep === 3 ? (
+          {currentStep === 3 ? (
             <section className="space-y-5">
-              <div className="space-y-2 text-start">
-                <h1 className="text-2xl font-extrabold sm:text-3xl">راجع البيانات ثم تحقق من الهاتف</h1>
-                <p className="text-sm leading-7 text-slate-300">
-                  لن يتم إنشاء {isCenterAccount ? "حساب السنتر" : "الحساب"} إلا بعد التحقق من رقم هاتف {isCenterAccount ? "المدرس المسؤول" : "المدرس"}.
-                </p>
-              </div>
-
-              <div className="space-y-3 rounded-[18px] border border-white/10 bg-slate-900/65 p-4">
-                {reviewItems.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between gap-4 border-b border-white/5 pb-3 last:border-b-0 last:pb-0">
-                    <span className="text-sm text-slate-300">{item.label}</span>
-                    <span className="text-sm font-bold text-white">{item.value || "-"}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-4 rounded-[20px] border border-white/10 bg-slate-900/50 p-4">
-                <div id={RECAPTCHA_CONTAINER_ID} />
-                <div className="flex items-start gap-3">
-                  <div className={`mt-0.5 rounded-full p-2 ${phoneVerified ? "bg-emerald-500/15 text-emerald-300" : "bg-sky-500/15 text-sky-300"}`}>
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-white">{phoneVerified ? "تم التحقق من رقم الهاتف" : "تحقق من رقم الهاتف"}</p>
-                    <p className="text-sm leading-6 text-slate-300">
-                      {phoneVerified
-                        ? "يمكنك الآن إنشاء الحساب بأمان."
-                        : `سيتم إرسال كود التحقق تلقائيًا، ثم أدخله هنا قبل إنشاء ${isCenterAccount ? "حساب السنتر" : "الحساب"}.`}
+              {!isVerified ? (
+                <>
+                  <div className="space-y-2 text-start">
+                    <h1 className="text-2xl font-extrabold sm:text-3xl">تأكيد رقم الهاتف</h1>
+                    <p className="text-sm leading-7 text-slate-300">
+                      أدخل كود التحقق المرسل إلى <span dir="ltr">{form.phone}</span>
                     </p>
                   </div>
-                </div>
 
-                {!phoneVerified ? (
-                  <>
-                    <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
-                      {isSendingOtp && !otpSent ? (
-                        <span className="inline-flex items-center gap-2 font-semibold text-sky-200">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          جارٍ إرسال كود التحقق تلقائيًا...
-                        </span>
-                      ) : otpSent && secondsLeft > 0 ? (
-                        <span className="font-semibold">
-                          يمكنك إعادة الإرسال بعد <span dir="ltr">{secondsLeft}</span> ثانية
-                        </span>
-                      ) : (
-                        <button
-                          className="inline-flex items-center gap-2 font-bold text-sky-300 transition hover:text-sky-200 disabled:cursor-not-allowed disabled:opacity-60"
-                          disabled={isSendingOtp}
-                          onClick={() => handleSendOtp(true)}
-                          type="button"
-                        >
-                          <RefreshCw className="h-4 w-4" />
-                          {otpSent ? "إعادة إرسال الكود" : "إعادة المحاولة"}
-                        </button>
-                      )}
-                    </div>
-
-                    {otpMessage ? <p className="text-sm text-emerald-300">{otpMessage}</p> : null}
-                    {otpError ? <p className="text-sm text-rose-300">{otpError}</p> : null}
-
-                    {otpSent ? (
-                      <div className="space-y-3">
-                        <div className="space-y-2">
-                          <Label htmlFor="signup-otp">كود التحقق</Label>
-                          <Input
-                            dir="ltr"
-                            id="signup-otp"
-                            inputMode="numeric"
-                            maxLength={OTP_LENGTH}
-                            onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, "").slice(0, OTP_LENGTH))}
-                            placeholder="123456"
-                            value={otpCode}
-                            className="min-h-11 border-white/10 bg-slate-950/70 text-base font-semibold text-white placeholder:text-slate-500"
-                          />
-                        </div>
-
-                        <Button className="w-full" disabled={isVerifyingOtp} onClick={handleVerifyOtp} type="button">
-                          {isVerifyingOtp ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              جارٍ التحقق...
-                            </>
-                          ) : (
-                            "تأكيد الكود"
-                          )}
-                        </Button>
+                  <div className="rounded-[18px] border border-white/10 bg-slate-900/70 px-4 py-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-start">
+                        <p className="text-sm font-bold text-white">مدة صلاحية الكود</p>
+                        <p className="text-sm text-slate-400">أدخل الرمز قبل انتهاء العداد ثم سيُعاد الإرسال</p>
                       </div>
-                    ) : null}
-                  </>
-                ) : (
-                  <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-                    تم ربط هذا الطلب برقم الهاتف <span dir="ltr" className="font-bold">{form.phone}</span>.
+                      <div className="rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-sky-200">
+                        <span dir="ltr">{secondsLeft}</span>
+                      </div>
+                    </div>
                   </div>
-                )}
-              </div>
 
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-                <Button
-                  className="min-h-11 border-white/15 bg-transparent text-base text-white hover:bg-white/10 sm:w-auto"
-                  onClick={() => setCurrentStep(2)}
-                  type="button"
-                  variant="outline"
-                >
-                  رجوع
-                </Button>
-                <Button className="min-h-11 text-base font-bold sm:w-auto" disabled={isCreating || !phoneVerified} onClick={handleCreateAccount} type="button">
-                  {isCreating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      جارٍ إنشاء الحساب...
-                    </>
-                  ) : (
-                    "إنشاء الحساب"
-                  )}
-                </Button>
-              </div>
+                  <div className="flex items-center justify-between gap-2" dir="ltr">
+                    {otpDigits.map((digit, index) => (
+                      <input
+                        key={`signup-otp-${index}`}
+                        ref={(element) => {
+                          inputsRef.current[index] = element;
+                        }}
+                        className="h-14 w-12 rounded-2xl border border-white/10 bg-slate-900/80 text-center text-2xl font-extrabold text-white outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-400/15 sm:w-14"
+                        inputMode="numeric"
+                        maxLength={1}
+                        onChange={(event) => handleOtpChange(index, event.target.value)}
+                        onKeyDown={(event) => handleOtpKeyDown(index, event)}
+                        value={digit}
+                      />
+                    ))}
+                  </div>
+
+                  {otpError ? <p className="text-sm text-rose-300">{otpError}</p> : null}
+
+                  <div className="rounded-[18px] border border-white/10 bg-slate-900/60 px-4 py-4 text-center">
+                    {secondsLeft > 0 ? (
+                      <p className="text-sm font-semibold text-slate-300">
+                        يمكنك إعادة الإرسال بعد <span dir="ltr">{secondsLeft}</span> ثانية
+                      </p>
+                    ) : (
+                      <button
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-sky-400/10 px-5 py-3 text-sm font-bold text-sky-300 transition hover:bg-sky-400/15"
+                        onClick={handleResend}
+                        type="button"
+                      >
+                        {isResending ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            جارٍ إعادة الإرسال...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="h-4 w-4" />
+                            إعادة إرسال الكود
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+
+                  <Button className="min-h-11 w-full text-base font-bold" disabled={isVerifyingOtp} type="button">
+                    {isVerifyingOtp ? "جارٍ التحقق..." : "بانتظار اكتمال إدخال الكود"}
+                  </Button>
+
+                  <Button
+                    className="min-h-11 w-full border-white/15 bg-transparent text-base text-white hover:bg-white/10"
+                    onClick={goBackToStepTwo}
+                    type="button"
+                    variant="outline"
+                  >
+                    ← رجوع
+                  </Button>
+                </>
+              ) : (
+                <div className="space-y-5 text-center">
+                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/15 text-emerald-300">
+                    <CheckCircle2 className="h-10 w-10" />
+                  </div>
+                  <div className="space-y-2">
+                    <h1 className="text-2xl font-extrabold sm:text-3xl">🎉 تم إنشاء حسابك بنجاح!</h1>
+                    <p className="text-sm leading-7 text-slate-300">
+                      سنترك جاهز على:
+                      <br />
+                      <span dir="ltr" className="font-bold text-sky-300">{normalizedSubdomain}.eduplatform.com</span>
+                    </p>
+                  </div>
+                  <Link
+                    className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-base font-bold text-white transition hover:bg-secondary"
+                    href="/teacher"
+                  >
+                    ادخل إلى سنترك ←
+                  </Link>
+                  <Button
+                    className="min-h-11 w-full border-white/15 bg-transparent text-base text-white hover:bg-white/10"
+                    onClick={goBackToStepTwo}
+                    type="button"
+                    variant="outline"
+                  >
+                    ← رجوع
+                  </Button>
+                </div>
+              )}
             </section>
           ) : null}
         </CardContent>
@@ -740,4 +567,3 @@ export default function TeacherSignupPage() {
     </main>
   );
 }
-

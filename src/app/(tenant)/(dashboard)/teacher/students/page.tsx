@@ -3,8 +3,8 @@ export const dynamic = "force-dynamic";
 import { redirect } from "next/navigation";
 
 import { requireAuth } from "@/lib/auth";
-import { getTeacherScopeUserId } from "@/lib/teacher-access";
 import { requireTenant } from "@/lib/tenant";
+import { getOpenGroups } from "@/modules/public-pages/queries";
 import { StudentsPageClient } from "@/modules/students/components/StudentsPageClient";
 import { getStudentsList } from "@/modules/students/queries";
 
@@ -16,8 +16,7 @@ export default async function TeacherStudentsPage() {
     redirect(user.role === "STUDENT" ? "/student" : "/parent");
   }
 
-  const teacherScopeUserId = getTeacherScopeUserId(tenant, user);
-  const students = await getStudentsList(tenant.id, teacherScopeUserId ?? undefined);
+  const [students, groups] = await Promise.all([getStudentsList(tenant.id), getOpenGroups(tenant.id)]);
 
-  return <StudentsPageClient students={students} />;
+  return <StudentsPageClient groups={groups} students={students} />;
 }

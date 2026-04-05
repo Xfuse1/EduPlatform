@@ -1,410 +1,304 @@
 import { cache } from "react";
 
 import { db } from "@/lib/db";
-import { formatArabicDate, getSessionStatusLabel } from "@/lib/utils";
-import { formatDisplayTime } from "@/lib/schedule";
-import { getCurrentMonthPaymentStatusMap, resolvePaymentStatus } from "@/modules/payments/queries";
+import { MOCK_ATTENDANCE_OVERVIEW, MOCK_ATTENDANCE_SESSIONS, MOCK_STUDENT_ATTENDANCE, MOCK_TODAY_SESSIONS } from "@/lib/mock-data";
 
-function startOfMonth(date = new Date()) {
-  const value = new Date(date);
-  value.setDate(1);
-  value.setHours(0, 0, 0, 0);
-  return value;
-}
+const arabicWeekDays = new Set(["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]);
 
-function addMonths(date: Date, offset: number) {
-  const value = new Date(date);
-  value.setMonth(value.getMonth() + offset);
-  return value;
-}
-
-function getAttendanceRate(statuses: string[]) {
-  if (statuses.length === 0) {
-    return 0;
-  }
-
-  const attendedCount = statuses.filter((status) => status !== "ABSENT").length;
-  return Math.round((attendedCount / statuses.length) * 100);
-}
-
-function getSessionMeta(status: string, date: Date) {
-  if (status === "IN_PROGRESS") {
-    return "الحصة جارية الآن";
-  }
-
-  if (status === "SCHEDULED") {
-    return formatArabicDate(date);
-  }
-
-  if (status === "COMPLETED") {
-    return "اكتملت الحصة";
-  }
-
-  return getSessionStatusLabel(status);
-}
-
-export const getTodaySessions = cache(async (tenantId: string, teacherId?: string) => {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-
-  const sessions = await db.session.findMany({
-    where: {
-      tenantId,
-      ...(teacherId
-        ? {
-            group: {
-              teacherId,
-            },
-          }
-        : {}),
-      date: {
-        gte: start,
-        lt: end,
-      },
-    },
-    orderBy: {
-      timeStart: "asc",
-    },
-    select: {
-      id: true,
-      timeStart: true,
-      timeEnd: true,
-      status: true,
-      group: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-
-  return sessions.map((session) => ({
-    ...session,
-    timeStart: formatDisplayTime(session.timeStart),
-    timeEnd: formatDisplayTime(session.timeEnd),
-  }));
-});
-
-export const getAttendanceOverview = cache(async (tenantId: string, teacherId?: string) => {
-  const currentMonthStart = startOfMonth();
-  const previousMonthStart = addMonths(currentMonthStart, -1);
-
-  const records = await db.attendance.findMany({
-    where: {
-      tenantId,
-      ...(teacherId
-        ? {
-            group: {
-              teacherId,
-            },
-          }
-        : {}),
-      createdAt: {
-        gte: previousMonthStart,
-      },
-    },
-    select: {
-      status: true,
-      createdAt: true,
-    },
-  });
-
-  const currentStatuses = records.filter((record) => record.createdAt >= currentMonthStart).map((record) => record.status);
-  const previousStatuses = records.filter((record) => record.createdAt < currentMonthStart).map((record) => record.status);
-  const rate = getAttendanceRate(currentStatuses);
-  const previousRate = getAttendanceRate(previousStatuses);
+function getTodayInfo() {
+  const now = new Date();
+  const date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const dayName = new Intl.DateTimeFormat("ar-EG", { weekday: "long" }).format(now);
 
   return {
-    rate,
-    change: rate - previousRate,
+    date,
+    dayName: arabicWeekDays.has(dayName) ? dayName : "السبت",
   };
-});
+}
 
-export const getStudentAttendanceSnapshot = cache(async (tenantId: string, studentId: string) => {
-  const currentMonthStart = startOfMonth();
-
-  const records = await db.attendance.findMany({
-    where: {
-      tenantId,
-      studentId,
-      createdAt: {
-        gte: currentMonthStart,
-      },
-    },
-    select: {
-      status: true,
-    },
-  });
-
-  return {
-    rate: getAttendanceRate(records.map((record) => record.status)),
-  };
-});
-
-export const getAttendanceSessions = cache(async (tenantId: string, teacherId?: string) => {
-  const sessions = await db.session.findMany({
-    where: {
-      tenantId,
-      ...(teacherId
-        ? {
-            group: {
-              teacherId,
-            },
-          }
-        : {}),
-    },
-    orderBy: [{ date: "desc" }, { timeStart: "desc" }],
-    take: 8,
-    select: {
-      id: true,
-      date: true,
-      timeStart: true,
-      timeEnd: true,
-      status: true,
-      group: {
-        select: {
-          name: true,
-          students: {
-            where: {
-              status: "ACTIVE",
-            },
-            select: {
-              id: true,
-            },
-          },
-        },
-      },
-      attendance: {
-        select: {
-          status: true,
-        },
-      },
-    },
-  });
-
-  return sessions.map((session) => {
-    const attended = session.attendance.filter((record) => record.status !== "ABSENT").length;
-    const total = session.attendance.length || session.group.students.length;
-
-    return {
-      id: session.id,
-      title: session.group.name,
-      group: session.group.name,
-      status: session.status,
-      timeStart: formatDisplayTime(session.timeStart),
-      timeEnd: formatDisplayTime(session.timeEnd),
-      attended,
-      total,
-      remaining: getSessionMeta(session.status, session.date),
-    };
-  });
-});
-
-export const getAttendanceSeries = cache(async (tenantId: string, teacherId?: string) => {
-  const currentMonthStart = startOfMonth();
-  const formatter = new Intl.DateTimeFormat("ar-EG", { month: "long" });
-
-  const records = await db.attendance.findMany({
-    where: {
-      tenantId,
-      ...(teacherId
-        ? {
-            group: {
-              teacherId,
-            },
-          }
-        : {}),
-    },
-    select: {
-      status: true,
-      createdAt: true,
-    },
-  });
-
-  return Array.from({ length: 6 }, (_, index) => {
-    const monthStart = addMonths(currentMonthStart, index - 5);
-    const nextMonth = addMonths(monthStart, 1);
-    const monthStatuses = records
-      .filter((record) => record.createdAt >= monthStart && record.createdAt < nextMonth)
-      .map((record) => record.status);
-
-    return {
-      month: formatter.format(monthStart),
-      rate: getAttendanceRate(monthStatuses),
-    };
-  });
-});
-
-export const getStudentTodayStatus = cache(async (tenantId: string, studentId: string) => {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-
-  const record = await db.attendance.findFirst({
-    where: {
-      tenantId,
-      studentId,
-      session: {
-        date: {
-          gte: start,
-          lt: end,
-        },
-      },
-    },
-    orderBy: {
-      markedAt: "desc",
-    },
-    select: {
-      status: true,
-    },
-  });
-
-  if (!record) {
-    return "NONE" as const;
-  }
-
-  return record.status === "ABSENT" ? ("ABSENT" as const) : ("PRESENT" as const);
-});
-
-export const getAttendanceReport = cache(async (tenantId: string, month: string, teacherId?: string) => {
-  const monthMatch = month.match(/^(\d{4})-(\d{2})$/);
-  const start = monthMatch ? new Date(Number(monthMatch[1]), Number(monthMatch[2]) - 1, 1) : startOfMonth();
-  const end = addMonths(start, 1);
-
-  return db.session.findMany({
-    where: {
-      tenantId,
-      ...(teacherId
-        ? {
-            group: {
-              teacherId,
-            },
-          }
-        : {}),
-      status: "COMPLETED",
-      date: {
-        gte: start,
-        lt: end,
-      },
-    },
-    orderBy: {
-      date: "desc",
-    },
-    select: {
-      id: true,
-      date: true,
-      group: {
-        select: {
-          name: true,
-          color: true,
-        },
-      },
-      _count: {
-        select: {
-          attendance: true,
-        },
-      },
-    },
-  });
-});
-
-export const getSessionAttendance = cache(async (tenantId: string, sessionId: string, teacherId?: string) => {
-  const session = await db.session.findFirst({
-    where: {
-      id: sessionId,
-      tenantId,
-      ...(teacherId
-        ? {
-            group: {
-              teacherId,
-            },
-          }
-        : {}),
-    },
-    select: {
-      id: true,
-      groupId: true,
-      date: true,
-      group: {
-        select: {
-          name: true,
-          timeStart: true,
-          timeEnd: true,
-        },
-      },
-    },
-  });
-
-  if (!session) {
-    return null;
-  }
-
-  const [enrollments, attendanceRecords] = await Promise.all([
-    db.groupStudent.findMany({
+export const getTodaySessions = cache(async (tenantId: string) => {
+  try {
+    const today = getTodayInfo();
+    const groups = await db.group.findMany({
       where: {
-        groupId: session.groupId,
-        status: {
-          in: ["ACTIVE", "WAITLIST"],
-        },
-        student: {
-          tenantId,
-          role: "STUDENT",
-          isActive: true,
+        tenantId,
+        isActive: true,
+      },
+      include: {
+        groupStudents: {
+          where: {
+            status: "ACTIVE",
+          },
+          select: {
+            studentId: true,
+          },
         },
       },
       orderBy: {
-        student: {
-          name: "asc",
-        },
+        timeStart: "asc",
       },
-      select: {
-        studentId: true,
-        student: {
+    });
+
+    const matchingGroups = groups.filter((group) => group.days.includes(today.dayName));
+
+    const sessions = await Promise.all(
+      matchingGroups.map(async (group) => {
+        const session = await db.session.upsert({
+          where: {
+            groupId_date: {
+              groupId: group.id,
+              date: today.date,
+            },
+          },
+          update: {},
+          create: {
+            tenantId,
+            groupId: group.id,
+            date: today.date,
+            timeStart: group.timeStart,
+            timeEnd: group.timeEnd,
+          },
+          include: {
+            group: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            attendances: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        });
+
+        return {
+          id: session.id,
+          timeStart: session.timeStart,
+          timeEnd: session.timeEnd,
+          status: session.status,
+          group: session.group,
+          attendanceCount: session.attendances.length,
+          totalStudents: group.groupStudents.length,
+        };
+      }),
+    );
+
+    return sessions;
+  } catch (error) {
+    console.error("DB getTodaySessions failed, using mock:", error);
+  }
+
+  return MOCK_TODAY_SESSIONS.map((session) => ({
+    ...session,
+    attendanceCount: 0,
+    totalStudents: 0,
+  }));
+});
+
+export const getAttendanceOverview = cache(async (tenantId: string) => {
+  try {
+    const now = new Date();
+    const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const previous30Days = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+    const [recentRecords, previousRecords] = await Promise.all([
+      db.attendance.findMany({
+        where: {
+          tenantId,
+          markedAt: {
+            gte: last30Days,
+          },
+        },
+        select: {
+          status: true,
+        },
+      }),
+      db.attendance.findMany({
+        where: {
+          tenantId,
+          markedAt: {
+            gte: previous30Days,
+            lt: last30Days,
+          },
+        },
+        select: {
+          status: true,
+        },
+      }),
+    ]);
+
+    const recentPresent = recentRecords.filter((record) => record.status === "PRESENT" || record.status === "LATE").length;
+    const previousPresent = previousRecords.filter((record) => record.status === "PRESENT" || record.status === "LATE").length;
+    const recentRate = recentRecords.length ? Math.round((recentPresent / recentRecords.length) * 100) : 0;
+    const previousRate = previousRecords.length ? Math.round((previousPresent / previousRecords.length) * 100) : 0;
+
+    return {
+      rate: recentRate,
+      change: recentRate - previousRate,
+    };
+  } catch (error) {
+    console.error("DB getAttendanceOverview failed, using mock:", error);
+  }
+
+  return MOCK_ATTENDANCE_OVERVIEW;
+});
+
+export const getStudentAttendanceSnapshot = cache(async (tenantId: string, studentId: string) => {
+  try {
+    const records = await db.attendance.findMany({
+      where: {
+        tenantId,
+        studentId,
+      },
+      orderBy: {
+        markedAt: "desc",
+      },
+      take: 10,
+      include: {
+        session: {
           select: {
-            id: true,
-            name: true,
+            date: true,
           },
         },
       },
-    }),
-    db.attendance.findMany({
-      where: {
-        tenantId,
-        sessionId,
-      },
-      select: {
-        studentId: true,
-        status: true,
-      },
-    }),
-  ]);
+    });
 
-  const paymentStatusMap = await getCurrentMonthPaymentStatusMap(
-    tenantId,
-    enrollments.map((enrollment) => enrollment.studentId),
-  );
-  const attendanceByStudentId = new Map(attendanceRecords.map((record) => [record.studentId, record.status]));
+    const attendedCount = records.filter((record) => record.status === "PRESENT" || record.status === "LATE").length;
+    const rate = records.length ? Math.round((attendedCount / records.length) * 100) : 0;
+
+    return {
+      rate,
+      records,
+    };
+  } catch (error) {
+    console.error("DB getStudentAttendanceSnapshot failed, using mock:", error);
+  }
 
   return {
-    session: {
-      id: session.id,
-      date: session.date,
-      group: {
-        name: session.group.name,
-        timeStart: formatDisplayTime(session.group.timeStart),
-        timeEnd: formatDisplayTime(session.group.timeEnd),
-      },
-    },
-    students: enrollments.map((enrollment) => ({
-      id: enrollment.student.id,
-      name: enrollment.student.name,
-      attendanceStatus: attendanceByStudentId.get(enrollment.studentId) ?? "ABSENT",
-      paymentStatus: resolvePaymentStatus(paymentStatusMap[enrollment.studentId] ?? []),
-    })),
+    ...MOCK_STUDENT_ATTENDANCE,
+    records: [],
   };
+});
+
+export const getAttendanceSessionsList = cache(async (tenantId: string) => {
+  try {
+    const sessions = await getTodaySessions(tenantId);
+
+    return sessions.map((session) => {
+      const remaining = session.status === "IN_PROGRESS" ? "الحصة جارية الآن" : session.status === "SCHEDULED" ? "لم تبدأ بعد" : "اكتملت الحصة";
+
+      return {
+        id: session.id,
+        title: session.group.name,
+        group: session.group.name,
+        status: session.status,
+        timeStart: session.timeStart,
+        timeEnd: session.timeEnd,
+        attended: session.attendanceCount ?? 0,
+        total: session.totalStudents ?? 0,
+        remaining,
+      };
+    });
+  } catch (error) {
+    console.error("DB getAttendanceSessionsList failed, using mock:", error);
+  }
+
+  return MOCK_ATTENDANCE_SESSIONS;
+});
+export const getSessionWithStudents = cache(async (sessionId: string) => {
+  try {
+    const session = await db.session.findUnique({
+      where: { id: sessionId },
+      include: {
+        group: {
+          include: {
+            groupStudents: {
+              where: { status: "ACTIVE" },
+              include: {
+                student: {
+                  select: { id: true, name: true, phone: true },
+                },
+              },
+            },
+          },
+        },
+        attendances: true,
+      },
+    });
+
+    if (!session) return null;
+
+    // Get all student IDs involved (either in group or in attendance)
+    const groupStudentIds = new Set(session.group.groupStudents.map((gs) => gs.studentId));
+    const attendanceStudentIds = new Set(session.attendances.map((a) => a.studentId));
+    const allStudentIds = new Set([...groupStudentIds, ...attendanceStudentIds]);
+
+    // Fetch details for students who are not in the group but are in attendance (guests)
+    const guestIds = [...attendanceStudentIds].filter(id => !groupStudentIds.has(id));
+    const guestStudents = guestIds.length > 0 
+      ? await db.user.findMany({
+          where: { id: { in: guestIds } },
+          select: { id: true, name: true, phone: true }
+        })
+      : [];
+
+    // Map all students
+    const students = [...allStudentIds].map((id) => {
+      const gs = session.group.groupStudents.find((s) => s.studentId === id);
+      const record = session.attendances.find((a) => a.studentId === id);
+      const guestInfo = guestStudents.find((s) => s.id === id);
+
+      return {
+        id: id,
+        name: gs ? gs.student.name : (guestInfo ? guestInfo.name : "طالب غير معروف"),
+        phone: gs ? gs.student.phone : (guestInfo ? guestInfo.phone : ""),
+        status: record ? record.status : "ABSENT",
+        method: record ? record.method : "MANUAL",
+        markedAt: record ? record.markedAt : null,
+      };
+    });
+
+    return {
+      id: session.id,
+      groupId: session.groupId,
+      tenantId: session.tenantId,
+      title: session.group.name,
+      status: session.status,
+      timeStart: session.timeStart,
+      timeEnd: session.timeEnd,
+      qrToken: session.qrToken,
+      qrExpiresAt: session.qrExpiresAt,
+      students: students.sort((a, b) => a.name.localeCompare(b.name, "ar")),
+    };
+  } catch (error) {
+    console.error("DB getSessionWithStudents failed:", error);
+    return null;
+  }
+});
+export const getAllAttendanceRecords = cache(async (tenantId: string) => {
+  try {
+    const records = await db.attendance.findMany({
+      where: { tenantId },
+      include: {
+        student: { select: { name: true } },
+        session: { select: { date: true, group: { select: { name: true } } } },
+      },
+      orderBy: { markedAt: "desc" },
+    });
+
+    return records.map((r) => ({
+      id: r.id,
+      studentName: r.student.name,
+      groupName: r.session.group.name,
+      date: r.session.date,
+      status: r.status,
+      method: r.method,
+      markedAt: r.markedAt,
+    }));
+  } catch (error) {
+    console.error("DB getAllAttendanceRecords failed:", error);
+    return [];
+  }
 });

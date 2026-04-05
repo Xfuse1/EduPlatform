@@ -1,16 +1,17 @@
 'use client';
 
-import { Clock3, Pencil, Plus, Users, X } from "lucide-react";
-import { useState, useTransition } from "react";
+import { Clock3, Pencil, Plus, Users, X, Info } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition, useEffect } from "react";
 
-import { saveGroup } from "@/modules/groups/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { formatCapacity, formatCurrency, toArabicDigits } from "@/lib/utils";
+import { createGroup, updateGroup } from "@/modules/groups/actions";
 
-export type GroupItem = {
+type GroupItem = {
   id: string;
   name: string;
   subject: string;
@@ -18,7 +19,6 @@ export type GroupItem = {
   days: string[];
   timeStart: string;
   timeEnd: string;
-  room?: string | null;
   monthlyFee: number;
   maxCapacity: number;
   enrolledCount: number;
@@ -26,55 +26,61 @@ export type GroupItem = {
 };
 
 export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[] }) {
+  const router = useRouter();
   const [groups, setGroups] = useState(initialGroups);
+
+  useEffect(() => {
+    setGroups(initialGroups);
+  }, [initialGroups]);
+
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
+  const [gradeLevel, setGradeLevel] = useState("");
   const [days, setDays] = useState("");
   const [timeStart, setTimeStart] = useState("");
   const [timeEnd, setTimeEnd] = useState("");
   const [monthlyFee, setMonthlyFee] = useState("");
   const [capacity, setCapacity] = useState("");
-  const [error, setError] = useState("");
-  const [isPending, startTransition] = useTransition();
 
   const resetForm = () => {
     setName("");
     setSubject("");
+    setGradeLevel("");
     setDays("");
     setTimeStart("");
     setTimeEnd("");
     setMonthlyFee("");
     setCapacity("");
     setEditingGroupId(null);
-    setError("");
     setIsOpen(false);
   };
 
   const openCreateDialog = () => {
     setName("");
     setSubject("");
+    setGradeLevel("");
     setDays("");
     setTimeStart("");
     setTimeEnd("");
     setMonthlyFee("");
     setCapacity("");
     setEditingGroupId(null);
-    setError("");
     setIsOpen(true);
   };
 
   const openEditDialog = (group: GroupItem) => {
     setName(group.name);
     setSubject(group.subject);
+    setGradeLevel(group.gradeLevel || "");
     setDays(group.days.join(" - "));
     setTimeStart(group.timeStart);
     setTimeEnd(group.timeEnd);
     setMonthlyFee(String(group.monthlyFee));
     setCapacity(String(group.maxCapacity));
     setEditingGroupId(group.id);
-    setError("");
     setIsOpen(true);
   };
 
@@ -82,46 +88,51 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
     event.preventDefault();
 
     if (!name.trim() || !subject.trim() || !days.trim() || !timeStart.trim() || !timeEnd.trim() || !monthlyFee.trim() || !capacity.trim()) {
-      setError("يرجى إدخال كل الحقول المطلوبة");
       return;
     }
 
-    setError("");
-
     startTransition(async () => {
-      const result = await saveGroup({
-        id: editingGroupId ?? undefined,
-        name: name.trim(),
-        subject: subject.trim(),
-        gradeLevel: "",
-        room: "",
-        days: days
-          .split("-")
-          .map((day) => day.trim())
-          .filter(Boolean),
-        timeStart: timeStart.trim(),
-        timeEnd: timeEnd.trim(),
-        monthlyFee: Number(monthlyFee),
-        maxCapacity: Number(capacity),
-      });
-
-      if (!result.success) {
-        setError(result.message ?? "تعذر حفظ المجموعة");
-        return;
-      }
-
-      if (!result.group) {
-        setError("تعذر استلام بيانات المجموعة بعد الحفظ");
-        return;
-      }
+      const formData = new FormData();
+      formData.set("name", name.trim());
+      formData.set("subject", subject.trim());
+      formData.set("gradeLevel", gradeLevel.trim());
+      formData.set("days", days.trim());
+      formData.set("timeStart", timeStart.trim());
+      formData.set("timeEnd", timeEnd.trim());
+      formData.set("monthlyFee", monthlyFee);
+      formData.set("maxCapacity", capacity);
 
       if (editingGroupId) {
-        setGroups((current) => current.map((group) => (group.id === editingGroupId ? result.group : group)));
-      } else {
-        setGroups((current) => [result.group, ...current]);
+        formData.set("groupId", editingGroupId);
+        const result = await updateGroup(formData);
+        if (result.success) {
+          setGroups((current) =>
+            current.map((group) =>
+              group.id === editingGroupId
+                ? {
+                    ...group,
+                    name: name.trim(),
+                    subject: subject.trim(),
+                    gradeLevel: gradeLevel.trim(),
+                    days: days.split("-").map((day) => day.trim()).filter(Boolean),
+                    timeStart: timeStart.trim(),
+                    timeEnd: timeEnd.trim(),
+                    monthlyFee: Number(monthlyFee),
+                    maxCapacity: Number(capacity),
+                  }
+                : group,
+            ),
+          );
+          resetForm();
+        }
+        return;
       }
 
-      resetForm();
+      const result = await createGroup(formData);
+      if (result.success) {
+        router.refresh();
+        resetForm();
+      }
     });
   };
 
@@ -138,7 +149,7 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
             <Plus className="h-4 w-4" />
             إنشاء مجموعة جديدة
           </Button>
-          <p className="text-xs text-slate-500 dark:text-slate-400">أي تعديل هنا يتم حفظه مباشرة في قاعدة البيانات.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">أضف مجموعة جديدة وستظهر مباشرة في القائمة أدناه.</p>
         </div>
       </div>
 
@@ -211,7 +222,7 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
                   {editingGroupId ? "تعديل المجموعة" : "إنشاء مجموعة جديدة"}
                 </h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  {editingGroupId ? "حدّث بيانات المجموعة وسيتم حفظها في القاعدة." : "أضف مجموعة جديدة وسيتم حفظها في القاعدة."}
+                  {editingGroupId ? "حدّث بيانات المجموعة وسيتم تعديل البطاقة مباشرة." : "أضف مجموعة وستظهر مباشرة داخل الصفحة."}
                 </p>
               </div>
               <button
@@ -234,6 +245,10 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
                 <Input onChange={(event) => setSubject(event.target.value)} placeholder="رياضيات" value={subject} />
               </div>
               <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">الصف الدراسي</label>
+                <Input onChange={(event) => setGradeLevel(event.target.value)} placeholder="مثال: الأول الثانوي" value={gradeLevel} />
+              </div>
+              <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">الأيام</label>
                 <Input onChange={(event) => setDays(event.target.value)} placeholder="الأحد - الثلاثاء" value={days} />
               </div>
@@ -253,13 +268,6 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
                 <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">السعة</label>
                 <Input dir="ltr" inputMode="numeric" onChange={(event) => setCapacity(event.target.value.replace(/\D/g, ""))} placeholder="24" value={capacity} />
               </div>
-
-              {error ? (
-                <p className="md:col-span-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200">
-                  {error}
-                </p>
-              ) : null}
-
               <div className="flex gap-3 md:col-span-2">
                 <Button className="w-full" disabled={isPending} type="submit">
                   {isPending ? "جارٍ الحفظ..." : editingGroupId ? "حفظ التعديلات" : "حفظ المجموعة"}

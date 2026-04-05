@@ -8,7 +8,7 @@ async function main() {
     update: {
       name: "أ/ أحمد حسن",
       plan: "PRO",
-      phone: "01000000001",
+      phone: "01000000000",
       region: "الجيزة",
       bio: "مركز تعليمي متخصص في الرياضيات والعلوم للمرحلة الإعدادية والثانوية.",
       subjects: ["الرياضيات", "العلوم"],
@@ -18,7 +18,7 @@ async function main() {
       slug: "ahmed",
       name: "أ/ أحمد حسن",
       plan: "PRO",
-      phone: "01000000001",
+      phone: "01000000000",
       region: "الجيزة",
       bio: "مركز تعليمي متخصص في الرياضيات والعلوم للمرحلة الإعدادية والثانوية.",
       subjects: ["الرياضيات", "العلوم"],
@@ -30,7 +30,7 @@ async function main() {
     where: {
       tenantId_phone: {
         tenantId: tenant.id,
-        phone: "01010000001",
+        phone: "01000000000",
       },
     },
     update: {
@@ -40,7 +40,7 @@ async function main() {
     },
     create: {
       tenantId: tenant.id,
-      phone: "01010000001",
+      phone: "01000000000",
       name: "أحمد حسن",
       role: UserRole.TEACHER,
       isActive: true,
@@ -51,7 +51,7 @@ async function main() {
     where: {
       tenantId_phone: {
         tenantId: tenant.id,
-        phone: "01010000002",
+        phone: "01000000001",
       },
     },
     update: {
@@ -62,7 +62,7 @@ async function main() {
     },
     create: {
       tenantId: tenant.id,
-      phone: "01010000002",
+      phone: "01000000001",
       name: "محمد خالد",
       role: UserRole.STUDENT,
       gradeLevel: "الصف الثالث الإعدادي",
@@ -74,23 +74,23 @@ async function main() {
     where: {
       tenantId_phone: {
         tenantId: tenant.id,
-        phone: "01010000003",
+        phone: "01000000002",
       },
     },
     update: {
       name: "خالد محمد",
       role: UserRole.PARENT,
       parentName: "ولي أمر محمد خالد",
-      parentPhone: "01010000003",
+      parentPhone: "01000000002",
       isActive: true,
     },
     create: {
       tenantId: tenant.id,
-      phone: "01010000003",
+      phone: "01000000002",
       name: "خالد محمد",
       role: UserRole.PARENT,
       parentName: "ولي أمر محمد خالد",
-      parentPhone: "01010000003",
+      parentPhone: "01000000002",
       isActive: true,
     },
   });

@@ -1,152 +1,127 @@
-import { Plan, TenantAccountType } from "@prisma/client";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
-import { TENANT_CONTEXT_COOKIE_NAME } from "@/lib/tenant-context";
 import { db } from "@/lib/db";
-import { extractTenantSlug } from "@/lib/tenant-host";
-
-type HeaderReader = {
-  get(name: string): string | null | undefined;
-};
-
-type CookieReader = {
-  get(name: string): { value: string } | undefined;
-};
-
-type TenantRequestLike = {
-  headers?: HeaderReader;
-  cookies?: CookieReader;
-};
+import { MOCK_TENANT } from "@/lib/mock-data";
 
 export type ResolvedTenant = {
   id: string;
   slug: string;
   name: string;
-  logoUrl: string | null;
   themeColor: string;
+  plan: "FREE" | "BASIC" | "PRO" | "BUSINESS";
+  isActive: boolean;
+  smsQuota: number;
+  logoUrl: string | null;
+  phone: string | null;
   region: string | null;
   bio: string | null;
   subjects: string[];
-  plan: Plan;
-  phone: string | null;
-  isActive: boolean;
-  accountType: TenantAccountType;
 };
 
-export class TenantNotFoundError extends Error {
-  constructor(message = "السنتر المطلوب غير موجود") {
-    super(message);
-    this.name = "TenantNotFoundError";
-  }
-}
+const SPECIAL_SUBDOMAINS = new Set(["www", "app", "api", "localhost"]);
 
-export class InactiveTenantError extends Error {
-  constructor(message = "السنتر المطلوب غير مفعل حاليًا") {
-    super(message);
-    this.name = "InactiveTenantError";
-  }
-}
+const FALLBACK_TENANT: ResolvedTenant = {
+  ...MOCK_TENANT,
+  isActive: true,
+  smsQuota: 50,
+  phone: null,
+};
 
-function getTenantSlugFromHost(host: string) {
-  return extractTenantSlug(host);
-}
+function extractSubdomain(host: string) {
+  const hostname = host.trim().toLowerCase().split(":")[0] ?? "";
 
-async function getHeaderValue(request: TenantRequestLike | undefined, name: string) {
-  if (request?.headers) {
-    return request.headers.get(name)?.trim() ?? null;
+  if (hostname.endsWith(".localhost")) {
+    return hostname.split(".")[0] ?? "";
   }
 
-  const headerStore = await headers();
-  return headerStore.get(name)?.trim() ?? null;
-}
-
-async function getCookieValue(request: TenantRequestLike | undefined, name: string) {
-  if (request?.cookies) {
-    return request.cookies.get(name)?.value?.trim() ?? null;
+  const parts = hostname.split(".");
+  if (parts.length > 2) {
+    return parts[0] ?? "";
   }
 
-  const cookieStore = await cookies();
-  return cookieStore.get(name)?.value?.trim() ?? null;
+  return hostname;
 }
 
-async function resolveTenantSlug(request?: TenantRequestLike) {
-  const forcedSlug = (await getHeaderValue(request, "x-tenant-slug"))?.toLowerCase();
+const findTenantByHost = cache(async (host: string): Promise<ResolvedTenant> => {
+  const subdomain = extractSubdomain(host)
+    .replace(":3000", "")
+    .replace(":3001", "");
 
-  if (forcedSlug) {
-    return forcedSlug;
+  try {
+    if (!subdomain || SPECIAL_SUBDOMAINS.has(subdomain) || subdomain.includes("vercel")) {
+      const defaultTenant = await db.tenant.findFirst({
+        where: {
+          isActive: true,
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+        select: {
+          id: true,
+          slug: true,
+          name: true,
+          themeColor: true,
+          plan: true,
+          isActive: true,
+          smsQuota: true,
+          logoUrl: true,
+          phone: true,
+          region: true,
+          bio: true,
+          subjects: true,
+        },
+      });
+
+      if (defaultTenant) {
+        return defaultTenant;
+      }
+
+      return FALLBACK_TENANT;
+    }
+
+    const tenant = await db.tenant.findFirst({
+      where: {
+        slug: subdomain,
+        isActive: true,
+      },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        themeColor: true,
+        plan: true,
+        isActive: true,
+        smsQuota: true,
+        logoUrl: true,
+        phone: true,
+        region: true,
+        bio: true,
+        subjects: true,
+      },
+    });
+
+    if (tenant) {
+      return tenant;
+    }
+  } catch (error) {
+    console.error("DB tenant lookup failed, using mock:", error);
   }
 
-  const host =
-    (await getHeaderValue(request, "x-forwarded-host")) ??
-    (await getHeaderValue(request, "host")) ??
-    "localhost:3000";
-  const hostSlug = getTenantSlugFromHost(host);
-
-  if (hostSlug) {
-    return hostSlug;
-  }
-
-  return (await getCookieValue(request, TENANT_CONTEXT_COOKIE_NAME))?.toLowerCase() ?? "";
-}
-
-export async function getTenantBySlug(slug: string) {
-  return db.tenant.findUnique({
-    where: { slug },
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      logoUrl: true,
-      themeColor: true,
-      region: true,
-      bio: true,
-      subjects: true,
-      plan: true,
-      phone: true,
-      isActive: true,
-      accountType: true,
-    },
-  });
-}
+  return FALLBACK_TENANT;
+});
 
 export async function getTenantFromHost(host: string) {
-  const slug = getTenantSlugFromHost(host);
-
-  if (!slug) {
-    return null;
-  }
-
-  return getTenantBySlug(slug);
+  return findTenantByHost(host);
 }
 
-export async function getOptionalTenant(request?: TenantRequestLike) {
-  const slug = await resolveTenantSlug(request);
-
-  if (!slug) {
-    return null;
-  }
-
-  return getTenantBySlug(slug);
-}
-
-export async function requireTenant(request?: TenantRequestLike) {
-  const slug = await resolveTenantSlug(request);
-  const tenant = slug ? await getTenantBySlug(slug) : null;
+export async function requireTenant() {
+  const headerStore = await headers();
+  const host = headerStore.get("host") ?? "localhost:3000";
+  const tenant = await getTenantFromHost(host);
 
   if (!tenant) {
-    if (request) {
-      throw new TenantNotFoundError();
-    }
-
-    notFound();
-  }
-
-  if (!tenant.isActive) {
-    if (request) {
-      throw new InactiveTenantError();
-    }
-
     notFound();
   }
 

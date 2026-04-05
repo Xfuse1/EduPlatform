@@ -1,442 +1,435 @@
-'use server'
+'use server';
 
-import { EnrollmentStatus, Prisma, type UserRole, UserRole as PrismaUserRole } from '@prisma/client'
-import { revalidatePath } from 'next/cache'
+import { randomUUID } from "node:crypto";
 
-import { ROUTES } from '@/config/routes'
-import { requireAuth } from '@/lib/auth'
-import { db } from '@/lib/db'
-import { requireTenant } from '@/lib/tenant'
-import { buildPhoneConflictMessage, findUserByPhone, isPhoneUniqueConstraintError } from '@/lib/user-phone'
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
-import { parseStudentFormData, parseStudentImportRecord } from './validations'
+import { db } from "@/lib/db";
+import { requireTenant } from "@/lib/tenant";
 
-const MANAGE_STUDENT_ROLES: UserRole[] = ['TEACHER', 'ASSISTANT']
-const ACTIVE_ENROLLMENT_STATUSES = [EnrollmentStatus.ACTIVE, EnrollmentStatus.WAITLIST]
+const createStudentSchema = z.object({
+  studentName: z.string().trim().min(2, "الاسم يجب أن يكون حرفين على الأقل"),
+  parentName: z.string().trim().min(2, "اسم ولي الأمر مطلوب"),
+  parentPhone: z.string().trim().regex(/^01[0-9]{9}$/, "رقم الهاتف غير صحيح"),
+  studentPhone: z.union([z.string().trim().regex(/^01[0-9]{9}$/, "رقم الهاتف غير صحيح"), z.literal("")]).optional(),
+  gradeLevel: z.string().trim().min(1, "الصف الدراسي مطلوب"),
+  groupId: z.string().trim().optional(),
+});
 
-function assertCanManageStudents(role: UserRole) {
-  if (!MANAGE_STUDENT_ROLES.includes(role)) {
-    throw new Error('ليس لديك صلاحية لإدارة الطلاب')
-  }
+type CreateStudentResult = {
+  success: boolean;
+  studentId?: string;
+  message?: string;
+};
+
+type UpdateStudentResult = {
+  success: boolean;
+  studentId?: string;
+  message?: string;
+};
+
+function generateId() {
+  return randomUUID();
 }
 
-function revalidateStudentPages(studentId?: string, groupIds: string[] = []) {
-  revalidatePath(ROUTES.teacher.students)
-  revalidatePath(ROUTES.teacher.newStudent)
-  revalidatePath(ROUTES.teacher.importStudents)
+export async function createStudent(formData: FormData): Promise<CreateStudentResult> {
+  const tenant = await requireTenant();
 
-  if (studentId) {
-    revalidatePath(`${ROUTES.teacher.students}/${studentId}`)
+  const parsed = createStudentSchema.safeParse({
+    studentName: formData.get("studentName"),
+    studentPhone: formData.get("studentPhone"),
+    parentName: formData.get("parentName"),
+    parentPhone: formData.get("parentPhone"),
+    gradeLevel: formData.get("gradeLevel"),
+    groupId: formData.get("groupId"),
+  });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: parsed.error.issues[0]?.message ?? "تعذر حفظ بيانات الطالب",
+    };
   }
 
-  revalidatePath(ROUTES.teacher.groups)
+  const { studentName, studentPhone, parentName, parentPhone, gradeLevel, groupId } = parsed.data;
+  const normalizedGroupId = groupId?.trim() ? groupId.trim() : undefined;
+  const normalizedStudentPhone = studentPhone?.trim() ? studentPhone.trim() : `student-${generateId()}`;
 
-  for (const groupId of groupIds) {
-    revalidatePath(`${ROUTES.teacher.groups}/${groupId}`)
-    revalidatePath(`${ROUTES.teacher.groups}/${groupId}/edit`)
-  }
-}
-
-async function getScopedStudent(tenantId: string, studentId: string) {
-  return db.user.findFirst({
-    where: {
-      id: studentId,
-      tenantId,
-      role: PrismaUserRole.STUDENT,
-    },
-  })
-}
-
-async function ensureUniqueStudentPhone(phone: string, currentStudentId?: string) {
-  const existingUser = await findUserByPhone(phone, currentStudentId)
-
-  if (existingUser) {
-    throw new Error(buildPhoneConflictMessage(existingUser.role))
-  }
-}
-
-async function getActiveEnrollmentGroupIds(tenantId: string, studentId: string) {
-  const enrollments = await db.groupStudent.findMany({
-    where: {
-      studentId,
-      status: {
-        in: ACTIVE_ENROLLMENT_STATUSES,
+  try {
+    const duplicateParent = await db.user.findFirst({
+      where: {
+        tenantId: tenant.id,
+        phone: parentPhone,
+        role: "PARENT",
       },
-      group: {
-        tenantId,
+      select: {
+        id: true,
       },
-    },
-    select: {
-      groupId: true,
-    },
-  })
+    });
 
-  return enrollments.map((enrollment) => enrollment.groupId)
-}
+    if (duplicateParent) {
+      return {
+        success: false,
+        message: "ولي الأمر مسجل مسبقاً",
+      };
+    }
 
-async function syncStudentEnrollments(
-  tx: Prisma.TransactionClient,
-  tenantId: string,
-  studentId: string,
-  groupIds: string[],
-) {
-  const uniqueGroupIds = [...new Set(groupIds)]
-
-  const [targetGroups, existingEnrollments] = await Promise.all([
-    uniqueGroupIds.length > 0
-      ? tx.group.findMany({
-          where: {
-            tenantId,
-            isActive: true,
-            id: {
-              in: uniqueGroupIds,
+    if (normalizedGroupId) {
+      const group = await db.group.findFirst({
+        where: {
+          id: normalizedGroupId,
+          tenantId: tenant.id,
+          isActive: true,
+        },
+        include: {
+          _count: {
+            select: {
+              groupStudents: true,
             },
+          },
+        },
+      });
+
+      if (!group) {
+        return {
+          success: false,
+          message: "المجموعة المختارة غير متاحة",
+        };
+      }
+
+      if (group._count.groupStudents >= group.maxCapacity) {
+        return {
+          success: false,
+          message: "لا توجد أماكن متاحة في هذه المجموعة",
+        };
+      }
+    }
+
+    const parent = await db.user.upsert({
+      where: {
+        tenantId_phone: {
+          tenantId: tenant.id,
+          phone: parentPhone,
+        },
+      },
+      create: {
+        id: generateId(),
+        tenantId: tenant.id,
+        phone: parentPhone,
+        name: parentName,
+        role: "PARENT",
+        isActive: true,
+      },
+      update: {},
+      select: {
+        id: true,
+      },
+    });
+
+    const student = await db.user.create({
+      data: {
+        id: generateId(),
+        tenantId: tenant.id,
+        phone: normalizedStudentPhone,
+        name: studentName,
+        role: "STUDENT",
+        isActive: true,
+        gradeLevel,
+        parentName,
+        parentPhone,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (normalizedGroupId) {
+      await db.groupStudent.create({
+        data: {
+          id: generateId(),
+          groupId: normalizedGroupId,
+          studentId: student.id,
+          status: "ACTIVE",
+          enrolledAt: new Date(),
+        },
+      });
+    }
+
+    await db.parentStudent.create({
+      data: {
+        id: generateId(),
+        parentId: parent.id,
+        studentId: student.id,
+        relationship: "parent",
+      },
+    });
+
+    revalidatePath("/teacher/students");
+
+    return {
+      success: true,
+      studentId: student.id,
+    };
+  } catch (error) {
+    console.error("DB createStudent failed:", error);
+
+    return {
+      success: false,
+      message: "تعذر إضافة الطالب حاليًا",
+    };
+  }
+}
+
+export async function updateStudent(formData: FormData): Promise<UpdateStudentResult> {
+  const tenant = await requireTenant();
+
+  const parsed = createStudentSchema.extend({
+    studentId: z.string().trim().min(1, "تعذر تحديد الطالب"),
+  }).safeParse({
+    studentId: formData.get("studentId"),
+    studentName: formData.get("studentName"),
+    studentPhone: formData.get("studentPhone"),
+    parentName: formData.get("parentName"),
+    parentPhone: formData.get("parentPhone"),
+    gradeLevel: formData.get("gradeLevel"),
+    groupId: formData.get("groupId"),
+  });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: parsed.error.issues[0]?.message ?? "تعذر تحديث بيانات الطالب",
+    };
+  }
+
+  const { studentId, studentName, studentPhone, parentName, parentPhone, gradeLevel, groupId } = parsed.data;
+  const normalizedGroupId = groupId?.trim() ? groupId.trim() : undefined;
+  const normalizedStudentPhone = studentPhone?.trim() ? studentPhone.trim() : undefined;
+
+  try {
+    const existingStudent = await db.user.findFirst({
+      where: {
+        id: studentId,
+        tenantId: tenant.id,
+        role: "STUDENT",
+      },
+      include: {
+        childStudents: {
+          include: {
+            parent: {
+              select: {
+                id: true,
+                phone: true,
+              },
+            },
+          },
+        },
+        groupStudents: {
+          where: {
+            status: "ACTIVE",
           },
           select: {
             id: true,
-            maxCapacity: true,
+            groupId: true,
           },
-        })
-      : Promise.resolve([]),
-    tx.groupStudent.findMany({
+        },
+      },
+    });
+
+    if (!existingStudent) {
+      return {
+        success: false,
+        message: "الطالب غير موجود",
+      };
+    }
+
+    const currentParentLink = existingStudent.childStudents[0];
+
+    if (!currentParentLink) {
+      return {
+        success: false,
+        message: "تعذر العثور على ولي الأمر المرتبط",
+      };
+    }
+
+    const duplicateParent = await db.user.findFirst({
       where: {
-        studentId,
-        group: {
-          tenantId,
+        tenantId: tenant.id,
+        phone: parentPhone,
+        role: "PARENT",
+        NOT: {
+          id: currentParentLink.parent.id,
         },
       },
       select: {
         id: true,
-        groupId: true,
-        status: true,
       },
-    }),
-  ])
+    });
 
-  if (targetGroups.length !== uniqueGroupIds.length) {
-    throw new Error('إحدى المجموعات المطلوبة غير موجودة أو غير نشطة')
-  }
-
-  const existingEnrollmentMap = new Map(
-    existingEnrollments.map((enrollment) => [enrollment.groupId, enrollment]),
-  )
-
-  for (const group of targetGroups) {
-    const existingEnrollment = existingEnrollmentMap.get(group.id)
-
-    const activeEnrollmentCount = await tx.groupStudent.count({
-      where: {
-        groupId: group.id,
-        status: EnrollmentStatus.ACTIVE,
-        group: {
-          tenantId,
-        },
-        student: {
-          tenantId,
-          role: PrismaUserRole.STUDENT,
-        },
-        ...(existingEnrollment?.status === EnrollmentStatus.ACTIVE
-          ? {
-              studentId: {
-                not: studentId,
-              },
-            }
-          : {}),
-      },
-    })
-
-    const nextStatus =
-      activeEnrollmentCount >= group.maxCapacity
-        ? EnrollmentStatus.WAITLIST
-        : EnrollmentStatus.ACTIVE
-
-    if (existingEnrollment) {
-      await tx.groupStudent.update({
-        where: {
-          id: existingEnrollment.id,
-        },
-        data: {
-          status: nextStatus,
-          droppedAt: null,
-        },
-      })
-      continue
-    }
-
-    await tx.groupStudent.create({
-      data: {
-        groupId: group.id,
-        studentId,
-        status: nextStatus,
-      },
-    })
-  }
-
-  const groupIdsToDrop = existingEnrollments
-    .filter(
-      (enrollment) =>
-        !uniqueGroupIds.includes(enrollment.groupId) &&
-        enrollment.status !== EnrollmentStatus.DROPPED,
-    )
-    .map((enrollment) => enrollment.id)
-
-  if (groupIdsToDrop.length > 0) {
-    await tx.groupStudent.updateMany({
-      where: {
-        id: {
-          in: groupIdsToDrop,
-        },
-      },
-      data: {
-        status: EnrollmentStatus.DROPPED,
-        droppedAt: new Date(),
-      },
-    })
-  }
-}
-
-function getImportErrorMessage(error: unknown) {
-  if (isPhoneUniqueConstraintError(error)) {
-    return buildPhoneConflictMessage()
-  }
-
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    if (error.code === 'P2002') {
-      return 'فشل الحفظ بسبب بيانات مكررة'
-    }
-  }
-
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return 'حدث خطأ غير متوقع أثناء الاستيراد'
-}
-
-export async function createStudent(formData: FormData) {
-  const tenant = await requireTenant()
-  const user = await requireAuth()
-
-  assertCanManageStudents(user.role)
-
-  const data = parseStudentFormData(formData)
-
-  await ensureUniqueStudentPhone(data.phone)
-
-  let result
-
-  try {
-    result = await db.$transaction(async (tx) => {
-      const student = await tx.user.create({
-        data: {
-          tenantId: tenant.id,
-          role: PrismaUserRole.STUDENT,
-          name: data.name,
-          phone: data.phone,
-          parentName: data.parentName,
-          parentPhone: data.parentPhone,
-          gradeLevel: data.gradeLevel,
-        },
-      })
-
-      if (data.syncGroups) {
-        await syncStudentEnrollments(tx, tenant.id, student.id, data.groupIds)
-      }
-
-      return student
-    })
-  } catch (error) {
-    if (isPhoneUniqueConstraintError(error)) {
-      throw new Error(buildPhoneConflictMessage())
-    }
-
-    throw error
-  }
-
-  revalidateStudentPages(result.id, data.groupIds)
-
-  return {
-    student: result,
-    groupIds: data.groupIds,
-  }
-}
-
-export async function updateStudent(studentId: string, formData: FormData) {
-  const tenant = await requireTenant()
-  const user = await requireAuth()
-
-  assertCanManageStudents(user.role)
-
-  const existingStudent = await getScopedStudent(tenant.id, studentId)
-
-  if (!existingStudent) {
-    throw new Error('الطالب غير موجود')
-  }
-
-  const currentGroupIds = await getActiveEnrollmentGroupIds(tenant.id, existingStudent.id)
-  const data = parseStudentFormData(formData)
-
-  await ensureUniqueStudentPhone(data.phone, existingStudent.id)
-
-  let result
-
-  try {
-    result = await db.$transaction(async (tx) => {
-      const student = await tx.user.update({
-        where: {
-          id: existingStudent.id,
-        },
-        data: {
-          name: data.name,
-          phone: data.phone,
-          parentName: data.parentName,
-          parentPhone: data.parentPhone,
-          gradeLevel: data.gradeLevel,
-        },
-      })
-
-      if (data.syncGroups) {
-        await syncStudentEnrollments(tx, tenant.id, student.id, data.groupIds)
-      }
-
-      return student
-    })
-  } catch (error) {
-    if (isPhoneUniqueConstraintError(error)) {
-      throw new Error(buildPhoneConflictMessage())
-    }
-
-    throw error
-  }
-
-  revalidateStudentPages(
-    existingStudent.id,
-    data.syncGroups ? [...new Set([...currentGroupIds, ...data.groupIds])] : currentGroupIds,
-  )
-
-  return {
-    student: result,
-    groupIds: data.syncGroups ? data.groupIds : currentGroupIds,
-  }
-}
-
-export async function syncStudentGroups(studentId: string, groupIds: string[]) {
-  const tenant = await requireTenant()
-  const user = await requireAuth()
-
-  assertCanManageStudents(user.role)
-
-  const student = await getScopedStudent(tenant.id, studentId)
-
-  if (!student) {
-    throw new Error('الطالب غير موجود')
-  }
-
-  const currentGroupIds = await getActiveEnrollmentGroupIds(tenant.id, student.id)
-
-  await db.$transaction((tx) =>
-    syncStudentEnrollments(tx, tenant.id, student.id, groupIds),
-  )
-
-  revalidateStudentPages(student.id, [...new Set([...currentGroupIds, ...groupIds])])
-
-  return {
-    studentId: student.id,
-    groupIds,
-  }
-}
-
-export async function enrollInGroup(studentId: string, groupId: string) {
-  const tenant = await requireTenant()
-  const currentGroupIds = await getActiveEnrollmentGroupIds(tenant.id, studentId)
-
-  if (currentGroupIds.includes(groupId)) {
-    return {
-      studentId,
-      groupIds: currentGroupIds,
-    }
-  }
-
-  return syncStudentGroups(studentId, [...currentGroupIds, groupId])
-}
-
-export async function removeFromGroup(studentId: string, groupId: string) {
-  const tenant = await requireTenant()
-  const currentGroupIds = await getActiveEnrollmentGroupIds(tenant.id, studentId)
-
-  if (!currentGroupIds.includes(groupId)) {
-    throw new Error('الطالب غير مسجل في هذه المجموعة')
-  }
-
-  return syncStudentGroups(
-    studentId,
-    currentGroupIds.filter((currentGroupId) => currentGroupId !== groupId),
-  )
-}
-
-export async function bulkImport(
-  tenantId: string,
-  records: Record<string, unknown>[],
-) {
-  const tenant = await requireTenant()
-  const user = await requireAuth()
-
-  assertCanManageStudents(user.role)
-
-  if (tenant.id !== tenantId) {
-    throw new Error('بيانات المؤسسة غير متطابقة مع الجلسة الحالية')
-  }
-
-  const results: Array<{
-    index: number
-    success: boolean
-    studentId?: string
-    error?: string
-  }> = []
-
-  for (const [index, record] of records.entries()) {
-    try {
-      const parsedRecord = parseStudentImportRecord(record)
-      await ensureUniqueStudentPhone(parsedRecord.phone)
-
-      const createdStudent = await db.$transaction(async (tx) => {
-        const student = await tx.user.create({
-          data: {
-            tenantId: tenant.id,
-            role: PrismaUserRole.STUDENT,
-            name: parsedRecord.name,
-            phone: parsedRecord.phone,
-            parentName: parsedRecord.parentName,
-            parentPhone: parsedRecord.parentPhone,
-            gradeLevel: parsedRecord.gradeLevel,
-          },
-        })
-
-        await syncStudentEnrollments(tx, tenant.id, student.id, parsedRecord.groupIds)
-
-        return student
-      })
-
-      results.push({
-        index,
-        success: true,
-        studentId: createdStudent.id,
-      })
-    } catch (error) {
-      results.push({
-        index,
+    if (duplicateParent) {
+      return {
         success: false,
-        error: getImportErrorMessage(error),
-      })
+        message: "ولي الأمر مسجل مسبقاً",
+      };
     }
-  }
 
-  revalidateStudentPages()
+    if (normalizedStudentPhone) {
+      const duplicateStudentPhone = await db.user.findFirst({
+        where: {
+          tenantId: tenant.id,
+          phone: normalizedStudentPhone,
+          role: "STUDENT",
+          NOT: {
+            id: studentId,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
 
-  return {
-    total: records.length,
-    created: results.filter((result) => result.success).length,
-    failed: results.filter((result) => !result.success).length,
-    results,
+      if (duplicateStudentPhone) {
+        return {
+          success: false,
+          message: "رقم هاتف الطالب مستخدم بالفعل",
+        };
+      }
+    }
+
+    if (normalizedGroupId) {
+      const group = await db.group.findFirst({
+        where: {
+          id: normalizedGroupId,
+          tenantId: tenant.id,
+          isActive: true,
+        },
+        include: {
+          _count: {
+            select: {
+              groupStudents: {
+                where: {
+                  status: "ACTIVE",
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!group) {
+        return {
+          success: false,
+          message: "المجموعة المختارة غير متاحة",
+        };
+      }
+
+      const alreadyEnrolled = existingStudent.groupStudents.some((enrollment) => enrollment.groupId === normalizedGroupId);
+
+      if (!alreadyEnrolled && group._count.groupStudents >= group.maxCapacity) {
+        return {
+          success: false,
+          message: "لا توجد أماكن متاحة في هذه المجموعة",
+        };
+      }
+    }
+
+    await db.user.update({
+      where: {
+        id: studentId,
+      },
+      data: {
+        name: studentName,
+        phone: normalizedStudentPhone ?? existingStudent.phone,
+        gradeLevel,
+        parentName,
+        parentPhone,
+      },
+    });
+
+    await db.user.update({
+      where: {
+        id: currentParentLink.parent.id,
+      },
+      data: {
+        name: parentName,
+        phone: parentPhone,
+      },
+    });
+
+    const currentEnrollmentIds = existingStudent.groupStudents.map((enrollment) => enrollment.id);
+    const currentEnrollment = existingStudent.groupStudents[0];
+
+    if (!normalizedGroupId && currentEnrollmentIds.length > 0) {
+      await db.groupStudent.updateMany({
+        where: {
+          id: {
+            in: currentEnrollmentIds,
+          },
+          student: {
+            tenantId: tenant.id,
+          },
+        },
+        data: {
+          status: "ARCHIVED",
+          droppedAt: new Date(),
+        },
+      });
+    }
+
+    if (normalizedGroupId) {
+      if (currentEnrollment && currentEnrollment.groupId === normalizedGroupId) {
+        await db.groupStudent.update({
+          where: {
+            id: currentEnrollment.id,
+          },
+          data: {
+            status: "ACTIVE",
+            droppedAt: null,
+          },
+        });
+      } else {
+        if (currentEnrollmentIds.length > 0) {
+          await db.groupStudent.updateMany({
+            where: {
+              id: {
+                in: currentEnrollmentIds,
+              },
+              student: {
+                tenantId: tenant.id,
+              },
+            },
+            data: {
+              status: "ARCHIVED",
+              droppedAt: new Date(),
+            },
+          });
+        }
+
+        await db.groupStudent.create({
+          data: {
+            id: generateId(),
+            groupId: normalizedGroupId,
+            studentId,
+            status: "ACTIVE",
+            enrolledAt: new Date(),
+          },
+        });
+      }
+    }
+
+    revalidatePath("/teacher/students");
+
+    return {
+      success: true,
+      studentId,
+    };
+  } catch (error) {
+    console.error("DB updateStudent failed:", error);
+
+    return {
+      success: false,
+      message: "تعذر تحديث بيانات الطالب حاليًا",
+    };
   }
 }
