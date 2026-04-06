@@ -5,6 +5,20 @@ import { cache } from "react";
 import { db } from "@/lib/db";
 import { MOCK_TENANT } from "@/lib/mock-data";
 
+export class TenantNotFoundError extends Error {
+  constructor() {
+    super("Tenant not found");
+    this.name = "TenantNotFoundError";
+  }
+}
+
+export class InactiveTenantError extends Error {
+  constructor() {
+    super("Tenant is inactive");
+    this.name = "InactiveTenantError";
+  }
+}
+
 export type ResolvedTenant = {
   id: string;
   slug: string;
