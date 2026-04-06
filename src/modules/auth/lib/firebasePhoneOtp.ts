@@ -9,7 +9,16 @@ let recaptchaVerifier: RecaptchaVerifier | null = null;
 let recaptchaContainerId: string | null = null;
 let recaptchaRenderElement: HTMLDivElement | null = null;
 let recaptchaRenderNonce = 0;
-let confirmationResult: ConfirmationResult | null = null;
+
+// Store confirmation on window to survive Turbopack cross-page module isolation
+const getConfirmation = (): ConfirmationResult | null =>
+  (typeof window !== "undefined" ? (window as Record<string, unknown>).__otp_confirmation as ConfirmationResult : null) ?? null;
+
+const setConfirmation = (result: ConfirmationResult | null) => {
+  if (typeof window !== "undefined") {
+    (window as Record<string, unknown>).__otp_confirmation = result;
+  }
+};
 
 function isLocalDevelopmentHost() {
   if (typeof window === "undefined") {
@@ -110,7 +119,8 @@ export async function sendFirebasePhoneOtp(phone: string, containerId: string) {
     const normalizedPhone = normalizeEgyptPhone(phone);
     const { auth, verifier } = await createRecaptcha(containerId);
 
-    confirmationResult = await signInWithPhoneNumber(auth, toEgyptE164(normalizedPhone), verifier);
+    const result = await signInWithPhoneNumber(auth, toEgyptE164(normalizedPhone), verifier);
+    setConfirmation(result);
     clearRecaptcha();
 
     return {
@@ -119,7 +129,7 @@ export async function sendFirebasePhoneOtp(phone: string, containerId: string) {
       message: `تم إرسال كود التحقق إلى ${normalizedPhone}`,
     };
   } catch (error) {
-    confirmationResult = null;
+    setConfirmation(null);
     clearRecaptcha();
 
     return {
@@ -130,7 +140,9 @@ export async function sendFirebasePhoneOtp(phone: string, containerId: string) {
 }
 
 export async function confirmFirebasePhoneOtp(code: string) {
-  if (!confirmationResult) {
+  const confirmation = getConfirmation();
+
+  if (!confirmation) {
     return {
       success: false,
       message: "يجب إرسال كود تحقق جديد أولًا",
@@ -138,12 +150,12 @@ export async function confirmFirebasePhoneOtp(code: string) {
   }
 
   try {
-    const result = await confirmationResult.confirm(code);
+    const result = await confirmation.confirm(code);
     const idToken = await result.user.getIdToken(true);
     const normalizedPhone = normalizeEgyptPhone(result.user.phoneNumber ?? "");
 
     await signOut(await getFirebaseAuth());
-    confirmationResult = null;
+    setConfirmation(null);
     clearRecaptcha();
 
     return {
@@ -165,7 +177,7 @@ export async function resetFirebasePhoneOtp() {
     const auth = await getFirebaseAuth();
     await signOut(auth).catch(() => {});
   } finally {
-    confirmationResult = null;
+    setConfirmation(null);
     clearRecaptcha();
   }
 }

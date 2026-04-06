@@ -11,10 +11,10 @@ type TeacherDashboardProps = {
 };
 
 const statCardStyles = [
-  "from-[#1A5276] to-[#2E86C1]",
-  "from-[#F39C12] to-[#E74C3C]",
-  "from-[#1E8449] to-[#27AE60]",
-  "from-[#117A65] to-[#48C9B0]",
+  "from-[#2E86C1] to-[#5DADE2] dark:from-[#1A5276] dark:to-[#2E86C1]",
+  "from-[#E67E22] to-[#E74C3C] dark:from-[#F39C12] dark:to-[#E74C3C]",
+  "from-[#229954] to-[#52BE80] dark:from-[#1E8449] dark:to-[#27AE60]",
+  "from-[#16A085] to-[#45B39D] dark:from-[#117A65] dark:to-[#48C9B0]",
 ] as const;
 
 const statIcons = [DollarSign, AlertTriangle, Users, CheckCircle2] as const;
@@ -56,7 +56,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[24px] bg-[linear-gradient(135deg,_#163b54,_#1A5276_45%,_#2E86C1)] px-6 py-7 text-white shadow-[0_20px_60px_rgba(26,82,118,0.25)]">
+      <section className="overflow-hidden rounded-[24px] bg-[linear-gradient(135deg,_#2471A3,_#2E86C1_45%,_#5DADE2)] px-6 py-7 text-white shadow-[0_20px_60px_rgba(46,134,193,0.25)] dark:bg-[linear-gradient(135deg,_#163b54,_#1A5276_45%,_#2E86C1)] dark:shadow-[0_20px_60px_rgba(26,82,118,0.25)]">
         <p className="text-start text-sm font-semibold text-white/75">لوحة المعلم</p>
         <h1 className="mt-3 text-start text-3xl font-extrabold">مرحبًا، {displayTeacherName}</h1>
         <p className="mt-3 max-w-2xl text-start text-sm leading-7 text-white/85">

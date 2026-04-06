@@ -2,10 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { z } from "zod";
 
-import { sendOTP as sendOTPRequest, verifyOTP } from "@/lib/auth";
+import { createAuthSession, setAuthSessionCookie, verifyOTP } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { verifyFirebasePhoneIdToken } from "@/lib/firebase-admin";
 import { requireTenant } from "@/lib/tenant";
-import { otpSchema, phoneSchema } from "@/modules/auth/validations";
+import { phoneSchema } from "@/modules/auth/validations";
+import { getDashboardRouteForRole } from "@/modules/auth/queries";
 
 type ActionResult = {
   success: boolean;
@@ -13,76 +17,63 @@ type ActionResult = {
   phone?: string;
   role?: "TEACHER" | "STUDENT" | "PARENT" | "ASSISTANT";
   redirectTo?: string;
+  hasPin?: boolean;
 };
 
-const redirectMap: Record<"TEACHER" | "STUDENT" | "PARENT" | "ASSISTANT", string> = {
+const redirectMap: Record<string, string> = {
   TEACHER: "/teacher",
   STUDENT: "/student",
   PARENT: "/parent",
   ASSISTANT: "/teacher",
+  CENTER_ADMIN: "/center",
 };
 
-export async function sendOTP(formData: FormData): Promise<ActionResult> {
-  await requireTenant();
-  const parsed = phoneSchema.safeParse(formData.get("phone"));
+// Used by the API route: POST /api/auth/verify-otp
+export async function verifyOtp(tenantId: string, payload: unknown) {
+  const schema = z.object({
+    phone: phoneSchema,
+    idToken: z.string().trim().min(1),
+  });
 
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: parsed.error.issues[0]?.message ?? "تعذر إرسال كود التحقق",
-    };
+  const { phone, idToken } = schema.parse(payload);
+  const verified = await verifyFirebasePhoneIdToken(idToken);
+
+  if (verified.phoneNumber !== phone) {
+    throw new Error("رقم الهاتف لا يطابق الكود المرسل");
   }
 
-  const phone = parsed.data;
+  const user = await db.user.findFirst({
+    where: { phone, tenantId, isActive: true },
+    select: { id: true, tenantId: true, name: true, phone: true, role: true },
+  });
 
-  try {
-    await sendOTPRequest(phone);
-
-    const cookieStore = await cookies();
-    cookieStore.set("otp-phone", phone, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      secure: process.env.NODE_ENV === "production",
-      expires: new Date(Date.now() + 10 * 60 * 1000),
-    });
-
-    revalidatePath("/login");
-
-    return {
-      success: true,
-      phone,
-      redirectTo: `/verify?phone=${encodeURIComponent(phone)}`,
-      message: `تم إرسال كود التحقق إلى ${phone}`,
-    };
-  } catch (error) {
-    console.error("sendOTP action failed:", error);
-
-    return {
-      success: false,
-      message: "تعذر إرسال كود التحقق",
-    };
+  if (!user) {
+    throw new Error("لا يوجد حساب مرتبط بهذا الرقم في هذا السنتر");
   }
-}
 
-export async function resendOTP(formData: FormData): Promise<ActionResult> {
-  return sendOTP(formData);
+  const session = await createAuthSession({ id: user.id, tenantId: user.tenantId });
+  const redirectTo = getDashboardRouteForRole(user.role);
+
+  return { user, session, redirectTo };
 }
 
 export async function verifyOTPAction(formData: FormData): Promise<ActionResult> {
-  await requireTenant();
+  const tenant = await requireTenant();
   const phoneResult = phoneSchema.safeParse(formData.get("phone"));
-  const codeResult = otpSchema.safeParse(formData.get("code"));
+  const idTokenResult = z.string().trim().min(1).safeParse(formData.get("idToken"));
 
-  if (!phoneResult.success || !codeResult.success) {
+  if (!phoneResult.success || !idTokenResult.success) {
     return {
       success: false,
-      message: "يرجى إدخال كود تحقق صحيح",
+      message: "بيانات غير صالحة",
     };
   }
 
+  const actualTenantId = formData.get("actualTenantId");
+  const tenantId = (typeof actualTenantId === "string" && actualTenantId) ? actualTenantId : tenant.id;
+
   try {
-    const result = await verifyOTP(phoneResult.data, codeResult.data);
+    const result = await verifyOTP(phoneResult.data, idTokenResult.data, tenantId);
     const cookieStore = await cookies();
 
     cookieStore.set("auth-token", result.token, {
@@ -92,21 +83,28 @@ export async function verifyOTPAction(formData: FormData): Promise<ActionResult>
       secure: process.env.NODE_ENV === "production",
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
-    cookieStore.delete("otp-phone");
 
     revalidatePath("/verify");
 
     return {
       success: true,
       role: result.user.role,
-      redirectTo: redirectMap[result.user.role],
+      redirectTo: redirectMap[result.user.role] ?? "/teacher",
+      hasPin: !!result.user.pinHash,
     };
   } catch (error) {
     console.error("verifyOTP action failed:", error);
 
+    const err = error as { message?: string };
+    if (err.message === "USER_NOT_FOUND") {
+      return { success: false, message: "لا يوجد حساب مرتبط بهذا الرقم. يرجى التسجيل أولاً." };
+    }
+    if (err.message === "PHONE_MISMATCH") {
+      return { success: false, message: "رقم الهاتف لا يطابق الكود المرسل" };
+    }
     return {
       success: false,
-      message: "كود التحقق غير صحيح أو منتهي الصلاحية",
+      message: "تعذر التحقق من الهوية",
     };
   }
 }
