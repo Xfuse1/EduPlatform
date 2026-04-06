@@ -92,7 +92,6 @@ model Group {
   days          String[]
   timeStart     String
   timeEnd       String
-  room          String?
   maxCapacity   Int            @default(40)
   monthlyFee    Int
   color         String         @default("#2E86C1")

@@ -46,13 +46,11 @@ export function StudentExamsPageClient({ initialExams = [] }: StudentExamsPageCl
     }
   }
 
-  const handleStartExam = (link?: string) => {
+  const handleStartExam = (examId: string, link?: string) => {
       if (link) {
           window.open(link, "_blank");
       } else {
-          // If no link, it might be an in-person exam or a downloaded PDF.
-          // For now, simple alert or handled by future logic.
-          alert("الامتحان ورقي في السنتر أو لا يحتوي على رابط حالياً.");
+          window.location.href = `/student/exams/${examId}`;
       }
   };
 
@@ -130,7 +128,7 @@ export function StudentExamsPageClient({ initialExams = [] }: StudentExamsPageCl
                         {exam.status === "active" && (
                             <Button 
                                 className="w-full rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold h-11 border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 active:h-10 mt-1 transition-all"
-                                onClick={() => handleStartExam(exam.examLink)}
+                                onClick={() => handleStartExam(exam.id, exam.examLink)}
                             >
                                 بدء الاختبار
                                 <ExternalLink className="mr-2 h-4 w-4" />

@@ -1,7 +1,7 @@
 'use client';
 
 import { Calendar, Plus, Users, Search, ClipboardCheck, Clock, CheckCircle, Pencil, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,6 +35,11 @@ export function ExamsPageClient({ initialExams = [], groups }: ExamsPageClientPr
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [examToEdit, setExamToEdit] = useState<any>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('new') === 'true') setIsModalOpen(true);
+  }, []);
 
   const filtered = exams.filter((a) => {
     const matchesGroup = filterGroupId === "all" || a.groupId === filterGroupId;
@@ -170,7 +175,13 @@ export function ExamsPageClient({ initialExams = [], groups }: ExamsPageClientPr
               </div>
 
               <div className="pt-2">
-                  <Button variant="outline" className="w-full font-bold group">
+                  <Button 
+                    variant="outline" 
+                    className="w-full font-bold group"
+                    onClick={() => {
+                        window.location.href = `/teacher/exams/${exam.id}/results`;
+                    }}
+                  >
                       نتائج الامتحان
                       <ClipboardCheck className="ms-2 h-4 w-4" />
                   </Button>
