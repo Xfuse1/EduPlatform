@@ -1,9 +1,11 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
+import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { MOCK_TENANT } from "@/lib/mock-data";
+import { TENANT_CONTEXT_COOKIE_NAME } from "@/lib/tenant-context";
 
 export class TenantNotFoundError extends Error {
   constructor() {
@@ -134,6 +136,39 @@ const findTenantByHost = cache(async (host: string): Promise<ResolvedTenant> => 
   return FALLBACK_TENANT;
 });
 
+const findTenantById = cache(async (tenantId: string) => {
+  try {
+    const tenant = await db.tenant.findFirst({
+      where: { id: tenantId, isActive: true },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        themeColor: true,
+        plan: true,
+        isActive: true,
+        smsQuota: true,
+        logoUrl: true,
+        phone: true,
+        region: true,
+        bio: true,
+        subjects: true,
+      },
+    });
+
+    if (!tenant) {
+      return null;
+    }
+
+    return {
+      ...tenant,
+      accountType: "CENTER" as const,
+    };
+  } catch {
+    return null;
+  }
+});
+
 export async function getTenantFromHost(host: string) {
   return findTenantByHost(host);
 }
@@ -174,7 +209,15 @@ export async function getTenantBySlug(slug: string) {
 export async function requireTenant() {
   const headerStore = await headers();
   const host = headerStore.get("host") ?? "localhost:3000";
-  const tenant = await getTenantFromHost(host);
+  const cookieStore = await cookies();
+  const user = await getCurrentUser();
+  const tenantSlugFromCookie =
+    cookieStore.get(TENANT_CONTEXT_COOKIE_NAME)?.value?.trim().toLowerCase() ?? "";
+
+  const tenant =
+    (user?.tenantId ? await findTenantById(user.tenantId) : null) ??
+    (tenantSlugFromCookie ? await getTenantBySlug(tenantSlugFromCookie) : null) ??
+    (await getTenantFromHost(host));
 
   if (!tenant) {
     notFound();
