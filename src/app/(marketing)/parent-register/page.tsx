@@ -1,27 +1,23 @@
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 import { ParentRegisterLauncher } from "@/modules/public-pages/components/ParentRegisterLauncher";
 
 export default function ParentRegisterPage() {
   return (
     <main
-      className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.18),_transparent_28%),linear-gradient(180deg,_#0d1830_0%,_#13203a_38%,_#0f1a30_100%)] px-4 py-6 sm:px-6 lg:px-8"
+      className="relative flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.22),_transparent_30%),linear-gradient(145deg,_#0f2740_0%,_#1A5276_45%,_#dbeafe_120%)] px-4 py-8 sm:px-6"
       dir="rtl"
     >
-      <div className="mx-auto max-w-5xl space-y-6">
-        <div className="flex items-center justify-between gap-3 rounded-[24px] border border-white/10 bg-white/8 px-5 py-4 text-white backdrop-blur">
-          <div>
-            <p className="text-sm font-semibold text-white/75">EduPlatform</p>
-            <h1 className="mt-1 text-xl font-extrabold sm:text-2xl">إنشاء حساب ولي الأمر</h1>
-          </div>
-          <Link
-            className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/15"
-            href="/"
-          >
-            العودة للرئيسية
-          </Link>
-        </div>
+      <Link
+        href="/"
+        className="absolute end-4 top-4 inline-flex items-center gap-1 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20 sm:end-6 sm:top-6"
+      >
+        <ChevronRight className="h-4 w-4" />
+        رجوع
+      </Link>
 
+      <div className="w-full max-w-[500px] font-[Cairo]">
         <ParentRegisterLauncher />
       </div>
     </main>

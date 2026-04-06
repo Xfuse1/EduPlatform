@@ -1,55 +1,108 @@
 'use server';
 
-import { randomUUID } from "crypto";
-
+import { randomBytes } from "crypto";
 import { cookies } from "next/headers";
 import { z } from "zod";
 
 import { createAuthSession, setAuthSessionCookie } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { verifyFirebasePhoneIdToken } from "@/lib/firebase-admin";
-import { setTenantContextCookie } from "@/lib/tenant-context";
-import { buildAbsoluteAppUrl, buildTenantLoginUrl } from "@/lib/tenant-url";
-import { buildPhoneConflictMessage, findUserByPhone, hasUniqueConstraintTarget } from "@/lib/user-phone";
-import { getDashboardRouteForRole } from "@/modules/auth/queries";
 
 const RESERVED_SUBDOMAINS = new Set(["ahmed", "noor", "test", "admin", "www", "app"]);
-const accountTypeSchema = z.enum(["CENTER", "TEACHER"]);
 
-const teacherSignupSchema = z
-  .object({
-    accountType: accountTypeSchema,
-    centerName: z.string().trim().optional(),
-    teacherName: z.string().trim().min(3, "يرجى إدخال اسم المدرس كاملًا بحد أدنى 3 أحرف"),
-    phone: z.string().trim().regex(/^01\d{9}$/, "يرجى إدخال رقم هاتف مصري صحيح يبدأ بـ 01"),
-    subject: z.string().trim().optional(),
-    governorate: z.string().trim().min(2, "يرجى إدخال المحافظة"),
-    subdomain: z
-      .string()
-      .trim()
-      .toLowerCase()
-      .min(3, "يجب أن يكون اسم الحساب بين 3 و20 حرفًا")
-      .max(20, "يجب أن يكون اسم الحساب بين 3 و20 حرفًا")
-      .regex(/^[a-z0-9-]+$/, "يجب أن يحتوي الرابط على حروف إنجليزية وأرقام فقط"),
-    idToken: z.string().trim().min(1, "يجب التحقق من رقم الهاتف أولًا"),
-  })
-  .superRefine((value, ctx) => {
-    if (value.accountType === "CENTER" && (!value.centerName || value.centerName.trim().length < 3)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["centerName"],
-        message: "يرجى إدخال اسم السنتر بحد أدنى 3 أحرف",
-      });
+const teacherSignupSchema = z.object({
+  teacherName: z.string().trim().min(3, "يرجى إدخال اسم المدرس كاملًا بحد أدنى 3 أحرف"),
+  phone: z.string().trim().regex(/^01\d{9}$/, "يرجى إدخال رقم هاتف مصري صحيح يبدأ بـ 01"),
+  subject: z.string().trim().min(1, "يرجى إدخال المادة الدراسية"),
+  governorate: z.string().trim().min(2, "يرجى إدخال المحافظة"),
+  subdomain: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(3, "يجب أن يكون اسم الحساب بين 3 و20 حرفًا")
+    .max(20, "يجب أن يكون اسم الحساب بين 3 و20 حرفًا")
+    .regex(/^[a-z0-9-]+$/, "يجب أن يحتوي الرابط على حروف إنجليزية وأرقام فقط"),
+  idToken: z.string().trim().min(1, "يجب التحقق من رقم الهاتف أولًا"),
+});
+
+type TeacherSignupInput = z.infer<typeof teacherSignupSchema>;
+
+type TeacherSignupResult =
+  | { success: false; message: string }
+  | { success: true; message: string; redirectTo: string };
+
+export async function createTeacherSignup(input: TeacherSignupInput): Promise<TeacherSignupResult> {
+  const parsed = teacherSignupSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues[0]?.message ?? "بيانات غير صحيحة" };
+  }
+
+  const payload = parsed.data;
+
+  if (RESERVED_SUBDOMAINS.has(payload.subdomain)) {
+    return { success: false, message: "هذا الاسم غير متاح حاليًا" };
+  }
+
+  // Verify Firebase ID token
+  const verified = await verifyFirebasePhoneIdToken(payload.idToken);
+
+  if (verified.phoneNumber !== payload.phone) {
+    return { success: false, message: "رقم الهاتف الموثق لا يطابق الرقم المدخل" };
+  }
+
+  try {
+    // Check subdomain availability
+    const existingTenant = await db.tenant.findUnique({ where: { slug: payload.subdomain } });
+    if (existingTenant) {
+      return { success: false, message: "هذا الرابط مستخدم بالفعل" };
     }
 
-    if (value.accountType === "TEACHER" && (!value.subject || value.subject.trim().length < 2)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["subject"],
-        message: "يرجى إدخال المادة الدراسية",
+    const account = await db.$transaction(async (tx) => {
+      const tenant = await tx.tenant.create({
+        data: {
+          slug: payload.subdomain,
+          name: payload.teacherName,
+          phone: payload.phone,
+          region: payload.governorate,
+          subjects: [payload.subject],
+          isActive: true,
+        },
+        select: { id: true, slug: true, name: true },
       });
+
+      const user = await tx.user.create({
+        data: {
+          tenantId: tenant.id,
+          phone: payload.phone,
+          name: payload.teacherName,
+          role: "TEACHER",
+          isActive: true,
+        },
+        select: { id: true, tenantId: true },
+      });
+
+      return { tenant, user };
+    });
+
+    const cookieStore = await cookies();
+    const session = await createAuthSession({ id: account.user.id, tenantId: account.user.tenantId });
+    setAuthSessionCookie(cookieStore, session.token, session.expiresAt);
+
+    return {
+      success: true,
+      message: "تم إنشاء الحساب بنجاح!",
+      redirectTo: "/teacher",
+    };
+  } catch (error) {
+    console.error("[teacher-signup]", error);
+    const err = error as { code?: string };
+    if (err.code === "P2002") {
+      return { success: false, message: "هذا الرقم أو الرابط مستخدم بالفعل" };
     }
-  });
+    return { success: false, message: "تعذر إنشاء الحساب. حاول مرة أخرى بعد قليل." };
+  }
+}
 
 const parentSignupSchema = z.object({
   parentName: z.string().trim().min(3, "يرجى إدخال اسم ولي الأمر كاملًا بحد أدنى 3 أحرف"),
@@ -57,314 +110,113 @@ const parentSignupSchema = z.object({
   idToken: z.string().trim().min(1, "يجب التحقق من رقم الهاتف أولًا"),
 });
 
-type CreateTeacherSignupInput = z.infer<typeof teacherSignupSchema>;
-type CreateParentSignupInput = z.infer<typeof parentSignupSchema>;
-type TeacherAccountType = z.infer<typeof accountTypeSchema>;
-type TeacherSignupActionResult =
-  | {
-      success: false;
-      message: string;
-      accessUrl?: undefined;
-      redirectTo?: undefined;
-      tenantName?: undefined;
-      tenantSlug?: undefined;
-      accountType?: undefined;
-    }
-  | {
-      success: true;
-      message: string;
-      accessUrl: string;
-      redirectTo: string;
-      tenantName: string;
-      tenantSlug: string;
-      accountType: TeacherAccountType;
-    };
+type ParentSignupResult = {
+  success: boolean;
+  message?: string;
+  redirectTo?: string;
+  accessUrl?: string;
+  tenantName?: string;
+};
 
-type ParentSignupActionResult =
-  | {
-      success: false;
-      message: string;
-      accessUrl?: string;
-      redirectTo?: string;
-      tenantName?: string;
-      tenantSlug?: string;
-      accountType?: "PARENT";
-    }
-  | {
-      success: true;
-      message: string;
-      accessUrl: string;
-      redirectTo: string;
-      tenantName: string;
-      tenantSlug: string;
-      accountType: "PARENT";
-    };
+const BASE_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "eduplatform.com";
 
-function buildStandaloneParentSlug(phone: string) {
-  return `parent-${phone.slice(-4)}-${randomUUID().slice(0, 6).toLowerCase()}`;
-}
-
-function isPrismaInitializationError(error: unknown): error is { name: string } {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "name" in error &&
-    typeof error.name === "string" &&
-    error.name === "PrismaClientInitializationError"
-  );
-}
-
-function buildActionErrorMessage(error: unknown) {
-  if (isPrismaInitializationError(error)) {
-    return "قاعدة البيانات غير متاحة الآن. السبب الحقيقي ليس رفض البيانات، بل أن PostgreSQL غير متاح أو غير قابل للوصول.";
-  }
-
-  if (hasUniqueConstraintTarget(error, "phone")) {
-    return buildPhoneConflictMessage();
-  }
-
-  if (hasUniqueConstraintTarget(error, "slug")) {
-    return "هذا الرابط مستخدم بالفعل";
-  }
-
-  return "تعذر إنشاء الحساب الآن. حاول مرة أخرى بعد قليل.";
-}
-
-export async function createTeacherSignup(input: CreateTeacherSignupInput): Promise<TeacherSignupActionResult> {
-  const parsed = teacherSignupSchema.safeParse(input);
-
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: parsed.error.issues[0]?.message ?? "بيانات إنشاء الحساب غير صحيحة",
-    };
-  }
-
-  const payload = parsed.data;
-
-  if (RESERVED_SUBDOMAINS.has(payload.subdomain)) {
-    return {
-      success: false,
-      message: "هذا الاسم غير متاح حاليًا",
-    };
-  }
-
-  try {
-    const verified = await verifyFirebasePhoneIdToken(payload.idToken);
-
-    if (verified.phoneNumber !== payload.phone) {
-      return {
-        success: false,
-        message: "رقم الهاتف الموثق لا يطابق الرقم المدخل",
-      };
-    }
-
-    const existingUser = await findUserByPhone(payload.phone);
-
-    if (existingUser) {
-      return {
-        success: false,
-        message: buildPhoneConflictMessage(existingUser.role),
-      };
-    }
-
-    const tenantDisplayName = payload.accountType === "CENTER" ? payload.centerName!.trim() : payload.teacherName;
-
-    const account = await db.$transaction(async (tx) => {
-      const createdTenant = await tx.tenant.create({
-        data: {
-          slug: payload.subdomain,
-          name: tenantDisplayName,
-          accountType: payload.accountType,
-          phone: payload.phone,
-          region: payload.governorate,
-          subjects: payload.accountType === "CENTER" ? [] : [payload.subject!.trim()],
-          isActive: true,
-        },
-        select: {
-          id: true,
-          slug: true,
-          name: true,
-          accountType: true,
-        },
-      });
-
-      const createdUser = await tx.user.create({
-        data: {
-          tenantId: createdTenant.id,
-          phone: payload.phone,
-          name: payload.teacherName,
-          role: payload.accountType === "CENTER" ? "CENTER_ADMIN" : "TEACHER",
-          isActive: true,
-        },
-        select: {
-          id: true,
-          tenantId: true,
-          role: true,
-        },
-      });
-
-      return {
-        tenant: createdTenant,
-        user: createdUser,
-      };
-    });
-
-    const cookieStore = await cookies();
-    const session = await createAuthSession({
-      id: account.user.id,
-      tenantId: account.user.tenantId,
-    });
-
-    setAuthSessionCookie(cookieStore, session.token, session.expiresAt);
-    setTenantContextCookie(cookieStore, account.tenant.slug, session.expiresAt);
-
-    return {
-      success: true,
-      message:
-        payload.accountType === "CENTER"
-          ? "تم إنشاء حساب السنتر وحساب المدرس المسؤول بنجاح."
-          : "تم إنشاء حساب المدرس بنجاح.",
-      accessUrl: await buildTenantLoginUrl(account.tenant.slug),
-      redirectTo: await buildAbsoluteAppUrl(getDashboardRouteForRole(account.user.role)),
-      tenantName: account.tenant.name,
-      tenantSlug: account.tenant.slug,
-      accountType: payload.accountType,
-    };
-  } catch (error) {
-    console.error("[teacher-signup][create-account]", error);
-
-    return {
-      success: false,
-      message: buildActionErrorMessage(error),
-    };
-  }
-}
-
-export async function createParentSignup(input: CreateParentSignupInput): Promise<ParentSignupActionResult> {
+export async function createParentSignup(input: z.infer<typeof parentSignupSchema>): Promise<ParentSignupResult> {
   const parsed = parentSignupSchema.safeParse(input);
 
   if (!parsed.success) {
-    return {
-      success: false,
-      message: parsed.error.issues[0]?.message ?? "بيانات إنشاء حساب ولي الأمر غير صحيحة",
-    };
+    return { success: false, message: parsed.error.issues[0]?.message ?? "بيانات غير صحيحة" };
   }
 
-  const payload = parsed.data;
+  const { parentName, phone, idToken } = parsed.data;
+
+  const verified = await verifyFirebasePhoneIdToken(idToken);
+  if (verified.phoneNumber !== phone) {
+    return { success: false, message: "رقم الهاتف الموثق لا يطابق الرقم المدخل" };
+  }
 
   try {
-    const verified = await verifyFirebasePhoneIdToken(payload.idToken);
+    // Check if this phone already has a PARENT user
+    const existing = await db.user.findFirst({
+      where: { phone, role: "PARENT", isActive: true },
+      select: { id: true, tenantId: true, tenant: { select: { slug: true, name: true } } },
+    });
 
-    if (verified.phoneNumber !== payload.phone) {
-      return {
-        success: false,
-        message: "رقم الهاتف الموثق لا يطابق الرقم المدخل",
-      };
-    }
-
-    const existingUser = await findUserByPhone(payload.phone);
-
-    if (existingUser) {
-      const canReuseExistingStandaloneParent =
-        existingUser.role === "PARENT" &&
-        existingUser.isActive &&
-        existingUser.tenant.isActive &&
-        existingUser.tenant.accountType === "PARENT";
-
-      if (canReuseExistingStandaloneParent) {
-        const cookieStore = await cookies();
-        const session = await createAuthSession({
-          id: existingUser.id,
-          tenantId: existingUser.tenantId,
-        });
-
-        setAuthSessionCookie(cookieStore, session.token, session.expiresAt);
-        setTenantContextCookie(cookieStore, existingUser.tenant.slug, session.expiresAt);
-
-        return {
-          success: false,
-          message: "يوجد حساب ولي أمر مستقل بالفعل لهذا الرقم. استخدم الحساب الحالي بدل إنشاء حساب جديد.",
-          accessUrl: await buildTenantLoginUrl(existingUser.tenant.slug),
-          redirectTo: await buildAbsoluteAppUrl(getDashboardRouteForRole("PARENT")),
-          tenantName: existingUser.tenant.name,
-          tenantSlug: existingUser.tenant.slug,
-          accountType: "PARENT",
-        };
-      }
+    if (existing) {
+      const accessUrl = `${existing.tenant.slug}.${BASE_DOMAIN}/login`;
+      const cookieStore = await cookies();
+      const session = await createAuthSession({ id: existing.id, tenantId: existing.tenantId });
+      setAuthSessionCookie(cookieStore, session.token, session.expiresAt);
 
       return {
         success: false,
-        message: buildPhoneConflictMessage(existingUser.role),
+        message: "يوجد حساب ولي أمر مرتبط بهذا الرقم بالفعل. تم تسجيل دخولك تلقائيًا.",
+        redirectTo: "/parent",
+        accessUrl,
+        tenantName: existing.tenant.name,
       };
     }
+
+    // Generate unique parent slug
+    const suffix = randomBytes(4).toString("hex");
+    const slug = `parent-${suffix}`;
 
     const account = await db.$transaction(async (tx) => {
-      const createdTenant = await tx.tenant.create({
+      const tenant = await tx.tenant.create({
         data: {
-          slug: buildStandaloneParentSlug(payload.phone),
-          name: payload.parentName,
-          accountType: "PARENT",
-          phone: payload.phone,
-          subjects: [],
+          slug,
+          name: parentName,
+          phone,
           isActive: true,
         },
-        select: {
-          id: true,
-          slug: true,
-          name: true,
-          accountType: true,
-        },
+        select: { id: true, slug: true, name: true },
       });
 
-      const createdUser = await tx.user.create({
+      const user = await tx.user.create({
         data: {
-          tenantId: createdTenant.id,
-          phone: payload.phone,
-          name: payload.parentName,
+          tenantId: tenant.id,
+          phone,
+          name: parentName,
           role: "PARENT",
-          parentName: payload.parentName,
-          parentPhone: payload.phone,
           isActive: true,
         },
-        select: {
-          id: true,
-          tenantId: true,
-          role: true,
-        },
+        select: { id: true, tenantId: true },
       });
 
-      return {
-        tenant: createdTenant,
-        user: createdUser,
-      };
+      return { tenant, user };
     });
 
     const cookieStore = await cookies();
-    const session = await createAuthSession({
-      id: account.user.id,
-      tenantId: account.user.tenantId,
-    });
-
+    const session = await createAuthSession({ id: account.user.id, tenantId: account.user.tenantId });
     setAuthSessionCookie(cookieStore, session.token, session.expiresAt);
-    setTenantContextCookie(cookieStore, account.tenant.slug, session.expiresAt);
 
     return {
       success: true,
-      message: "تم إنشاء حساب ولي الأمر المستقل بنجاح.",
-      accessUrl: await buildTenantLoginUrl(account.tenant.slug),
-      redirectTo: await buildAbsoluteAppUrl(getDashboardRouteForRole(account.user.role)),
+      message: "تم إنشاء حساب ولي الأمر بنجاح. يمكنك الآن الدخول ومتابعة أبنائك.",
+      redirectTo: "/parent",
+      accessUrl: `${account.tenant.slug}.${BASE_DOMAIN}/login`,
       tenantName: account.tenant.name,
-      tenantSlug: account.tenant.slug,
-      accountType: "PARENT",
     };
   } catch (error) {
-    console.error("[parent-signup][create-account]", error);
-
-    return {
-      success: false,
-      message: buildActionErrorMessage(error),
-    };
+    console.error("[parent-signup]", error);
+    const err = error as { code?: string };
+    if (err.code === "P2002") {
+      return { success: false, message: "هذا الرقم مستخدم بالفعل" };
+    }
+    return { success: false, message: "تعذر إنشاء الحساب. حاول مرة أخرى بعد قليل." };
   }
 }
 
+export async function checkSubdomainAvailability(subdomain: string): Promise<{ available: boolean; message?: string }> {
+  const normalized = subdomain.trim().toLowerCase();
+
+  if (RESERVED_SUBDOMAINS.has(normalized)) {
+    return { available: false, message: "هذا الاسم غير متاح حاليًا" };
+  }
+
+  const existing = await db.tenant.findUnique({ where: { slug: normalized } });
+  if (existing) {
+    return { available: false, message: "هذا الرابط مستخدم بالفعل" };
+  }
+
+  return { available: true };
+}

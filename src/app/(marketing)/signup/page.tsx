@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Check, CheckCircle2, CircleAlert, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { createTeacherSignup, checkSubdomainAvailability } from "@/modules/marketing/actions";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -106,8 +107,12 @@ export default function TeacherSignupPage() {
   const [isResending, setIsResending] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isCheckingSubdomain, setIsCheckingSubdomain] = useState(false);
+  const [dbSubdomainStatus, setDbSubdomainStatus] = useState<"idle" | "available" | "taken">("idle");
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
   const verifyTimerRef = useRef<number | null>(null);
+  const subdomainCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setIsReady(true);
@@ -143,18 +148,62 @@ export default function TeacherSignupPage() {
       setOtpError("");
       setPageError("");
 
-      verifyTimerRef.current = window.setTimeout(() => {
-        if (otpCode === "123456") {
+      (async () => {
+        try {
+          const { getConfirmationResult, clearConfirmationResult, clearRecaptchaVerifier } = await import("@/lib/firebase-phone-otp");
+          const confirmation = getConfirmationResult();
+
+          if (!confirmation) {
+            setOtpError("انتهت الجلسة، يرجى العودة وإرسال الكود من جديد");
+            setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ""));
+            setIsVerifyingOtp(false);
+            inputsRef.current[0]?.focus();
+            return;
+          }
+
+          const userCredential = await confirmation.confirm(otpCode);
+          const idToken = await userCredential.user.getIdToken();
+          clearConfirmationResult();
+          clearRecaptchaVerifier();
+
+          // Call server action to create account
+          const result = await createTeacherSignup({
+            teacherName: form.teacherName,
+            phone: form.phone,
+            subject: form.subject,
+            governorate: form.governorate,
+            subdomain: form.subdomain,
+            idToken,
+          });
+
+          if (!result.success) {
+            setPageError(result.message);
+            setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ""));
+            setIsVerifyingOtp(false);
+            return;
+          }
+
           setIsVerified(true);
           setIsVerifyingOtp(false);
-          return;
-        }
 
-        setOtpError("كود التحقق غير صحيح. جرّب مرة أخرى");
-        setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ""));
-        setIsVerifyingOtp(false);
-        inputsRef.current[0]?.focus();
-      }, 500);
+          // Redirect after short delay
+          window.setTimeout(() => {
+            window.location.replace(result.redirectTo);
+          }, 1500);
+        } catch (err: unknown) {
+          const firebaseError = err as { code?: string };
+          if (firebaseError.code === "auth/invalid-verification-code") {
+            setOtpError("كود التحقق غير صحيح. جرّب مرة أخرى");
+          } else if (firebaseError.code === "auth/code-expired") {
+            setOtpError("انتهت صلاحية الكود، يرجى إعادة الإرسال");
+          } else {
+            setOtpError("كود التحقق غير صحيح. جرّب مرة أخرى");
+          }
+          setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ""));
+          setIsVerifyingOtp(false);
+          inputsRef.current[0]?.focus();
+        }
+      })();
     }
   }, [currentStep, isVerified, isVerifyingOtp, otpDigits]);
 
@@ -187,6 +236,20 @@ export default function TeacherSignupPage() {
 
     if (field === "subdomain") {
       setSubdomainError("");
+      setDbSubdomainStatus("idle");
+
+      // Debounced DB check
+      if (subdomainCheckTimer.current) clearTimeout(subdomainCheckTimer.current);
+      const normalized = value.trim().toLowerCase();
+      if (normalized.length >= 3 && !getSubdomainError(normalized)) {
+        setIsCheckingSubdomain(true);
+        subdomainCheckTimer.current = setTimeout(async () => {
+          const result = await checkSubdomainAvailability(normalized);
+          setDbSubdomainStatus(result.available ? "available" : "taken");
+          if (!result.available) setSubdomainError(result.message ?? "هذا الرابط مستخدم بالفعل");
+          setIsCheckingSubdomain(false);
+        }, 600);
+      }
     }
   };
 
@@ -202,20 +265,43 @@ export default function TeacherSignupPage() {
     setCurrentStep(2);
   };
 
-  const goToStepThree = () => {
+  const goToStepThree = async () => {
     const error = getSubdomainError(form.subdomain);
     setSubdomainError(error);
     setPageError("");
 
-    if (error) {
+    if (error) return;
+    if (isCheckingSubdomain) return;
+    if (dbSubdomainStatus === "taken") {
+      setSubdomainError("هذا الرابط مستخدم بالفعل");
       return;
     }
 
-    setCurrentStep(3);
-    setSecondsLeft(60);
-    setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ""));
-    setOtpError("");
-    setIsVerified(false);
+    setIsSendingOtp(true);
+    try {
+      const { signInWithPhoneNumber } = await import("firebase/auth");
+      const { getFirebaseAuth } = await import("@/lib/firebase");
+      const { getOrCreateRecaptchaVerifier, clearRecaptchaVerifier, setConfirmationResult } = await import("@/lib/firebase-phone-otp");
+
+      clearRecaptchaVerifier();
+      const auth = await getFirebaseAuth();
+      const verifier = await getOrCreateRecaptchaVerifier("recaptcha-container-signup");
+      const e164 = "+2" + form.phone;
+      const confirmation = await signInWithPhoneNumber(auth, e164, verifier);
+      setConfirmationResult(confirmation);
+
+      setCurrentStep(3);
+      setSecondsLeft(60);
+      setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ""));
+      setOtpError("");
+      setIsVerified(false);
+    } catch (err) {
+      console.error("[signup] send OTP failed:", err);
+      setPageError("تعذر إرسال كود التحقق. تحقق من رقم الهاتف وحاول مرة أخرى.");
+      import("@/lib/firebase-phone-otp").then(({ clearRecaptchaVerifier }) => clearRecaptchaVerifier());
+    } finally {
+      setIsSendingOtp(false);
+    }
   };
 
   const goBackToStepOne = () => {
@@ -256,21 +342,34 @@ export default function TeacherSignupPage() {
     }
   };
 
-  const handleResend = () => {
-    if (secondsLeft > 0 || isResending) {
-      return;
-    }
+  const handleResend = async () => {
+    if (secondsLeft > 0 || isResending) return;
 
     setIsResending(true);
     setOtpError("");
     setPageError("");
 
-    window.setTimeout(() => {
+    try {
+      const { signInWithPhoneNumber } = await import("firebase/auth");
+      const { getFirebaseAuth } = await import("@/lib/firebase");
+      const { getOrCreateRecaptchaVerifier, clearRecaptchaVerifier, setConfirmationResult } = await import("@/lib/firebase-phone-otp");
+
+      clearRecaptchaVerifier();
+      const auth = await getFirebaseAuth();
+      const verifier = await getOrCreateRecaptchaVerifier("recaptcha-container-signup");
+      const e164 = "+2" + form.phone;
+      const confirmation = await signInWithPhoneNumber(auth, e164, verifier);
+      setConfirmationResult(confirmation);
       setSecondsLeft(60);
       setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ""));
-      setIsResending(false);
       inputsRef.current[0]?.focus();
-    }, 400);
+    } catch (err) {
+      console.error("[signup] resend OTP failed:", err);
+      setOtpError("تعذر إعادة الإرسال");
+      import("@/lib/firebase-phone-otp").then(({ clearRecaptchaVerifier }) => clearRecaptchaVerifier());
+    } finally {
+      setIsResending(false);
+    }
   };
 
   if (!isReady) {
@@ -294,9 +393,17 @@ export default function TeacherSignupPage() {
 
   return (
     <main
-      className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.22),_transparent_30%),linear-gradient(145deg,_#0f2740_0%,_#1A5276_45%,_#dbeafe_120%)] px-4 py-8 sm:px-6"
+      className="relative flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.22),_transparent_30%),linear-gradient(145deg,_#0f2740_0%,_#1A5276_45%,_#dbeafe_120%)] px-4 py-8 sm:px-6"
       dir="rtl"
     >
+      <Link
+        href="/"
+        className="absolute end-4 top-4 inline-flex items-center gap-1 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20 sm:end-6 sm:top-6"
+      >
+        <span>›</span>
+        رجوع
+      </Link>
+
       <Card className="w-full max-w-[500px] overflow-hidden rounded-[28px] border-white/10 bg-slate-950/85 font-[Cairo] text-white shadow-[0_24px_80px_rgba(15,23,42,0.4)] backdrop-blur">
         <div className="border-b border-white/10 bg-[linear-gradient(135deg,_rgba(22,59,84,0.96),_rgba(26,82,118,0.98)_45%,_rgba(46,134,193,0.92))] px-5 py-6 sm:px-7">
           <div className="flex items-center justify-between gap-2">
@@ -424,11 +531,14 @@ export default function TeacherSignupPage() {
                 <p className="text-start text-sm text-slate-400">
                   رابطك سيكون: <span dir="ltr" className="font-bold text-sky-300">{helperSubdomain}.eduplatform.com</span>
                 </p>
-                {subdomainStatus === "available" ? (
+                {isCheckingSubdomain ? (
+                  <p className="text-sm font-semibold text-slate-400">جارٍ التحقق...</p>
+                ) : dbSubdomainStatus === "available" ? (
                   <p className="text-sm font-semibold text-emerald-300">متاح ✅</p>
-                ) : null}
-                {subdomainStatus === "unavailable" ? (
+                ) : dbSubdomainStatus === "taken" ? (
                   <p className="text-sm font-semibold text-rose-300">غير متاح ❌</p>
+                ) : subdomainStatus === "available" && normalizedSubdomain.length >= 3 ? (
+                  <p className="text-sm font-semibold text-slate-400">جارٍ التحقق...</p>
                 ) : null}
                 {liveSubdomainError ? <p className="text-sm text-rose-300">{liveSubdomainError}</p> : null}
                 {!liveSubdomainError && subdomainError ? <p className="text-sm text-rose-300">{subdomainError}</p> : null}
@@ -443,8 +553,8 @@ export default function TeacherSignupPage() {
                 >
                   ← رجوع
                 </Button>
-                <Button className="min-h-11 text-base font-bold sm:w-auto" onClick={goToStepThree} type="button">
-                  التالي ←
+                <Button className="min-h-11 text-base font-bold sm:w-auto" disabled={isSendingOtp} onClick={goToStepThree} type="button">
+                  {isSendingOtp ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />جارٍ الإرسال...</> : "التالي ←"}
                 </Button>
               </div>
             </section>
@@ -477,6 +587,7 @@ export default function TeacherSignupPage() {
                     {otpDigits.map((digit, index) => (
                       <input
                         key={`signup-otp-${index}`}
+                        aria-label={`رقم ${index + 1} من كود التحقق`}
                         ref={(element) => {
                           inputsRef.current[index] = element;
                         }}
@@ -563,7 +674,16 @@ export default function TeacherSignupPage() {
             </section>
           ) : null}
         </CardContent>
+        <div className="border-t border-white/10 px-5 py-4 text-center sm:px-7">
+          <p className="text-sm text-slate-400">
+            ولي أمر وتريد تسجيل ابنك؟{" "}
+            <Link href="/parent-register" className="font-bold text-sky-300 transition hover:text-sky-200 hover:underline">
+              أنشئ حساب ولي أمر
+            </Link>
+          </p>
+        </div>
       </Card>
+      <div aria-hidden="true" id="recaptcha-container-signup" />
     </main>
   );
 }

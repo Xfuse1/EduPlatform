@@ -47,6 +47,7 @@ model User {
   gradeLevel            String?
   parentName            String?
   parentPhone           String?
+  pinHash               String?
   isActive              Boolean                @default(true)
   lastLoginAt           DateTime?
   createdAt             DateTime               @default(now())

@@ -41,6 +41,15 @@ export function getFirebaseAuth() {
       const app: FirebaseApp = getFirebaseApp();
       const auth = getAuth(app);
       await setPersistence(auth, inMemoryPersistence);
+
+      // Disable app verification for test phone numbers on localhost
+      if (
+        typeof window !== "undefined" &&
+        ["localhost", "127.0.0.1"].includes(window.location.hostname)
+      ) {
+        auth.settings.appVerificationDisabledForTesting = true;
+      }
+
       return auth;
     })();
   }

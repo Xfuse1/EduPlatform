@@ -26,10 +26,6 @@ export default async function TenantSlugPage({
     notFound();
   }
 
-  if (tenant.accountType === "PARENT") {
-    redirect("/login?portal=parent");
-  }
-
   const [teacher, groups] = await Promise.all([
     getTeacherPublicProfile(tenant.id),
     getOpenGroups(tenant.id),

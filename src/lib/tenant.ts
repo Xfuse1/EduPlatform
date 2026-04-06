@@ -116,6 +116,30 @@ export async function getTenantFromHost(host: string) {
   return findTenantByHost(host);
 }
 
+export async function getTenantBySlug(slug: string) {
+  try {
+    return await db.tenant.findFirst({
+      where: { slug, isActive: true },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        themeColor: true,
+        plan: true,
+        isActive: true,
+        smsQuota: true,
+        logoUrl: true,
+        phone: true,
+        region: true,
+        bio: true,
+        subjects: true,
+      },
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function requireTenant() {
   const headerStore = await headers();
   const host = headerStore.get("host") ?? "localhost:3000";
