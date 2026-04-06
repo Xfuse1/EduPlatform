@@ -94,7 +94,10 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
         startAt: formData.examDate,
         duration: parseInt(formData.durationMinutes),
         maxGrade: parseInt(formData.maxScore),
-        questions
+        questions: questions.map(q => ({
+          ...q,
+          correctAnswer: q.correctAnswer
+        }))
       };
 
       const url = examToEdit ? `/api/exams/${examToEdit.id}` : '/api/exams';
@@ -117,8 +120,16 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
         examDate: data.startAt,
         durationMinutes: data.duration,
         maxScore: data.maxGrade,
-        status: "upcoming",
-        _count: { submissions: 0 }
+        status: (() => {
+          const now = new Date();
+          const start = new Date(data.startAt);
+          const end = new Date(start.getTime() + data.duration * 60000);
+          if (now > end) return "completed";
+          if (now >= start) return "active";
+          return "upcoming";
+        })(),
+        _count: { submissions: examToEdit ? examToEdit._count.submissions : 0 },
+        questions: data.questions || []
       };
 
       onAdd(result);
@@ -134,7 +145,9 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto" dir="rtl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-extrabold text-slate-900 border-b pb-4 dark:text-white">إضافة امتحان جديد</DialogTitle>
+          <DialogTitle className="text-2xl font-extrabold text-slate-900 border-b pb-4 dark:text-white">
+            {examToEdit ? "تعديل الامتحان" : "إضافة امتحان جديد"}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-6">
@@ -326,7 +339,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
               {loading ? "جاري الحفظ..." : (
                   <>
                     <Save className="me-2 h-5 w-5" />
-                    حفظ الامتحان ({questions.length} سؤال)
+                    {examToEdit ? "حفظ التعديلات" : `حفظ الامتحان (${questions.length} سؤال)`}
                   </>
               )}
             </Button>

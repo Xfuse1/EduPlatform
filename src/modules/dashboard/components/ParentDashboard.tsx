@@ -2,7 +2,7 @@
 
 import { CalendarClock, CheckCircle2, CreditCard, UserRound, Bell, MessageSquare, Clock, BookOpen, AlertTriangle, X, Sparkles } from "lucide-react";
 import { useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, ResponsiveContainer } from 'recharts';
 import { Button } from "@/components/ui/button";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,29 +15,6 @@ type ParentDashboardProps = {
   data: Awaited<ReturnType<typeof import("@/modules/dashboard/queries").getParentDashboardData>>;
 };
 
-// Imports for assignments and exams removed.
-
-
-// --- Mock Data for New Sections ---
-
-const MOCK_DAILY_SESSIONS = [
-  { id: "s1", childId: "c1", subject: "رياضيات", teacher: "أحمد المدرس", time: "04:00 م", room: "قاعة 1", status: "COMPLETED" },
-  { id: "s2", childId: "c1", subject: "فيزياء", teacher: "مستر خالد", time: "06:00 م", room: "قاعة 3", status: "NOT_STARTED" },
-  { id: "s3", childId: "c2", subject: "اللغة العربية", teacher: "ميس هند", time: "03:30 م", room: "قاعة 2", status: "COMPLETED" },
-]
-
-const MOCK_ATTENDANCE_DATA = [
-  { week: 'الأسبوع 1', rate: 100 },
-  { week: 'الأسبوع 2', rate: 75 },
-  { week: 'الأسبوع 3', rate: 100 },
-  { week: 'الأسبوع 4', rate: 90 },
-]
-
-const MOCK_ASSIGNMENT_GRADES = [
-  { id: "g1", title: "واجب الجبر 1", grade: 18, maxGrade: 20, gradedByAi: true },
-  { id: "g2", title: "نصوص العصر الأموي", grade: 10, maxGrade: 10, gradedByAi: false },
-  { id: "g3", title: "تطبيقات الحركة", grade: 14, maxGrade: 15, gradedByAi: true },
-]
 
 function todayStatusLabel(status: string) {
   if (status === "PRESENT") return "حضر اليوم";
@@ -153,39 +130,32 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
             <Clock className="h-5 w-5 text-primary opacity-50" />
           </CardHeader>
           <CardContent className="px-6 py-4 space-y-4">
-            {data.children.map(child => {
-              const childSessions = MOCK_DAILY_SESSIONS.filter(s => s.childId === child.id)
-              return (
-                <div key={child.id} className="space-y-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{child.name}</span>
-                  </div>
-                  {childSessions.length > 0 ? (
-                    childSessions.map(session => (
-                      <div key={session.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center gap-4">
-                          <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0", 
-                            session.status === 'COMPLETED' ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600"
-                          )}>
-                            {session.status === 'COMPLETED' ? '✓' : session.time.split(' ')[0]}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-900 dark:text-white">{session.subject}</p>
-                            <p className="text-[10px] text-slate-400">{session.teacher} • {session.room}</p>
-                          </div>
-                        </div>
-                        <Badge variant={session.status === 'COMPLETED' ? 'success' : 'secondary'} className="text-[10px] px-2 py-0">
-                          {session.status === 'COMPLETED' ? 'حضر' : 'لم تبدأ'}
-                        </Badge>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-slate-400 pr-5">لا توجد حصص مسجلة اليوم.</p>
-                  )}
+            {data.children.map(child => (
+              <div key={child.id} className="space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{child.name}</span>
                 </div>
-              )
-            })}
+                {child.nextSession ? (
+                  <div key={child.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+                        {child.nextSession.timeStart.split(':')[0]}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-900 dark:text-white">{child.nextSession.group.name}</p>
+                        <p className="text-[10px] text-slate-400">{formatSessionDate(new Date(child.nextSession.date))}</p>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="text-[10px] px-2 py-0">
+                      حصة قادمة
+                    </Badge>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 pr-5">لا توجد حصص مسجلة اليوم.</p>
+                )}
+              </div>
+            ))}
           </CardContent>
         </Card>
 
@@ -196,40 +166,29 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
               <CardTitle className="text-xl font-bold">الأداء والتقدم</CardTitle>
               <p className="text-xs text-slate-400 mt-1">مؤشرات الحضور والدرجات خلال الفترة الأخيرة</p>
             </div>
-            <ResponsiveContainer width={24} height={24}>
-              <BarChart data={[{v: 1}]}><Bar dataKey="v" fill="#1A5276" /></BarChart>
-            </ResponsiveContainer>
+
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Sparkles className="h-4 w-4 text-primary" />
+            </div>
           </CardHeader>
+
           <CardContent className="p-0">
             {/* Chart Area */}
             <div className="px-6 pt-4 pb-2 border-b border-dashed border-slate-100 dark:border-slate-800">
-              <p className="text-xs font-bold text-slate-500 mb-4 px-2">معدل الحضور الأسبوعي (%)</p>
-              <div className="h-[180px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={MOCK_ATTENDANCE_DATA}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
-                    <XAxis 
-                      dataKey="week" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fontSize: 10 }}
-                    />
-                    <YAxis 
-                      hide 
-                      domain={[0, 100]} 
-                    />
-                    <Tooltip 
-                      cursor={{ fill: 'rgba(26, 82, 118, 0.05)' }} 
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '10px' }}
-                    />
-                    <Bar dataKey="rate" radius={[4, 4, 0, 0]} barSize={32}>
-                      {MOCK_ATTENDANCE_DATA.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.rate > 80 ? '#1A5276' : '#2E86C1'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs font-bold text-slate-500 px-2">معدل الحضور العام</p>
+                <span className="text-lg font-black text-primary">
+                  {toArabicDigits(
+                    data.children.length > 0 
+                      ? Math.round(data.children.reduce((acc, c) => acc + (c.attendanceRate || 0), 0) / data.children.length)
+                      : 0
+                  )}%
+                </span>
               </div>
+              <Progress 
+                value={data.children.length > 0 ? data.children.reduce((acc, c) => acc + (c.attendanceRate || 0), 0) / data.children.length : 0} 
+                className="h-2 mb-4" 
+              />
             </div>
             
             {/* Recent Grades */}
@@ -239,18 +198,24 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                 آخر درجات الواجبات
               </p>
               <div className="space-y-2">
-                {MOCK_ASSIGNMENT_GRADES.map(grade => (
-                  <div key={grade.id} className="flex items-center justify-between p-2 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                    <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{grade.title}</span>
+                {(data.assignments as any[]).map(assignment => (
+                  <div key={assignment.id} className="flex items-center justify-between p-2 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{assignment.title}</span>
+                      <span className="text-[9px] text-slate-400">{assignment.childName}</span>
+                    </div>
                     <div className="flex items-center gap-2">
-                       {grade.gradedByAi && <Sparkles className="h-3 w-3 text-purple-500 animate-pulse" />}
-                      <span className="text-[11px] font-extrabold text-primary">{toArabicDigits(grade.grade)}/{toArabicDigits(grade.maxGrade)}</span>
+                      {assignment.gradedByAi && <Sparkles className="h-3 w-3 text-purple-500 animate-pulse" />}
+                      <span className="text-[11px] font-extrabold text-primary">{toArabicDigits(assignment.grade)}/{toArabicDigits(assignment.maxGrade)}</span>
                       <div className="h-1.5 w-16 bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden">
-                        <div className="h-full bg-primary" style={{ width: `${(grade.grade/grade.maxGrade)*100}%` }} />
+                        <div className="h-full bg-primary" style={{ width: `${(assignment.grade/assignment.maxGrade)*100}%` }} />
                       </div>
                     </div>
                   </div>
                 ))}
+                {data.assignments?.length === 0 && (
+                  <p className="text-[11px] text-slate-400 text-center py-4">لا توجد درجات مسجلة حالياً.</p>
+                )}
               </div>
             </div>
           </CardContent>
