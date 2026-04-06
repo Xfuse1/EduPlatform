@@ -17,7 +17,7 @@ import {
   formatDate,
   formatPhone,
 } from '@/lib/utils'
-import type { DayOfWeek } from '@/types'
+import { formatGroupScheduleEntry, type GroupScheduleInput } from '@/modules/groups/schedule'
 
 type GroupStudent = {
   id: string
@@ -65,6 +65,7 @@ type GroupDetailsProps = {
     days: string[]
     timeStart: string
     timeEnd: string
+    schedule: GroupScheduleInput[]
     room: string | null
     maxCapacity: number
     monthlyFee: number
@@ -75,16 +76,6 @@ type GroupDetailsProps = {
     recentSessions: RecentSession[]
   }
   availableStudents: AvailableStudent[]
-}
-
-const DAY_LABELS: Record<DayOfWeek, string> = {
-  saturday: 'السبت',
-  sunday: 'الأحد',
-  monday: 'الاثنين',
-  tuesday: 'الثلاثاء',
-  wednesday: 'الأربعاء',
-  thursday: 'الخميس',
-  friday: 'الجمعة',
 }
 
 const paymentStatusLabels = {
@@ -136,27 +127,17 @@ const sessionTypeLabels = {
 } as const
 
 const numberFormatter = new Intl.NumberFormat('ar-EG')
-const listFormatter = new Intl.ListFormat('ar', {
-  style: 'long',
-  type: 'conjunction',
-})
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ')
 }
 
-function isDayOfWeek(day: string): day is DayOfWeek {
-  return day in DAY_LABELS
-}
-
-function formatDays(days: string[]) {
-  const normalizedDays = days.filter(isDayOfWeek)
-
-  if (normalizedDays.length === 0) {
-    return 'غير محدد'
+function formatScheduleEntries(schedule: GroupScheduleInput[]) {
+  if (schedule.length === 0) {
+    return ['غير محدد']
   }
 
-  return listFormatter.format(normalizedDays.map((day) => DAY_LABELS[day]))
+  return schedule.map((entry) => formatGroupScheduleEntry(entry))
 }
 
 export default function GroupDetails({
@@ -192,6 +173,7 @@ export default function GroupDetails({
   }, [availableStudents, enrolledStudentIds, search])
 
   const isGroupAtCapacity = group.activeStudentCount >= group.maxCapacity
+  const scheduleEntries = formatScheduleEntries(group.schedule)
 
   function runGroupAction(action: () => Promise<unknown>, onSuccess?: () => void) {
     setActionError(null)
@@ -248,16 +230,16 @@ export default function GroupDetails({
 
         <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
           <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-900">
-            <p className="text-xs text-slate-500 dark:text-slate-400">الأيام</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">الجدول الأسبوعي</p>
             <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
-              {formatDays(group.days)}
+              {scheduleEntries.join('، ')}
             </p>
           </div>
 
           <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-900">
-            <p className="text-xs text-slate-500 dark:text-slate-400">الوقت</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">عدد الحصص</p>
             <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
-              {group.timeStart} - {group.timeEnd}
+              {`${numberFormatter.format(group.schedule.length)} حصة أسبوعيا`}
             </p>
           </div>
 

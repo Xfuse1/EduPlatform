@@ -1,9 +1,12 @@
+﻿import { parseStoredGroupSchedule } from "@/modules/groups/schedule";
+
 const orderedArabicDays = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"] as const;
 
 const normalizedDayMap: Record<string, (typeof orderedArabicDays)[number]> = {
   السبت: "السبت",
   الاحد: "الأحد",
   الأحد: "الأحد",
+  الاحد: "الأحد",
   الاثنين: "الاثنين",
   الإثنين: "الاثنين",
   الثلاثاء: "الثلاثاء",
@@ -12,6 +15,13 @@ const normalizedDayMap: Record<string, (typeof orderedArabicDays)[number]> = {
   الخميس: "الخميس",
   الجمعه: "الجمعة",
   الجمعة: "الجمعة",
+  saturday: "السبت",
+  sunday: "الأحد",
+  monday: "الاثنين",
+  tuesday: "الثلاثاء",
+  wednesday: "الأربعاء",
+  thursday: "الخميس",
+  friday: "الجمعة",
 };
 
 function pad(value: number) {
@@ -19,7 +29,7 @@ function pad(value: number) {
 }
 
 export function normalizeArabicDay(value: string) {
-  return normalizedDayMap[value.trim()] ?? value.trim();
+  return normalizedDayMap[value.trim().toLowerCase()] ?? normalizedDayMap[value.trim()] ?? value.trim();
 }
 
 export function getArabicDaysOrder() {
@@ -121,7 +131,20 @@ type SchedulableGroup = {
   timeEnd: string;
   room?: string | null;
   color?: string | null;
+  schedule?: unknown;
 };
+
+function getGroupScheduleEntries(group: SchedulableGroup) {
+  return parseStoredGroupSchedule(group.schedule, {
+    days: group.days,
+    timeStart: group.timeStart,
+    timeEnd: group.timeEnd,
+  }).map((entry) => ({
+    day: normalizeArabicDay(entry.day),
+    timeStart: entry.timeStart,
+    timeEnd: entry.timeEnd,
+  }));
+}
 
 export function getNextRecurringSession(groups: SchedulableGroup[], fromDate = new Date()) {
   let nextSession:
@@ -137,24 +160,24 @@ export function getNextRecurringSession(groups: SchedulableGroup[], fromDate = n
     | null = null;
 
   for (const group of groups) {
-    for (const day of group.days) {
-      const occurrenceDate = getNextOccurrenceDate(day, fromDate);
+    for (const entry of getGroupScheduleEntries(group)) {
+      const occurrenceDate = getNextOccurrenceDate(entry.day, fromDate);
 
       if (!occurrenceDate) {
         continue;
       }
 
-      let sessionDate = buildDateTime(occurrenceDate, group.timeStart);
+      let sessionDate = buildDateTime(occurrenceDate, entry.timeStart);
 
       if (!sessionDate) {
         continue;
       }
 
-      const sessionEnd = buildDateTime(occurrenceDate, group.timeEnd);
+      const sessionEnd = buildDateTime(occurrenceDate, entry.timeEnd);
 
       if (sessionEnd && sessionEnd <= fromDate) {
         occurrenceDate.setDate(occurrenceDate.getDate() + 7);
-        sessionDate = buildDateTime(occurrenceDate, group.timeStart);
+        sessionDate = buildDateTime(occurrenceDate, entry.timeStart);
 
         if (!sessionDate) {
           continue;
@@ -164,8 +187,8 @@ export function getNextRecurringSession(groups: SchedulableGroup[], fromDate = n
       if (!nextSession || sessionDate < nextSession.date) {
         nextSession = {
           date: sessionDate,
-          timeStart: formatDisplayTime(group.timeStart),
-          timeEnd: formatDisplayTime(group.timeEnd),
+          timeStart: formatDisplayTime(entry.timeStart),
+          timeEnd: formatDisplayTime(entry.timeEnd),
           group: {
             id: group.id,
             name: group.name,
@@ -181,15 +204,15 @@ export function getNextRecurringSession(groups: SchedulableGroup[], fromDate = n
 export function buildWeeklyScheduleItems(groups: SchedulableGroup[], today = getArabicWeekday()) {
   return groups
     .flatMap((group) =>
-      group.days.map((day) => ({
-        id: `${group.id}-${normalizeArabicDay(day)}`,
+      getGroupScheduleEntries(group).map((entry, index) => ({
+        id: `${group.id}-${normalizeArabicDay(entry.day)}-${index}`,
         subject: group.subject ? `${group.subject} - ${group.name}` : group.name,
-        day: normalizeArabicDay(day),
-        timeStart: formatDisplayTime(group.timeStart),
-        timeEnd: formatDisplayTime(group.timeEnd),
+        day: normalizeArabicDay(entry.day),
+        timeStart: formatDisplayTime(entry.timeStart),
+        timeEnd: formatDisplayTime(entry.timeEnd),
         room: group.room?.trim() || "القاعة غير محددة",
         color: group.color?.trim() || "#1A5276",
-        isToday: normalizeArabicDay(day) === today,
+        isToday: normalizeArabicDay(entry.day) === today,
       })),
     )
     .sort((first, second) => {

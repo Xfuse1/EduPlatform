@@ -1,4 +1,4 @@
-import { EnrollmentStatus, UserRole } from '@prisma/client'
+﻿import { EnrollmentStatus, UserRole } from '@prisma/client'
 
 import { db } from '@/lib/db'
 import { buildWeeklyScheduleItems } from '@/lib/schedule'
@@ -7,20 +7,12 @@ import {
   resolvePaymentStatus,
 } from '@/modules/payments/queries'
 import { getRecentGroupSessions } from '@/modules/schedule/queries'
+import { getArabicDayLabel, parseStoredGroupSchedule } from '@/modules/groups/schedule'
 
 const ACTIVE_GROUP_STATUSES = [EnrollmentStatus.ACTIVE, EnrollmentStatus.WAITLIST]
-const DAY_LABELS: Record<string, string> = {
-  saturday: 'السبت',
-  sunday: 'الأحد',
-  monday: 'الاثنين',
-  tuesday: 'الثلاثاء',
-  wednesday: 'الأربعاء',
-  thursday: 'الخميس',
-  friday: 'الجمعة',
-}
 
 function toArabicDay(day: string) {
-  return DAY_LABELS[day] ?? day
+  return getArabicDayLabel(day)
 }
 
 export async function getGroups(tenantId: string, teacherId?: string) {
@@ -36,7 +28,7 @@ export async function getGroups(tenantId: string, teacherId?: string) {
       { name: 'asc' },
     ],
     include: {
-      students: {
+      groupStudents: {
         where: {
           status: EnrollmentStatus.ACTIVE,
           student: {
@@ -52,9 +44,14 @@ export async function getGroups(tenantId: string, teacherId?: string) {
     },
   })
 
-  return groups.map(({ students, ...group }) => ({
+  return groups.map(({ groupStudents, ...group }) => ({
     ...group,
-    studentCount: students.length,
+    schedule: parseStoredGroupSchedule(group.schedule, {
+      days: group.days,
+      timeStart: group.timeStart,
+      timeEnd: group.timeEnd,
+    }),
+    studentCount: groupStudents.length,
   }))
 }
 
@@ -125,6 +122,11 @@ export async function getGroupById(tenantId: string, groupId: string, teacherId?
 
   return {
     ...group,
+    schedule: parseStoredGroupSchedule(group.schedule, {
+      days: group.days,
+      timeStart: group.timeStart,
+      timeEnd: group.timeEnd,
+    }),
     activeStudentCount,
     waitlistCount,
     students,
@@ -143,6 +145,7 @@ export async function getGroupsList(tenantId: string, teacherId?: string) {
     days: group.days.map(toArabicDay),
     timeStart: group.timeStart,
     timeEnd: group.timeEnd,
+    schedule: group.schedule,
     room: group.room,
     monthlyFee: group.monthlyFee,
     maxCapacity: group.maxCapacity,
@@ -158,7 +161,7 @@ export async function getTeacherScheduleItems(tenantId: string, teacherId?: stri
       isActive: true,
       ...(teacherId ? { teacherId } : {}),
     },
-    orderBy: [{ timeStart: 'asc' }, { name: 'asc' }],
+    orderBy: [{ name: 'asc' }],
     select: {
       id: true,
       name: true,
@@ -168,13 +171,18 @@ export async function getTeacherScheduleItems(tenantId: string, teacherId?: stri
       timeEnd: true,
       room: true,
       color: true,
+      schedule: true,
     },
   })
 
   return buildWeeklyScheduleItems(
     groups.map((group) => ({
       ...group,
-      days: group.days.map(toArabicDay),
+      schedule: parseStoredGroupSchedule(group.schedule, {
+        days: group.days,
+        timeStart: group.timeStart,
+        timeEnd: group.timeEnd,
+      }),
     })),
   )
 }
@@ -204,6 +212,7 @@ export async function getStudentScheduleItems(tenantId: string, studentId: strin
           timeEnd: true,
           room: true,
           color: true,
+          schedule: true,
         },
       },
     },
@@ -212,7 +221,11 @@ export async function getStudentScheduleItems(tenantId: string, studentId: strin
   return buildWeeklyScheduleItems(
     enrollments.map(({ group }) => ({
       ...group,
-      days: group.days.map(toArabicDay),
+      schedule: parseStoredGroupSchedule(group.schedule, {
+        days: group.days,
+        timeStart: group.timeStart,
+        timeEnd: group.timeEnd,
+      }),
     })),
   )
 }

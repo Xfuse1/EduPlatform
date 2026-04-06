@@ -1,4 +1,4 @@
-import {
+﻿import {
   AttendanceStatus,
   EnrollmentStatus,
   UserRole,
@@ -6,6 +6,7 @@ import {
 
 import type { DayOfWeek } from '@/types'
 import { db } from '@/lib/db'
+import { parseStoredGroupSchedule } from '@/modules/groups/schedule'
 
 const DAY_ORDER: DayOfWeek[] = [
   'saturday',
@@ -45,6 +46,19 @@ function doTimesOverlap(
   return firstStart < secondEnd && firstEnd > secondStart
 }
 
+function getGroupScheduleEntries(group: {
+  schedule: unknown
+  days: string[]
+  timeStart: string
+  timeEnd: string
+}) {
+  return parseStoredGroupSchedule(group.schedule, {
+    days: group.days,
+    timeStart: group.timeStart,
+    timeEnd: group.timeEnd,
+  }).filter((entry) => isDayOfWeek(entry.day))
+}
+
 export async function checkConflicts(
   tenantId: string,
   days: string[],
@@ -58,29 +72,13 @@ export async function checkConflicts(
     return []
   }
 
-  const overlappingGroups = await db.group.findMany({
+  const groups = await db.group.findMany({
     where: {
       tenantId,
       isActive: true,
-      days: {
-        hasSome: normalizedDays,
-      },
-      AND: [
-        {
-          timeStart: {
-            lt: timeEnd,
-          },
-        },
-        {
-          timeEnd: {
-            gt: timeStart,
-          },
-        },
-      ],
     },
-    orderBy: [{ timeStart: 'asc' }, { name: 'asc' }],
     include: {
-      students: {
+      groupStudents: {
         where: {
           status: EnrollmentStatus.ACTIVE,
           student: {
@@ -94,22 +92,32 @@ export async function checkConflicts(
         },
       },
     },
+    orderBy: [{ name: 'asc' }],
   })
 
   const normalizedRoom = normalizeRoom(room)
 
-  return overlappingGroups.map(({ students, ...group }) => {
-    const sameRoom =
-      normalizedRoom !== null &&
-      normalizeRoom(group.room) !== null &&
-      normalizeRoom(group.room) === normalizedRoom
+  return groups
+    .filter((group) =>
+      getGroupScheduleEntries(group).some(
+        (entry) =>
+          normalizedDays.includes(entry.day) &&
+          doTimesOverlap(entry.timeStart, entry.timeEnd, timeStart, timeEnd),
+      ),
+    )
+    .map(({ groupStudents, ...group }) => {
+      const sameRoom =
+        normalizedRoom !== null &&
+        normalizeRoom(group.room) !== null &&
+        normalizeRoom(group.room) === normalizedRoom
 
-    return {
-      ...group,
-      studentCount: students.length,
-      conflictType: sameRoom ? 'teacher_and_room' : ('teacher' as ConflictType),
-    }
-  })
+      return {
+        ...group,
+        schedule: getGroupScheduleEntries(group),
+        studentCount: groupStudents.length,
+        conflictType: sameRoom ? 'teacher_and_room' : ('teacher' as ConflictType),
+      }
+    })
 }
 
 export async function getWeeklySchedule(tenantId: string) {
@@ -118,9 +126,9 @@ export async function getWeeklySchedule(tenantId: string) {
       tenantId,
       isActive: true,
     },
-    orderBy: [{ timeStart: 'asc' }, { subject: 'asc' }, { name: 'asc' }],
+    orderBy: [{ name: 'asc' }],
     include: {
-      students: {
+      groupStudents: {
         where: {
           status: EnrollmentStatus.ACTIVE,
           student: {
@@ -153,19 +161,19 @@ export async function getWeeklySchedule(tenantId: string) {
     conflictGroupIds: string[]
   }
 
-  const entries: ScheduleEntry[] = groups.flatMap(({ students, ...group }) =>
-    group.days.filter(isDayOfWeek).map((day) => ({
-      id: `${group.id}-${day}`,
+  const entries: ScheduleEntry[] = groups.flatMap(({ groupStudents, ...group }) =>
+    getGroupScheduleEntries(group).map((entry, index) => ({
+      id: `${group.id}-${entry.day}-${index}`,
       groupId: group.id,
       groupName: group.name,
       subject: group.subject,
       gradeLevel: group.gradeLevel,
-      day,
-      timeStart: group.timeStart,
-      timeEnd: group.timeEnd,
+      day: entry.day,
+      timeStart: entry.timeStart,
+      timeEnd: entry.timeEnd,
       room: group.room,
       color: group.color,
-      studentCount: students.length,
+      studentCount: groupStudents.length,
       maxCapacity: group.maxCapacity,
       hasConflict: false,
       conflictGroupIds: [],
@@ -240,7 +248,7 @@ export async function getRecentGroupSessions(
     orderBy: [{ date: 'desc' }, { timeStart: 'desc' }],
     take,
     include: {
-      attendance: {
+      attendances: {
         select: {
           status: true,
         },
@@ -248,10 +256,10 @@ export async function getRecentGroupSessions(
     },
   })
 
-  return sessions.map(({ attendance, ...session }) => ({
+  return sessions.map(({ attendances, ...session }) => ({
     ...session,
-    attendanceCount: attendance.length,
-    attendedCount: attendance.filter((record) =>
+    attendanceCount: attendances.length,
+    attendedCount: attendances.filter((record) =>
       ATTENDED_STATUSES.includes(record.status),
     ).length,
   }))

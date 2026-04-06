@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -6,10 +6,15 @@ import type { FormEvent } from 'react'
 import { useState, useTransition } from 'react'
 
 import ColorPicker from '@/components/forms/ColorPicker'
-import DaysPicker from '@/components/forms/DaysPicker'
 import FormField from '@/components/forms/FormField'
 import { ROUTES } from '@/config/routes'
 import { createGroup, updateGroup } from '@/modules/groups/actions'
+import {
+  GROUP_DAY_VALUES,
+  getArabicDayLabel,
+  getTimeMeridiemLabel,
+  type GroupScheduleInput,
+} from '@/modules/groups/schedule'
 import {
   groupCreateSchema,
   type GroupCreateInput,
@@ -22,15 +27,27 @@ type GroupFormProps = {
   redirectTo?: string
 }
 
-type FieldErrorState = Partial<Record<keyof GroupCreateInput | 'form', string>>
+type ScheduleEntryErrors = Array<{
+  day?: string
+  timeStart?: string
+  timeEnd?: string
+}>
+
+type FieldErrorState = Partial<Record<Exclude<keyof GroupCreateInput, 'schedule'> | 'schedule' | 'form', string>>
+
+const SESSION_LABELS = ['الأولى', 'الثانية', 'الثالثة', 'الرابعة'] as const
 
 const defaultValues: GroupCreateInput = {
   name: '',
   subject: '',
   gradeLevel: '',
-  days: [],
-  timeStart: '',
-  timeEnd: '',
+  schedule: [
+    {
+      day: 'saturday',
+      timeStart: '',
+      timeEnd: '',
+    },
+  ],
   room: undefined,
   maxCapacity: 40,
   monthlyFee: 0,
@@ -41,19 +58,80 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ')
 }
 
-function buildFieldErrors(
-  validationError: Exclude<
-    ReturnType<typeof groupCreateSchema.safeParse>,
-    { success: true }
-  >,
-) {
-  const flattenedErrors = validationError.error.flatten().fieldErrors
+function cloneSchedule(schedule: GroupScheduleInput[]) {
+  return schedule.map((entry) => ({ ...entry }))
+}
 
-  return Object.fromEntries(
-    Object.entries(flattenedErrors)
-      .map(([key, value]) => [key, value?.[0]])
-      .filter((entry): entry is [string, string] => Boolean(entry[1])),
-  ) as FieldErrorState
+function isUsingSameTime(schedule: GroupScheduleInput[]) {
+  if (schedule.length <= 1) {
+    return false
+  }
+
+  const firstEntry = schedule[0]
+  return schedule.slice(1).every(
+    (entry) => entry.timeStart === firstEntry.timeStart && entry.timeEnd === firstEntry.timeEnd,
+  )
+}
+
+function syncTimesFromFirst(entries: GroupScheduleInput[]) {
+  if (entries.length <= 1) {
+    return entries
+  }
+
+  const firstEntry = entries[0]
+
+  return entries.map((entry, index) =>
+    index === 0
+      ? entry
+      : {
+          ...entry,
+          timeStart: firstEntry.timeStart,
+          timeEnd: firstEntry.timeEnd,
+        },
+  )
+}
+
+function getNextDay(entries: GroupScheduleInput[], index: number) {
+  const usedDays = new Set(entries.map((entry) => entry.day))
+  return GROUP_DAY_VALUES.find((day) => !usedDays.has(day)) ?? GROUP_DAY_VALUES[index % GROUP_DAY_VALUES.length]
+}
+
+function buildValidationState(invalidResult: Exclude<ReturnType<typeof groupCreateSchema.safeParse>, { success: true }>, scheduleLength: number) {
+  const fieldErrors: FieldErrorState = {}
+  const scheduleErrors: ScheduleEntryErrors = Array.from({ length: scheduleLength }, () => ({}))
+
+  for (const issue of invalidResult.error.issues) {
+    const [firstSegment, secondSegment, thirdSegment] = issue.path
+
+    if (firstSegment === 'schedule') {
+      if (typeof secondSegment === 'number' && typeof thirdSegment === 'string') {
+        scheduleErrors[secondSegment] ??= {}
+        scheduleErrors[secondSegment][thirdSegment as 'day' | 'timeStart' | 'timeEnd'] = issue.message
+      } else if (!fieldErrors.schedule) {
+        fieldErrors.schedule = issue.message
+      }
+
+      continue
+    }
+
+    if (typeof firstSegment === 'string' && !fieldErrors[firstSegment as keyof FieldErrorState]) {
+      fieldErrors[firstSegment as keyof FieldErrorState] = issue.message
+    }
+  }
+
+  return {
+    fieldErrors,
+    scheduleErrors,
+  }
+}
+
+function getTimeHint(value: string) {
+  if (!value) {
+    return 'اختر الوقت بصيغة 24 ساعة'
+  }
+
+  const meridiemLabel = getTimeMeridiemLabel(value)
+  return meridiemLabel ? `هذا الوقت ${meridiemLabel}` : 'أدخل وقتًا صحيحًا'
 }
 
 const inputClassName =
@@ -67,48 +145,107 @@ export default function GroupForm({
 }: GroupFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [days, setDays] = useState(initialValues.days)
+  const initialSchedule = initialValues.schedule.length > 0 ? cloneSchedule(initialValues.schedule) : cloneSchedule(defaultValues.schedule)
+  const [scheduleEntries, setScheduleEntries] = useState<GroupScheduleInput[]>(initialSchedule)
+  const [sameTimeForAll, setSameTimeForAll] = useState(isUsingSameTime(initialSchedule))
   const [color, setColor] = useState(initialValues.color)
   const [errors, setErrors] = useState<FieldErrorState>({})
+  const [scheduleErrors, setScheduleErrors] = useState<ScheduleEntryErrors>(
+    Array.from({ length: initialSchedule.length }, () => ({})),
+  )
   const [submitError, setSubmitError] = useState<string | null>(null)
+
+  function resizeSchedule(nextCount: number) {
+    setScheduleEntries((currentEntries) => {
+      let nextEntries = cloneSchedule(currentEntries)
+
+      if (nextCount > nextEntries.length) {
+        for (let index = nextEntries.length; index < nextCount; index += 1) {
+          nextEntries.push({
+            day: getNextDay(nextEntries, index),
+            timeStart: sameTimeForAll ? nextEntries[0]?.timeStart ?? '' : '',
+            timeEnd: sameTimeForAll ? nextEntries[0]?.timeEnd ?? '' : '',
+          })
+        }
+      } else {
+        nextEntries = nextEntries.slice(0, nextCount)
+      }
+
+      return sameTimeForAll ? syncTimesFromFirst(nextEntries) : nextEntries
+    })
+
+    setScheduleErrors(Array.from({ length: nextCount }, () => ({})))
+  }
+
+  function updateScheduleEntry(index: number, field: keyof GroupScheduleInput, value: string) {
+    setScheduleEntries((currentEntries) => {
+      let nextEntries = currentEntries.map((entry, entryIndex) =>
+        entryIndex === index
+          ? {
+              ...entry,
+              [field]: value,
+            }
+          : entry,
+      )
+
+      if (sameTimeForAll && index === 0 && (field === 'timeStart' || field === 'timeEnd')) {
+        nextEntries = syncTimesFromFirst(nextEntries)
+      }
+
+      return nextEntries
+    })
+
+    setScheduleErrors((currentErrors) => {
+      const nextErrors = currentErrors.length > 0
+        ? currentErrors.map((entry) => ({ ...entry }))
+        : Array.from({ length: scheduleEntries.length }, () => ({}))
+
+      if (!nextErrors[index]) {
+        nextErrors[index] = {}
+      }
+
+      nextErrors[index][field] = undefined
+      return nextErrors
+    })
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const form = event.currentTarget
     const formData = new FormData(form)
-    const validationResult = groupCreateSchema.safeParse({
+    const payload = {
       ...Object.fromEntries(formData.entries()),
-      days,
       color,
-    })
+      schedule: scheduleEntries,
+    }
+    const validationResult = groupCreateSchema.safeParse(payload)
 
     if (!validationResult.success) {
-      setErrors(buildFieldErrors(validationResult))
+      const validationState = buildValidationState(validationResult, scheduleEntries.length)
+      setErrors(validationState.fieldErrors)
+      setScheduleErrors(validationState.scheduleErrors)
       setSubmitError(null)
       return
     }
 
-    formData.delete('days')
     formData.set('color', color)
-    for (const day of days) {
-      formData.append('days', day)
-    }
+    formData.set('schedule', JSON.stringify(scheduleEntries))
 
     setErrors({})
+    setScheduleErrors(Array.from({ length: scheduleEntries.length }, () => ({})))
     setSubmitError(null)
 
     startTransition(() => {
       void (async () => {
         try {
-          if (mode === 'edit') {
-            if (!groupId) {
-              throw new Error('معرف المجموعة مطلوب للتعديل')
-            }
+          const result = mode === 'edit'
+            ? await updateGroup(groupId ?? '', formData)
+            : await createGroup(formData)
 
-            await updateGroup(groupId, formData)
-          } else {
-            await createGroup(formData)
+          if (!result.success) {
+            setSubmitError(result.message ?? 'تعذر حفظ المجموعة الآن')
+            return
           }
 
           router.push(redirectTo)
@@ -132,7 +269,7 @@ export default function GroupForm({
           {mode === 'edit' ? 'تعديل بيانات المجموعة' : 'بيانات المجموعة'}
         </h2>
         <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
-          أدخل تفاصيل المجموعة كما ستظهر في لوحة المعلم والحضور والمصاريف.
+          أدخل بيانات المجموعة الأساسية، ثم أضف الحصص الأسبوعية بمواعيدها الفعلية كما ستظهر في الجدول والحضور.
         </p>
       </div>
 
@@ -201,38 +338,6 @@ export default function GroupForm({
         </FormField>
 
         <FormField
-          label="وقت البداية"
-          htmlFor="timeStart"
-          required
-          error={errors.timeStart}
-        >
-          <input
-            id="timeStart"
-            name="timeStart"
-            type="time"
-            defaultValue={initialValues.timeStart}
-            className={inputClassName}
-            aria-invalid={Boolean(errors.timeStart)}
-          />
-        </FormField>
-
-        <FormField
-          label="وقت النهاية"
-          htmlFor="timeEnd"
-          required
-          error={errors.timeEnd}
-        >
-          <input
-            id="timeEnd"
-            name="timeEnd"
-            type="time"
-            defaultValue={initialValues.timeEnd}
-            className={inputClassName}
-            aria-invalid={Boolean(errors.timeEnd)}
-          />
-        </FormField>
-
-        <FormField
           label="الحد الأقصى للطلاب"
           htmlFor="maxCapacity"
           required
@@ -269,14 +374,140 @@ export default function GroupForm({
         </FormField>
       </div>
 
-      <FormField
-        label="أيام الدراسة"
-        required
-        error={errors.days}
-        hint="يمكن اختيار أكثر من يوم"
-      >
-        <DaysPicker value={days} onChange={setDays} disabled={isPending} />
-      </FormField>
+      <div className="space-y-4 rounded-[28px] border border-slate-200/80 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/40 md:p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="space-y-1">
+            <h3 className="text-lg font-bold text-slate-950 dark:text-white">الحصص الأسبوعية</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              أضف من 1 إلى 4 حصص. لكل حصة يوم ووقت بداية ووقت نهاية.
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FormField
+              label="عدد الحصص"
+              htmlFor="sessionCount"
+              required
+              error={errors.schedule}
+              className="min-w-[180px]"
+            >
+              <select
+                id="sessionCount"
+                name="sessionCount"
+                value={String(scheduleEntries.length)}
+                onChange={(event) => resizeSchedule(Number(event.target.value))}
+                className={inputClassName}
+              >
+                {[1, 2, 3, 4].map((count) => (
+                  <option key={count} value={count}>
+                    {count}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+
+            <label className="flex min-h-12 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200">
+              <input
+                type="checkbox"
+                checked={sameTimeForAll}
+                onChange={(event) => {
+                  const isChecked = event.target.checked
+                  setSameTimeForAll(isChecked)
+                  if (isChecked) {
+                    setScheduleEntries((currentEntries) => syncTimesFromFirst(cloneSchedule(currentEntries)))
+                  }
+                }}
+                className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+              />
+              <span>استخدم نفس وقت البداية والنهاية لكل الحصص</span>
+            </label>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {scheduleEntries.map((entry, index) => {
+            const isTimeLocked = sameTimeForAll && index > 0
+            const entryErrors = scheduleErrors[index] ?? {}
+
+            return (
+              <div
+                key={`schedule-entry-${index}`}
+                className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950"
+              >
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                  <h4 className="text-base font-bold text-slate-950 dark:text-white">
+                    الحصة {SESSION_LABELS[index] ?? index + 1}
+                  </h4>
+                  {isTimeLocked ? (
+                    <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800 dark:bg-sky-900/40 dark:text-sky-200">
+                      نفس وقت الحصة الأولى
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <FormField
+                    label="اليوم"
+                    htmlFor={`schedule-day-${index}`}
+                    required
+                    error={entryErrors.day}
+                  >
+                    <select
+                      id={`schedule-day-${index}`}
+                      value={entry.day}
+                      onChange={(event) => updateScheduleEntry(index, 'day', event.target.value)}
+                      className={inputClassName}
+                      aria-invalid={Boolean(entryErrors.day)}
+                    >
+                      {GROUP_DAY_VALUES.map((day) => (
+                        <option key={day} value={day}>
+                          {getArabicDayLabel(day)}
+                        </option>
+                      ))}
+                    </select>
+                  </FormField>
+
+                  <FormField
+                    label="ساعة البدء"
+                    htmlFor={`schedule-start-${index}`}
+                    required
+                    error={entryErrors.timeStart}
+                    hint={isTimeLocked ? 'يتم تعبئة هذا الحقل تلقائيًا من الحصة الأولى' : getTimeHint(entry.timeStart)}
+                  >
+                    <input
+                      id={`schedule-start-${index}`}
+                      type="time"
+                      value={entry.timeStart}
+                      onChange={(event) => updateScheduleEntry(index, 'timeStart', event.target.value)}
+                      className={inputClassName}
+                      disabled={isTimeLocked}
+                      aria-invalid={Boolean(entryErrors.timeStart)}
+                    />
+                  </FormField>
+
+                  <FormField
+                    label="ساعة الانتهاء"
+                    htmlFor={`schedule-end-${index}`}
+                    required
+                    error={entryErrors.timeEnd}
+                    hint={isTimeLocked ? 'يتم تعبئة هذا الحقل تلقائيًا من الحصة الأولى' : getTimeHint(entry.timeEnd)}
+                  >
+                    <input
+                      id={`schedule-end-${index}`}
+                      type="time"
+                      value={entry.timeEnd}
+                      onChange={(event) => updateScheduleEntry(index, 'timeEnd', event.target.value)}
+                      className={inputClassName}
+                      disabled={isTimeLocked}
+                      aria-invalid={Boolean(entryErrors.timeEnd)}
+                    />
+                  </FormField>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
 
       <FormField
         label="لون المجموعة"
@@ -315,7 +546,7 @@ export default function GroupForm({
               : 'جارٍ إنشاء المجموعة...'
             : mode === 'edit'
               ? 'حفظ التعديلات'
-              : 'حفظ المجموعة'}
+              : 'إضافة المجموعة'}
         </button>
       </div>
     </form>

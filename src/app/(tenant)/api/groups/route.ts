@@ -1,4 +1,4 @@
-import type { NextRequest } from 'next/server'
+﻿import type { NextRequest } from 'next/server'
 import { ZodError } from 'zod'
 
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
 
     return errorResponse(
       'GROUPS_FETCH_FAILED',
-      error instanceof Error ? error.message : 'تعذر جلب المجموعات',
+      error instanceof Error ? error.message : 'ØªØ¹Ø°Ø± Ø¬Ù„Ø¨ Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹Ø§Øª',
       400,
     )
   }
@@ -77,8 +77,9 @@ export async function POST(request: NextRequest) {
 
     return errorResponse(
       'GROUP_CREATE_FAILED',
-      error instanceof Error ? error.message : 'تعذر إنشاء المجموعة',
+      error instanceof Error ? error.message : 'ØªØ¹Ø°Ø± Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹Ø©',
       400,
     )
   }
 }
+

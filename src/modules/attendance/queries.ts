@@ -1,18 +1,18 @@
-import { cache } from "react";
+﻿import { cache } from "react";
 
 import { db } from "@/lib/db";
 import { MOCK_ATTENDANCE_OVERVIEW, MOCK_ATTENDANCE_SESSIONS, MOCK_STUDENT_ATTENDANCE, MOCK_TODAY_SESSIONS } from "@/lib/mock-data";
+import { parseStoredGroupSchedule } from "@/modules/groups/schedule";
 
-const arabicWeekDays = new Set(["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]);
+const dayValueByIndex = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
 
 function getTodayInfo() {
   const now = new Date();
   const date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-  const dayName = new Intl.DateTimeFormat("ar-EG", { weekday: "long" }).format(now);
 
   return {
     date,
-    dayName: arabicWeekDays.has(dayName) ? dayName : "السبت",
+    dayName: dayValueByIndex[now.getDay()],
   };
 }
 
@@ -35,14 +35,31 @@ export const getTodaySessions = cache(async (tenantId: string) => {
         },
       },
       orderBy: {
-        timeStart: "asc",
+        name: "asc",
       },
     });
 
-    const matchingGroups = groups.filter((group) => group.days.includes(today.dayName));
+    const matchingGroups = groups
+      .map((group) => {
+        const scheduleEntry = parseStoredGroupSchedule(group.schedule, {
+          days: group.days,
+          timeStart: group.timeStart,
+          timeEnd: group.timeEnd,
+        }).find((entry) => entry.day === today.dayName);
+
+        if (!scheduleEntry) {
+          return null;
+        }
+
+        return {
+          group,
+          scheduleEntry,
+        };
+      })
+      .filter((item): item is { group: (typeof groups)[number]; scheduleEntry: { day: string; timeStart: string; timeEnd: string } } => item !== null);
 
     const sessions = await Promise.all(
-      matchingGroups.map(async (group) => {
+      matchingGroups.map(async ({ group, scheduleEntry }) => {
         const session = await db.session.upsert({
           where: {
             groupId_date: {
@@ -50,13 +67,16 @@ export const getTodaySessions = cache(async (tenantId: string) => {
               date: today.date,
             },
           },
-          update: {},
+          update: {
+            timeStart: scheduleEntry.timeStart,
+            timeEnd: scheduleEntry.timeEnd,
+          },
           create: {
             tenantId,
             groupId: group.id,
             date: today.date,
-            timeStart: group.timeStart,
-            timeEnd: group.timeEnd,
+            timeStart: scheduleEntry.timeStart,
+            timeEnd: scheduleEntry.timeEnd,
           },
           include: {
             group: {
@@ -96,7 +116,6 @@ export const getTodaySessions = cache(async (tenantId: string) => {
     totalStudents: 0,
   }));
 });
-
 export const getAttendanceOverview = cache(async (tenantId: string) => {
   try {
     const now = new Date();
@@ -187,7 +206,7 @@ export const getAttendanceSessionsList = cache(async (tenantId: string) => {
     const sessions = await getTodaySessions(tenantId);
 
     return sessions.map((session) => {
-      const remaining = session.status === "IN_PROGRESS" ? "الحصة جارية الآن" : session.status === "SCHEDULED" ? "لم تبدأ بعد" : "اكتملت الحصة";
+      const remaining = session.status === "IN_PROGRESS" ? "Ø§Ù„Ø­ØµØ© Ø¬Ø§Ø±ÙŠØ© Ø§Ù„Ø¢Ù†" : session.status === "SCHEDULED" ? "Ù„Ù… ØªØ¨Ø¯Ø£ Ø¨Ø¹Ø¯" : "Ø§ÙƒØªÙ…Ù„Øª Ø§Ù„Ø­ØµØ©";
 
       return {
         id: session.id,
@@ -252,7 +271,7 @@ export const getSessionWithStudents = cache(async (sessionId: string) => {
 
       return {
         id: id,
-        name: gs ? gs.student.name : (guestInfo ? guestInfo.name : "طالب غير معروف"),
+        name: gs ? gs.student.name : (guestInfo ? guestInfo.name : "Ø·Ø§Ù„Ø¨ ØºÙŠØ± Ù…Ø¹Ø±ÙˆÙ"),
         phone: gs ? gs.student.phone : (guestInfo ? guestInfo.phone : ""),
         status: record ? record.status : "ABSENT",
         method: record ? record.method : "MANUAL",
