@@ -47,11 +47,11 @@ model User {
   gradeLevel            String?
   parentName            String?
   parentPhone           String?
-  pinHash               String?
   isActive              Boolean                @default(true)
   lastLoginAt           DateTime?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
+  pinHash               String?
   assignmentSubmissions AssignmentSubmission[]
   markedAttendances     Attendance[]           @relation("MarkedByAttendance")
   attendances           Attendance[]           @relation("StudentAttendance")
@@ -87,21 +87,21 @@ model ParentStudent {
 model Group {
   id            String         @id @default(cuid())
   tenantId      String
-  teacherId     String?
   name          String
   subject       String
   gradeLevel    String
   days          String[]
   timeStart     String
   timeEnd       String
-  room          String?
-  schedule      Json           @default("[]")
   maxCapacity   Int            @default(40)
   monthlyFee    Int
   color         String         @default("#2E86C1")
   isActive      Boolean        @default(true)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  room          String?
+  schedule      Json           @default("[]")
+  teacherId     String?
   assignments   Assignment[]
   attendances   Attendance[]
   exams         Exam[]
@@ -442,5 +442,3 @@ enum QuestionType {
   MCQ
   ESSAY
 }
-
-
