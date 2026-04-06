@@ -163,3 +163,26 @@ export async function requireAuth() {
 
   return user;
 }
+
+export class UnauthorizedError extends Error {
+  constructor() {
+    super("Unauthorized");
+    this.name = "UnauthorizedError";
+  }
+}
+
+export async function getCurrentSession() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth-token")?.value ?? cookieStore.get("eduplatform-session")?.value;
+  if (!token) return null;
+
+  try {
+    const session = await db.authSession.findFirst({
+      where: { token, expiresAt: { gt: new Date() } },
+      select: { token: true, expiresAt: true, userId: true, tenantId: true },
+    });
+    return session ?? null;
+  } catch {
+    return null;
+  }
+}
