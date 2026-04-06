@@ -87,12 +87,15 @@ model ParentStudent {
 model Group {
   id            String         @id @default(cuid())
   tenantId      String
+  teacherId     String?
   name          String
   subject       String
   gradeLevel    String
   days          String[]
   timeStart     String
   timeEnd       String
+  room          String?
+  schedule      Json           @default("[]")
   maxCapacity   Int            @default(40)
   monthlyFee    Int
   color         String         @default("#2E86C1")
@@ -108,6 +111,7 @@ model Group {
 
   @@index([tenantId])
   @@index([tenantId, isActive])
+  @@index([tenantId, teacherId])
 }
 
 model GroupStudent {
@@ -438,3 +442,5 @@ enum QuestionType {
   MCQ
   ESSAY
 }
+
+

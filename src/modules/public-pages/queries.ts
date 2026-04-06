@@ -1,7 +1,8 @@
-import { cache } from "react";
+﻿import { cache } from "react";
 
 import { db } from "@/lib/db";
 import { MOCK_GROUPS, MOCK_TENANT } from "@/lib/mock-data";
+import { parseStoredGroupSchedule } from "@/modules/groups/schedule";
 
 export const getTeacherPublicProfile = cache(async (tenantId: string) => {
   try {
@@ -61,6 +62,11 @@ export const getOpenGroups = cache(async (tenantId: string) => {
     return groups.map((group) => {
       const enrolledCount = group._count.groupStudents;
       const remainingCapacity = Math.max(group.maxCapacity - enrolledCount, 0);
+      const schedule = parseStoredGroupSchedule(group.schedule, {
+        days: group.days,
+        timeStart: group.timeStart,
+        timeEnd: group.timeEnd,
+      });
 
       return {
         id: group.id,
@@ -70,6 +76,7 @@ export const getOpenGroups = cache(async (tenantId: string) => {
         days: group.days,
         timeStart: group.timeStart,
         timeEnd: group.timeEnd,
+        schedule,
         monthlyFee: group.monthlyFee,
         maxCapacity: group.maxCapacity,
         enrolledCount,
@@ -90,6 +97,11 @@ export const getOpenGroups = cache(async (tenantId: string) => {
     days: group.days,
     timeStart: group.timeStart,
     timeEnd: group.timeEnd,
+    schedule: group.days.map((day) => ({
+      day,
+      timeStart: group.timeStart,
+      timeEnd: group.timeEnd,
+    })),
     monthlyFee: group.monthlyFee,
     maxCapacity: group.maxCapacity,
     enrolledCount: group.enrolledCount,

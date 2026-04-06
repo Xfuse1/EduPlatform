@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { ROUTES } from '@/config/routes'
@@ -6,9 +6,8 @@ import { requireAuth } from '@/lib/auth'
 import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
 import GroupForm from '@/modules/groups/components/GroupForm'
-import { GROUP_DAY_VALUES } from '@/modules/groups/validations'
+import { parseStoredGroupSchedule } from '@/modules/groups/schedule'
 import { getGroupById } from '@/modules/groups/queries'
-import type { DayOfWeek } from '@/types'
 
 const ALLOWED_ROLES = new Set(['TEACHER', 'ASSISTANT'])
 
@@ -36,9 +35,11 @@ export default async function EditGroupPage({ params }: EditGroupPageProps) {
     notFound()
   }
 
-  const days = group.days.filter(
-    (day): day is DayOfWeek => GROUP_DAY_VALUES.includes(day as DayOfWeek),
-  )
+  const schedule = parseStoredGroupSchedule(group.schedule, {
+    days: group.days,
+    timeStart: group.timeStart,
+    timeEnd: group.timeEnd,
+  })
 
   return (
     <section className="space-y-6">
@@ -56,7 +57,7 @@ export default async function EditGroupPage({ params }: EditGroupPageProps) {
             تعديل {group.name}
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-            حدّث المواعيد والسعة واللون والبيانات الأساسية للمجموعة.
+            حدّث المواعيد وعدد الحصص والسعة واللون والبيانات الأساسية للمجموعة.
           </p>
         </div>
       </div>
@@ -69,9 +70,7 @@ export default async function EditGroupPage({ params }: EditGroupPageProps) {
           name: group.name,
           subject: group.subject,
           gradeLevel: group.gradeLevel,
-          days,
-          timeStart: group.timeStart,
-          timeEnd: group.timeEnd,
+          schedule,
           room: group.room ?? undefined,
           maxCapacity: group.maxCapacity,
           monthlyFee: group.monthlyFee,

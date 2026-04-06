@@ -1,4 +1,4 @@
-export type DayOfWeek =
+﻿export type DayOfWeek =
   | 'saturday'
   | 'sunday'
   | 'monday'
@@ -113,9 +113,16 @@ export interface ParentStudent {
   student?: User
 }
 
+export interface GroupScheduleEntry {
+  day: DayOfWeek
+  timeStart: string
+  timeEnd: string
+}
+
 export interface Group {
   id: string
   tenantId: string
+  teacherId?: string | null
   name: string
   subject: string
   gradeLevel: string
@@ -123,6 +130,7 @@ export interface Group {
   timeStart: string
   timeEnd: string
   room: string | null
+  schedule?: GroupScheduleEntry[]
   maxCapacity: number
   monthlyFee: number
   color: string

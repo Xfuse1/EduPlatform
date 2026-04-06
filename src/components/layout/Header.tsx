@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { LogOut, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -34,8 +34,6 @@ export function Header({
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-slate-200/80 bg-white/90 shadow-sm shadow-slate-200/30 backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/90 dark:shadow-slate-950/20">
       <div className="flex h-full items-center justify-between gap-4 px-4 sm:px-6">
-
-        {/* Left side: avatar + menu toggle + logout */}
         <div className="flex items-center gap-2">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-sm font-extrabold text-white shadow-lg shadow-primary/20">
             {getInitials(userName)}
@@ -54,15 +52,15 @@ export function Header({
 
           <button
             type="button"
-            aria-label="تسجيل الخروج"
+            aria-label="تسجيل خروج"
             onClick={handleLogout}
-            className="touch-target inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition hover:border-rose-300 hover:text-rose-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+            className="touch-target inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200 dark:hover:bg-rose-950/60"
           >
             <LogOut className="h-5 w-5" />
+            <span className="hidden sm:inline">تسجيل خروج</span>
           </button>
         </div>
 
-        {/* Right side: tenant name + notifications + theme toggle */}
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <NotificationBell />
@@ -71,7 +69,6 @@ export function Header({
             <h1 className="text-base font-extrabold text-primary dark:text-sky-300">{tenantName}</h1>
           </div>
         </div>
-
       </div>
     </header>
   );
