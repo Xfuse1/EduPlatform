@@ -8,6 +8,8 @@ import Badge from '@/components/data-display/Badge'
 import EmptyState from '@/components/shared/EmptyState'
 import SearchBar from '@/components/shared/SearchBar'
 import { ROUTES } from '@/config/routes'
+import { deleteGroup } from '@/modules/groups/actions'
+import { formatGroupScheduleEntry, type GroupScheduleInput } from '@/modules/groups/schedule'
 import {
   enrollInGroup,
   removeFromGroup,
@@ -17,7 +19,6 @@ import {
   formatDate,
   formatPhone,
 } from '@/lib/utils'
-import { formatGroupScheduleEntry, type GroupScheduleInput } from '@/modules/groups/schedule'
 
 type GroupStudent = {
   id: string
@@ -193,6 +194,28 @@ export default function GroupDetails({
     })
   }
 
+  function handleDeleteGroup() {
+    if (!window.confirm('هل أنت متأكد من حذف هذه المجموعة؟ سيتم حذف الحصص والطلاب المرتبطين بها من هذه المجموعة.')) {
+      return
+    }
+
+    setActionError(null)
+
+    startTransition(() => {
+      void (async () => {
+        const result = await deleteGroup(group.id)
+
+        if (!result.success) {
+          setActionError(result.message ?? 'تعذر حذف المجموعة')
+          return
+        }
+
+        router.push(ROUTES.teacher.groups)
+        router.refresh()
+      })()
+    })
+  }
+
   return (
     <section className="space-y-6">
       <div
@@ -219,6 +242,17 @@ export default function GroupDetails({
             >
               تعديل المجموعة
             </Link>
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={handleDeleteGroup}
+              className={joinClasses(
+                'inline-flex items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-950/50',
+                isPending && 'cursor-not-allowed opacity-70',
+              )}
+            >
+              {isPending ? 'جاري حذف المجموعة...' : 'حذف المجموعة'}
+            </button>
             <Link
               href={ROUTES.teacher.groups}
               className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"

@@ -1,4 +1,4 @@
-﻿'use server';
+'use server';
 
 import { revalidatePath } from "next/cache";
 
@@ -195,6 +195,54 @@ export async function updateGroup(
   } catch (error) {
     console.error("Failed to update group:", error);
     return { success: false, message: "حدث خطأ أثناء تحديث المجموعة" };
+  }
+}
+
+export async function deleteGroup(groupId: string): Promise<GroupActionResult> {
+  try {
+    const user = await requireAuth();
+    const tenant = await requireTenant();
+
+    if (!canManageGroups(user.role)) {
+      return { success: false, message: "غير مسموح لك بحذف المجموعة" };
+    }
+
+    const existingGroup = await db.group.findFirst({
+      where: {
+        id: groupId,
+        tenantId: tenant.id,
+      },
+      select: {
+        id: true,
+        teacherId: true,
+      },
+    });
+
+    if (!existingGroup) {
+      return { success: false, message: "المجموعة غير موجودة" };
+    }
+
+    if (user.role === "TEACHER" && existingGroup.teacherId && existingGroup.teacherId !== user.id) {
+      return { success: false, message: "لا يمكنك حذف مجموعة لا تتبعك" };
+    }
+
+    await db.group.delete({
+      where: {
+        id: groupId,
+      },
+    });
+
+    revalidateGroupPaths(groupId);
+
+    return {
+      success: true,
+      group: {
+        id: groupId,
+      },
+    };
+  } catch (error) {
+    console.error("Failed to delete group:", error);
+    return { success: false, message: "حدث خطأ أثناء حذف المجموعة" };
   }
 }
 
