@@ -122,7 +122,7 @@ export function NotificationBell() {
             onClick={() => setIsOpen(false)}
             type="button"
           />
-          <div className="absolute left-0 sm:right-0 sm:left-auto top-14 z-40 w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-slate-100 bg-white/95 backdrop-blur-sm shadow-2xl dark:border-slate-800 dark:bg-slate-950/95 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 origin-top">
+          <div className="absolute end-0 top-14 z-40 w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-slate-100 bg-white/95 backdrop-blur-sm shadow-2xl dark:border-slate-800 dark:bg-slate-950/95 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 origin-top">
             {/* Header */}
             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
               <div>

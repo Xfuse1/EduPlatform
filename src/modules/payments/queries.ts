@@ -13,6 +13,38 @@ function startOfPreviousMonth() {
   return new Date(now.getFullYear(), now.getMonth() - 1, 1);
 }
 
+function currentMonthKey() {
+  return new Date().toISOString().slice(0, 7);
+}
+
+function toClientPaymentStatus(status?: string | null) {
+  if (status === "PAID" || status === "OVERDUE" || status === "PENDING") {
+    return status;
+  }
+
+  return status === "PARTIAL" ? "PENDING" : "PENDING";
+}
+
+function mapPaymentItem(payment: {
+  id: string;
+  studentId: string;
+  month: string;
+  status: string;
+  amount: number;
+  student: {
+    name: string;
+  };
+}) {
+  return {
+    id: payment.id,
+    studentId: payment.studentId,
+    studentName: payment.student.name,
+    month: payment.month,
+    status: toClientPaymentStatus(payment.status),
+    amount: payment.amount,
+  };
+}
+
 export const getRevenueSummary = cache(async (tenantId: string) => {
   try {
     const currentMonthStart = startOfCurrentMonth();
@@ -132,36 +164,149 @@ export const getStudentPaymentSnapshot = cache(async (tenantId: string, studentI
   return MOCK_PAYMENT_SNAPSHOT;
 });
 
-export const getPaymentsList = cache(async (tenantId: string) => {
-  try {
-    const payments = await db.payment.findMany({
-      where: {
-        tenantId,
+export function resolvePaymentStatus(payments: Array<{ status: string }> = []) {
+  if (payments.some((payment) => payment.status === "OVERDUE")) {
+    return "OVERDUE" as const;
+  }
+
+  if (payments.some((payment) => payment.status === "PARTIAL")) {
+    return "PARTIAL" as const;
+  }
+
+  if (payments.some((payment) => payment.status === "PAID")) {
+    return "PAID" as const;
+  }
+
+  return "PENDING" as const;
+}
+
+export const getCurrentMonthPaymentStatusMap = cache(async (tenantId: string, studentIds: string[]) => {
+  if (studentIds.length === 0) {
+    return {} as Record<string, Array<{ id: string; status: string; amount: number; month: string }>>;
+  }
+
+  const payments = await db.payment.findMany({
+    where: {
+      tenantId,
+      studentId: {
+        in: [...new Set(studentIds)],
       },
-      include: {
-        student: {
-          select: {
-            name: true,
-          },
+      month: currentMonthKey(),
+    },
+    select: {
+      id: true,
+      studentId: true,
+      status: true,
+      amount: true,
+      month: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return payments.reduce<Record<string, Array<{ id: string; status: string; amount: number; month: string }>>>((accumulator, payment) => {
+    const key = payment.studentId;
+    accumulator[key] ??= [];
+    accumulator[key].push({
+      id: payment.id,
+      status: payment.status,
+      amount: payment.amount,
+      month: payment.month,
+    });
+    return accumulator;
+  }, {});
+});
+
+export const getPayments = cache(async (
+  tenantId: string,
+  filters: {
+    studentId?: string;
+    month?: string;
+    status?: string;
+  } = {},
+) => {
+  const payments = await db.payment.findMany({
+    where: {
+      tenantId,
+      ...(filters.studentId ? { studentId: filters.studentId } : {}),
+      ...(filters.month ? { month: filters.month } : {}),
+      ...(filters.status ? { status: filters.status as any } : {}),
+    },
+    include: {
+      student: {
+        select: {
+          name: true,
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
-    return payments
-      .filter((payment) => payment.status === "PAID" || payment.status === "OVERDUE" || payment.status === "PENDING")
-      .map((payment) => ({
-        id: payment.id,
-        studentName: payment.student.name,
-        month: payment.month,
-        status: payment.status === "PAID" || payment.status === "OVERDUE" || payment.status === "PENDING" ? payment.status : "PENDING",
-        amount: payment.amount,
-      }));
+  return payments.map(mapPaymentItem);
+});
+
+export const getPaymentsList = cache(async (tenantId: string) => {
+  try {
+    const payments = await getPayments(tenantId);
+    return payments;
   } catch (error) {
     console.error("DB getPaymentsList failed, using mock:", error);
   }
 
   return MOCK_PAYMENTS;
+});
+
+export const getOverdueStudents = cache(async (tenantId: string, _teacherId?: string) => {
+  return db.payment.findMany({
+    where: {
+      tenantId,
+      status: "OVERDUE",
+    },
+    include: {
+      student: {
+        select: {
+          id: true,
+          name: true,
+          parentPhone: true,
+          gradeLevel: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+});
+
+export const getPaymentByKashierOrderId = cache(async (orderId: string) => {
+  if (!orderId) {
+    return null;
+  }
+
+  return db.payment.findFirst({
+    where: {
+      receiptNumber: orderId,
+    },
+  });
+});
+
+export const getPaymentStudentOptions = cache(async (tenantId: string) => {
+  return db.user.findMany({
+    where: {
+      tenantId,
+      role: "STUDENT",
+      isActive: true,
+    },
+    select: {
+      id: true,
+      name: true,
+      gradeLevel: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
 });

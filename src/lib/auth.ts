@@ -1,20 +1,20 @@
 import { randomUUID } from "node:crypto";
 
 import type { UserRole } from "@prisma/client";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import type { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { verifyFirebasePhoneIdToken } from "@/lib/firebase-admin";
 import { getMockUserByToken } from "@/lib/mock-data";
-import { getTenantFromHost } from "@/lib/tenant";
 
 export type SessionUser = {
   id: string;
   tenantId: string;
   name: string;
   phone: string;
-  role: UserRole;
+  role: UserRole | "CENTER_ADMIN";
 };
 
 type VerifyOTPResult = {
@@ -55,12 +55,30 @@ export function setAuthSessionCookie(
   });
 }
 
+export function applySessionCookie(
+  response: NextResponse,
+  session: { token: string; expiresAt: Date },
+) {
+  response.cookies.set("auth-token", session.token, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+    expires: session.expiresAt,
+  });
+}
+
+export function clearSessionCookie(response: NextResponse) {
+  response.cookies.delete("auth-token");
+  response.cookies.delete("eduplatform-session");
+}
+
 function toSessionUser(user: {
   id: string;
   tenantId: string;
   name: string;
   phone: string;
-  role: UserRole;
+  role: UserRole | "CENTER_ADMIN";
 }): SessionUser {
   return {
     id: user.id,
@@ -71,30 +89,18 @@ function toSessionUser(user: {
   };
 }
 
-async function resolveTenantForRequest() {
-  const headerStore = await headers();
-  const host = headerStore.get("host") ?? "localhost:3000";
-  return getTenantFromHost(host);
-}
-
 function getFallbackUserByToken(token?: string | null) {
   if (!token) return null;
   return getMockUserByToken(token);
 }
 
-/**
- * Verifies a Firebase Phone ID token, then finds or creates the user,
- * and creates a DB session. Returns the session token.
- */
 export async function verifyOTP(phone: string, idToken: string, tenantId: string): Promise<VerifyOTPResult> {
-  // Verify with Firebase Admin
   const verified = await verifyFirebasePhoneIdToken(idToken);
 
   if (verified.phoneNumber !== phone) {
     throw new Error("PHONE_MISMATCH");
   }
 
-  // Look up user scoped to the current tenant
   const existingUser = await db.user.findFirst({
     where: { phone, tenantId, isActive: true },
     select: { id: true, tenantId: true, name: true, phone: true, role: true, pinHash: true },
@@ -126,8 +132,6 @@ export async function getCurrentUser() {
 
   if (!token) return null;
 
-  const tenant = await resolveTenantForRequest();
-
   try {
     const session = await db.authSession.findFirst({
       where: {
@@ -154,21 +158,44 @@ export async function getCurrentUser() {
   }
 }
 
-export async function requireAuth() {
-  const user = await getCurrentUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  return user;
-}
-
 export class UnauthorizedError extends Error {
   constructor() {
     super("Unauthorized");
     this.name = "UnauthorizedError";
   }
+}
+
+export async function getSessionToken(
+  request?: {
+    cookies?: {
+      get(name: string): { value: string } | undefined;
+    };
+  },
+) {
+  const requestToken =
+    request?.cookies?.get("auth-token")?.value ??
+    request?.cookies?.get("eduplatform-session")?.value;
+
+  if (requestToken) {
+    return requestToken;
+  }
+
+  const cookieStore = await cookies();
+  return cookieStore.get("auth-token")?.value ?? cookieStore.get("eduplatform-session")?.value ?? null;
+}
+
+export async function requireAuth(request?: unknown) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    if (request) {
+      throw new UnauthorizedError();
+    }
+
+    redirect("/login");
+  }
+
+  return user;
 }
 
 export async function getCurrentSession() {

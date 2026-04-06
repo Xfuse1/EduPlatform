@@ -98,3 +98,6 @@ export const getOpenGroups = cache(async (tenantId: string) => {
     isFull: group.enrolledCount >= group.maxCapacity,
   }));
 });
+
+export const getPublicGroups = getOpenGroups;
+export const getPublicTenantProfile = getTeacherPublicProfile;

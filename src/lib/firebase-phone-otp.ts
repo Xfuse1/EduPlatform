@@ -2,41 +2,46 @@
 
 import type { ConfirmationResult, RecaptchaVerifier as RecaptchaVerifierType } from "firebase/auth";
 
-// Module-level store for the confirmation result.
-// Survives client-side navigation but resets on full page reload.
-let storedConfirmation: ConfirmationResult | null = null;
-let recaptchaVerifier: RecaptchaVerifierType | null = null;
+// Store on window so it survives Next.js client-side navigation
+// across different module chunks (Turbopack/webpack code splitting)
+declare global {
+  interface Window {
+    __firebaseConfirmation?: ConfirmationResult | null;
+    __firebaseRecaptcha?: RecaptchaVerifierType | null;
+  }
+}
 
 export function setConfirmationResult(result: ConfirmationResult) {
-  storedConfirmation = result;
+  window.__firebaseConfirmation = result;
 }
 
 export function getConfirmationResult(): ConfirmationResult | null {
-  return storedConfirmation;
+  return window.__firebaseConfirmation ?? null;
 }
 
 export function clearConfirmationResult() {
-  storedConfirmation = null;
+  window.__firebaseConfirmation = null;
 }
 
 export async function getOrCreateRecaptchaVerifier(containerId: string): Promise<RecaptchaVerifierType> {
-  if (recaptchaVerifier) {
-    return recaptchaVerifier;
+  if (window.__firebaseRecaptcha) {
+    return window.__firebaseRecaptcha;
   }
 
   const { RecaptchaVerifier } = await import("firebase/auth");
-  const { firebaseAuth } = await import("@/lib/firebase");
+  const { getFirebaseAuth } = await import("@/lib/firebase");
+  const auth = await getFirebaseAuth();
 
-  recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, containerId, {
+  window.__firebaseRecaptcha = new RecaptchaVerifier(auth, containerId, {
     size: "invisible",
   });
 
-  return recaptchaVerifier;
+  return window.__firebaseRecaptcha;
 }
 
 export function clearRecaptchaVerifier() {
-  if (recaptchaVerifier) {
-    recaptchaVerifier.clear();
-    recaptchaVerifier = null;
+  if (window.__firebaseRecaptcha) {
+    window.__firebaseRecaptcha.clear();
+    window.__firebaseRecaptcha = null;
   }
 }
