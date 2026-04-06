@@ -7,7 +7,11 @@ export async function GET() {
     const user = await requireAuth();
 
     const users = await db.user.findMany({
-      where: { tenantId: user.tenantId, id: { not: user.id } },
+      where: { 
+        tenantId: user.tenantId, 
+        id: { not: user.id },
+        role: { not: 'STUDENT' } 
+      },
       select: { id: true, name: true, role: true, avatarUrl: true }
     });
 

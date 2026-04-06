@@ -1,4 +1,4 @@
-import { CalendarDays, DoorOpen } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 
 type StudentScheduleSession = {
   id: string;
@@ -6,7 +6,6 @@ type StudentScheduleSession = {
   day: string;
   timeStart: string;
   timeEnd: string;
-  room: string;
   color: string;
   isToday: boolean;
 };
@@ -144,10 +143,6 @@ export function StudentSchedule({ sessions }: StudentScheduleProps) {
                       </div>
                     </div>
 
-                    <div className="mt-4 flex min-h-11 items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                      <DoorOpen className="h-4 w-4 shrink-0" />
-                      <span className="text-start">{session.room}</span>
-                    </div>
                   </article>
                 );
               })}
