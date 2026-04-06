@@ -8,7 +8,6 @@ type GroupOption = {
   name: string;
   subject?: string;
   gradeLevel?: string;
-  room?: string;
   days: string[];
   timeStart: string;
   timeEnd: string;
@@ -36,7 +35,6 @@ export function GroupSelector({
         const isSelected = selectedGroupId === group.id;
         const subjectLabel = group.subject?.trim() || "المادة غير محددة";
         const gradeLevelLabel = group.gradeLevel?.trim() || "الصف غير محدد";
-        const roomLabel = group.room?.trim() || "القاعة غير محددة";
 
         return (
           <button
@@ -123,14 +121,10 @@ export function GroupSelector({
                   </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3">
                   <p className="flex items-center gap-2 rounded-2xl border border-white/6 bg-white/[0.04] px-3 py-3 text-sm text-slate-300">
                     <BookOpen className="h-4 w-4 text-sky-300" />
                     <span>{subjectLabel}</span>
-                  </p>
-                  <p className="flex items-center gap-2 rounded-2xl border border-white/6 bg-white/[0.04] px-3 py-3 text-sm text-slate-300">
-                    <span className="text-base">🚪</span>
-                    <span>{roomLabel}</span>
                   </p>
                 </div>
               </div>

@@ -2,7 +2,7 @@ import { cache } from "react";
 
 import { db } from "@/lib/db";
 import { MOCK_PARENT_NEXT_SESSION, MOCK_STUDENT_NEXT_SESSION, MOCK_TENANT } from "@/lib/mock-data";
-import { getAssignmentsByParent, getAssignmentsByStudent } from "@/modules/assignments/queries";
+import { getAssignmentsByStudent } from "@/modules/assignments/queries";
 import { getAttendanceOverview, getStudentAttendanceSnapshot, getTodaySessions } from "@/modules/attendance/queries";
 import { getRevenueSummary, getStudentPaymentSnapshot } from "@/modules/payments/queries";
 import { getParentChildren, getStudentCountSummary, getStudentProfile } from "@/modules/students/queries";
@@ -65,6 +65,40 @@ function getNextSessionFromEnrollments(
 
   return upcoming[0] ?? null;
 }
+
+export const getAssignmentsByParent = cache(async (tenantId: string, parentId: string) => {
+  try {
+    const parentChildren = await db.parentStudent.findMany({
+      where: { parentId, student: { tenantId } },
+      include: {
+        student: { select: { id: true, name: true } }
+      }
+    });
+
+    const results = await Promise.all(
+      parentChildren.map(async (pc) => {
+        const student = pc.student;
+        const assignments = await getAssignmentsByStudent(student.id);
+        
+        return assignments
+          .filter((a: any) => a.status === "graded")
+          .map((a: any) => ({
+            id: a.id,
+            title: a.title,
+            grade: a.submission?.grade || 0,
+            maxGrade: 20, // This can be expanded to use a.maxGrade if it exists in schema
+            childName: student.name,
+            gradedByAi: a.submission?.gradedByAi || false
+          }));
+      })
+    );
+
+    return results.flat();
+  } catch (error) {
+    console.error("Failed to get parent assignments:", error);
+    return [];
+  }
+});
 
 export const getTeacherDashboardData = cache(async (tenantId: string) => {
   try {

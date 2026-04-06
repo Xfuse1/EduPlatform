@@ -1,4 +1,4 @@
-import { MOCK_TENANT } from "@/lib/mock-data";
+import { requireTenant } from "@/lib/tenant";
 import { getCurrentUser } from "@/lib/auth";
 import { getParentDashboardData } from "@/modules/dashboard/queries";
 import { ParentAssignments } from "@/modules/dashboard/components/ParentAssignments";
@@ -15,7 +15,8 @@ export default async function ParentAssignmentsPage() {
     redirect("/login");
   }
 
-  const data = await getParentDashboardData(MOCK_TENANT.id, session.id);
+  const tenant = await requireTenant();
+  const data = await getParentDashboardData(tenant.id, session.id);
 
   return (
     <div className="space-y-6" dir="rtl">
