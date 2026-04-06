@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import { normalizeEgyptPhone, toEgyptE164 } from "@/lib/phone";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -26,6 +28,47 @@ export function formatArabicDate(value: string | Date) {
     month: "long",
     day: "numeric",
   }).format(new Date(value));
+}
+
+export function formatDate(value: string | Date) {
+  return new Intl.DateTimeFormat("ar-EG", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(value));
+}
+
+export function normalizeEgyptianPhone(value: string) {
+  const normalized = normalizeEgyptPhone(value);
+
+  if (!normalized) {
+    return "";
+  }
+
+  try {
+    return toEgyptE164(normalized);
+  } catch {
+    return "";
+  }
+}
+
+export function formatPhone(value: string | null | undefined) {
+  if (!value) {
+    return "غير متاح";
+  }
+
+  if (/^\+201\d{9}$/.test(value)) {
+    const local = `0${value.slice(3)}`;
+    return `${local.slice(0, 4)} ${local.slice(4, 7)} ${local.slice(7)}`;
+  }
+
+  const normalized = normalizeEgyptPhone(value);
+
+  if (/^01\d{9}$/.test(normalized)) {
+    return `${normalized.slice(0, 4)} ${normalized.slice(4, 7)} ${normalized.slice(7)}`;
+  }
+
+  return value;
 }
 
 export function getInitials(name: string) {

@@ -2,10 +2,6 @@ import type { NextRequest } from 'next/server'
 
 import { UnauthorizedError } from '@/lib/auth'
 import { errorResponse, successResponse } from '@/lib/api-response'
-import {
-  InactiveTenantError,
-  TenantNotFoundError,
-} from '@/lib/tenant'
 import { archiveGroup } from '@/modules/groups/actions'
 
 type RouteProps = {
@@ -22,14 +18,6 @@ export async function POST(_request: NextRequest, { params }: RouteProps) {
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       return errorResponse('UNAUTHORIZED', error.message, 401)
-    }
-
-    if (error instanceof TenantNotFoundError) {
-      return errorResponse('TENANT_NOT_FOUND', error.message, 404)
-    }
-
-    if (error instanceof InactiveTenantError) {
-      return errorResponse('TENANT_INACTIVE', error.message, 403)
     }
 
     return errorResponse(

@@ -3,11 +3,7 @@ import { ZodError } from 'zod'
 
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import { errorResponse, forbidden, successResponse, validationError } from '@/lib/api-response'
-import {
-  InactiveTenantError,
-  TenantNotFoundError,
-  requireTenant,
-} from '@/lib/tenant'
+import { requireTenant } from '@/lib/tenant'
 import { updateTenant } from '@/modules/settings/actions'
 import { getTenantSettings } from '@/modules/settings/queries'
 
@@ -42,7 +38,7 @@ async function requestToFormData(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const tenant = await requireTenant(request)
+    const tenant = await requireTenant()
     const user = await requireAuth(request)
 
     if (user.role !== 'TEACHER') {
@@ -54,14 +50,6 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       return errorResponse('UNAUTHORIZED', error.message, 401)
-    }
-
-    if (error instanceof TenantNotFoundError) {
-      return errorResponse('TENANT_NOT_FOUND', error.message, 404)
-    }
-
-    if (error instanceof InactiveTenantError) {
-      return errorResponse('TENANT_INACTIVE', error.message, 403)
     }
 
     return errorResponse(
@@ -84,14 +72,6 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof UnauthorizedError) {
       return errorResponse('UNAUTHORIZED', error.message, 401)
-    }
-
-    if (error instanceof TenantNotFoundError) {
-      return errorResponse('TENANT_NOT_FOUND', error.message, 404)
-    }
-
-    if (error instanceof InactiveTenantError) {
-      return errorResponse('TENANT_INACTIVE', error.message, 403)
     }
 
     return errorResponse(

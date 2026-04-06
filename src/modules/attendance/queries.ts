@@ -302,3 +302,76 @@ export const getAllAttendanceRecords = cache(async (tenantId: string) => {
     return [];
   }
 });
+
+export const getAttendanceReport = cache(async (tenantId: string, month: string, _teacherId?: string) => {
+  const monthStart = new Date(`${month}-01T00:00:00.000Z`);
+  const monthEnd = new Date(monthStart);
+  monthEnd.setMonth(monthEnd.getMonth() + 1);
+
+  const sessions = await db.session.findMany({
+    where: {
+      tenantId,
+      date: {
+        gte: monthStart,
+        lt: monthEnd,
+      },
+    },
+    select: {
+      id: true,
+      date: true,
+      group: {
+        select: {
+          name: true,
+          color: true,
+        },
+      },
+      _count: {
+        select: {
+          attendances: true,
+        },
+      },
+    },
+    orderBy: {
+      date: "desc",
+    },
+  });
+
+  return sessions.map((session) => ({
+    ...session,
+    _count: {
+      attendance: session._count.attendances,
+    },
+  }));
+});
+
+export const getSessionAttendance = cache(async (tenantId: string, sessionId: string, _teacherId?: string) => {
+  const session = await getSessionWithStudents(sessionId);
+
+  if (!session || session.tenantId !== tenantId) {
+    return null;
+  }
+
+  const { getCurrentMonthPaymentStatusMap, resolvePaymentStatus } = await import("@/modules/payments/queries");
+  const paymentStatuses = await getCurrentMonthPaymentStatusMap(tenantId, session.students.map((student) => student.id));
+
+  return {
+    session: {
+      id: session.id,
+      status: session.status,
+      date: new Date(),
+      group: {
+        id: session.groupId,
+        name: session.title,
+        timeStart: session.timeStart,
+        timeEnd: session.timeEnd,
+      },
+    },
+    students: session.students.map((student) => ({
+      id: student.id,
+      name: student.name,
+      phone: student.phone,
+      attendanceStatus: student.status,
+      paymentStatus: resolvePaymentStatus(paymentStatuses[student.id] ?? []),
+    })),
+  };
+});

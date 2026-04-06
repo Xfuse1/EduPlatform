@@ -15,7 +15,7 @@ type ActionResult = {
   success: boolean;
   message?: string;
   phone?: string;
-  role?: "TEACHER" | "STUDENT" | "PARENT" | "ASSISTANT";
+  role?: "TEACHER" | "STUDENT" | "PARENT" | "ASSISTANT" | "CENTER_ADMIN";
   redirectTo?: string;
   hasPin?: boolean;
 };
@@ -28,7 +28,36 @@ const redirectMap: Record<string, string> = {
   CENTER_ADMIN: "/center",
 };
 
-// Used by the API route: POST /api/auth/verify-otp
+export async function sendOtp(tenantId: string, payload: unknown) {
+  const schema = z.object({
+    phone: phoneSchema,
+  });
+
+  const { phone } = schema.parse(payload);
+
+  const user = await db.user.findFirst({
+    where: {
+      tenantId,
+      phone,
+      isActive: true,
+    },
+    select: {
+      id: true,
+      phone: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error("لا يوجد حساب مرتبط بهذا الرقم في هذا السنتر");
+  }
+
+  return {
+    success: true,
+    phone,
+    message: "تم تجهيز التحقق لهذا الرقم",
+  };
+}
+
 export async function verifyOtp(tenantId: string, payload: unknown) {
   const schema = z.object({
     phone: phoneSchema,
@@ -76,13 +105,7 @@ export async function verifyOTPAction(formData: FormData): Promise<ActionResult>
     const result = await verifyOTP(phoneResult.data, idTokenResult.data, tenantId);
     const cookieStore = await cookies();
 
-    cookieStore.set("auth-token", result.token, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      secure: process.env.NODE_ENV === "production",
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    });
+    setAuthSessionCookie(cookieStore, result.token, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
 
     revalidatePath("/verify");
 

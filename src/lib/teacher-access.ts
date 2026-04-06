@@ -1,31 +1,15 @@
 import type { SessionUser } from "@/lib/auth";
 import type { ResolvedTenant } from "@/lib/tenant";
 
-export function isCenterOwner(tenant: ResolvedTenant, user: SessionUser) {
-  return tenant.accountType === "CENTER" && user.role === "CENTER_ADMIN";
+export function isCenterOwner(_tenant: ResolvedTenant, user: SessionUser) {
+  return user.role === "CENTER_ADMIN";
 }
 
-export function canManageTeacherAccounts(tenant: ResolvedTenant, user: SessionUser) {
-  if (tenant.accountType !== "CENTER") {
-    return false;
-  }
-
-  if (user.role === "CENTER_ADMIN") {
-    return true;
-  }
-
-  if (user.role === "ASSISTANT") {
-    return true;
-  }
-
-  return false;
+export function canManageTeacherAccounts(_tenant: ResolvedTenant, user: SessionUser) {
+  return user.role === "CENTER_ADMIN" || user.role === "ASSISTANT";
 }
 
-export function getTeacherScopeUserId(tenant: ResolvedTenant, user: SessionUser) {
-  if (tenant.accountType !== "CENTER") {
-    return null;
-  }
-
+export function getTeacherScopeUserId(_tenant: ResolvedTenant, user: SessionUser) {
   if (user.role === "CENTER_ADMIN" || user.role === "ASSISTANT") {
     return null;
   }

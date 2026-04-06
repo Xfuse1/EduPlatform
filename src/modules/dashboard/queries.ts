@@ -336,3 +336,100 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
     assignments: [],
   };
 });
+
+export const getCenterDashboardData = cache(async (tenantId: string) => {
+  const [teacherData, teachersCount, notifications, groups, revenue] = await Promise.all([
+    getTeacherDashboardData(tenantId),
+    db.user.count({
+      where: {
+        tenantId,
+        role: "TEACHER",
+        isActive: true,
+      },
+    }).catch(() => 0),
+    db.notification.findMany({
+      where: {
+        tenantId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 10,
+    }).catch(() => []),
+    db.group.findMany({
+      where: {
+        tenantId,
+        isActive: true,
+      },
+      orderBy: {
+        timeStart: "asc",
+      },
+      take: 20,
+    }).catch(() => []),
+    getRevenueSummary(tenantId),
+  ]);
+
+  return {
+    summary: {
+      revenueCollected: teacherData.revenue.thisMonth,
+      outstandingAmount: teacherData.outstanding.total,
+      attendanceRate: teacherData.attendance.rate,
+      activeTeachers: teachersCount,
+      activeStudents: teacherData.students.total,
+      liveSessions: teacherData.todaySessions.filter((session) => session.status === "IN_PROGRESS").length,
+    },
+    attendanceSeries: [
+      {
+        month: "الحالي",
+        rate: teacherData.attendance.rate,
+      },
+      {
+        month: "السابق",
+        rate: Math.max(teacherData.attendance.rate - teacherData.attendance.change, 0),
+      },
+    ],
+    revenueSeries: [
+      {
+        month: "السابق",
+        revenue: revenue.lastMonth,
+      },
+      {
+        month: "الحالي",
+        revenue: revenue.thisMonth,
+      },
+    ],
+    schedule: groups.flatMap((group) =>
+      group.days.map((day) => ({
+        id: `${group.id}-${day}`,
+        subject: group.subject,
+        day,
+        timeStart: group.timeStart,
+        timeEnd: group.timeEnd,
+        room: null,
+        color: group.color,
+        isToday: false,
+      })),
+    ),
+    alerts: teacherData.alerts,
+    notifications: notifications.map((notification) => ({
+      id: notification.id,
+      title: notification.type,
+      description: notification.message,
+      timeLabel: new Intl.DateTimeFormat("ar-EG", {
+        day: "numeric",
+        month: "short",
+      }).format(notification.createdAt),
+      channelLabel: notification.channel,
+      isUnread: notification.status === "QUEUED",
+    })),
+    liveAttendance: teacherData.todaySessions.map((session) => ({
+      id: session.id,
+      sessionName: session.group.name,
+      attendedCount: session.attendanceCount,
+      totalCount: session.totalStudents,
+      timeLabel: `${session.timeStart} - ${session.timeEnd}`,
+      groupName: session.group.name,
+      status: session.status,
+    })),
+  };
+});

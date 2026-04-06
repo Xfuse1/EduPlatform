@@ -23,6 +23,7 @@ export type ResolvedTenant = {
   id: string;
   slug: string;
   name: string;
+  accountType?: "CENTER" | "TEACHER";
   themeColor: string;
   plan: "FREE" | "BASIC" | "PRO" | "BUSINESS";
   isActive: boolean;
@@ -38,6 +39,7 @@ const SPECIAL_SUBDOMAINS = new Set(["www", "app", "api", "localhost"]);
 
 const FALLBACK_TENANT: ResolvedTenant = {
   ...MOCK_TENANT,
+  accountType: "CENTER",
   isActive: true,
   smsQuota: 50,
   phone: null,
@@ -89,7 +91,10 @@ const findTenantByHost = cache(async (host: string): Promise<ResolvedTenant> => 
       });
 
       if (defaultTenant) {
-        return defaultTenant;
+        return {
+          ...defaultTenant,
+          accountType: "CENTER",
+        };
       }
 
       return FALLBACK_TENANT;
@@ -117,7 +122,10 @@ const findTenantByHost = cache(async (host: string): Promise<ResolvedTenant> => 
     });
 
     if (tenant) {
-      return tenant;
+      return {
+        ...tenant,
+        accountType: "CENTER",
+      };
     }
   } catch (error) {
     console.error("DB tenant lookup failed, using mock:", error);
@@ -132,7 +140,7 @@ export async function getTenantFromHost(host: string) {
 
 export async function getTenantBySlug(slug: string) {
   try {
-    return await db.tenant.findFirst({
+    const tenant = await db.tenant.findFirst({
       where: { slug, isActive: true },
       select: {
         id: true,
@@ -149,6 +157,15 @@ export async function getTenantBySlug(slug: string) {
         subjects: true,
       },
     });
+
+    if (!tenant) {
+      return null;
+    }
+
+    return {
+      ...tenant,
+      accountType: "CENTER" as const,
+    };
   } catch {
     return null;
   }

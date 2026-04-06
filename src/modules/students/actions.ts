@@ -3,19 +3,10 @@
 import { randomUUID } from "node:crypto";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 import { db } from "@/lib/db";
+import { normalizeEgyptPhone } from "@/lib/phone";
 import { requireTenant } from "@/lib/tenant";
-
-const createStudentSchema = z.object({
-  studentName: z.string().trim().min(2, "الاسم يجب أن يكون حرفين على الأقل"),
-  parentName: z.string().trim().min(2, "اسم ولي الأمر مطلوب"),
-  parentPhone: z.string().trim().regex(/^01[0-9]{9}$/, "رقم الهاتف غير صحيح"),
-  studentPhone: z.union([z.string().trim().regex(/^01[0-9]{9}$/, "رقم الهاتف غير صحيح"), z.literal("")]).optional(),
-  gradeLevel: z.string().trim().min(1, "الصف الدراسي مطلوب"),
-  groupId: z.string().trim().optional(),
-});
 
 type CreateStudentResult = {
   success: boolean;
@@ -29,143 +20,276 @@ type UpdateStudentResult = {
   message?: string;
 };
 
+type NormalizedStudentInput = {
+  studentId?: string;
+  name: string;
+  phone: string;
+  parentName: string;
+  parentPhone: string;
+  gradeLevel: string;
+  groupIds: string[];
+  syncGroups: boolean;
+  hasExplicitGroupSelection: boolean;
+};
+
 function generateId() {
   return randomUUID();
 }
 
-export async function createStudent(formData: FormData): Promise<CreateStudentResult> {
-  const tenant = await requireTenant();
-
-  const parsed = createStudentSchema.safeParse({
-    studentName: formData.get("studentName"),
-    studentPhone: formData.get("studentPhone"),
-    parentName: formData.get("parentName"),
-    parentPhone: formData.get("parentPhone"),
-    gradeLevel: formData.get("gradeLevel"),
-    groupId: formData.get("groupId"),
-  });
-
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: parsed.error.issues[0]?.message ?? "تعذر حفظ بيانات الطالب",
-    };
+function getString(formData: FormData, ...keys: string[]) {
+  for (const key of keys) {
+    const value = formData.get(key);
+    if (typeof value === "string") {
+      return value.trim();
+    }
   }
 
-  const { studentName, studentPhone, parentName, parentPhone, gradeLevel, groupId } = parsed.data;
-  const normalizedGroupId = groupId?.trim() ? groupId.trim() : undefined;
-  const normalizedStudentPhone = studentPhone?.trim() ? studentPhone.trim() : `student-${generateId()}`;
+  return "";
+}
 
-  try {
-    const duplicateParent = await db.user.findFirst({
-      where: {
-        tenantId: tenant.id,
+function getGroupIds(formData: FormData) {
+  const rawGroupIds = formData.getAll("groupIds")
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (rawGroupIds.length > 0) {
+    return rawGroupIds;
+  }
+
+  const legacyGroupId = getString(formData, "groupId");
+  return legacyGroupId ? [legacyGroupId] : [];
+}
+
+function normalizeStudentInput(formData: FormData, studentIdOverride?: string): NormalizedStudentInput {
+  return {
+    studentId: studentIdOverride ?? (getString(formData, "studentId") || undefined),
+    name: getString(formData, "name", "studentName"),
+    phone: normalizeEgyptPhone(getString(formData, "phone", "studentPhone")),
+    parentName: getString(formData, "parentName"),
+    parentPhone: normalizeEgyptPhone(getString(formData, "parentPhone")),
+    gradeLevel: getString(formData, "gradeLevel"),
+    groupIds: [...new Set(getGroupIds(formData))],
+    syncGroups: String(formData.get("syncGroups") ?? "false") === "true",
+    hasExplicitGroupSelection: formData.has("groupIds") || formData.has("groupId"),
+  };
+}
+
+function validateStudentInput(input: NormalizedStudentInput, requireStudentId = false) {
+  if (requireStudentId && !input.studentId) {
+    return "تعذر تحديد الطالب";
+  }
+
+  if (input.name.length < 2) {
+    return "اسم الطالب يجب أن يكون حرفين على الأقل";
+  }
+
+  if (!/^01\d{9}$/.test(input.parentPhone)) {
+    return "رقم هاتف ولي الأمر غير صحيح";
+  }
+
+  if (!input.parentName || input.parentName.length < 2) {
+    return "اسم ولي الأمر مطلوب";
+  }
+
+  if (!input.gradeLevel) {
+    return "الصف الدراسي مطلوب";
+  }
+
+  if (input.phone && !/^01\d{9}$/.test(input.phone)) {
+    return "رقم هاتف الطالب غير صحيح";
+  }
+
+  return null;
+}
+
+async function upsertParent(tenantId: string, parentName: string, parentPhone: string) {
+  return db.user.upsert({
+    where: {
+      tenantId_phone: {
+        tenantId,
         phone: parentPhone,
-        role: "PARENT",
       },
-      select: {
-        id: true,
+    },
+    create: {
+      id: generateId(),
+      tenantId,
+      phone: parentPhone,
+      name: parentName,
+      role: "PARENT",
+      isActive: true,
+    },
+    update: {
+      name: parentName,
+      isActive: true,
+    },
+    select: {
+      id: true,
+    },
+  });
+}
+
+async function syncParentLink(parentId: string, studentId: string) {
+  await db.parentStudent.deleteMany({
+    where: {
+      studentId,
+    },
+  });
+
+  await db.parentStudent.create({
+    data: {
+      id: generateId(),
+      parentId,
+      studentId,
+      relationship: "parent",
+    },
+  });
+}
+
+async function syncGroupMemberships(tenantId: string, studentId: string, groupIds: string[]) {
+  const desiredGroupIds = [...new Set(groupIds.filter(Boolean))];
+
+  const existingEnrollments = await db.groupStudent.findMany({
+    where: {
+      studentId,
+      group: {
+        tenantId,
+      },
+    },
+    select: {
+      id: true,
+      groupId: true,
+      status: true,
+    },
+  });
+
+  const activeEnrollmentStatuses = new Set(["ACTIVE", "WAITLIST"]);
+  const removedGroupIds = existingEnrollments
+    .filter((enrollment) => activeEnrollmentStatuses.has(enrollment.status) && !desiredGroupIds.includes(enrollment.groupId))
+    .map((enrollment) => enrollment.groupId);
+
+  if (removedGroupIds.length > 0) {
+    await db.groupStudent.updateMany({
+      where: {
+        studentId,
+        groupId: {
+          in: removedGroupIds,
+        },
+      },
+      data: {
+        status: "ARCHIVED",
+        droppedAt: new Date(),
       },
     });
+  }
 
-    if (duplicateParent) {
-      return {
-        success: false,
-        message: "ولي الأمر مسجل مسبقاً",
-      };
-    }
-
-    if (normalizedGroupId) {
-      const group = await db.group.findFirst({
-        where: {
-          id: normalizedGroupId,
-          tenantId: tenant.id,
-          isActive: true,
-        },
-        include: {
-          _count: {
-            select: {
-              groupStudents: true,
-            },
-          },
-        },
-      });
-
-      if (!group) {
-        return {
-          success: false,
-          message: "المجموعة المختارة غير متاحة",
-        };
-      }
-
-      if (group._count.groupStudents >= group.maxCapacity) {
-        return {
-          success: false,
-          message: "لا توجد أماكن متاحة في هذه المجموعة",
-        };
-      }
-    }
-
-    const parent = await db.user.upsert({
+  for (const groupId of desiredGroupIds) {
+    const group = await db.group.findFirst({
       where: {
-        tenantId_phone: {
-          tenantId: tenant.id,
-          phone: parentPhone,
-        },
-      },
-      create: {
-        id: generateId(),
-        tenantId: tenant.id,
-        phone: parentPhone,
-        name: parentName,
-        role: "PARENT",
+        id: groupId,
+        tenantId,
         isActive: true,
       },
-      update: {},
       select: {
         id: true,
+        maxCapacity: true,
       },
     });
+
+    if (!group) {
+      continue;
+    }
+
+    const existingEnrollment = existingEnrollments.find((enrollment) => enrollment.groupId === groupId);
+    const activeCount = await db.groupStudent.count({
+      where: {
+        groupId,
+        status: "ACTIVE",
+      },
+    });
+
+    const nextStatus = existingEnrollment?.status === "ACTIVE"
+      ? "ACTIVE"
+      : activeCount >= group.maxCapacity
+        ? "WAITLIST"
+        : "ACTIVE";
+
+    if (existingEnrollment) {
+      await db.groupStudent.update({
+        where: {
+          id: existingEnrollment.id,
+        },
+        data: {
+          status: nextStatus,
+          droppedAt: null,
+        },
+      });
+      continue;
+    }
+
+    await db.groupStudent.create({
+      data: {
+        id: generateId(),
+        groupId,
+        studentId,
+        status: nextStatus,
+        enrolledAt: new Date(),
+      },
+    });
+  }
+}
+
+async function createStudentForTenant(tenantId: string, input: NormalizedStudentInput): Promise<CreateStudentResult> {
+  const validationMessage = validateStudentInput(input);
+  if (validationMessage) {
+    return { success: false, message: validationMessage };
+  }
+
+  const storedStudentPhone = input.phone || `student-${generateId()}`;
+
+  try {
+    if (input.phone) {
+      const duplicateStudent = await db.user.findFirst({
+        where: {
+          tenantId,
+          phone: storedStudentPhone,
+          role: "STUDENT",
+        },
+        select: { id: true },
+      });
+
+      if (duplicateStudent) {
+        return { success: false, message: "رقم هاتف الطالب مستخدم بالفعل" };
+      }
+    }
+
+    const parent = await upsertParent(tenantId, input.parentName, input.parentPhone);
 
     const student = await db.user.create({
       data: {
         id: generateId(),
-        tenantId: tenant.id,
-        phone: normalizedStudentPhone,
-        name: studentName,
+        tenantId,
+        phone: storedStudentPhone,
+        name: input.name,
         role: "STUDENT",
         isActive: true,
-        gradeLevel,
-        parentName,
-        parentPhone,
+        gradeLevel: input.gradeLevel,
+        parentName: input.parentName,
+        parentPhone: input.parentPhone,
       },
       select: {
         id: true,
       },
     });
 
-    if (normalizedGroupId) {
-      await db.groupStudent.create({
-        data: {
-          id: generateId(),
-          groupId: normalizedGroupId,
-          studentId: student.id,
-          status: "ACTIVE",
-          enrolledAt: new Date(),
-        },
-      });
+    await syncParentLink(parent.id, student.id);
+
+    if (input.groupIds.length > 0) {
+      await syncGroupMemberships(tenantId, student.id, input.groupIds);
     }
 
-    await db.parentStudent.create({
-      data: {
-        id: generateId(),
-        parentId: parent.id,
-        studentId: student.id,
-        relationship: "parent",
-      },
-    });
-
     revalidatePath("/teacher/students");
+    revalidatePath("/teacher/groups");
 
     return {
       success: true,
@@ -181,59 +305,22 @@ export async function createStudent(formData: FormData): Promise<CreateStudentRe
   }
 }
 
-export async function updateStudent(formData: FormData): Promise<UpdateStudentResult> {
-  const tenant = await requireTenant();
-
-  const parsed = createStudentSchema.extend({
-    studentId: z.string().trim().min(1, "تعذر تحديد الطالب"),
-  }).safeParse({
-    studentId: formData.get("studentId"),
-    studentName: formData.get("studentName"),
-    studentPhone: formData.get("studentPhone"),
-    parentName: formData.get("parentName"),
-    parentPhone: formData.get("parentPhone"),
-    gradeLevel: formData.get("gradeLevel"),
-    groupId: formData.get("groupId"),
-  });
-
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: parsed.error.issues[0]?.message ?? "تعذر تحديث بيانات الطالب",
-    };
+async function updateStudentForTenant(tenantId: string, input: NormalizedStudentInput): Promise<UpdateStudentResult> {
+  const validationMessage = validateStudentInput(input, true);
+  if (validationMessage) {
+    return { success: false, message: validationMessage };
   }
-
-  const { studentId, studentName, studentPhone, parentName, parentPhone, gradeLevel, groupId } = parsed.data;
-  const normalizedGroupId = groupId?.trim() ? groupId.trim() : undefined;
-  const normalizedStudentPhone = studentPhone?.trim() ? studentPhone.trim() : undefined;
 
   try {
     const existingStudent = await db.user.findFirst({
       where: {
-        id: studentId,
-        tenantId: tenant.id,
+        id: input.studentId,
+        tenantId,
         role: "STUDENT",
       },
-      include: {
-        childStudents: {
-          include: {
-            parent: {
-              select: {
-                id: true,
-                phone: true,
-              },
-            },
-          },
-        },
-        groupStudents: {
-          where: {
-            status: "ACTIVE",
-          },
-          select: {
-            id: true,
-            groupId: true,
-          },
-        },
+      select: {
+        id: true,
+        phone: true,
       },
     });
 
@@ -244,52 +331,20 @@ export async function updateStudent(formData: FormData): Promise<UpdateStudentRe
       };
     }
 
-    const currentParentLink = existingStudent.childStudents[0];
-
-    if (!currentParentLink) {
-      return {
-        success: false,
-        message: "تعذر العثور على ولي الأمر المرتبط",
-      };
-    }
-
-    const duplicateParent = await db.user.findFirst({
-      where: {
-        tenantId: tenant.id,
-        phone: parentPhone,
-        role: "PARENT",
-        NOT: {
-          id: currentParentLink.parent.id,
-        },
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    if (duplicateParent) {
-      return {
-        success: false,
-        message: "ولي الأمر مسجل مسبقاً",
-      };
-    }
-
-    if (normalizedStudentPhone) {
-      const duplicateStudentPhone = await db.user.findFirst({
+    if (input.phone) {
+      const duplicateStudent = await db.user.findFirst({
         where: {
-          tenantId: tenant.id,
-          phone: normalizedStudentPhone,
+          tenantId,
+          phone: input.phone,
           role: "STUDENT",
           NOT: {
-            id: studentId,
+            id: existingStudent.id,
           },
         },
-        select: {
-          id: true,
-        },
+        select: { id: true },
       });
 
-      if (duplicateStudentPhone) {
+      if (duplicateStudent) {
         return {
           success: false,
           message: "رقم هاتف الطالب مستخدم بالفعل",
@@ -297,132 +352,34 @@ export async function updateStudent(formData: FormData): Promise<UpdateStudentRe
       }
     }
 
-    if (normalizedGroupId) {
-      const group = await db.group.findFirst({
-        where: {
-          id: normalizedGroupId,
-          tenantId: tenant.id,
-          isActive: true,
-        },
-        include: {
-          _count: {
-            select: {
-              groupStudents: {
-                where: {
-                  status: "ACTIVE",
-                },
-              },
-            },
-          },
-        },
-      });
-
-      if (!group) {
-        return {
-          success: false,
-          message: "المجموعة المختارة غير متاحة",
-        };
-      }
-
-      const alreadyEnrolled = existingStudent.groupStudents.some((enrollment) => enrollment.groupId === normalizedGroupId);
-
-      if (!alreadyEnrolled && group._count.groupStudents >= group.maxCapacity) {
-        return {
-          success: false,
-          message: "لا توجد أماكن متاحة في هذه المجموعة",
-        };
-      }
-    }
+    const parent = await upsertParent(tenantId, input.parentName, input.parentPhone);
 
     await db.user.update({
       where: {
-        id: studentId,
+        id: existingStudent.id,
       },
       data: {
-        name: studentName,
-        phone: normalizedStudentPhone ?? existingStudent.phone,
-        gradeLevel,
-        parentName,
-        parentPhone,
+        name: input.name,
+        phone: input.phone || existingStudent.phone,
+        gradeLevel: input.gradeLevel,
+        parentName: input.parentName,
+        parentPhone: input.parentPhone,
       },
     });
 
-    await db.user.update({
-      where: {
-        id: currentParentLink.parent.id,
-      },
-      data: {
-        name: parentName,
-        phone: parentPhone,
-      },
-    });
+    await syncParentLink(parent.id, existingStudent.id);
 
-    const currentEnrollmentIds = existingStudent.groupStudents.map((enrollment) => enrollment.id);
-    const currentEnrollment = existingStudent.groupStudents[0];
-
-    if (!normalizedGroupId && currentEnrollmentIds.length > 0) {
-      await db.groupStudent.updateMany({
-        where: {
-          id: {
-            in: currentEnrollmentIds,
-          },
-          student: {
-            tenantId: tenant.id,
-          },
-        },
-        data: {
-          status: "ARCHIVED",
-          droppedAt: new Date(),
-        },
-      });
-    }
-
-    if (normalizedGroupId) {
-      if (currentEnrollment && currentEnrollment.groupId === normalizedGroupId) {
-        await db.groupStudent.update({
-          where: {
-            id: currentEnrollment.id,
-          },
-          data: {
-            status: "ACTIVE",
-            droppedAt: null,
-          },
-        });
-      } else {
-        if (currentEnrollmentIds.length > 0) {
-          await db.groupStudent.updateMany({
-            where: {
-              id: {
-                in: currentEnrollmentIds,
-              },
-              student: {
-                tenantId: tenant.id,
-              },
-            },
-            data: {
-              status: "ARCHIVED",
-              droppedAt: new Date(),
-            },
-          });
-        }
-
-        await db.groupStudent.create({
-          data: {
-            id: generateId(),
-            groupId: normalizedGroupId,
-            studentId,
-            status: "ACTIVE",
-            enrolledAt: new Date(),
-          },
-        });
-      }
+    if (input.syncGroups || input.hasExplicitGroupSelection) {
+      await syncGroupMemberships(tenantId, existingStudent.id, input.groupIds);
     }
 
     revalidatePath("/teacher/students");
+    revalidatePath(`/teacher/students/${existingStudent.id}`);
+    revalidatePath("/teacher/groups");
 
     return {
       success: true,
-      studentId,
+      studentId: existingStudent.id,
     };
   } catch (error) {
     console.error("DB updateStudent failed:", error);
@@ -432,4 +389,116 @@ export async function updateStudent(formData: FormData): Promise<UpdateStudentRe
       message: "تعذر تحديث بيانات الطالب حاليًا",
     };
   }
+}
+
+export async function createStudent(formData: FormData): Promise<CreateStudentResult> {
+  const tenant = await requireTenant();
+  return createStudentForTenant(tenant.id, normalizeStudentInput(formData));
+}
+
+export async function updateStudent(
+  studentIdOrFormData: string | FormData,
+  maybeFormData?: FormData,
+): Promise<UpdateStudentResult> {
+  const tenant = await requireTenant();
+  const formData = studentIdOrFormData instanceof FormData ? studentIdOrFormData : maybeFormData;
+
+  if (!formData) {
+    return {
+      success: false,
+      message: "تعذر تحديث بيانات الطالب",
+    };
+  }
+
+  const studentIdOverride = typeof studentIdOrFormData === "string" ? studentIdOrFormData : undefined;
+  return updateStudentForTenant(tenant.id, normalizeStudentInput(formData, studentIdOverride));
+}
+
+export async function bulkImport(_tenantId: string, records: Record<string, unknown>[]) {
+  const tenant = await requireTenant();
+
+  const results: Array<{ index: number; success: boolean; error?: string }> = [];
+  let created = 0;
+
+  for (const [index, record] of records.entries()) {
+    const formData = new FormData();
+    formData.set("name", String(record.name ?? record.studentName ?? ""));
+    formData.set("phone", String(record.phone ?? record.studentPhone ?? ""));
+    formData.set("parentName", String(record.parentName ?? ""));
+    formData.set("parentPhone", String(record.parentPhone ?? ""));
+    formData.set("gradeLevel", String(record.gradeLevel ?? ""));
+    formData.set("syncGroups", "true");
+
+    if (record.groupId) {
+      formData.append("groupIds", String(record.groupId));
+    }
+
+    const result = await createStudentForTenant(tenant.id, normalizeStudentInput(formData));
+    if (result.success) {
+      created += 1;
+      results.push({ index, success: true });
+    } else {
+      results.push({ index, success: false, error: result.message ?? "تعذر إضافة الطالب" });
+    }
+  }
+
+  return {
+    total: records.length,
+    created,
+    failed: records.length - created,
+    results,
+  };
+}
+
+export async function syncStudentGroups(studentId: string, groupIds: string[]) {
+  const tenant = await requireTenant();
+  await syncGroupMemberships(tenant.id, studentId, groupIds);
+  revalidatePath(`/teacher/students/${studentId}`);
+  revalidatePath("/teacher/groups");
+}
+
+export async function enrollInGroup(studentId: string, groupId: string) {
+  const tenant = await requireTenant();
+  const currentGroups = await db.groupStudent.findMany({
+    where: {
+      studentId,
+      status: {
+        in: ["ACTIVE", "WAITLIST"],
+      },
+      group: {
+        tenantId: tenant.id,
+      },
+    },
+    select: {
+      groupId: true,
+    },
+  });
+
+  await syncGroupMemberships(tenant.id, studentId, [...currentGroups.map((group) => group.groupId), groupId]);
+  revalidatePath("/teacher/groups");
+}
+
+export async function removeFromGroup(studentId: string, groupId: string) {
+  const tenant = await requireTenant();
+  const currentGroups = await db.groupStudent.findMany({
+    where: {
+      studentId,
+      status: {
+        in: ["ACTIVE", "WAITLIST"],
+      },
+      group: {
+        tenantId: tenant.id,
+      },
+    },
+    select: {
+      groupId: true,
+    },
+  });
+
+  await syncGroupMemberships(
+    tenant.id,
+    studentId,
+    currentGroups.map((group) => group.groupId).filter((currentGroupId) => currentGroupId !== groupId),
+  );
+  revalidatePath("/teacher/groups");
 }

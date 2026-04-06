@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { getCurrentUser } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
 
 function normalizeRole(role: "TEACHER" | "STUDENT" | "PARENT" | "ASSISTANT") {
@@ -14,7 +15,6 @@ function normalizeRole(role: "TEACHER" | "STUDENT" | "PARENT" | "ASSISTANT") {
 }
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const tenant = await requireTenant();
   const user = await getCurrentUser();
 
   if (!user) {
@@ -37,8 +37,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect(role === "teacher" ? "/teacher" : "/student");
   }
 
+  // Use user's actual tenantId to get the correct tenant (avoids localhost first-tenant fallback bug)
+  const userTenant = await db.tenant.findUnique({
+    where: { id: user.tenantId },
+    select: { name: true },
+  });
+
+  const tenantName = userTenant?.name ?? "EduPlatform";
+
   return (
-    <AppShell currentPath={currentPath} role={role} tenantName={tenant.name} userName={user.name}>
+    <AppShell currentPath={currentPath} role={role} tenantName={tenantName} userName={user.name}>
       {children}
     </AppShell>
   );

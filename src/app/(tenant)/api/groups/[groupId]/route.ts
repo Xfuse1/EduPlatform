@@ -3,11 +3,7 @@ import type { NextRequest } from 'next/server'
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import { errorResponse, forbidden, notFound, successResponse } from '@/lib/api-response'
 import { getTeacherScopeUserId } from '@/lib/teacher-access'
-import {
-  InactiveTenantError,
-  TenantNotFoundError,
-  requireTenant,
-} from '@/lib/tenant'
+import { requireTenant } from '@/lib/tenant'
 import { getGroupById } from '@/modules/groups/queries'
 
 type RouteProps = {
@@ -20,7 +16,7 @@ export async function GET(request: NextRequest, { params }: RouteProps) {
   try {
     const [{ groupId }, tenant, user] = await Promise.all([
       params,
-      requireTenant(request),
+      requireTenant(),
       requireAuth(request),
     ])
 
@@ -39,14 +35,6 @@ export async function GET(request: NextRequest, { params }: RouteProps) {
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       return errorResponse('UNAUTHORIZED', error.message, 401)
-    }
-
-    if (error instanceof TenantNotFoundError) {
-      return errorResponse('TENANT_NOT_FOUND', error.message, 404)
-    }
-
-    if (error instanceof InactiveTenantError) {
-      return errorResponse('TENANT_INACTIVE', error.message, 403)
     }
 
     return errorResponse(
