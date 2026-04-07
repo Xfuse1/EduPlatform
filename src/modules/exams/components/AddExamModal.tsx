@@ -250,6 +250,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                       >
                         <option value="MCQ">اختيار متعدد (MCQ)</option>
                         <option value="ESSAY">سؤال مقالي (Essay)</option>
+                        <option value="TRUE_FALSE">صح وخطأ</option>
                       </select>
                     </div>
 
@@ -292,6 +293,34 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                           placeholder="اكتب نموذج الإجابة هنا لمساعدة الـ AI في تصحيح إجابات الطلاب..."
                           className="w-full text-sm italic border-dashed"
                         />
+                      </div>
+                    )}
+
+                    {q.type === 'TRUE_FALSE' && (
+                      <div className="space-y-2">
+                        <Label className="text-xs font-bold text-slate-500">الإجابة الصحيحة:</Label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`tf-${index}`}
+                              checked={q.correctAnswer === 'true'}
+                              onChange={() => updateQuestion(index, 'correctAnswer', 'true')}
+                              className="w-4 h-4 accent-primary"
+                            />
+                            <span className="text-sm font-bold text-emerald-600">✓ صح</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`tf-${index}`}
+                              checked={q.correctAnswer === 'false'}
+                              onChange={() => updateQuestion(index, 'correctAnswer', 'false')}
+                              className="w-4 h-4 accent-primary"
+                            />
+                            <span className="text-sm font-bold text-red-500">✗ خطأ</span>
+                          </label>
+                        </div>
                       </div>
                     )}
                   </div>

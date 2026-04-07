@@ -43,7 +43,10 @@ export const getExamsByStudent = cache(async (tenantId: string, studentId: strin
   const exams = await db.exam.findMany({
     where: { tenantId, groupId: { in: groupIds } },
     include: {
-      submissions: { where: { studentId } },
+      submissions: { 
+        where: { studentId },
+        select: { totalGrade: true, submittedAt: true }
+      },
     },
     orderBy: { startAt: "desc" },
   });
@@ -57,6 +60,7 @@ export const getExamsByStudent = cache(async (tenantId: string, studentId: strin
     if (now > end) status = "completed";
     else if (now >= start) status = "active";
 
+    const hasSubmitted = exam.submissions.length > 0;
     const submission = exam.submissions[0];
 
     return {
@@ -64,8 +68,8 @@ export const getExamsByStudent = cache(async (tenantId: string, studentId: strin
       examDate: exam.startAt.toISOString(),
       durationMinutes: exam.duration,
       maxScore: exam.maxGrade,
-      status,
-      myScore: submission?.totalGrade,
+      status: hasSubmitted ? "completed" : status,
+      myScore: hasSubmitted ? submission.totalGrade : null,
     };
   });
 });

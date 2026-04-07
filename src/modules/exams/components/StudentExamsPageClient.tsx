@@ -137,11 +137,17 @@ export function StudentExamsPageClient({ initialExams = [] }: StudentExamsPageCl
                         
                         {exam.status === "completed" && (
                             <div className="text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-2 shadow-sm">
-                                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">الدرجة النهائية</span>
-                                <div className="flex items-baseline justify-center gap-1 text-primary">
-                                    <span className="text-2xl font-black">{toArabicDigits(exam.myScore || "0")}</span>
-                                    <span className="text-sm font-bold text-slate-400">/ {toArabicDigits(exam.maxScore)}</span>
-                                </div>
+                                {exam.myScore === null || exam.myScore === undefined ? (
+                                    <span className="block text-sm font-bold text-amber-600">قيد التصحيح</span>
+                                ) : (
+                                    <>
+                                        <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">الدرجة النهائية</span>
+                                        <div className="flex items-baseline justify-center gap-1 text-primary">
+                                            <span className="text-2xl font-black">{toArabicDigits(exam.myScore)}</span>
+                                            <span className="text-sm font-bold text-slate-400">/ {toArabicDigits(exam.maxScore)}</span>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>

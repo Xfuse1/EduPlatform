@@ -1,7 +1,6 @@
 import { cache } from "react";
 
 import { db } from "@/lib/db";
-import { MOCK_PARENT_NEXT_SESSION, MOCK_STUDENT_NEXT_SESSION, MOCK_TENANT } from "@/lib/mock-data";
 import { getAssignmentsByStudent } from "@/modules/assignments/queries";
 import { getAttendanceOverview, getStudentAttendanceSnapshot, getTodaySessions } from "@/modules/attendance/queries";
 import { getRevenueSummary, getStudentPaymentSnapshot } from "@/modules/payments/queries";
@@ -9,8 +8,16 @@ import { getParentChildren, getStudentCountSummary, getStudentProfile } from "@/
 
 const arabicDaysByIndex = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"] as const;
 
+const englishDaysByIndex = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
+
 function getNextDateForDay(dayName: string, fromDate: Date) {
-  const targetDayIndex = arabicDaysByIndex.indexOf(dayName as (typeof arabicDaysByIndex)[number]);
+  const normalized = dayName.toLowerCase().trim();
+  
+  let targetDayIndex = englishDaysByIndex.indexOf(normalized as (typeof englishDaysByIndex)[number]);
+  
+  if (targetDayIndex === -1) {
+    targetDayIndex = arabicDaysByIndex.indexOf(dayName as (typeof arabicDaysByIndex)[number]);
+  }
 
   if (targetDayIndex === -1) {
     return null;
@@ -190,7 +197,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
     });
 
     return {
-      teacherName: tenant?.name ?? MOCK_TENANT.name,
+      teacherName: tenant?.name ?? "المعلم",
       revenue: {
         thisMonth: revenue.thisMonth,
         lastMonth: revenue.lastMonth,
@@ -217,7 +224,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
   ]);
 
   return {
-    teacherName: MOCK_TENANT.name,
+    teacherName: "المعلم",
     revenue: {
       thisMonth: revenue.thisMonth,
       lastMonth: revenue.lastMonth,
@@ -248,7 +255,7 @@ export const getStudentDashboardData = cache(async (tenantId: string, studentId:
       attendance,
       payment,
       assignments,
-      nextSession: getNextSessionFromEnrollments(profile?.enrollments ?? []) ?? MOCK_STUDENT_NEXT_SESSION,
+      nextSession: getNextSessionFromEnrollments(profile?.enrollments ?? []),
     };
   } catch (error) {
     console.error("DB getStudentDashboardData failed, using fallback:", error);
@@ -261,7 +268,7 @@ export const getStudentDashboardData = cache(async (tenantId: string, studentId:
     getAssignmentsByStudent(studentId),
   ]);
 
-  return { profile, attendance, payment, assignments, nextSession: MOCK_STUDENT_NEXT_SESSION };
+  return { profile, attendance, payment, assignments, nextSession: null };
 });
 
 export const getParentDashboardData = cache(async (tenantId: string, parentId: string) => {
@@ -330,7 +337,7 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
           amount: 0,
         },
         todayStatus: "NO_SESSION",
-        nextSession: MOCK_PARENT_NEXT_SESSION,
+        nextSession: null,
       },
     ],
     assignments: [],
@@ -433,3 +440,5 @@ export const getCenterDashboardData = cache(async (tenantId: string) => {
     })),
   };
 });
+
+

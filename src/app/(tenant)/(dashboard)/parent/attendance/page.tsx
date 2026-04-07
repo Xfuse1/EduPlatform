@@ -1,7 +1,11 @@
-"use client"
+export const dynamic = "force-dynamic";
 
-import React, { useState } from "react"
-import { Calendar, User, Search, Filter, CheckCircle2, XCircle, Clock, ChevronRight } from "lucide-react"
+import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth";
+import { requireTenant } from "@/lib/tenant";
+import { getParentChildren } from "@/modules/students/queries";
+import { getStudentAttendanceSnapshot } from "@/modules/attendance/queries";
+import { Calendar, User, Filter, CheckCircle2, XCircle, Clock } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select } from "@/components/ui/select"
@@ -23,38 +27,40 @@ interface Child {
   name: string
 }
 
-// --- Mock Data ---
+export default async function ParentAttendancePage({
+  searchParams,
+}: {
+  searchParams: { childId?: string };
+}) {
+  const user = await requireAuth();
+  if (user.role !== "PARENT") redirect("/student");
 
-const MOCK_CHILDREN: Child[] = [
-  { id: "c1", name: "أحمد محمد" },
-  { id: "c2", name: "سارة محمد" },
-]
+  const tenant = await requireTenant();
+  const childrenData = await getParentChildren(tenant.id, user.id);
+  const children = childrenData.map((pc: any) => ({ id: pc.student.id, name: pc.student.name }));
 
-const MOCK_ATTENDANCE: Record<string, AttendanceRecord[]> = {
-  "c1": Array.from({ length: 20 }).map((_, i) => ({
-    id: `a1-${i}`,
-    date: `2026-03-${28 - i > 0 ? 28 - i : 1}`,
-    groupName: "الرياضيات - الصف التاسع",
-    teacherName: "أحمد المدرس",
-    status: i % 7 === 0 ? "ABSENT" : i % 5 === 0 ? "LATE" : "PRESENT",
-  })),
-  "c2": Array.from({ length: 15 }).map((_, i) => ({
-    id: `a2-${i}`,
-    date: `2026-03-${28 - i > 0 ? 28 - i : 1}`,
-    groupName: "اللغة العربية - الصف العاشر",
-    teacherName: "ميس هند",
-    status: i % 10 === 0 ? "ABSENT" : "PRESENT",
-  })),
-}
+  const selectedChildId = searchParams.childId ?? children[0]?.id;
 
-export default function ParentAttendancePage() {
-  const [selectedChildId, setSelectedChildId] = useState(MOCK_CHILDREN[0].id)
-  const [monthFilter, setMonthFilter] = useState("03")
+  if (!selectedChildId || children.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-muted-foreground" dir="rtl">
+        لا يوجد أبناء مسجلين
+      </div>
+    );
+  }
 
-  const attendanceData = MOCK_ATTENDANCE[selectedChildId] || []
-  const presentCount = attendanceData.filter(a => a.status === "PRESENT" || a.status === "LATE").length
-  const totalCount = attendanceData.length
-  const attendanceRate = totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 0
+  const attendance = await getStudentAttendanceSnapshot(tenant.id, selectedChildId);
+  const attendanceData = (attendance.records ?? []).map((r: any) => ({
+    id: r.id,
+    date: new Date(r.session.date).toLocaleDateString("ar-EG"),
+    groupName: r.group?.name ?? "—",
+    teacherName: "—",
+    status: r.status as "PRESENT" | "ABSENT" | "LATE",
+  }));
+
+  const presentCount = attendanceData.filter(a => a.status === "PRESENT" || a.status === "LATE").length;
+  const totalCount = attendanceData.length;
+  const attendanceRate = totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 0;
 
   return (
     <div className="flex flex-col gap-6 p-6 pb-20 max-w-5xl mx-auto w-full" dir="rtl">
@@ -67,15 +73,19 @@ export default function ParentAttendancePage() {
         
         <div className="flex items-center gap-3 bg-white dark:bg-slate-950 p-2 rounded-2xl border shadow-sm">
           <User className="h-4 w-4 text-primary mr-2" />
-          <Select 
-            value={selectedChildId} 
-            onChange={(e) => setSelectedChildId(e.target.value)}
-            className="border-none bg-transparent focus:ring-0 font-bold min-w-[150px]"
-          >
-            {MOCK_CHILDREN.map(child => (
-              <option key={child.id} value={child.id}>{child.name}</option>
-            ))}
-          </Select>
+          <form method="get">
+            <select
+              name="childId"
+              defaultValue={selectedChildId}
+              className="border-none bg-transparent focus:ring-0 font-bold min-w-[150px] outline-none"
+              onChange={undefined}
+            >
+              {children.map((child: any) => (
+                <option key={child.id} value={child.id}>{child.name}</option>
+              ))}
+            </select>
+            <button type="submit" className="text-xs text-primary underline mr-2">عرض</button>
+          </form>
         </div>
       </div>
 
@@ -114,15 +124,14 @@ export default function ParentAttendancePage() {
           <CardTitle className="text-lg font-bold">تفاصيل السجل</CardTitle>
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-slate-400" />
-            <Select 
-              value={monthFilter} 
-              onChange={(e) => setMonthFilter(e.target.value)}
-              className="h-9 rounded-xl text-xs"
+            <select 
+              defaultValue="03"
+              className="h-9 rounded-xl text-xs bg-transparent"
             >
               <option value="03">مارس 2026</option>
               <option value="02">فبراير 2026</option>
               <option value="01">يناير 2026</option>
-            </Select>
+            </select>
           </div>
         </CardHeader>
         <CardContent className="p-0">

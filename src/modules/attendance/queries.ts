@@ -1,7 +1,7 @@
-﻿import { cache } from "react";
+import { cache } from "react";
 
 import { db } from "@/lib/db";
-import { MOCK_ATTENDANCE_OVERVIEW, MOCK_ATTENDANCE_SESSIONS, MOCK_STUDENT_ATTENDANCE, MOCK_TODAY_SESSIONS } from "@/lib/mock-data";
+import { MOCK_TODAY_SESSIONS } from "@/lib/mock-data";
 import { parseStoredGroupSchedule } from "@/modules/groups/schedule";
 
 const dayValueByIndex = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
@@ -161,7 +161,7 @@ export const getAttendanceOverview = cache(async (tenantId: string) => {
     console.error("DB getAttendanceOverview failed, using mock:", error);
   }
 
-  return MOCK_ATTENDANCE_OVERVIEW;
+  return { rate: 0, change: 0 };
 });
 
 export const getStudentAttendanceSnapshot = cache(async (tenantId: string, studentId: string) => {
@@ -176,11 +176,8 @@ export const getStudentAttendanceSnapshot = cache(async (tenantId: string, stude
       },
       take: 10,
       include: {
-        session: {
-          select: {
-            date: true,
-          },
-        },
+        session: { select: { date: true } },
+        group: { select: { name: true } },
       },
     });
 
@@ -195,10 +192,7 @@ export const getStudentAttendanceSnapshot = cache(async (tenantId: string, stude
     console.error("DB getStudentAttendanceSnapshot failed, using mock:", error);
   }
 
-  return {
-    ...MOCK_STUDENT_ATTENDANCE,
-    records: [],
-  };
+  return { rate: 0, records: [] };
 });
 
 export const getAttendanceSessionsList = cache(async (tenantId: string) => {
@@ -206,7 +200,7 @@ export const getAttendanceSessionsList = cache(async (tenantId: string) => {
     const sessions = await getTodaySessions(tenantId);
 
     return sessions.map((session) => {
-      const remaining = session.status === "IN_PROGRESS" ? "Ø§Ù„Ø­ØµØ© Ø¬Ø§Ø±ÙŠØ© Ø§Ù„Ø¢Ù†" : session.status === "SCHEDULED" ? "Ù„Ù… ØªØ¨Ø¯Ø£ Ø¨Ø¹Ø¯" : "Ø§ÙƒØªÙ…Ù„Øª Ø§Ù„Ø­ØµØ©";
+      const remaining = session.status === "IN_PROGRESS" ? "الحصة جارية الآن" : session.status === "SCHEDULED" ? "لم تبدأ بعد" : "اكتملت الحصة";
 
       return {
         id: session.id,
@@ -224,7 +218,7 @@ export const getAttendanceSessionsList = cache(async (tenantId: string) => {
     console.error("DB getAttendanceSessionsList failed, using mock:", error);
   }
 
-  return MOCK_ATTENDANCE_SESSIONS;
+  return [];
 });
 export const getSessionWithStudents = cache(async (sessionId: string) => {
   try {
@@ -271,7 +265,7 @@ export const getSessionWithStudents = cache(async (sessionId: string) => {
 
       return {
         id: id,
-        name: gs ? gs.student.name : (guestInfo ? guestInfo.name : "Ø·Ø§Ù„Ø¨ ØºÙŠØ± Ù…Ø¹Ø±ÙˆÙ"),
+        name: gs ? gs.student.name : (guestInfo ? guestInfo.name : "طالب غير معروف"),
         phone: gs ? gs.student.phone : (guestInfo ? guestInfo.phone : ""),
         status: record ? record.status : "ABSENT",
         method: record ? record.method : "MANUAL",
@@ -394,3 +388,4 @@ export const getSessionAttendance = cache(async (tenantId: string, sessionId: st
     })),
   };
 });
+
