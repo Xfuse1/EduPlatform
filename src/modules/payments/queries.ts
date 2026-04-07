@@ -1,7 +1,7 @@
 import { cache } from "react";
 
 import { db } from "@/lib/db";
-import { MOCK_PAYMENT_SNAPSHOT, MOCK_PAYMENTS, MOCK_REVENUE_SUMMARY } from "@/lib/mock-data";
+
 
 function startOfCurrentMonth() {
   const now = new Date();
@@ -127,15 +127,7 @@ export const getRevenueSummary = cache(async (tenantId: string) => {
     console.error("DB getRevenueSummary failed, using mock:", error);
   }
 
-  return {
-    collected: MOCK_REVENUE_SUMMARY.thisMonth,
-    outstanding: MOCK_REVENUE_SUMMARY.outstanding.total,
-    total: MOCK_REVENUE_SUMMARY.thisMonth + MOCK_REVENUE_SUMMARY.outstanding.total,
-    collectionRate: 0,
-    thisMonth: MOCK_REVENUE_SUMMARY.thisMonth,
-    lastMonth: MOCK_REVENUE_SUMMARY.lastMonth,
-    change: MOCK_REVENUE_SUMMARY.change,
-  };
+  return { collected: 0, outstanding: 0, total: 0, collectionRate: 0, thisMonth: 0, lastMonth: 0, change: 0 };
 });
 
 export const getStudentPaymentSnapshot = cache(async (tenantId: string, studentId: string) => {
@@ -161,7 +153,7 @@ export const getStudentPaymentSnapshot = cache(async (tenantId: string, studentI
     console.error("DB getStudentPaymentSnapshot failed, using mock:", error);
   }
 
-  return MOCK_PAYMENT_SNAPSHOT;
+  return { status: "PENDING", amount: 0, payments: [] };
 });
 
 export function resolvePaymentStatus(payments: Array<{ status: string }> = []) {
@@ -256,7 +248,7 @@ export const getPaymentsList = cache(async (tenantId: string) => {
     console.error("DB getPaymentsList failed, using mock:", error);
   }
 
-  return MOCK_PAYMENTS;
+  return [];
 });
 
 export const getOverdueStudents = cache(async (tenantId: string, _teacherId?: string) => {

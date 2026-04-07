@@ -441,4 +441,5 @@ enum NotificationStatus {
 enum QuestionType {
   MCQ
   ESSAY
+  TRUE_FALSE
 }

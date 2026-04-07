@@ -48,7 +48,6 @@ const navigation: Record<DashboardRole, NavigationItem[]> = {
     { href: "/student/schedule", label: "جدولي", icon: Calendar },
     { href: "/student/assignments", label: "الواجبات", icon: ClipboardList },
     { href: "/student/exams", label: "الامتحانات", icon: PenTool },
-    { href: "/messages", label: "الرسائل", icon: MessageSquare },
   ],
   parent: [
     { href: "/parent", label: "لوحة التحكم", icon: LayoutDashboard, activeMode: "exact" },

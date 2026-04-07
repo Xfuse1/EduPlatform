@@ -1,7 +1,6 @@
-﻿import { cache } from "react";
+import { cache } from "react";
 
 import { db } from "@/lib/db";
-import { MOCK_GROUPS, MOCK_TENANT } from "@/lib/mock-data";
 import { parseStoredGroupSchedule } from "@/modules/groups/schedule";
 
 export const getTeacherPublicProfile = cache(async (tenantId: string) => {
@@ -29,15 +28,7 @@ export const getTeacherPublicProfile = cache(async (tenantId: string) => {
     console.error("DB getTeacherPublicProfile failed, using mock:", error);
   }
 
-  return {
-    id: MOCK_TENANT.id,
-    name: MOCK_TENANT.name,
-    logoUrl: MOCK_TENANT.logoUrl,
-    themeColor: MOCK_TENANT.themeColor,
-    region: MOCK_TENANT.region,
-    bio: MOCK_TENANT.bio,
-    subjects: MOCK_TENANT.subjects,
-  };
+  return null;
 });
 
 export const getOpenGroups = cache(async (tenantId: string) => {
@@ -89,26 +80,7 @@ export const getOpenGroups = cache(async (tenantId: string) => {
     console.error("DB getOpenGroups failed, using mock:", error);
   }
 
-  return MOCK_GROUPS.map((group) => ({
-    id: group.id,
-    name: group.name,
-    subject: group.subject,
-    gradeLevel: group.gradeLevel,
-    days: group.days,
-    timeStart: group.timeStart,
-    timeEnd: group.timeEnd,
-    schedule: group.days.map((day) => ({
-      day,
-      timeStart: group.timeStart,
-      timeEnd: group.timeEnd,
-    })),
-    monthlyFee: group.monthlyFee,
-    maxCapacity: group.maxCapacity,
-    enrolledCount: group.enrolledCount,
-    remainingCapacity: Math.max(group.maxCapacity - group.enrolledCount, 0),
-    color: group.color,
-    isFull: group.enrolledCount >= group.maxCapacity,
-  }));
+  return [];
 });
 
 export const getPublicGroups = getOpenGroups;

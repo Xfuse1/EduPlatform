@@ -1,7 +1,7 @@
 import { cache } from "react";
 
 import { db } from "@/lib/db";
-import { MOCK_PARENT_CHILDREN, MOCK_STUDENT_COUNT_SUMMARY, MOCK_STUDENT_PROFILE, MOCK_STUDENTS } from "@/lib/mock-data";
+
 
 function startOfMonth() {
   const now = new Date();
@@ -45,11 +45,7 @@ export const getStudentCountSummary = cache(async (tenantId: string) => {
     console.error("DB getStudentCountSummary failed, using mock:", error);
   }
 
-  return {
-    total: MOCK_STUDENT_COUNT_SUMMARY.total,
-    newThisMonth: MOCK_STUDENT_COUNT_SUMMARY.recent,
-    recent: MOCK_STUDENT_COUNT_SUMMARY.recent,
-  };
+  return { total: 0, newThisMonth: 0, recent: 0 };
 });
 
 export const getStudentProfile = cache(async (tenantId: string, studentId: string, _teacherId?: string) => {
@@ -173,7 +169,7 @@ export const getStudentProfile = cache(async (tenantId: string, studentId: strin
     console.error("DB getStudentProfile failed, using mock:", error);
   }
 
-  return MOCK_STUDENT_PROFILE;
+  return null;
 });
 
 export const getParentChildren = cache(async (tenantId: string, parentId: string) => {
@@ -209,7 +205,7 @@ export const getParentChildren = cache(async (tenantId: string, parentId: string
     console.error("DB getParentChildren failed, using mock:", error);
   }
 
-  return MOCK_PARENT_CHILDREN;
+  return [];
 });
 
 export const getStudents = cache(async (
@@ -335,16 +331,7 @@ export const getStudents = cache(async (
     console.error("DB getStudents failed, using mock:", error);
   }
 
-  return MOCK_STUDENTS.map((student) => ({
-    ...student,
-    phone: "",
-    studentPhone: "",
-    parentName: "",
-    parentPhone: "",
-    gradeLevel: student.grade,
-    groupId: "",
-    groups: [],
-  }));
+  return [];
 });
 
 export const getStudentsList = cache(async (tenantId: string) => {

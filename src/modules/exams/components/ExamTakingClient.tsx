@@ -16,7 +16,7 @@ import { submitExamAction } from "../actions";
 interface Question {
   id: string;
   questionText: string;
-  type: "MCQ" | "ESSAY";
+  type: "MCQ" | "ESSAY" | "TRUE_FALSE";
   options: any; // array of strings for MCQ
   grade: number;
 }
@@ -153,7 +153,7 @@ export function ExamTakingClient({ exam, studentId }: ExamTakingClientProps) {
           <Card className="rounded-[32px] border-slate-200 shadow-xl overflow-hidden dark:border-slate-800">
               <CardHeader className="p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                   <Badge className="mb-4 bg-primary/10 text-primary border-none font-bold px-3 py-1 text-xs">
-                       {currentQuestion.type === "MCQ" ? 'اختيار من متعدد' : 'سؤال مقالي'} — {toArabicDigits(currentQuestion.grade)} درجات
+                       {currentQuestion.type === "MCQ" ? 'اختيار من متعدد' : currentQuestion.type === "TRUE_FALSE" ? 'صح أو خطأ' : 'سؤال مقالي'} — {toArabicDigits(currentQuestion.grade)} درجات
                   </Badge>
                   <CardTitle className="text-2xl font-black text-slate-900 dark:text-white leading-relaxed">
                       {currentQuestion.questionText}
@@ -167,6 +167,28 @@ export function ExamTakingClient({ exam, studentId }: ExamTakingClientProps) {
                               return (
                                   <button
                                       key={idx}
+                                      onClick={() => handleAnswer(currentQuestion.id, option)}
+                                      className={`flex items-center text-right gap-4 p-5 rounded-2xl border-2 transition-all group ${
+                                          isSelected 
+                                          ? 'border-primary bg-primary/5 text-primary' 
+                                          : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50'
+                                      }`}
+                                  >
+                                      <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600'}`}>
+                                          {isSelected && <div className="h-2 w-2 rounded-full bg-white" />}
+                                      </div>
+                                      <span className="text-lg font-bold">{option}</span>
+                                  </button>
+                              );
+                          })}
+                      </div>
+                  ) : currentQuestion.type === "TRUE_FALSE" ? (
+                      <div className="grid gap-4">
+                          {["صح", "خطأ"].map((option) => {
+                              const isSelected = answers[currentQuestion.id] === option;
+                              return (
+                                  <button
+                                      key={option}
                                       onClick={() => handleAnswer(currentQuestion.id, option)}
                                       className={`flex items-center text-right gap-4 p-5 rounded-2xl border-2 transition-all group ${
                                           isSelected 

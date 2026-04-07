@@ -16,5 +16,10 @@ export default async function ExamPage({ params }: { params: Promise<{ examId: s
 
   if (!exam) redirect("/student/exams");
 
+  const existingSubmission = await db.examSubmission.findFirst({
+    where: { examId, studentId: user.id }
+  });
+  if (existingSubmission) redirect("/student/exams");
+
   return <ExamTakingClient exam={exam as any} studentId={user.id} />;
 }
