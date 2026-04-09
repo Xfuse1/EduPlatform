@@ -14,7 +14,7 @@ import { z } from "zod";
 const pinSchema = z
   .string()
   .trim()
-  .regex(/^\d{4,6}$/, "الـ PIN يجب أن يكون من 4 إلى 6 أرقام");
+  .regex(/^\d{4,8}$/, "الـ PIN يجب أن يكون من 4 إلى 8 أرقام");
 
 const redirectMap: Record<string, string> = {
   TEACHER: "/teacher",
