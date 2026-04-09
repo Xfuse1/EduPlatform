@@ -1,4 +1,4 @@
-import { Prisma, UserRole } from "@prisma/client";
+import { Prisma, UserRole } from "@/generated/client";
 
 import { db } from "@/lib/db";
 

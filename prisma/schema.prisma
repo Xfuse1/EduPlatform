@@ -1,11 +1,12 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model Tenant {
@@ -65,6 +66,8 @@ model User {
   childStudents         ParentStudent[]        @relation("StudentRelation")
   recordedPayments      Payment[]              @relation("RecordedPayments")
   payments              Payment[]              @relation("StudentPayments")
+  email                 String?
+  settings              Json?                  @default("{}")
   tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, phone])

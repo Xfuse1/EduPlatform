@@ -1,4 +1,4 @@
-﻿import { EnrollmentStatus, UserRole } from '@prisma/client'
+import { EnrollmentStatus, UserRole } from '@/generated/client'
 
 import { db } from '@/lib/db'
 import { buildWeeklyScheduleItems } from '@/lib/schedule'

@@ -50,6 +50,7 @@ export const ROUTES = {
   parent: {
     dashboard: '/parent',
     children: '/parent/children',
+    settings: '/parent/settings',
   },
   api: {
     auth: {

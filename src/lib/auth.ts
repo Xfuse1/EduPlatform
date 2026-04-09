@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import type { UserRole } from "@prisma/client";
+import type { UserRole } from "@/generated/client";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { NextResponse } from "next/server";

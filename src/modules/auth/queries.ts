@@ -1,4 +1,4 @@
-import type { UserRole } from '@prisma/client'
+import type { UserRole } from '@/generated/client'
 
 import { ROUTES } from '@/config/routes'
 import { db } from '@/lib/db'

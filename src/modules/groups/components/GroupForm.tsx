@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -36,6 +36,12 @@ type ScheduleEntryErrors = Array<{
 type FieldErrorState = Partial<Record<Exclude<keyof GroupCreateInput, 'schedule'> | 'schedule' | 'form', string>>
 
 const SESSION_LABELS = ['الأولى', 'الثانية', 'الثالثة', 'الرابعة'] as const
+
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+  const hours = Math.floor(i / 2).toString().padStart(2, '0')
+  const minutes = i % 2 === 0 ? '00' : '30'
+  return `${hours}:${minutes}`
+})
 
 const defaultValues: GroupCreateInput = {
   name: '',
@@ -154,6 +160,7 @@ export default function GroupForm({
     Array.from({ length: initialSchedule.length }, () => ({})),
   )
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [feeType, setFeeType] = useState<'monthly' | 'per_session'>('monthly')
 
   function resizeSchedule(nextCount: number) {
     setScheduleEntries((currentEntries) => {
@@ -355,23 +362,54 @@ export default function GroupForm({
           />
         </FormField>
 
-        <FormField
-          label="المصاريف الشهرية"
-          htmlFor="monthlyFee"
-          required
-          error={errors.monthlyFee}
-          hint="اكتب المبلغ بالجنيه المصري"
-        >
-          <input
-            id="monthlyFee"
-            name="monthlyFee"
-            type="number"
-            min={0}
-            defaultValue={String(initialValues.monthlyFee)}
-            className={inputClassName}
-            aria-invalid={Boolean(errors.monthlyFee)}
-          />
-        </FormField>
+        <div className="space-y-3 md:col-span-2">
+          {/* اختيار نوع الحساب */}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setFeeType('monthly')}
+              className={joinClasses(
+                'flex-1 rounded-2xl border-2 py-3 text-sm font-bold transition-colors',
+                feeType === 'monthly'
+                  ? 'border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
+                  : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-950',
+              )}
+            >
+              💳 الحساب بالشهر
+            </button>
+            <button
+              type="button"
+              onClick={() => setFeeType('per_session')}
+              className={joinClasses(
+                'flex-1 rounded-2xl border-2 py-3 text-sm font-bold transition-colors',
+                feeType === 'per_session'
+                  ? 'border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
+                  : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-950',
+              )}
+            >
+              📚 الحساب بالحصة
+            </button>
+          </div>
+
+          {/* حقل إدخال المبلغ */}
+          <FormField
+            label={feeType === 'monthly' ? 'المصاريف الشهرية' : 'سعر الحصة'}
+            htmlFor="monthlyFee"
+            required
+            error={errors.monthlyFee}
+            hint={feeType === 'monthly' ? 'اكتب المبلغ الشهري بالجنيه المصري' : 'اكتب سعر الحصة الواحدة بالجنيه المصري'}
+          >
+            <input
+              id="monthlyFee"
+              name="monthlyFee"
+              type="number"
+              min={0}
+              defaultValue={String(initialValues.monthlyFee)}
+              className={inputClassName}
+              aria-invalid={Boolean(errors.monthlyFee)}
+            />
+          </FormField>
+        </div>
       </div>
 
       <div className="space-y-4 rounded-[28px] border border-slate-200/80 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/40 md:p-6">
@@ -474,15 +512,21 @@ export default function GroupForm({
                     error={entryErrors.timeStart}
                     hint={isTimeLocked ? 'يتم تعبئة هذا الحقل تلقائيًا من الحصة الأولى' : getTimeHint(entry.timeStart)}
                   >
-                    <input
+                    <select
                       id={`schedule-start-${index}`}
-                      type="time"
                       value={entry.timeStart}
                       onChange={(event) => updateScheduleEntry(index, 'timeStart', event.target.value)}
                       className={inputClassName}
                       disabled={isTimeLocked}
                       aria-invalid={Boolean(entryErrors.timeStart)}
-                    />
+                    >
+                      <option value="">-- اختر وقت البدء --</option>
+                      {TIME_OPTIONS.map((time) => (
+                        <option key={time} value={time}>
+                          {time} — {getTimeMeridiemLabel(time) ?? ''}
+                        </option>
+                      ))}
+                    </select>
                   </FormField>
 
                   <FormField
@@ -492,15 +536,21 @@ export default function GroupForm({
                     error={entryErrors.timeEnd}
                     hint={isTimeLocked ? 'يتم تعبئة هذا الحقل تلقائيًا من الحصة الأولى' : getTimeHint(entry.timeEnd)}
                   >
-                    <input
+                    <select
                       id={`schedule-end-${index}`}
-                      type="time"
                       value={entry.timeEnd}
                       onChange={(event) => updateScheduleEntry(index, 'timeEnd', event.target.value)}
                       className={inputClassName}
                       disabled={isTimeLocked}
                       aria-invalid={Boolean(entryErrors.timeEnd)}
-                    />
+                    >
+                      <option value="">-- اختر وقت الانتهاء --</option>
+                      {TIME_OPTIONS.map((time) => (
+                        <option key={time} value={time}>
+                          {time} — {getTimeMeridiemLabel(time) ?? ''}
+                        </option>
+                      ))}
+                    </select>
                   </FormField>
                 </div>
               </div>
