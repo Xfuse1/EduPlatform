@@ -88,6 +88,42 @@ function getProgressState(currentStep: SignupStep, itemStep: number, isVerified:
   return "upcoming";
 }
 
+function isLocalDevelopmentHost() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+}
+
+function mapSignupOtpError(error: unknown) {
+  const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "";
+
+  switch (code) {
+    case "auth/billing-not-enabled":
+      return isLocalDevelopmentHost()
+        ? "خدمة تسجيل الدخول برقم الهاتف في Firebase تحتاج تفعيل Billing أو استخدام أرقام اختبار Firebase أثناء التطوير."
+        : "خدمة التحقق برقم الهاتف غير مفعلة حاليًا. تواصل مع إدارة المنصة.";
+    case "auth/quota-exceeded":
+      return "تم تجاوز حصة الإرسال في Firebase.";
+    case "auth/too-many-requests":
+      return "تمت محاولات كثيرة. انتظر قليلًا ثم أعد المحاولة.";
+    case "auth/invalid-phone-number":
+      return "رقم الهاتف غير صحيح.";
+    case "auth/captcha-check-failed":
+      return "فشل التحقق الأمني من Firebase. أعد المحاولة.";
+    case "auth/missing-app-credential":
+    case "auth/invalid-app-credential":
+      return "تعذر إنشاء اعتماد Firebase المطلوب لهذا الطلب.";
+    case "auth/internal-error":
+      return isLocalDevelopmentHost()
+        ? "تعذر إرسال كود التحقق على localhost. استخدم رقم اختبار Firebase أو فعّل الخدمة."
+        : "تعذر إرسال كود التحقق الآن. حاول مرة أخرى بعد قليل.";
+    default:
+      return "تعذر إرسال كود التحقق. تحقق من رقم الهاتف وحاول مرة أخرى.";
+  }
+}
+
 export default function TeacherSignupPage() {
   const [isReady, setIsReady] = useState(false);
   const [currentStep, setCurrentStep] = useState<SignupStep>(1);
@@ -245,7 +281,8 @@ export default function TeacherSignupPage() {
         setIsCheckingSubdomain(true);
         subdomainCheckTimer.current = setTimeout(async () => {
           const result = await checkSubdomainAvailability(normalized);
-          setDbSubdomainStatus(result.available ? "available" : "taken");
+          const isTaken = !result.available && (result.message ?? "").includes("مستخدم بالفعل");
+          setDbSubdomainStatus(result.available ? "available" : isTaken ? "taken" : "idle");
           if (!result.available) setSubdomainError(result.message ?? "هذا الرابط مستخدم بالفعل");
           setIsCheckingSubdomain(false);
         }, 600);
@@ -296,8 +333,7 @@ export default function TeacherSignupPage() {
       setOtpError("");
       setIsVerified(false);
     } catch (err) {
-      console.error("[signup] send OTP failed:", err);
-      setPageError("تعذر إرسال كود التحقق. تحقق من رقم الهاتف وحاول مرة أخرى.");
+      setPageError(mapSignupOtpError(err));
       import("@/lib/firebase-phone-otp").then(({ clearRecaptchaVerifier }) => clearRecaptchaVerifier());
     } finally {
       setIsSendingOtp(false);
@@ -364,8 +400,7 @@ export default function TeacherSignupPage() {
       setOtpDigits(Array.from({ length: OTP_LENGTH }, () => ""));
       inputsRef.current[0]?.focus();
     } catch (err) {
-      console.error("[signup] resend OTP failed:", err);
-      setOtpError("تعذر إعادة الإرسال");
+      setOtpError(mapSignupOtpError(err));
       import("@/lib/firebase-phone-otp").then(({ clearRecaptchaVerifier }) => clearRecaptchaVerifier());
     } finally {
       setIsResending(false);

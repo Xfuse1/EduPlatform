@@ -27,15 +27,6 @@ export async function findUserByPhone(phone: string, currentUserId?: string) {
       tenantId: true,
       role: true,
       isActive: true,
-      tenant: {
-        select: {
-          id: true,
-          slug: true,
-          name: true,
-          isActive: true,
-          accountType: true,
-        },
-      },
     },
   });
 }

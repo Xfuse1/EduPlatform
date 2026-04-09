@@ -167,7 +167,9 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
             <div className="space-y-2">
               <Label htmlFor="groupId" className="text-sm font-bold text-slate-700 dark:text-slate-200">المجموعة المختبرة</Label>
               <select
+                aria-label="المجموعة المختبرة"
                 id="groupId"
+                name="groupId"
                 className="w-full min-h-11 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900 shadow-sm"
                 value={formData.groupId}
                 onChange={(e) => setFormData({ ...formData, groupId: e.target.value })}
@@ -244,6 +246,8 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                         سؤال {index + 1}
                        </Badge>
                        <select
+                        aria-label={`نوع السؤال ${index + 1}`}
+                        name={`question-type-${index}`}
                         value={q.type}
                         onChange={e => updateQuestion(index, 'type', e.target.value)}
                         className="flex-1 min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900"
@@ -255,6 +259,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                     </div>
 
                     <Textarea
+                      aria-label={`نص السؤال ${index + 1}`}
                       value={q.questionText}
                       onChange={e => updateQuestion(index, 'questionText', e.target.value)}
                       placeholder="اكتب نص السؤال هنا..."
@@ -267,6 +272,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                         {q.options.map((opt: string, i: number) => (
                           <div key={i} className="flex gap-3 items-center group/opt">
                             <input
+                              aria-label={`تحديد الخيار ${i + 1} كإجابة صحيحة للسؤال ${index + 1}`}
                               type="radio"
                               name={`correct-${index}`}
                               checked={q.correctAnswer === opt && opt !== ''}
@@ -274,6 +280,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                               className="w-4 h-4 accent-primary cursor-pointer"
                             />
                             <Input
+                              aria-label={`الخيار ${i + 1} للسؤال ${index + 1}`}
                               value={opt}
                               onChange={e => updateOption(index, i, e.target.value)}
                               placeholder={`الخيار ${i + 1}`}
@@ -288,6 +295,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                       <div className="space-y-2">
                         <Label className="text-xs font-bold text-slate-500">نموذج الإجابة (يستخدمه الـ AI للتقييم):</Label>
                         <Textarea
+                          aria-label={`نموذج إجابة السؤال ${index + 1}`}
                           value={q.correctAnswer}
                           onChange={e => updateQuestion(index, 'correctAnswer', e.target.value)}
                           placeholder="اكتب نموذج الإجابة هنا لمساعدة الـ AI في تصحيح إجابات الطلاب..."
@@ -329,6 +337,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                     <div className="flex items-center gap-3">
                       <Label className="text-xs font-bold text-slate-500">الدرجة:</Label>
                       <Input
+                        aria-label={`درجة السؤال ${index + 1}`}
                         type="number"
                         value={q.grade}
                         onChange={e => updateQuestion(index, 'grade', Number(e.target.value))}

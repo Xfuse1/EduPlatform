@@ -118,6 +118,17 @@ type ParentSignupResult = {
   tenantName?: string;
 };
 
+function isTransientDatabaseError(error: unknown) {
+  const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "";
+  const message = error instanceof Error ? error.message : String(error);
+
+  return (
+    code === "P1001" ||
+    code === "P1017" ||
+    message.includes("ConnectionReset") ||
+    message.includes("forcibly closed by the remote host")
+  );
+}
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "eduplatform.com";
 
 export async function createParentSignup(input: z.infer<typeof parentSignupSchema>): Promise<ParentSignupResult> {
@@ -213,10 +224,31 @@ export async function checkSubdomainAvailability(subdomain: string): Promise<{ a
     return { available: false, message: "هذا الاسم غير متاح حاليًا" };
   }
 
-  const existing = await db.tenant.findUnique({ where: { slug: normalized } });
-  if (existing) {
-    return { available: false, message: "هذا الرابط مستخدم بالفعل" };
-  }
+  const findExistingTenant = () => db.tenant.findUnique({ where: { slug: normalized } });
 
-  return { available: true };
+  try {
+    const existing = await findExistingTenant();
+    if (existing) {
+      return { available: false, message: "هذا الرابط مستخدم بالفعل" };
+    }
+
+    return { available: true };
+  } catch (error) {
+    if (isTransientDatabaseError(error)) {
+      try {
+        const existing = await findExistingTenant();
+        if (existing) {
+          return { available: false, message: "هذا الرابط مستخدم بالفعل" };
+        }
+
+        return { available: true };
+      } catch (retryError) {
+        console.error("[check-subdomain-availability:retry]", retryError);
+      }
+    } else {
+      console.error("[check-subdomain-availability]", error);
+    }
+
+    return { available: false, message: "تعذر التحقق من الرابط الآن. حاول مرة أخرى بعد قليل." };
+  }
 }

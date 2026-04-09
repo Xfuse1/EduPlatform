@@ -95,10 +95,10 @@ export function ParentChildrenPage({ data }: ParentChildrenPageProps) {
                     </p>
                   </div>
                   <ChildGroupEnrollmentButton
-                    availableGroups={child.availableGroups}
+                    availableGroups={child.availableGroups ?? []}
                     childId={child.id}
                     childName={child.name}
-                    currentGroups={child.currentGroups}
+                    currentGroups={child.currentGroups ?? []}
                   />
                 </div>
               </div>
