@@ -187,9 +187,16 @@ export const getParentChildren = cache(async (tenantId: string, parentId: string
       include: {
         student: {
           include: {
+            tenant: {
+              select: {
+                name: true,
+              },
+            },
             groupStudents: {
               where: {
-                status: "ACTIVE",
+                status: {
+                  in: ["ACTIVE", "WAITLIST"],
+                },
               },
               include: {
                 group: true,
