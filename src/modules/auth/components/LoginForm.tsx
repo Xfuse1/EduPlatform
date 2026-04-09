@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowLeft, Delete, Phone } from "lucide-react";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,9 @@ type TenantSummary = {
 
 type LoginStep = "phone" | "pin" | "otp";
 
+const PIN_MIN_LENGTH = 4;
+const PIN_MAX_LENGTH = 8;
+
 function getInitials(name: string) {
   return name
     .split(" ")
@@ -28,14 +31,14 @@ function getInitials(name: string) {
 }
 
 // ─── PIN Pad ──────────────────────────────────────────────────────────────────
-function PinPad({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function PinPad({ value, onChange, disabled = false }: { value: string; onChange: (v: string) => void; disabled?: boolean }) {
   const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"];
 
   return (
     <div className="space-y-4">
       {/* Dots indicator */}
       <div className="flex items-center justify-center gap-3" dir="ltr">
-        {Array.from({ length: 8 }).map((_, i) => (
+        {Array.from({ length: PIN_MAX_LENGTH }).map((_, i) => (
           <div
             key={i}
             className={`h-3 w-3 rounded-full border-2 transition-all duration-150 ${
@@ -58,8 +61,9 @@ function PinPad({ value, onChange }: { value: string; onChange: (v: string) => v
                 key={i}
                 type="button"
                 aria-label="حذف آخر رقم"
+                disabled={disabled}
                 onClick={() => onChange(value.slice(0, -1))}
-                className="flex h-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:bg-white/10 active:scale-95"
+                className="flex h-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:bg-white/10 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Delete className="h-5 w-5" />
               </button>
@@ -70,8 +74,9 @@ function PinPad({ value, onChange }: { value: string; onChange: (v: string) => v
             <button
               key={i}
               type="button"
-              onClick={() => value.length < 8 && onChange(value + key)}
-              className="flex h-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-lg font-bold text-white transition hover:bg-white/10 active:scale-95"
+              disabled={disabled}
+              onClick={() => value.length < PIN_MAX_LENGTH && onChange(value + key)}
+              className="flex h-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-lg font-bold text-white transition hover:bg-white/10 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {key}
             </button>
@@ -95,13 +100,6 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
 
   // Note: intentionally NOT resetting OTP state on unmount
   // because OTPInput on /verify needs the confirmation result stored on window
-
-  // Auto-submit PIN when 4+ digits entered and length matches
-  useEffect(() => {
-    if (step !== "pin" || pin.length < 4) return;
-    handlePinSubmit(pin);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pin]);
 
   const handlePhoneSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -150,7 +148,9 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
   };
 
   const handlePinSubmit = (currentPin: string) => {
-    if (currentPin.length < 4) return;
+    if (currentPin.length < PIN_MIN_LENGTH) return;
+
+    setError("");
 
     startTransition(async () => {
       const result = await verifyPinAction(phone, currentPin, actualTenantId);
@@ -266,7 +266,15 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
           </p>
         ) : null}
 
-        <PinPad value={pin} onChange={setPin} />
+        <PinPad
+          value={pin}
+          onChange={(nextPin) => { setPin(nextPin); setError(""); }}
+          disabled={isPending}
+        />
+
+        <Button className="w-full text-base" disabled={isPending || pin.length < PIN_MIN_LENGTH} onClick={() => handlePinSubmit(pin)} type="button">
+          متابعة
+        </Button>
 
         {isPending ? (
           <p className="text-center text-sm text-slate-400">جارٍ التحقق...</p>

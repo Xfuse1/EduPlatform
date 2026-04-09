@@ -71,7 +71,7 @@ function PinSetupPrompt({ redirectTo }: { redirectTo: string }) {
     <div className="space-y-5">
       <div className="text-center">
         <p className="font-bold text-white">
-          {stage === "enter" ? "اختر PIN جديد (4-6 أرقام)" : "أكّد الـ PIN"}
+          {stage === "enter" ? "اختر PIN جديد (4-8 أرقام)" : "أكّد الـ PIN"}
         </p>
         <p className="mt-1 text-sm text-slate-400">
           {stage === "enter" ? "سيُستخدم بدلاً من OTP في المرات القادمة" : "أعد إدخال نفس الـ PIN للتأكيد"}
