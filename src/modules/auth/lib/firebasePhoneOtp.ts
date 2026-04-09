@@ -48,6 +48,10 @@ function mapFirebaseAuthError(error: unknown) {
       return "تمت محاولات كثيرة. انتظر قليلًا ثم أعد المحاولة";
     case "auth/quota-exceeded":
       return "تم تجاوز حصة الإرسال في Firebase";
+    case "auth/billing-not-enabled":
+      return isLocalDevelopmentHost()
+        ? "خدمة تسجيل الدخول برقم الهاتف في Firebase تحتاج تفعيل Billing أو استخدام أرقام اختبار Firebase أثناء التطوير."
+        : "خدمة التحقق برقم الهاتف غير مفعلة حاليًا. تواصل مع إدارة المنصة.";
     case "auth/captcha-check-failed":
       return "فشل التحقق الأمني من Firebase. أعد المحاولة";
     case "auth/missing-app-credential":

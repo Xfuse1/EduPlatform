@@ -34,8 +34,8 @@ type CurrentGroup = {
 type ChildGroupEnrollmentButtonProps = {
   childId: string;
   childName: string;
-  currentGroups: CurrentGroup[];
-  availableGroups: AvailableGroup[];
+  currentGroups?: CurrentGroup[] | null;
+  availableGroups?: AvailableGroup[] | null;
 };
 
 export function ChildGroupEnrollmentButton({
@@ -49,10 +49,12 @@ export function ChildGroupEnrollmentButton({
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const safeCurrentGroups = currentGroups ?? [];
+  const safeAvailableGroups = availableGroups ?? [];
 
   const selectedGroup = useMemo(
-    () => availableGroups.find((group) => group.id === selectedGroupId) ?? null,
-    [availableGroups, selectedGroupId],
+    () => safeAvailableGroups.find((group) => group.id === selectedGroupId) ?? null,
+    [safeAvailableGroups, selectedGroupId],
   );
 
   function closeDialog() {
@@ -116,11 +118,11 @@ export function ChildGroupEnrollmentButton({
               </button>
             </div>
 
-            {currentGroups.length ? (
+            {safeCurrentGroups.length ? (
               <div className="mb-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
                 <p className="mb-3 text-sm font-bold text-slate-900 dark:text-white">المجموعات الحالية</p>
                 <div className="flex flex-wrap gap-2">
-                  {currentGroups.map((group) => (
+                  {safeCurrentGroups.map((group) => (
                     <span
                       key={group.id}
                       className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
@@ -132,13 +134,13 @@ export function ChildGroupEnrollmentButton({
               </div>
             ) : null}
 
-            {availableGroups.length === 0 ? (
+            {safeAvailableGroups.length === 0 ? (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
                 لا توجد مجموعات متاحة حاليًا لهذا الابن في نفس الصف الدراسي.
               </div>
             ) : (
               <div className="space-y-3">
-                {availableGroups.map((group) => {
+                {safeAvailableGroups.map((group) => {
                   const isSelected = selectedGroupId === group.id;
 
                   return (
@@ -211,7 +213,7 @@ export function ChildGroupEnrollmentButton({
               </Button>
               <Button
                 className="w-full gap-2"
-                disabled={isPending || availableGroups.length === 0 || !selectedGroupId}
+                disabled={isPending || safeAvailableGroups.length === 0 || !selectedGroupId}
                 onClick={handleSubmit}
                 type="button"
               >
