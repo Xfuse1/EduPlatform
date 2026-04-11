@@ -77,7 +77,9 @@ function getNextSessionFromEnrollments(
 export const getAssignmentsByParent = cache(async (tenantId: string, parentId: string) => {
   try {
     const parentChildren = await db.parentStudent.findMany({
-      where: { parentId, student: { tenantId } },
+      where: {
+        parentId,
+      },
       include: {
         student: { select: { id: true, name: true } }
       }
@@ -274,7 +276,7 @@ export const getStudentDashboardData = cache(async (tenantId: string, studentId:
 
 export const getParentDashboardData = cache(async (tenantId: string, parentId: string) => {
   try {
-    const [children, notifications, parentAssignments, groups] = await Promise.all([
+    const [children, notifications, parentAssignments] = await Promise.all([
       getParentChildren(tenantId, parentId),
       db.notification.findMany({
         where: { tenantId, userId: parentId, status: "QUEUED" },
@@ -282,12 +284,15 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
         take: 10,
       }),
       getAssignmentsByParent(tenantId, parentId),
-      db.group.findMany({
+    ]);
+
+    const groups = await db.group.findMany({
         where: {
-          tenantId,
           isActive: true,
+          tenant: { isActive: true },
         },
         select: {
+          tenantId: true,
           id: true,
           name: true,
           subject: true,
@@ -311,32 +316,13 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
         orderBy: {
           createdAt: "asc",
         },
-      }),
-    ]);
+      });
 
     const childrenData = await Promise.all(
       children.map(async ({ student }) => {
-        const [attendance, payment, availableGroupsRaw] = await Promise.all([
-          getStudentAttendanceSnapshot(tenantId, student.id),
-          getStudentPaymentSnapshot(tenantId, student.id),
-          db.group.findMany({
-            where: {
-              tenantId,
-              isActive: true,
-              gradeLevel: student.gradeLevel,
-              groupStudents: {
-                none: {
-                  studentId: student.id,
-                  status: "ACTIVE",
-                },
-              },
-            },
-            include: {
-              _count: {
-                select: { groupStudents: { where: { status: "ACTIVE" } } },
-              },
-            },
-          }),
+        const [attendance, payment] = await Promise.all([
+          getStudentAttendanceSnapshot(student.tenantId, student.id),
+          getStudentPaymentSnapshot(student.tenantId, student.id),
         ]);
 
         const currentEnrollmentStatuses = new Set(["ACTIVE", "WAITLIST"]);
@@ -386,31 +372,6 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
           attendanceRate: attendance.rate,
           payment,
           todayStatus: attendance.records?.[0]?.status ?? "NO_SESSION",
-          currentGroups: student.groupStudents.map((enrollment) => ({
-            id: enrollment.group.id,
-            name: enrollment.group.name,
-            subject: enrollment.group.subject,
-          })),
-          availableGroups: availableGroupsRaw.map((group) => {
-            const enrolledCount = group._count.groupStudents;
-            const remainingCapacity = Math.max(0, group.maxCapacity - enrolledCount);
-            return {
-              id: group.id,
-              name: group.name,
-              subject: group.subject,
-              gradeLevel: group.gradeLevel,
-              room: group.room,
-              days: group.days,
-              timeStart: group.timeStart,
-              timeEnd: group.timeEnd,
-              monthlyFee: group.monthlyFee,
-              enrolledCount,
-              remainingCapacity,
-              maxCapacity: group.maxCapacity,
-              isFull: remainingCapacity <= 0,
-              color: group.color,
-            };
-          }),
           nextSession: getNextSessionFromEnrollments(
             activeEnrollments.map((enrollment) => ({
               group: {

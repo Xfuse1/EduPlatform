@@ -338,6 +338,7 @@ export async function removeChildFromParent(input: { studentId: string }) {
           select: {
             id: true,
             name: true,
+            role: true,
           },
         },
       },
@@ -350,22 +351,36 @@ export async function removeChildFromParent(input: { studentId: string }) {
       };
     }
 
-    await db.parentStudent.delete({
-      where: {
-        parentId_studentId: {
-          parentId: parent.id,
-          studentId: parsed.data.studentId,
+    if (relation.student.role !== "STUDENT") {
+      return {
+        success: false,
+        message: "لا يمكن حذف هذا الملف كابن.",
+      };
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.examSubmission.deleteMany({
+        where: {
+          studentId: relation.student.id,
         },
-      },
+      });
+
+      await tx.user.delete({
+        where: {
+          id: relation.student.id,
+        },
+      });
     });
 
+    revalidatePath(ROUTES.center.dashboard);
+    revalidatePath(ROUTES.teacher.students);
     revalidatePath(ROUTES.parent.dashboard);
     revalidatePath(ROUTES.parent.children);
     revalidatePath(`/parent/${parsed.data.studentId}`);
 
     return {
       success: true,
-      message: `تم حذف ${relation.student.name} من قائمة أبنائي.`,
+      message: `تم حذف ${relation.student.name} وجميع بياناته من السنتر.`,
     };
   } catch (error) {
     return {
@@ -374,7 +389,6 @@ export async function removeChildFromParent(input: { studentId: string }) {
     };
   }
 }
-
 export async function enrollChildInGroup(input: { studentId: string; groupId: string }) {
   const parent = await requireAuth();
 
@@ -422,7 +436,6 @@ export async function enrollChildInGroup(input: { studentId: string; groupId: st
     const group = await db.group.findFirst({
       where: {
         id: parsed.data.groupId,
-        tenantId: relation.student.tenantId,
         isActive: true,
       },
       select: {
@@ -430,13 +443,14 @@ export async function enrollChildInGroup(input: { studentId: string; groupId: st
         name: true,
         gradeLevel: true,
         maxCapacity: true,
+        tenantId: true,
       },
     });
 
     if (!group) {
       return {
         success: false,
-        message: "المجموعة المطلوبة غير متاحة لهذا الابن.",
+        message: "المجموعة المطلوبة غير متاحة.",
       };
     }
 
@@ -484,6 +498,13 @@ export async function enrollChildInGroup(input: { studentId: string; groupId: st
     const nextStatus = activeEnrollmentCount >= group.maxCapacity ? "WAITLIST" : "ACTIVE";
 
     await db.$transaction(async (tx) => {
+      if (relation.student.tenantId !== group.tenantId) {
+        await tx.user.update({
+          where: { id: relation.student.id },
+          data: { tenantId: group.tenantId },
+        });
+      }
+
       if (existingEnrollment) {
         await tx.groupStudent.update({
           where: {

@@ -1,4 +1,4 @@
-﻿import { CalendarClock, CheckCircle2, CreditCard, GraduationCap, School } from "lucide-react";
+import { CalendarClock, CheckCircle2, CreditCard, GraduationCap, School } from "lucide-react";
 
 import EmptyState from "@/components/shared/EmptyState";
 import { Card, CardContent } from "@/components/ui/card";
@@ -96,7 +96,7 @@ export function ParentChildrenPage({ data }: ParentChildrenPageProps) {
                     </p>
                   </div>
 
-                  <div className="flex flex-col gap-2 sm:min-w-[190px]">
+                  <div className="flex flex-wrap items-center justify-end gap-2 sm:min-w-[320px]">
                     <ChildGroupEnrollmentButton
                       availableGroups={child.availableGroups ?? []}
                       childId={child.id}
