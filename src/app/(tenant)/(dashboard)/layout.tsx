@@ -38,15 +38,28 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   // Use user's actual tenantId to get the correct tenant (avoids localhost first-tenant fallback bug)
-  const userTenant = await db.tenant.findUnique({
-    where: { id: user.tenantId },
-    select: { name: true },
-  });
+  const [userTenant, userData] = await Promise.all([
+    db.tenant.findUnique({
+      where: { id: user.tenantId },
+      select: { name: true },
+    }),
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { avatarUrl: true },
+    }),
+  ]);
 
   const tenantName = userTenant?.name ?? "EduPlatform";
+  const avatarUrl = userData?.avatarUrl ?? null;
 
   return (
-    <AppShell currentPath={currentPath} role={role} tenantName={tenantName} userName={user.name}>
+    <AppShell
+      currentPath={currentPath}
+      role={role}
+      tenantName={tenantName}
+      userName={user.name}
+      avatarUrl={avatarUrl}
+    >
       {children}
     </AppShell>
   );

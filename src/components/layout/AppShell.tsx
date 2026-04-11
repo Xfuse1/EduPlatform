@@ -13,12 +13,14 @@ export function AppShell({
   role,
   tenantName,
   userName,
+  avatarUrl,
 }: {
   children: React.ReactNode;
   role: "teacher" | "student" | "parent";
   currentPath: string;
   tenantName: string;
   userName: string;
+  avatarUrl?: string | null;
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -69,6 +71,7 @@ export function AppShell({
           <Header
             tenantName={tenantName}
             userName={userName}
+            avatarUrl={avatarUrl}
             onMenuToggle={() => setSidebarOpen((prev) => !prev)}
           />
           <main className="page-enter mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>

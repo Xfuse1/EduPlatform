@@ -1,6 +1,6 @@
 'use client';
 
-import { X } from "lucide-react";
+import { Camera, Loader2, User, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
@@ -48,6 +48,8 @@ export function SettingsForm({ tenant }: { tenant: TenantSettings }) {
   const [subjects, setSubjects] = useState(tenant.subjects ?? []);
   const [subjectInput, setSubjectInput] = useState("");
   const [toast, setToast] = useState<ToastState>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const bioLength = useMemo(() => bio.length, [bio]);
 
@@ -57,6 +59,41 @@ export function SettingsForm({ tenant }: { tenant: TenantSettings }) {
       setToast(null);
     }, 2500);
   };
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload/avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // حفظ الـ URL في الداتابيز
+      const saveRes = await fetch("/api/teacher/avatar", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: data.url }),
+      });
+
+      if (!saveRes.ok) throw new Error("فشل حفظ الصورة");
+
+      setAvatarUrl(data.url);
+      showToast("success", "تم تحديث الصورة بنجاح ✓");
+    } catch (error) {
+      showToast("error", error instanceof Error ? error.message : "فشل رفع الصورة");
+    } finally {
+      setIsUploading(false);
+    }
+  }
 
   const addSubject = () => {
     const nextSubject = subjectInput.trim();
@@ -121,6 +158,63 @@ export function SettingsForm({ tenant }: { tenant: TenantSettings }) {
       </div>
 
       <form className="space-y-6" onSubmit={handleSubmit}>
+        {/* ——— Teacher Personal Avatar Card ——— */}
+        <Card>
+          <CardContent className="space-y-5">
+            <div>
+              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                الصورة الشخصية
+              </h2>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                صورتك الشخصية التي تظهر للطلاب وأولياء الأمور.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                <div className="h-24 w-24 rounded-3xl bg-slate-100 dark:bg-slate-800 overflow-hidden border-2 border-white dark:border-slate-700 shadow-md">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="صورتك" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-slate-400">
+                      <User className="h-10 w-10" />
+                    </div>
+                  )}
+                </div>
+
+                <input
+                  type="file"
+                  id="teacher-avatar-upload"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+
+                <label
+                  htmlFor="teacher-avatar-upload"
+                  className="absolute -bottom-2 -right-2 h-9 w-9 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-lg hover:bg-sky-700 transition-colors cursor-pointer"
+                >
+                  {isUploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
+                </label>
+              </div>
+
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">
+                  اضغط على أيقونة الكاميرا لتغيير الصورة
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  PNG، JPG — بحد أقصى 2MB
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ——— Tenant Identity Card ——— */}
         <Card>
           <CardContent className="space-y-5">
             <div>

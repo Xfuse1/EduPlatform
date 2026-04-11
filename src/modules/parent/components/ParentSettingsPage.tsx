@@ -42,6 +42,8 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
   const [name, setName] = useState(initialData.name);
   const [email, setEmail] = useState(initialData.email || "");
   const [isLoading, setIsLoading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(initialData.avatarUrl);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Settings / Notifications
   const [notifications, setNotifications] = useState({
@@ -51,6 +53,39 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
   });
 
   const [language, setLanguage] = useState(initialData.settings?.language || "ar");
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload/avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // حفظ الـ URL في الداتابيز
+      await fetch("/api/parent/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: data.url }),
+      });
+
+      setAvatarUrl(data.url);
+      toast.success("تم تحديث الصورة بنجاح ✓");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "فشل رفع الصورة");
+    } finally {
+      setIsUploading(false);
+    }
+  }
 
   async function handleSave() {
     if (!name.trim() || name.trim().length < 2) {
@@ -125,17 +160,34 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
               <div className="flex flex-col sm:flex-row items-center gap-6 pb-4 border-b border-slate-100 dark:border-slate-800">
                 <div className="relative group">
                   <div className="h-24 w-24 rounded-3xl bg-slate-100 dark:bg-slate-800 overflow-hidden border-2 border-white dark:border-slate-700 shadow-md">
-                    {initialData.avatarUrl ? (
-                      <img src={initialData.avatarUrl} alt={name} className="h-full w-full object-cover" />
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center text-slate-400">
                         <User className="h-10 w-10" />
                       </div>
                     )}
                   </div>
-                  <button className="absolute -bottom-2 -right-2 h-9 w-9 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-lg hover:bg-sky-700 transition-colors">
-                    <Camera className="h-4 w-4" />
-                  </button>
+
+                  {/* hidden file input */}
+                  <input
+                    type="file"
+                    id="avatar-upload"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
+
+                  <label
+                    htmlFor="avatar-upload"
+                    className="absolute -bottom-2 -right-2 h-9 w-9 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-lg hover:bg-sky-700 transition-colors cursor-pointer"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Camera className="h-4 w-4" />
+                    )}
+                  </label>
                 </div>
                 <div className="text-center sm:text-start">
                   <h3 className="font-bold text-slate-900 dark:text-white">الصورة الشخصية</h3>
