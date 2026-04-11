@@ -39,9 +39,12 @@ export default async function ParentAttendancePage({
   const childrenData = await getParentChildren(tenant.id, user.id);
   const children = childrenData.map((pc: any) => ({ id: pc.student.id, name: pc.student.name }));
 
-  const selectedChildId = searchParams.childId ?? children[0]?.id;
+  const selectedChild =
+    childrenData.find((pc: any) => pc.student.id === searchParams.childId) ??
+    childrenData[0];
+  const selectedChildId = selectedChild?.student.id;
 
-  if (!selectedChildId || children.length === 0) {
+  if (!selectedChild || !selectedChildId || children.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-muted-foreground" dir="rtl">
         لا يوجد أبناء مسجلين
@@ -49,7 +52,7 @@ export default async function ParentAttendancePage({
     );
   }
 
-  const attendance = await getStudentAttendanceSnapshot(tenant.id, selectedChildId);
+  const attendance = await getStudentAttendanceSnapshot(selectedChild.student.tenantId, selectedChildId);
   const attendanceData = (attendance.records ?? []).map((r: any) => ({
     id: r.id,
     date: new Date(r.session.date).toLocaleDateString("ar-EG"),

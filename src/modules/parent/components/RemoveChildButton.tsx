@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { AlertTriangle, Loader2, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -67,7 +67,7 @@ export function RemoveChildButton({ childId, childName }: RemoveChildButtonProps
                 </div>
                 <h2 className="text-2xl font-extrabold text-slate-950 dark:text-white">حذف {childName}</h2>
                 <p className="mt-2 text-sm leading-7 text-slate-500 dark:text-slate-400">
-                  سيتم إزالة الابن من قائمة أبنائي فقط. لن يتم حذف بيانات الطالب من السنتر ويمكنك إعادة ربطه لاحقًا.
+                  سيتم حذف ملف الابن وبياناته المرتبطة من السنتر نهائيًا. لا يمكن التراجع عن هذه العملية.
                 </p>
               </div>
 
@@ -104,7 +104,7 @@ export function RemoveChildButton({ childId, childName }: RemoveChildButtonProps
                 ) : (
                   <>
                     <Trash2 className="h-4 w-4" />
-                    تأكيد الحذف
+                    حذف نهائي
                   </>
                 )}
               </Button>

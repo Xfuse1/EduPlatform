@@ -59,7 +59,7 @@ export const EDUCATION_STAGE_OPTIONS: EducationStageConfig[] = [
     formattedLabel: "الجامعية",
     prefixLabel: "الفرقة",
     yearCount: 4,
-    aliases: ["جامعه", "جامعة", "جامعي", "جامعية"],
+    aliases: ["جامعه", "جامعة", "جامعي", "جامعية", "فرقة", "فرقه"],
   },
 ];
 
