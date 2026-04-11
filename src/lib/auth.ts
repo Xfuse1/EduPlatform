@@ -15,6 +15,7 @@ export type SessionUser = {
   name: string;
   phone: string;
   role: UserRole | "CENTER_ADMIN";
+  avatarUrl?: string | null;
 };
 
 type VerifyOTPResult = {
@@ -79,6 +80,7 @@ function toSessionUser(user: {
   name: string;
   phone: string;
   role: UserRole | "CENTER_ADMIN";
+  avatarUrl?: string | null;
 }): SessionUser {
   return {
     id: user.id,
@@ -86,6 +88,7 @@ function toSessionUser(user: {
     name: user.name,
     phone: user.phone,
     role: user.role,
+    avatarUrl: user.avatarUrl ?? null,
   };
 }
 
@@ -140,7 +143,7 @@ export async function getCurrentUser() {
       },
       include: {
         user: {
-          select: { id: true, tenantId: true, name: true, phone: true, role: true },
+          select: { id: true, tenantId: true, name: true, phone: true, role: true, avatarUrl: true },
         },
       },
     });
