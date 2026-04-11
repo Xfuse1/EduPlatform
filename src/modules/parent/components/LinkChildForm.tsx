@@ -1,34 +1,60 @@
-'use client';
+﻿'use client';
 
 import { Link2, Loader2, PlusCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { FormEvent } from "react";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EDUCATION_STAGE_OPTIONS, formatGradeLevel, getEducationYears, type EducationStage } from "@/lib/grade-levels";
 import { linkChildToParent } from "@/modules/parent/actions";
+
+const selectClassName =
+  "touch-target flex min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none ring-0 transition focus:border-secondary focus:ring-4 focus:ring-secondary/15 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100";
 
 export function LinkChildForm() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [studentName, setStudentName] = useState("");
   const [studentPhone, setStudentPhone] = useState("");
-  const [gradeLevel, setGradeLevel] = useState("");
+  const [educationStage, setEducationStage] = useState<EducationStage | "">("");
+  const [gradeYear, setGradeYear] = useState("");
   const [tenantSlug, setTenantSlug] = useState("");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
+  const gradeYearOptions = educationStage ? getEducationYears(educationStage) : [];
+  const gradeLevel = educationStage && gradeYear ? formatGradeLevel(educationStage, Number(gradeYear)) : "";
+
   const resetForm = () => {
     setStudentName("");
     setStudentPhone("");
-    setGradeLevel("");
+    setEducationStage("");
+    setGradeYear("");
     setTenantSlug("");
     setError("");
     setIsOpen(false);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleEducationStageChange = (value: string) => {
+    const nextStage = value as EducationStage | "";
+    setEducationStage(nextStage);
+    setError("");
+
+    if (!nextStage) {
+      setGradeYear("");
+      return;
+    }
+
+    setGradeYear((currentYear) => {
+      const hasCurrentYear = getEducationYears(nextStage).some((yearOption) => String(yearOption.value) === currentYear);
+      return hasCurrentYear ? currentYear : "";
+    });
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
 
@@ -36,7 +62,7 @@ export function LinkChildForm() {
       const result = await linkChildToParent({
         studentName,
         studentPhone,
-        gradeLevel: gradeLevel.trim(),
+        gradeLevel,
         tenantSlug: tenantSlug.trim() || undefined,
       });
 
@@ -85,7 +111,10 @@ export function LinkChildForm() {
                   <Label htmlFor="studentName">اسم الابن</Label>
                   <Input
                     id="studentName"
-                    onChange={(event) => setStudentName(event.target.value)}
+                    onChange={(event) => {
+                      setStudentName(event.target.value);
+                      setError("");
+                    }}
                     placeholder="مثال: أحمد محمد"
                     value={studentName}
                   />
@@ -99,28 +128,62 @@ export function LinkChildForm() {
                     id="studentPhone"
                     inputMode="numeric"
                     maxLength={11}
-                    onChange={(event) => setStudentPhone(event.target.value.replace(/\D/g, ""))}
+                    onChange={(event) => {
+                      setStudentPhone(event.target.value.replace(/\D/g, ""));
+                      setError("");
+                    }}
                     placeholder="01XXXXXXXXX"
                     value={studentPhone}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="gradeLevel">الصف الدراسي</Label>
-                  <Input
-                    id="gradeLevel"
-                    onChange={(event) => setGradeLevel(event.target.value)}
-                    placeholder="مثال: ثالثة إعدادي"
-                    value={gradeLevel}
-                  />
+                  <Label htmlFor="educationStage">المرحلة الدراسية</Label>
+                  <select
+                    className={selectClassName}
+                    id="educationStage"
+                    onChange={(event) => handleEducationStageChange(event.target.value)}
+                    value={educationStage}
+                  >
+                    <option value="">اختر المرحلة الدراسية</option>
+                    {EDUCATION_STAGE_OPTIONS.map((stageOption) => (
+                      <option key={stageOption.value} value={stageOption.value}>
+                        {stageOption.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="gradeYear">سنة المرحلة</Label>
+                  <select
+                    className={selectClassName}
+                    disabled={!educationStage}
+                    id="gradeYear"
+                    onChange={(event) => {
+                      setGradeYear(event.target.value);
+                      setError("");
+                    }}
+                    value={gradeYear}
+                  >
+                    <option value="">{educationStage ? "اختر سنة المرحلة" : "اختر المرحلة الدراسية أولًا"}</option>
+                    {gradeYearOptions.map((yearOption) => (
+                      <option key={yearOption.value} value={String(yearOption.value)}>
+                        {yearOption.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="tenantSlug">رابط السنتر</Label>
                   <Input
                     dir="ltr"
                     id="tenantSlug"
-                    onChange={(event) => setTenantSlug(event.target.value.trim().toLowerCase())}
+                    onChange={(event) => {
+                      setTenantSlug(event.target.value.trim().toLowerCase());
+                      setError("");
+                    }}
                     placeholder="اختياري مثل alamal"
                     value={tenantSlug}
                   />
@@ -128,7 +191,7 @@ export function LinkChildForm() {
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                أدخل اسم الابن ورقم هاتفه والصف الدراسي كما هي في ملف الطالب. وإذا لم يوجد ملف سابق، سيُنشأ حساب طالب جديد بنفس رقم الهاتف داخل الحساب أو السنتر الذي اخترته.
+                أدخل اسم الابن ورقم هاتفه والمرحلة ثم السنة الدراسية كما هي في ملف الطالب. وإذا لم يوجد ملف سابق، سيُنشأ حساب طالب جديد بنفس رقم الهاتف داخل الحساب أو السنتر الذي اخترته.
               </div>
 
               <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-200">
@@ -147,7 +210,7 @@ export function LinkChildForm() {
                 </Button>
                 <Button
                   className="w-full gap-2"
-                  disabled={isPending || studentPhone.length === 0 || studentName.trim().length < 2 || gradeLevel.trim().length === 0}
+                  disabled={isPending || studentPhone.length === 0 || studentName.trim().length < 2 || !gradeLevel}
                   type="submit"
                 >
                   {isPending ? (

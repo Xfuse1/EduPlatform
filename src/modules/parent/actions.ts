@@ -7,6 +7,7 @@ import { ROUTES } from "@/config/routes";
 import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { normalizeEgyptPhone } from "@/lib/phone";
+import { isSameGradeLevel } from "@/lib/grade-levels";
 import { getTenantBySlug, requireTenant } from "@/lib/tenant";
 import { buildPhoneConflictMessage, findUserByPhone, isPhoneUniqueConstraintError } from "@/lib/user-phone";
 
@@ -20,6 +21,10 @@ const linkChildSchema = z.object({
 const enrollChildInGroupSchema = z.object({
   studentId: z.string().trim().min(1, "معرف الابن مطلوب"),
   groupId: z.string().trim().min(1, "المجموعة مطلوبة"),
+});
+
+const removeChildLinkSchema = z.object({
+  studentId: z.string().trim().min(1, "معرف الابن مطلوب"),
 });
 
 function normalizeStudentPhone(value: string) {
@@ -301,6 +306,75 @@ export async function linkChildToParent(input: {
   }
 }
 
+export async function removeChildFromParent(input: { studentId: string }) {
+  const parent = await requireAuth();
+
+  if (parent.role !== "PARENT") {
+    return {
+      success: false,
+      message: "هذه العملية متاحة لولي الأمر فقط",
+    };
+  }
+
+  const parsed = removeChildLinkSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: parsed.error.issues[0]?.message ?? "بيانات حذف الابن غير صحيحة",
+    };
+  }
+
+  try {
+    const relation = await db.parentStudent.findUnique({
+      where: {
+        parentId_studentId: {
+          parentId: parent.id,
+          studentId: parsed.data.studentId,
+        },
+      },
+      select: {
+        student: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!relation) {
+      return {
+        success: false,
+        message: "هذا الابن غير مرتبط بحسابك.",
+      };
+    }
+
+    await db.parentStudent.delete({
+      where: {
+        parentId_studentId: {
+          parentId: parent.id,
+          studentId: parsed.data.studentId,
+        },
+      },
+    });
+
+    revalidatePath(ROUTES.parent.dashboard);
+    revalidatePath(ROUTES.parent.children);
+    revalidatePath(`/parent/${parsed.data.studentId}`);
+
+    return {
+      success: true,
+      message: `تم حذف ${relation.student.name} من قائمة أبنائي.`,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "تعذر حذف الابن الآن",
+    };
+  }
+}
+
 export async function enrollChildInGroup(input: { studentId: string; groupId: string }) {
   const parent = await requireAuth();
 
@@ -366,10 +440,7 @@ export async function enrollChildInGroup(input: { studentId: string; groupId: st
       };
     }
 
-    if (
-      relation.student.gradeLevel &&
-      group.gradeLevel.trim().toLowerCase() !== relation.student.gradeLevel.trim().toLowerCase()
-    ) {
+    if (relation.student.gradeLevel && !isSameGradeLevel(relation.student.gradeLevel, group.gradeLevel)) {
       return {
         success: false,
         message: "هذه المجموعة ليست لنفس الصف الدراسي الخاص بالابن.",

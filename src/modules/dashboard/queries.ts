@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import { db } from "@/lib/db";
+import { getGradeLevelKey } from "@/lib/grade-levels";
 import { getAssignmentsByStudent } from "@/modules/assignments/queries";
 import { getAttendanceOverview, getStudentAttendanceSnapshot, getTodaySessions } from "@/modules/attendance/queries";
 import { getRevenueSummary, getStudentPaymentSnapshot } from "@/modules/payments/queries";
@@ -342,7 +343,7 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
         const activeEnrollments = student.groupStudents.filter((enrollment) => enrollment.status === "ACTIVE");
         const currentEnrollments = student.groupStudents.filter((enrollment) => currentEnrollmentStatuses.has(enrollment.status));
         const enrolledGroupIds = new Set(currentEnrollments.map((enrollment) => enrollment.group.id));
-        const normalizedGradeLevel = student.gradeLevel?.trim().toLowerCase();
+        const studentGradeLevelKey = getGradeLevelKey(student.gradeLevel);
 
         const currentGroups = currentEnrollments.map((enrollment) => ({
           id: enrollment.group.id,
@@ -351,7 +352,7 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
         }));
 
         const availableGroups = groups
-          .filter((group) => !normalizedGradeLevel || group.gradeLevel.trim().toLowerCase() === normalizedGradeLevel)
+          .filter((group) => !studentGradeLevelKey || getGradeLevelKey(group.gradeLevel) === studentGradeLevelKey)
           .filter((group) => !enrolledGroupIds.has(group.id))
           .map((group) => {
             const enrolledCount = group.groupStudents.length;

@@ -1,4 +1,4 @@
-import { CalendarClock, CheckCircle2, CreditCard, GraduationCap, School } from "lucide-react";
+﻿import { CalendarClock, CheckCircle2, CreditCard, GraduationCap, School } from "lucide-react";
 
 import EmptyState from "@/components/shared/EmptyState";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { formatCurrency, toArabicDigits } from "@/lib/utils";
 import { LinkChildForm } from "@/modules/parent/components/LinkChildForm";
 import { ChildGroupEnrollmentButton } from "@/modules/parent/components/ChildGroupEnrollmentButton";
+import { RemoveChildButton } from "@/modules/parent/components/RemoveChildButton";
 
 type ParentChildrenPageProps = {
   data: Awaited<ReturnType<typeof import("@/modules/dashboard/queries").getParentDashboardData>>;
@@ -94,12 +95,16 @@ export function ParentChildrenPage({ data }: ParentChildrenPageProps) {
                       {child.tenantName}
                     </p>
                   </div>
-                  <ChildGroupEnrollmentButton
-                    availableGroups={child.availableGroups ?? []}
-                    childId={child.id}
-                    childName={child.name}
-                    currentGroups={child.currentGroups ?? []}
-                  />
+
+                  <div className="flex flex-col gap-2 sm:min-w-[190px]">
+                    <ChildGroupEnrollmentButton
+                      availableGroups={child.availableGroups ?? []}
+                      childId={child.id}
+                      childName={child.name}
+                      currentGroups={child.currentGroups ?? []}
+                    />
+                    <RemoveChildButton childId={child.id} childName={child.name} />
+                  </div>
                 </div>
               </div>
 

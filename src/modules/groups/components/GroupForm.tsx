@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import type { FormEvent } from 'react'
 import { useState, useTransition } from 'react'
 
+import { EDUCATION_STAGE_OPTIONS, formatGradeLevel, getEducationYears, parseGradeLevel, type EducationStage } from '@/lib/grade-levels'
+
 import ColorPicker from '@/components/forms/ColorPicker'
 import FormField from '@/components/forms/FormField'
 import { ROUTES } from '@/config/routes'
@@ -143,6 +145,15 @@ function getTimeHint(value: string) {
 const inputClassName =
   'h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900/60'
 
+function getInitialGradeLevelState(gradeLevel: string) {
+  const parsedGradeLevel = parseGradeLevel(gradeLevel)
+
+  return {
+    stage: parsedGradeLevel.stage ?? '',
+    year: parsedGradeLevel.year ? String(parsedGradeLevel.year) : '',
+  }
+}
+
 export default function GroupForm({
   mode = 'create',
   groupId,
@@ -152,6 +163,7 @@ export default function GroupForm({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const initialSchedule = initialValues.schedule.length > 0 ? cloneSchedule(initialValues.schedule) : cloneSchedule(defaultValues.schedule)
+  const initialGradeLevelState = getInitialGradeLevelState(initialValues.gradeLevel)
   const [scheduleEntries, setScheduleEntries] = useState<GroupScheduleInput[]>(initialSchedule)
   const [sameTimeForAll, setSameTimeForAll] = useState(isUsingSameTime(initialSchedule))
   const [color, setColor] = useState(initialValues.color)
@@ -161,6 +173,10 @@ export default function GroupForm({
   )
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [feeType, setFeeType] = useState<'monthly' | 'per_session'>('monthly')
+  const [educationStage, setEducationStage] = useState<EducationStage | ''>(initialGradeLevelState.stage)
+  const [gradeYear, setGradeYear] = useState(initialGradeLevelState.year)
+  const gradeYearOptions = educationStage ? getEducationYears(educationStage) : []
+  const gradeLevelValue = educationStage && gradeYear ? formatGradeLevel(educationStage, Number(gradeYear)) : ''
 
   function resizeSchedule(nextCount: number) {
     setScheduleEntries((currentEntries) => {
@@ -214,6 +230,35 @@ export default function GroupForm({
       nextErrors[index][field] = undefined
       return nextErrors
     })
+  }
+
+  function clearGradeLevelError() {
+    setErrors((currentErrors) => ({
+      ...currentErrors,
+      gradeLevel: undefined,
+    }))
+    setSubmitError(null)
+  }
+
+  function handleEducationStageChange(value: string) {
+    const nextStage = value as EducationStage | ''
+    clearGradeLevelError()
+    setEducationStage(nextStage)
+
+    if (!nextStage) {
+      setGradeYear('')
+      return
+    }
+
+    setGradeYear((currentYear) => {
+      const hasCurrentYear = getEducationYears(nextStage).some((yearOption) => String(yearOption.value) === currentYear)
+      return hasCurrentYear ? currentYear : ''
+    })
+  }
+
+  function handleGradeYearChange(value: string) {
+    clearGradeLevelError()
+    setGradeYear(value)
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -316,20 +361,51 @@ export default function GroupForm({
         </FormField>
 
         <FormField
-          label="الصف الدراسي"
-          htmlFor="gradeLevel"
+          label="المرحلة الدراسية"
+          htmlFor="educationStage"
           required
           error={errors.gradeLevel}
         >
-          <input
-            id="gradeLevel"
-            name="gradeLevel"
-            type="text"
-            defaultValue={initialValues.gradeLevel}
-            placeholder="مثال: الصف الثالث الثانوي"
+          <>
+            <input id="gradeLevel" name="gradeLevel" type="hidden" value={gradeLevelValue} />
+            <select
+              id="educationStage"
+              value={educationStage}
+              onChange={(event) => handleEducationStageChange(event.target.value)}
+              className={inputClassName}
+              aria-invalid={Boolean(errors.gradeLevel)}
+            >
+              <option value="">اختر المرحلة الدراسية</option>
+              {EDUCATION_STAGE_OPTIONS.map((stageOption) => (
+                <option key={stageOption.value} value={stageOption.value}>
+                  {stageOption.label}
+                </option>
+              ))}
+            </select>
+          </>
+        </FormField>
+
+        <FormField
+          label="سنة المرحلة"
+          htmlFor="gradeYear"
+          required
+          error={errors.gradeLevel}
+        >
+          <select
+            id="gradeYear"
+            value={gradeYear}
+            onChange={(event) => handleGradeYearChange(event.target.value)}
             className={inputClassName}
+            disabled={!educationStage}
             aria-invalid={Boolean(errors.gradeLevel)}
-          />
+          >
+            <option value="">{educationStage ? 'اختر سنة المرحلة' : 'اختر المرحلة الدراسية أولًا'}</option>
+            {gradeYearOptions.map((yearOption) => (
+              <option key={yearOption.value} value={String(yearOption.value)}>
+                {yearOption.label}
+              </option>
+            ))}
+          </select>
         </FormField>
 
         <FormField label="القاعة" htmlFor="room" error={errors.room}>
