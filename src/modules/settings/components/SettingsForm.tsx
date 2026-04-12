@@ -37,7 +37,10 @@ const planLabels: Record<TenantSettings["plan"], string> = {
   BUSINESS: "أعمال",
 };
 
-export function SettingsForm({ tenant }: { tenant: TenantSettings }) {
+export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl }: { 
+  tenant: TenantSettings;
+  avatarUrl?: string | null;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [name, setName] = useState(tenant.name);
@@ -48,7 +51,7 @@ export function SettingsForm({ tenant }: { tenant: TenantSettings }) {
   const [subjects, setSubjects] = useState(tenant.subjects ?? []);
   const [subjectInput, setSubjectInput] = useState("");
   const [toast, setToast] = useState<ToastState>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl ?? null);
   const [isUploading, setIsUploading] = useState(false);
 
   const bioLength = useMemo(() => bio.length, [bio]);
