@@ -142,8 +142,14 @@ export async function markAttendance(
       })
       if (!student?.parentPhone) return
 
+      const parentRelation = await db.parentStudent.findFirst({
+        where: { studentId: record.studentId },
+        select: { parentId: true },
+      })
+      if (!parentRelation) return
+
       await sendNotification({
-        userId: record.studentId,
+        userId: parentRelation.parentId,
         type:
           record.status === 'PRESENT'
             ? 'ATTENDANCE_PRESENT'

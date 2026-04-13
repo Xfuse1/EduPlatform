@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { sendNotification } from "@/modules/notifications/actions";
 
 export async function submitExamAction(examId: string, studentId: string, answers: Record<string, any>) {
     try {
@@ -43,6 +44,34 @@ export async function submitExamAction(examId: string, studentId: string, answer
         });
 
         revalidatePath('/student/exams');
+
+        const examWithTeacher = await db.exam.findUnique({
+            where: { id: examId },
+            select: {
+                title: true,
+                group: {
+                    select: { teacherId: true }
+                }
+            }
+        });
+
+        const studentInfo = await db.user.findUnique({
+            where: { id: studentId },
+            select: { name: true }
+        });
+
+        if (examWithTeacher?.group.teacherId) {
+            await sendNotification({
+                userId: examWithTeacher.group.teacherId,
+                type: 'EXAM_PUBLISHED',
+                channel: 'IN_APP',
+                templateData: {
+                    studentName: studentInfo?.name ?? "",
+                    examTitle: examWithTeacher.title,
+                }
+            });
+        }
+
         return { success: true };
     } catch (error) {
         console.error("Error submitting exam:", error);
