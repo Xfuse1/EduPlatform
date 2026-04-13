@@ -16,8 +16,11 @@ interface NotificationPayload {
     | 'PAYMENT_REMINDER'
     | 'PAYMENT_OVERDUE'
     | 'CLASS_REMINDER'
-  channel: 'SMS' | 'WHATSAPP'
-  recipientPhone: string
+    | 'ASSIGNMENT_DUE'
+    | 'EXAM_PUBLISHED'
+    | 'GRADE_ADDED'
+  channel: 'SMS' | 'WHATSAPP' | 'IN_APP' | 'PUSH'
+  recipientPhone?: string
   templateData: Record<string, string | number>
 }
 
@@ -63,15 +66,33 @@ export async function sendNotification(payload: NotificationPayload) {
         d.time as string,
       )
       break
+    case 'ASSIGNMENT_DUE':
+      template = {
+        title: 'تم تسليم واجب جديد',
+        body: `الطالب ${d.studentName as string} سلّم الواجب "${d.assignmentTitle as string}"`,
+      }
+      break
+    case 'EXAM_PUBLISHED':
+      template = {
+        title: 'تم تسليم امتحان',
+        body: `الطالب ${d.studentName as string} سلّم الامتحان "${d.examTitle as string}"`,
+      }
+      break
+    case 'GRADE_ADDED':
+      template = {
+        title: 'تمت إضافة درجة',
+        body: `تمت إضافة درجة جديدة للطالب ${d.studentName as string}`,
+      }
+      break
   }
 
   // أرسل عبر القناة المناسبة
-  let success = false
+  let success = payload.channel === 'IN_APP' || payload.channel === 'PUSH'
   try {
     if (payload.channel === 'SMS') {
-      success = await sendSMS(payload.recipientPhone, template.body)
-    } else {
-      success = await sendWhatsApp(payload.recipientPhone, template.body)
+      success = await sendSMS(payload.recipientPhone as string, template.body)
+    } else if (payload.channel === 'WHATSAPP') {
+      success = await sendWhatsApp(payload.recipientPhone as string, template.body)
     }
   } catch {
     success = false
@@ -84,8 +105,8 @@ export async function sendNotification(payload: NotificationPayload) {
       userId: payload.userId,
       type: payload.type,
       message: template.body,
-      channel: payload.channel,
-      recipientPhone: payload.recipientPhone,
+      channel: payload.channel === 'IN_APP' ? 'PUSH' : payload.channel,
+      recipientPhone: payload.recipientPhone ?? '',
       status: success ? 'SENT' : 'FAILED',
       sentAt: success ? new Date() : null,
     },
