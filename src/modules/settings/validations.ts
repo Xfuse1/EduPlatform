@@ -1,7 +1,5 @@
 import { z } from 'zod'
 
-const hexColorPattern = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
-
 function normalizeOptionalText(value: unknown) {
   if (typeof value !== 'string') {
     return value
@@ -54,10 +52,6 @@ export const tenantSettingsSchema = z.object({
       .refine(isSupportedLogoValue, 'صيغة الشعار غير مدعومة')
       .optional(),
   ),
-  themeColor: z
-    .string()
-    .trim()
-    .regex(hexColorPattern, 'لون الهوية يجب أن يكون بصيغة hex'),
   bio: z.preprocess(
     normalizeOptionalText,
     z.string().trim().max(500, 'الوصف يجب ألا يزيد عن 500 حرف').optional(),

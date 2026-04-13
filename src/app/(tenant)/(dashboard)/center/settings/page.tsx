@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { Palette, Settings, Users } from "lucide-react";
+import { Settings, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import { StatsCard } from "@/components/data-display/StatsCard";
@@ -36,9 +36,8 @@ export default async function CenterSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <StatsCard icon={Settings} title="اسم الكيان" tone="petrol" value={tenant.name} />
-        <StatsCard icon={Palette} title="اللون الرئيسي" tone="teal" value={tenant.themeColor} />
         <StatsCard icon={Users} title="نشاط السنتر" tone="ink" value={`${studentsCount} طالب / ${teachersCount} مدرس`} />
       </div>
 
@@ -47,7 +46,6 @@ export default async function CenterSettingsPage() {
           slug: tenant.slug,
           name: tenant.name,
           logoUrl: tenant.logoUrl,
-          themeColor: tenant.themeColor,
           bio: tenant.bio,
           subjects: tenant.subjects,
           region: tenant.region,

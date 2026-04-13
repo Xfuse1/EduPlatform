@@ -13,6 +13,23 @@ export function toArabicDigits(value: number | string) {
   return String(value).replace(/\d/g, (digit) => arabicDigits[Number(digit)] ?? digit);
 }
 
+export function normalizeArabicText(value: string) {
+  return String(value)
+    .normalize("NFKD")
+    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, "")
+    .replace(/ـ/g, "")
+    .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)))
+    .trim()
+    .toLowerCase()
+    .replace(/[أإآٱ]/g, "ا")
+    .replace(/ؤ/g, "و")
+    .replace(/ئ/g, "ي")
+    .replace(/ء/g, "")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/\s+/g, " ");
+}
+
 export function formatCurrency(amount: number) {
   return `${toArabicDigits(amount)} جنيه`;
 }

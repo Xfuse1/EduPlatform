@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -24,14 +24,28 @@ export function AIGradingModal({
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const requestInFlightRef = useRef(false);
 
   useEffect(() => {
-    if (isOpen && !result && !loading) {
-      handleStartGrading();
+    if (!isOpen) {
+      requestInFlightRef.current = false;
+      setLoading(false);
+      setError(null);
+      setResult(null);
+      return;
+    }
+
+    if (!result) {
+      void handleStartGrading();
     }
   }, [isOpen]);
 
   const handleStartGrading = async () => {
+    if (requestInFlightRef.current) {
+      return;
+    }
+
+    requestInFlightRef.current = true;
     setLoading(true);
     setError(null);
     try {
@@ -59,6 +73,7 @@ export function AIGradingModal({
       setError(err.message || "حدث خطأ غير متوقع");
       showToast.error("فشل التصحيح الآلي");
     } finally {
+      requestInFlightRef.current = false;
       setLoading(false);
     }
   };

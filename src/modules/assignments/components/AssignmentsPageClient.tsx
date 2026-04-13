@@ -1,13 +1,13 @@
 'use client';
 
-import { BookOpen, Calendar, Plus, Users, Search, ClipboardList, Pencil, Trash2 } from "lucide-react";
+import { BookOpen, Calendar, Plus, Users, Search, ClipboardList, Loader2, Trash2, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toArabicDigits } from "@/lib/utils";
+import { normalizeArabicText, toArabicDigits } from "@/lib/utils";
+import { showToast } from "@/components/ui/Toast";
 import { AddAssignmentModal } from "./AddAssignmentModal";
 import { AssignmentSubmissionsModal } from "./AssignmentSubmissionsModal";
 
@@ -18,6 +18,7 @@ interface Assignment {
   dueDate: Date | string;
   groupId: string;
   group: { name: string };
+  submissions?: { grade: number | null; student: { name: string } }[];
   _count: { submissions: number };
 }
 
@@ -32,33 +33,54 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null);
-  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
+  const [deletingAssignmentId, setDeletingAssignmentId] = useState<string | null>(null);
+  const normalizedQuery = normalizeArabicText(searchQuery);
 
   const filtered = assignments.filter((a) => {
     const matchesGroup = filterGroupId === "all" || a.groupId === filterGroupId;
-    const matchesSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesAssignmentTitle = normalizeArabicText(a.title).includes(normalizedQuery);
+    const matchesStudentName = a.submissions?.some((submission) =>
+      normalizeArabicText(submission.student.name).includes(normalizedQuery),
+    ) ?? false;
+    const matchesSearch = normalizedQuery.length === 0 || matchesAssignmentTitle || matchesStudentName;
     return matchesGroup && matchesSearch;
   });
 
   const handleAdd = (newAssignment: any) => {
-      setAssignments([newAssignment, ...assignments]);
+      setAssignments((currentAssignments) => [newAssignment, ...currentAssignments]);
   };
 
-  const handleUpdate = (updated: any) => {
-    setAssignments(assignments.map(a => a.id === updated.id ? { ...a, ...updated } : a));
-    setEditingAssignment(null);
-  };
+  const handleDelete = async (assignmentId: string, assignmentTitle: string) => {
+    if (!window.confirm(`هل أنت متأكد من حذف الواجب "${assignmentTitle}"؟`)) {
+      return;
+    }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا الواجب؟")) return;
-    
+    setDeletingAssignmentId(assignmentId);
+
     try {
-      const res = await fetch(`/api/assignments/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setAssignments(assignments.filter(a => a.id !== id));
+      const response = await fetch(`/api/assignments/${assignmentId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+        throw new Error(result?.error || "تعذر حذف الواجب الآن");
       }
+
+      setAssignments((currentAssignments) =>
+        currentAssignments.filter((assignment) => assignment.id !== assignmentId),
+      );
+
+      if (selectedAssignmentId === assignmentId) {
+        setSelectedAssignmentId(null);
+      }
+
+      showToast.success("تم حذف الواجب بنجاح");
     } catch (error) {
       console.error("Failed to delete assignment:", error);
+      showToast.error(error instanceof Error ? error.message : "تعذر حذف الواجب الآن");
+    } finally {
+      setDeletingAssignmentId((currentId) => (currentId === assignmentId ? null : currentId));
     }
   };
 
@@ -77,11 +99,11 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-200">البحث بالاسم</label>
+              <label className="text-sm font-bold text-slate-700 dark:text-slate-200">البحث باسم الواجب أو الطالب</label>
               <div className="relative">
                   <Search className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
                   <Input 
-                    placeholder="ابحث عن واجب..." 
+                    placeholder="ابحث عن واجب أو طالب..." 
                     className="ps-10 min-h-11"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -108,35 +130,26 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
           <Card key={assignment.id} className="group relative transition hover:-translate-y-1">
             <CardContent className="pt-6 space-y-5">
               <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1 flex-1">
+                <div className="space-y-1">
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary transition">{assignment.title}</h3>
                   <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
                       <BookOpen className="h-4 w-4" />
                       {assignment.group.name}
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingAssignment(assignment);
-                    }}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-primary hover:text-primary transition-colors"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(assignment.id);
-                    }}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-rose-500 hover:text-rose-500 transition-colors"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+                <Button
+                  aria-label={`حذف الواجب ${assignment.title}`}
+                  variant="ghost"
+                  className="h-9 w-9 shrink-0 rounded-xl border border-rose-200 bg-rose-50 p-0 text-rose-600 hover:bg-rose-100 hover:text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-950/50"
+                  onClick={() => handleDelete(assignment.id, assignment.title)}
+                  disabled={deletingAssignmentId === assignment.id}
+                >
+                  {deletingAssignmentId === assignment.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
 
               <div className="flex flex-wrap gap-4 text-sm font-medium">
@@ -147,6 +160,10 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
                   <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
                       <Users className="h-4 w-4" />
                       <span className="text-xs">{toArabicDigits(assignment._count.submissions)} تسليمات</span>
+                  </div>
+                  <div className="flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-2 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span className="text-xs">{toArabicDigits(assignment.submissions?.filter((submission) => submission.grade !== null).length ?? 0)} {'\u062A\u0645 \u062A\u0635\u062D\u064A\u062D'}</span>
                   </div>
               </div>
 
@@ -175,15 +192,10 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
       </div>
 
       <AddAssignmentModal 
-        isOpen={isModalOpen || !!editingAssignment} 
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingAssignment(null);
-        }} 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
         groups={groups}
         onAdd={handleAdd}
-        onUpdate={handleUpdate}
-        initialData={editingAssignment}
       />
 
       <AssignmentSubmissionsModal
@@ -193,3 +205,4 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
     </div>
   );
 }
+

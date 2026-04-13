@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Loader2, X, Sparkles } from "lucide-react";
+import { Check, ExternalLink, FileText, Loader2, X, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -112,10 +112,32 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
                                                 {sub.note}
                                             </p>
                                         )}
-                                        {sub.fileUrl && (
-                                            <a href={sub.fileUrl} target="_blank" rel="noreferrer" className="block text-xs text-primary hover:underline font-bold mb-2">
-                                                عرض المرفق
-                                            </a>
+                                        {(sub.fileUrl || assignment?.fileUrl) && (
+                                            <div className="mb-2 flex flex-wrap items-center gap-2">
+                                                {sub.fileUrl && (
+                                                    <a
+                                                        href={sub.fileUrl}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 text-sm font-extrabold text-sky-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-800/70 dark:bg-sky-950/40 dark:text-sky-200 dark:hover:bg-sky-900/60 dark:hover:text-white"
+                                                    >
+                                                        <ExternalLink className="h-4 w-4 shrink-0" />
+                                                        عرض إجابات الطالب
+                                                    </a>
+                                                )}
+
+                                                {assignment?.fileUrl && (
+                                                    <a
+                                                        href={assignment.fileUrl}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 text-sm font-extrabold text-amber-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-800/70 dark:bg-amber-950/30 dark:text-amber-200 dark:hover:bg-amber-900/50 dark:hover:text-white"
+                                                    >
+                                                        <FileText className="h-4 w-4 shrink-0" />
+                                                        عرض ملف الأسئلة
+                                                    </a>
+                                                )}
+                                            </div>
                                         )}
                                         {sub.teacherComment && (
                                             <p className="text-sm text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800/50 inline-block">

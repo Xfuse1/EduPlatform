@@ -1,22 +1,25 @@
-import { requireTenant } from "@/lib/tenant";
-import { getCurrentUser } from "@/lib/auth";
-import { getParentDashboardData } from "@/modules/dashboard/queries";
-import { ParentAssignments } from "@/modules/dashboard/components/ParentAssignments";
+export const dynamic = "force-dynamic";
+
 import { redirect } from "next/navigation";
+
+import { requireAuth } from "@/lib/auth";
+import { requireTenant } from "@/lib/tenant";
+import { getAssignmentsByParent } from "@/modules/assignments/queries";
+import { ParentAssignments } from "@/modules/dashboard/components/ParentAssignments";
 
 export const metadata = {
   title: "متابعة الواجبات | EduPlatform",
 };
 
 export default async function ParentAssignmentsPage() {
-  const session = await getCurrentUser();
+  const tenant = await requireTenant();
+  const user = await requireAuth();
 
-  if (!session || session.role !== "PARENT") {
-    redirect("/login");
+  if (user.role !== "PARENT") {
+    redirect(user.role === "STUDENT" ? "/student" : "/teacher");
   }
 
-  const tenant = await requireTenant();
-  const data = await getParentDashboardData(tenant.id, session.id);
+  const data = await getAssignmentsByParent(tenant.id, user.id);
 
   return (
     <div className="space-y-6" dir="rtl">
@@ -26,7 +29,7 @@ export default async function ParentAssignmentsPage() {
           تابع الواجبات المطلوبة من أبنائك وحالتها.
         </p>
       </div>
-      <ParentAssignments data={data?.assignments || []} />
+      <ParentAssignments data={data ?? []} />
     </div>
   );
 }

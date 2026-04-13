@@ -27,7 +27,39 @@ import {
 } from "@/components/ui/dialog";
 import { toArabicDigits } from "@/lib/utils";
 import { toast } from "sonner";
-import { updateExamSubmissionAction, aiGradeExamAction } from "../actions";
+import {
+  updateExamSubmissionAction,
+  aiGradeExamAction,
+  approveAutoGradeByModelAnswerAction,
+} from "../actions";
+
+const submittedAtFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Africa/Cairo",
+  day: "2-digit",
+  month: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+function formatSubmittedAt(value: Date | string) {
+  const date = new Date(value);
+  const parts = submittedAtFormatter.formatToParts(date);
+
+  const day = parts.find((part) => part.type === "day")?.value ?? "00";
+  const month = parts.find((part) => part.type === "month")?.value ?? "00";
+  const hour = parts.find((part) => part.type === "hour")?.value ?? "00";
+  const minute = parts.find((part) => part.type === "minute")?.value ?? "00";
+
+  return `${toArabicDigits(`${day}/${month}`)} ${toArabicDigits(`${hour}:${minute}`)}`;
+}
+
+function normalizeTrueFalse(value: string | null | undefined) {
+  const normalized = (value ?? "").trim().toLowerCase();
+  if (["true", "صح", "صحيح", "yes", "1"].includes(normalized)) return "true";
+  if (["false", "خطأ", "خطا", "غلط", "no", "0"].includes(normalized)) return "false";
+  return "";
+}
 
 interface ExamResultsClientProps {
   exam: {
@@ -36,7 +68,7 @@ interface ExamResultsClientProps {
     questions: {
       id: string;
       questionText: string;
-      type: "MCQ" | "ESSAY";
+      type: "MCQ" | "ESSAY" | "TRUE_FALSE";
       options: any;
       correctAnswer: string | null;
       grade: number;
@@ -49,6 +81,7 @@ interface ExamResultsClientProps {
       aiGrade: number | null;
       aiFeedback: string | null;
       teacherComment: string | null;
+      gradedByAi: boolean;
       submittedAt: Date | string;
       student: {
         id: string;
@@ -66,6 +99,7 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isAiGrading, setIsAiGrading] = useState(false);
+  const [isAutoApproving, setIsAutoApproving] = useState(false);
   const [localGrade, setLocalGrade] = useState<number | null>(null);
   const [localComment, setLocalComment] = useState("");
 
@@ -141,6 +175,40 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
     }
   };
 
+  const handleApproveAutoGrade = async () => {
+    if (!selectedSubmission) return;
+
+    setIsAutoApproving(true);
+    try {
+      const result = await approveAutoGradeByModelAnswerAction(exam.id, selectedSubmission.id);
+
+      if (!result.success || !result.data) {
+        toast.error(result.error || "فشل اعتماد التصحيح التلقائي");
+        return;
+      }
+
+      const updatedData = {
+        totalGrade: result.data.grade,
+        teacherComment: result.data.teacherComment,
+        gradedByAi: result.data.gradedByAi,
+      };
+
+      setLocalGrade(result.data.grade);
+      setLocalComment(result.data.teacherComment || "");
+      setSubmissions((prev) =>
+        prev.map((s) => (s.id === selectedSubmission.id ? { ...s, ...updatedData } : s))
+      );
+      setSelectedSubmission((prev) => (prev ? { ...prev, ...updatedData } : null));
+
+      toast.success("تم اعتماد التصحيح التلقائي بنجاح");
+    } catch (error) {
+      console.error("Auto-grade approval error:", error);
+      toast.error("حدث خطأ أثناء اعتماد التصحيح التلقائي");
+    } finally {
+      setIsAutoApproving(false);
+    }
+  };
+
   return (
     <div className="space-y-8" dir="rtl">
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -195,8 +263,10 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
               </tr>
             </thead>
             <tbody>
-              {filteredSubmissions.map((s) => (
-                <tr key={s.id} className="group border-b last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors">
+              {filteredSubmissions.map((s) => {
+                const isGradeApproved = s.teacherComment !== null || s.gradedByAi === true;
+                return (
+                  <tr key={s.id} className="group border-b last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors">
                   <td className="p-4">
                      <div className="font-bold text-slate-900 dark:text-white">{s.student.name}</div>
                   </td>
@@ -209,32 +279,33 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
                   <td className="p-4 text-slate-500 text-xs">
                      <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {new Date(s.submittedAt).toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                        {formatSubmittedAt(s.submittedAt)}
                      </div>
                   </td>
                   <td className="p-4">
                      <div className="flex items-center gap-1">
-                        <span className={`text-lg font-extrabold ${s.totalGrade !== null ? 'text-primary' : 'text-slate-300'}`}>
-                           {s.totalGrade !== null ? toArabicDigits(s.totalGrade) : '--'}
+                        <span className={`text-lg font-extrabold ${isGradeApproved ? 'text-primary' : 'text-slate-300'}`}>
+                           {isGradeApproved ? toArabicDigits(s.totalGrade) : '--'}
                         </span>
                         <span className="text-xs text-slate-400 font-bold">/ {toArabicDigits(exam.questions.reduce((a, b) => a + b.grade, 0))}</span>
                      </div>
                   </td>
                   <td className="p-4">
-                      {s.totalGrade !== null ? (
-                         <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400">تم التصحيح</Badge>
+                      {isGradeApproved ? (
+                         <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400">تم اعتماد الدرجة</Badge>
                       ) : (
-                         <Badge variant="outline" className="text-slate-400 bg-slate-50 border-slate-200">بانتظار الرصد</Badge>
+                         <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/50">في انتظار المراجعة</Badge>
                       )}
                   </td>
                   <td className="p-4 text-left">
                     <Button variant="ghost" className="h-auto py-2 group-hover:bg-white shadow-sm rounded-lg" onClick={() => handleOpenDetail(s)}>
                       <Eye className="h-4 w-4 ml-1.5" />
-                      عرض الإجابات
+                       عرض الإجابات
                     </Button>
                   </td>
-                </tr>
-              ))}
+                  </tr>
+                );
+              })}
               {filteredSubmissions.length === 0 && (
                 <tr>
                   <td colSpan={6} className="p-10 text-center text-slate-500 font-bold">
@@ -262,11 +333,20 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
                  </div>
               </div>
               <div className="flex items-center gap-2">
+                 <Button
+                   onClick={handleApproveAutoGrade}
+                   disabled={isAutoApproving || isAiGrading}
+                   variant="outline"
+                   className="rounded-xl border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400 font-bold min-h-0 h-10 py-0"
+                 >
+                    {isAutoApproving ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : <ClipboardCheck className="h-4 w-4 ml-2" />}
+                    اعتماد التصحيح التلقائي
+                 </Button>
                  <Button 
-                   onClick={handleAiGrade} 
-                   disabled={isAiGrading}
-                   variant="outline" 
-                   className="rounded-xl border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-400 font-bold min-h-0 h-10 py-0"
+                    onClick={handleAiGrade} 
+                    disabled={isAiGrading || isAutoApproving}
+                    variant="outline" 
+                    className="rounded-xl border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-400 font-bold min-h-0 h-10 py-0"
                  >
                     {isAiGrading ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : <Sparkles className="h-4 w-4 ml-2" />}
                     تصحيح بالـ AI
@@ -279,6 +359,8 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
             <div className="space-y-8">
               {exam.questions.map((question, index) => {
                 const studentAnswer = selectedSubmission?.answers[question.id];
+                const normalizedStudentTf = normalizeTrueFalse(studentAnswer);
+                const normalizedCorrectTf = normalizeTrueFalse(question.correctAnswer);
 
                 return (
                   <div key={question.id} className="border border-slate-700 rounded-2xl p-5 space-y-4 bg-slate-900/50">
@@ -308,6 +390,30 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
                             {opt}
                           </div>
                         ))}
+                      </div>
+                    )}
+
+                    {question.type === 'TRUE_FALSE' && (
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { value: "true", label: "صح" },
+                          { value: "false", label: "خطأ" },
+                        ].map((option) => {
+                          const isCorrectOption = option.value === normalizedCorrectTf;
+                          const isStudentOption = option.value === normalizedStudentTf;
+
+                          return (
+                            <div key={option.value} className={`rounded-xl px-4 py-2 text-sm text-center border
+                              ${isCorrectOption
+                                ? 'border-green-500 bg-green-950 text-green-300'
+                                : isStudentOption
+                                  ? 'border-red-500 bg-red-950 text-red-300'
+                                  : 'border-slate-700 bg-slate-800 text-slate-400'
+                              }`}>
+                              {option.label}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 

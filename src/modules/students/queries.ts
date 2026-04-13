@@ -172,11 +172,14 @@ export const getStudentProfile = cache(async (tenantId: string, studentId: strin
   return null;
 });
 
-export const getParentChildren = cache(async (_tenantId: string, parentId: string) => {
+export const getParentChildren = cache(async (tenantId: string, parentId: string) => {
   try {
     const children = await db.parentStudent.findMany({
       where: {
         parentId,
+        student: {
+          tenantId,
+        },
       },
       include: {
         student: {

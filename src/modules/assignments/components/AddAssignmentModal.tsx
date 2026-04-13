@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { buildStorageFilePath } from "@/lib/storage-file-name";
 
 interface Group {
   id: string;
@@ -36,18 +37,16 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd }: AddAssign
     answerKeyFile: null as File | null,
   });
 
-  const uploadFile = async (file: File, folder: string) => {
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${folder}/${Date.now()}.${fileExt}`
+  const uploadFile = async (file: File, filePath: string) => {
     const { data, error } = await supabase.storage
       .from("assignments")
-      .upload(fileName, file)
+      .upload(filePath, file)
     
     if (error) throw error
     
     const { data: urlData } = supabase.storage
       .from("assignments")
-      .getPublicUrl(fileName)
+      .getPublicUrl(filePath)
     
     return urlData.publicUrl
   }
@@ -61,11 +60,25 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd }: AddAssign
       let answerKeyUrl = "";
 
       if (formData.file) {
-        fileUrl = await uploadFile(formData.file, "questions");
+        fileUrl = await uploadFile(
+          formData.file,
+          buildStorageFilePath({
+            folder: "questions",
+            file: formData.file,
+            parts: [formData.title],
+          }),
+        );
       }
 
       if (formData.answerKeyFile) {
-        answerKeyUrl = await uploadFile(formData.answerKeyFile, "answer-keys");
+        answerKeyUrl = await uploadFile(
+          formData.answerKeyFile,
+          buildStorageFilePath({
+            folder: "answer-keys",
+            file: formData.answerKeyFile,
+            parts: [formData.title, "answer-key"],
+          }),
+        );
       }
 
       // Note: Backend engineer will update this to use FormData if handling actual files

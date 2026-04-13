@@ -44,6 +44,7 @@ function getNextSessionFromEnrollments(
       days: string[];
       timeStart: string;
       timeEnd?: string;
+      teacherId?: string | null;
     };
   }>,
 ) {
@@ -62,13 +63,14 @@ function getNextSessionFromEnrollments(
           date,
           timeStart: enrollment.group.timeStart,
           timeEnd: enrollment.group.timeEnd ?? enrollment.group.timeStart,
+          teacherId: enrollment.group.teacherId ?? null,
           group: {
             name: enrollment.group.name,
           },
         };
       }),
     )
-    .filter((item): item is { date: Date; timeStart: string; timeEnd: string; group: { name: string } } => item !== null)
+    .filter((item): item is { date: Date; timeStart: string; timeEnd: string; teacherId: string | null; group: { name: string } } => item !== null)
     .sort((left, right) => left.date.getTime() - right.date.getTime());
 
   return upcoming[0] ?? null;
@@ -79,6 +81,9 @@ export const getAssignmentsByParent = cache(async (tenantId: string, parentId: s
     const parentChildren = await db.parentStudent.findMany({
       where: {
         parentId,
+        student: {
+          tenantId,
+        },
       },
       include: {
         student: { select: { id: true, name: true } }
@@ -286,10 +291,11 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
       getAssignmentsByParent(tenantId, parentId),
     ]);
 
-    const groups = await db.group.findMany({
+    const childTenantIds = Array.from(new Set(children.map(({ student }) => student.tenantId)));
+    const groups = childTenantIds.length ? await db.group.findMany({
         where: {
+          tenantId: { in: childTenantIds },
           isActive: true,
-          tenant: { isActive: true },
         },
         select: {
           tenantId: true,
@@ -316,7 +322,7 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
         orderBy: {
           createdAt: "asc",
         },
-      });
+      }) : [];
 
     const childrenData = await Promise.all(
       children.map(async ({ student }) => {
@@ -338,6 +344,7 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
         }));
 
         const availableGroups = groups
+          .filter((group) => group.tenantId === student.tenantId)
           .filter((group) => !studentGradeLevelKey || getGradeLevelKey(group.gradeLevel) === studentGradeLevelKey)
           .filter((group) => !enrolledGroupIds.has(group.id))
           .map((group) => {
@@ -379,6 +386,7 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
                 days: enrollment.group.days,
                 timeStart: enrollment.group.timeStart,
                 timeEnd: enrollment.group.timeEnd,
+                teacherId: enrollment.group.teacherId,
               },
             })),
           ),
@@ -401,23 +409,7 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
   }
 
   return {
-    children: [
-      {
-        id: "student-1",
-        name: "محمد أحمد",
-        grade: "غير محدد",
-        tenantName: "السنتر",
-        currentGroups: [],
-        availableGroups: [],
-        attendanceRate: 0,
-        payment: {
-          status: "PENDING" as const,
-          amount: 0,
-        },
-        todayStatus: "NO_SESSION",
-        nextSession: null,
-      },
-    ],
+    children: [],
     notifications: [],
     assignments: [],
   };
@@ -518,5 +510,6 @@ export const getCenterDashboardData = cache(async (tenantId: string) => {
     })),
   };
 });
+
 
 
