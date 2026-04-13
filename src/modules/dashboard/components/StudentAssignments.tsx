@@ -13,7 +13,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import { buildStorageFilePath } from "@/lib/storage-file-name"
 import { showToast } from "@/components/ui/Toast"
+import { useSession } from "@/modules/auth/hooks/useSession"
 
 interface StudentAssignment {
   id: string
@@ -45,6 +47,7 @@ export function StudentAssignments({
   title = "واجباتي",
   emptyMessage = "لا توجد واجبات معلقة",
 }: StudentAssignmentsProps) {
+  const { data: session } = useSession()
   const [assignments, setAssignments] = useState(initialAssignments)
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false)
   const [selectedAssignment, setSelectedAssignment] = useState<StudentAssignment | null>(null)
@@ -64,18 +67,16 @@ export function StudentAssignments({
     }
   }
 
-  const uploadFile = async (file: File, folder: string) => {
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${folder}/${Date.now()}.${fileExt}`
+  const uploadFile = async (file: File, filePath: string) => {
     const { data, error } = await supabase.storage
       .from("assignments")
-      .upload(fileName, file)
+      .upload(filePath, file)
     
     if (error) throw error
     
     const { data: urlData } = supabase.storage
       .from("assignments")
-      .getPublicUrl(fileName)
+      .getPublicUrl(filePath)
     
     return urlData.publicUrl
   }
@@ -92,11 +93,22 @@ export function StudentAssignments({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!submissionFile) return;
+    if (!submissionFile || !selectedAssignment) return;
+    if (!session?.user.name) {
+      showToast.error("تعذر تحديد اسم الطالب الآن. يرجى إعادة المحاولة.")
+      return
+    }
     
     setIsSubmitting(true)
     try {
-      const fileUrl = await uploadFile(submissionFile, "submissions")
+      const fileUrl = await uploadFile(
+        submissionFile,
+        buildStorageFilePath({
+          folder: "submissions",
+          file: submissionFile,
+          parts: [selectedAssignment.title, session.user.name],
+        }),
+      )
       
       const response = await fetch(`/api/assignments/${selectedAssignment?.id}/submissions`, {
         method: "POST",

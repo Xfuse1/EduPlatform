@@ -8,7 +8,7 @@ import { parseTenantSettingsFormData } from "@/modules/settings/validations";
 
 type SettingsPayload = {
   name: string;
-  themeColor: string;
+  themeColor?: string;
   phone?: string;
   region?: string;
   bio?: string;
@@ -32,7 +32,7 @@ export async function updateTenantSettings(data: SettingsPayload): Promise<Updat
       },
       data: {
         name: data.name,
-        themeColor: data.themeColor,
+        ...(data.themeColor ? { themeColor: data.themeColor } : {}),
         phone: data.phone?.trim() ? data.phone.trim() : null,
         region: data.region?.trim() ? data.region.trim() : null,
         bio: data.bio?.trim() ? data.bio.trim() : null,
@@ -61,7 +61,6 @@ export async function updateTenant(input: FormData | Record<string, unknown>) {
 
   return updateTenantSettings({
     name: parsed.name,
-    themeColor: parsed.themeColor,
     phone: undefined,
     region: parsed.region,
     bio: parsed.bio,

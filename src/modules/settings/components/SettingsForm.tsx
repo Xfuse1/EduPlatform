@@ -15,7 +15,6 @@ type TenantSettings = {
   id: string;
   slug: string;
   name: string;
-  themeColor: string;
   phone: string | null;
   region: string | null;
   bio: string | null;
@@ -44,7 +43,6 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl }: {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [name, setName] = useState(tenant.name);
-  const [themeColor, setThemeColor] = useState(tenant.themeColor || "#1A5276");
   const [phone, setPhone] = useState(tenant.phone ?? "");
   const [region, setRegion] = useState(tenant.region ?? "");
   const [bio, setBio] = useState(tenant.bio ?? "");
@@ -123,7 +121,6 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl }: {
     startTransition(async () => {
       const result = await updateTenantSettings({
         name,
-        themeColor,
         phone,
         region,
         bio,
@@ -237,19 +234,6 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl }: {
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">لا يمكن تغيير الرابط بعد الإنشاء</p>
               </div>
 
-              <div className="sm:col-span-2">
-                <Label htmlFor="themeColor">اللون الرئيسي</Label>
-                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900">
-                  <input
-                    className="h-12 w-16 cursor-pointer rounded-xl border border-slate-200 bg-transparent p-1 dark:border-slate-700"
-                    id="themeColor"
-                    onChange={(event) => setThemeColor(event.target.value)}
-                    type="color"
-                    value={themeColor}
-                  />
-                  <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{themeColor}</span>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>

@@ -5,6 +5,52 @@ import { requireAuth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { sendNotification } from "@/modules/notifications/actions";
 
+function normalizeTrueFalse(value: string | null | undefined) {
+    const normalized = (value ?? "").trim().toLowerCase();
+    if (["true", "صح", "صحيح", "yes", "1"].includes(normalized)) return "true";
+    if (["false", "خطأ", "خطا", "غلط", "no", "0"].includes(normalized)) return "false";
+    return normalized;
+}
+
+function isObjectiveAnswerCorrect(
+    question: { type: string; correctAnswer: string | null },
+    answer: unknown
+) {
+    const studentAnswer = String(answer ?? "").trim();
+    const correctAnswer = String(question.correctAnswer ?? "").trim();
+
+    if (!studentAnswer || !correctAnswer) return false;
+
+    if (question.type === "TRUE_FALSE") {
+        return normalizeTrueFalse(studentAnswer) === normalizeTrueFalse(correctAnswer);
+    }
+
+    return studentAnswer === correctAnswer;
+}
+
+function normalizeAnswerText(value: string | null | undefined) {
+    return String(value ?? "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+}
+
+function isModelAnswerMatch(
+    question: { type: string; correctAnswer: string | null },
+    answer: unknown
+) {
+    const correctAnswer = String(question.correctAnswer ?? "").trim();
+    const studentAnswer = String(answer ?? "").trim();
+
+    if (!correctAnswer || !studentAnswer) return false;
+
+    if (question.type === "TRUE_FALSE") {
+        return normalizeTrueFalse(correctAnswer) === normalizeTrueFalse(studentAnswer);
+    }
+
+    return normalizeAnswerText(correctAnswer) === normalizeAnswerText(studentAnswer);
+}
+
 export async function submitExamAction(examId: string, studentId: string, answers: Record<string, any>) {
     try {
         const user = await requireAuth();
@@ -21,13 +67,18 @@ export async function submitExamAction(examId: string, studentId: string, answer
             return { success: false, error: "الامتحان غير موجود." };
         }
 
-        // Calculate auto-grade for MCQ
+        // Calculate auto-grade for objective questions (MCQ + TRUE_FALSE)
         let earnedGrade = 0;
         const questionsMap = new Map(exam.questions.map(q => [q.id, q]));
 
         for (const [qId, answer] of Object.entries(answers)) {
             const question = questionsMap.get(qId);
-            if (question && question.type === 'MCQ' && question.correctAnswer === answer) {
+            if (!question) continue;
+
+            if (
+                (question.type === "MCQ" || question.type === "TRUE_FALSE") &&
+                isObjectiveAnswerCorrect(question, answer)
+            ) {
                 earnedGrade += question.grade;
             }
         }
@@ -94,6 +145,67 @@ export async function updateExamSubmissionAction(submissionId: string, grade: nu
     } catch (error) {
         console.error("Error updating exam submission:", error);
         return { success: false, error: "فشل تحديث الدرجة." };
+    }
+}
+
+export async function approveAutoGradeByModelAnswerAction(examId: string, submissionId: string) {
+    try {
+        await requireAuth();
+
+        const [exam, submission] = await Promise.all([
+            db.exam.findUnique({
+                where: { id: examId },
+                include: { questions: true },
+            }),
+            db.examSubmission.findUnique({
+                where: { id: submissionId },
+            }),
+        ]);
+
+        if (!exam || !submission || submission.examId !== examId) {
+            return { success: false, error: "بيانات الامتحان أو التسليم غير صحيحة." };
+        }
+
+        const answers = submission.answers as Record<string, unknown>;
+        let autoGrade = 0;
+
+        for (const question of exam.questions) {
+            if (isModelAnswerMatch(question, answers[question.id])) {
+                autoGrade += question.grade;
+            }
+        }
+
+        const teacherComment =
+            submission.teacherComment ?? "تم اعتماد التصحيح التلقائي بمقارنة الإجابات بالنموذج.";
+
+        const updatedSubmission = await db.examSubmission.update({
+            where: { id: submissionId },
+            data: {
+                totalGrade: autoGrade,
+                teacherComment,
+                gradedByAi: false,
+            },
+            select: {
+                totalGrade: true,
+                teacherComment: true,
+                gradedByAi: true,
+            },
+        });
+
+        revalidatePath(`/teacher/exams/${examId}/results`);
+        revalidatePath(`/teacher/exams`);
+
+        return {
+            success: true,
+            data: {
+                grade: updatedSubmission.totalGrade ?? 0,
+                teacherComment: updatedSubmission.teacherComment ?? "",
+                gradedByAi: updatedSubmission.gradedByAi,
+            },
+        };
+    } catch (error) {
+        console.error("Error approving model auto-grade:", error);
+        return { success: false, error: "فشل اعتماد التصحيح التلقائي." };
     }
 }
 

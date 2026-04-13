@@ -22,7 +22,16 @@ interface ChildAssignmentData {
 }
 
 export function ParentAssignments({ data }: { data: ChildAssignmentData[] }) {
-  if (!data || data.length === 0) return null;
+  if (!data || data.length === 0) {
+    return (
+      <Card className="border-none shadow-md bg-white dark:bg-slate-900">
+        <CardContent className="p-6 text-sm font-bold text-slate-500 dark:text-slate-400">
+          لا توجد واجبات مرتبطة بالأبناء حالياً.
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-4" dir="rtl">
       <div className="flex items-center gap-2">

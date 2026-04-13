@@ -389,6 +389,100 @@ export async function removeChildFromParent(input: { studentId: string }) {
     };
   }
 }
+export async function searchGroupsForChild(input: { studentId: string; tenantSlug: string }) {
+  const parent = await requireAuth();
+
+  if (parent.role !== "PARENT") {
+    return { success: false as const, message: "هذه العملية متاحة لولي الأمر فقط", groups: [] };
+  }
+
+  try {
+    const relation = await db.parentStudent.findFirst({
+      where: { parentId: parent.id, studentId: input.studentId },
+      select: {
+        student: {
+          select: {
+            id: true,
+            gradeLevel: true,
+            groupStudents: {
+              where: { status: { in: ["ACTIVE", "WAITLIST"] } },
+              select: { groupId: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!relation) {
+      return { success: false as const, message: "هذا الابن غير مرتبط بحسابك.", groups: [] };
+    }
+
+    const targetTenant = await getTenantBySlug(input.tenantSlug.trim().toLowerCase());
+
+    if (!targetTenant || !targetTenant.isActive) {
+      return { success: false as const, message: "رابط السنتر غير صحيح أو غير متاح.", groups: [] };
+    }
+
+    const enrolledGroupIds = new Set(relation.student.groupStudents.map((gs) => gs.groupId));
+
+    const { getGradeLevelKey } = await import("@/lib/grade-levels");
+    const studentGradeLevelKey = getGradeLevelKey(relation.student.gradeLevel);
+
+    const groups = await db.group.findMany({
+      where: { tenantId: targetTenant.id, isActive: true },
+      select: {
+        id: true,
+        name: true,
+        subject: true,
+        gradeLevel: true,
+        room: true,
+        days: true,
+        timeStart: true,
+        timeEnd: true,
+        monthlyFee: true,
+        maxCapacity: true,
+        color: true,
+        tenantId: true,
+        groupStudents: { where: { status: "ACTIVE" }, select: { id: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    const filtered = groups
+      .filter((g) => !studentGradeLevelKey || getGradeLevelKey(g.gradeLevel) === studentGradeLevelKey)
+      .filter((g) => !enrolledGroupIds.has(g.id))
+      .map((g) => {
+        const enrolledCount = g.groupStudents.length;
+        const remainingCapacity = Math.max(g.maxCapacity - enrolledCount, 0);
+        return {
+          id: g.id,
+          name: g.name,
+          subject: g.subject,
+          gradeLevel: g.gradeLevel,
+          room: g.room,
+          days: g.days,
+          timeStart: g.timeStart,
+          timeEnd: g.timeEnd,
+          monthlyFee: g.monthlyFee,
+          enrolledCount,
+          remainingCapacity,
+          maxCapacity: g.maxCapacity,
+          isFull: remainingCapacity === 0,
+          color: g.color,
+          tenantId: g.tenantId,
+        };
+      });
+
+    return { success: true as const, groups: filtered };
+  } catch (error) {
+    return {
+      success: false as const,
+      message: error instanceof Error ? error.message : "تعذر البحث عن المجموعات",
+      groups: [],
+    };
+  }
+}
+
 export async function enrollChildInGroup(input: { studentId: string; groupId: string }) {
   const parent = await requireAuth();
 

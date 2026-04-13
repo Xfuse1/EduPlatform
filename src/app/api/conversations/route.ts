@@ -9,7 +9,6 @@ export async function GET() {
     // Fetch all messages where user is sender or receiver
     const messages = await db.message.findMany({
       where: {
-        tenantId: user.tenantId,
         OR: [
           { senderId: user.id },
           { receiverId: user.id }
@@ -74,7 +73,6 @@ export async function PATCH(request: Request) {
 
     await db.message.updateMany({
       where: {
-        tenantId: user.tenantId,
         senderId: contactId,
         receiverId: user.id,
         readAt: null

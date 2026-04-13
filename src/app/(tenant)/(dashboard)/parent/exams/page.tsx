@@ -1,10 +1,26 @@
+export const dynamic = "force-dynamic";
+
+import { redirect } from "next/navigation";
+
+import { requireAuth } from "@/lib/auth";
+import { requireTenant } from "@/lib/tenant";
 import { ParentExams } from "@/modules/dashboard/components/ParentExams";
+import { getParentExamReports } from "@/modules/exams/queries";
 
 export const metadata = {
   title: "الامتحانات والتقييمات | EduPlatform",
 };
 
-export default function ParentExamsPage() {
+export default async function ParentExamsPage() {
+  const tenant = await requireTenant();
+  const user = await requireAuth();
+
+  if (user.role !== "PARENT") {
+    redirect(user.role === "STUDENT" ? "/student" : "/teacher");
+  }
+
+  const examReports = await getParentExamReports(tenant.id, user.id);
+
   return (
     <div className="space-y-6" dir="rtl">
       <div className="flex flex-col gap-2">
@@ -13,7 +29,7 @@ export default function ParentExamsPage() {
           تابع مستوى وتطور أبنائك من خلال درجات الامتحانات والتقييمات.
         </p>
       </div>
-      <ParentExams />
+      <ParentExams data={examReports} />
     </div>
   );
 }

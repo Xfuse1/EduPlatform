@@ -303,7 +303,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                   <Button 
                     variant="outline" 
                     className="flex-1 gap-2 rounded-2xl text-sm font-bold border-primary/20 text-primary hover:bg-primary/5 min-h-[50px]"
-                    onClick={() => window.location.href = `/messages?contact=${(child.nextSession as any)?.teacherId || 't1'}`}
+                    onClick={() => window.location.href = `/messages${child.nextSession?.teacherId ? `?contact=${child.nextSession.teacherId}` : ''}`}
                   >
                     <MessageSquare className="h-4 w-4" />
                     راسل المدرس

@@ -58,7 +58,10 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
     setLoading("start");
     try {
       const res = await fetch(`/api/attendance/sessions/${session.id}/start`, { method: "POST" });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data) {
+        throw new Error(data?.error || "استجابة غير صالحة من السيرفر");
+      }
       if (data.success) {
         setSession({ ...session, status: "IN_PROGRESS", qrToken: data.token, qrExpiresAt: data.expiresAt });
       }
@@ -77,7 +80,10 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ studentId, status }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data) {
+        throw new Error(data?.error || "استجابة غير صالحة من السيرفر");
+      }
       if (data.success) {
         const updatedStudents = session.students.map((s) =>
           s.id === studentId ? { ...s, status, method: "MANUAL" as const, markedAt: new Date() } : s

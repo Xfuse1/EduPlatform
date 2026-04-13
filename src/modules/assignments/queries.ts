@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { db } from "@/lib/db";
 
-export const getAssignmentsByGroup = cache(async (tenantId: string, groupId?: string) => {
+export const getAssignmentsByGroup = async (tenantId: string, groupId?: string) => {
   try {
     return await db.assignment.findMany({
       where: {
@@ -12,6 +12,16 @@ export const getAssignmentsByGroup = cache(async (tenantId: string, groupId?: st
       },
       include: {
         group: { select: { name: true } },
+        submissions: {
+          select: {
+            grade: true,
+            student: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
         _count: { select: { submissions: true } },
       },
       orderBy: { dueDate: "asc" },
@@ -20,7 +30,7 @@ export const getAssignmentsByGroup = cache(async (tenantId: string, groupId?: st
     console.error("Failed to get assignments:", error);
     return [];
   }
-});
+};
 
 export const getAssignments = getAssignmentsByGroup;
 
@@ -108,12 +118,14 @@ export const getAssignmentsByParent = cache(async (tenantId: string, parentId: s
           childName: student.name,
           lastPendingAssignment: pending.length > 0 ? {
             title: pending[0].title,
-            dueDate: new Date(pending[0].dueDate).toLocaleDateString("ar-EG")
+            dueDate: pending[0].dueDate
+              ? new Date(pending[0].dueDate).toLocaleDateString("ar-EG")
+              : "غير محدد",
           } : undefined,
           lastGrade: graded.length > 0 ? {
             assignmentTitle: graded[0].title,
             grade: graded[0].submission!.grade || 0,
-            maxGrade: 20
+            maxGrade: graded[0].maxGrade ?? 100
           } : undefined,
         };
       })

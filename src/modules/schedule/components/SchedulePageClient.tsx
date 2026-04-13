@@ -61,7 +61,7 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
               {todaySessions.map((session) => (
                 <Link
                   key={session.id}
-                  href={`/checkin/${session.id}`}
+                  href={`/attendance/${session.id}`}
                   className={cn(
                     "group relative flex flex-col p-5 rounded-2xl border transition-all duration-200 cursor-pointer overflow-hidden",
                     "bg-white border-slate-200 hover:border-primary/50 hover:shadow-xl hover:-translate-y-1 dark:bg-slate-900/50 dark:border-slate-800 dark:hover:border-primary/40",

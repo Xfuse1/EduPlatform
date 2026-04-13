@@ -11,7 +11,6 @@ import {
   Wallet,
   ClipboardList,
   PenTool,
-  ShieldCheck,
   MessageSquare,
   X,
 } from "lucide-react";
@@ -39,7 +38,6 @@ const navigation: Record<DashboardRole, NavigationItem[]> = {
     { href: "/teacher/exams", label: "الامتحانات", icon: PenTool },
     { href: "/payments", label: "المصاريف", icon: Wallet },
     { href: "/teacher/schedule", label: "الجدول", icon: Calendar },
-    { href: "/teacher/assistants", label: "المساعدين", icon: ShieldCheck },
     { href: "/messages", label: "الرسائل", icon: MessageSquare },
     { href: "/teacher/settings", label: "الإعدادات", icon: Settings },
   ],

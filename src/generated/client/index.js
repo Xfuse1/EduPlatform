@@ -479,7 +479,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\DELL\\Eduplatform\\EduPlatform\\src\\generated\\client",
+      "value": "D:\\eduplatform\\src\\generated\\client",
       "fromEnvVar": null
     },
     "config": {
@@ -493,12 +493,11 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\DELL\\Eduplatform\\EduPlatform\\prisma\\schema.prisma",
+    "sourceFilePath": "D:\\eduplatform\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null,
-    "schemaEnvPath": "../../../.env"
+    "rootEnvPath": null
   },
   "relativePath": "../../../prisma",
   "clientVersion": "6.19.2",

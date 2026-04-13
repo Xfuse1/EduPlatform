@@ -184,12 +184,15 @@ export function ExamTakingClient({ exam, studentId }: ExamTakingClientProps) {
                       </div>
                   ) : currentQuestion.type === "TRUE_FALSE" ? (
                       <div className="grid gap-4">
-                          {["صح", "خطأ"].map((option) => {
-                              const isSelected = answers[currentQuestion.id] === option;
+                          {[
+                            { value: "true", label: "صح" },
+                            { value: "false", label: "خطأ" },
+                          ].map((option) => {
+                              const isSelected = answers[currentQuestion.id] === option.value;
                               return (
                                   <button
-                                      key={option}
-                                      onClick={() => handleAnswer(currentQuestion.id, option)}
+                                      key={option.value}
+                                      onClick={() => handleAnswer(currentQuestion.id, option.value)}
                                       className={`flex items-center text-right gap-4 p-5 rounded-2xl border-2 transition-all group ${
                                           isSelected 
                                           ? 'border-primary bg-primary/5 text-primary' 
@@ -199,7 +202,7 @@ export function ExamTakingClient({ exam, studentId }: ExamTakingClientProps) {
                                       <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? 'border-primary bg-primary' : 'border-slate-300 dark:border-slate-600'}`}>
                                           {isSelected && <div className="h-2 w-2 rounded-full bg-white" />}
                                       </div>
-                                      <span className="text-lg font-bold">{option}</span>
+                                      <span className="text-lg font-bold">{option.label}</span>
                                   </button>
                               );
                           })}

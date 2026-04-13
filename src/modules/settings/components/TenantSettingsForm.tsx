@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import type { ChangeEvent, FormEvent } from 'react'
 import { useState, useTransition } from 'react'
 
-import ColorPicker from '@/components/forms/ColorPicker'
 import FormField from '@/components/forms/FormField'
 
 import { updateTenant } from '../actions'
@@ -19,7 +18,6 @@ type TenantSettingsFormProps = {
     slug: string
     name: string
     logoUrl: string | null
-    themeColor: string
     bio: string | null
     subjects: string[]
     region: string | null
@@ -55,7 +53,6 @@ export default function TenantSettingsForm({
 }: TenantSettingsFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [themeColor, setThemeColor] = useState(tenant.themeColor)
   const [logoPreview, setLogoPreview] = useState(tenant.logoUrl ?? '')
   const [subjectsInput, setSubjectsInput] = useState(tenant.subjects.join('\n'))
   const [errors, setErrors] = useState<FieldErrorState>({})
@@ -92,13 +89,11 @@ export default function TenantSettingsForm({
     const form = event.currentTarget
     const formData = new FormData(form)
 
-    formData.set('themeColor', themeColor)
     formData.set('logoUrl', logoPreview)
     formData.set('subjects', subjectsInput)
 
     const validationResult = tenantSettingsSchema.safeParse({
       ...Object.fromEntries(formData.entries()),
-      themeColor,
       logoUrl: logoPreview,
       subjects: subjectsInput,
     })
@@ -199,20 +194,6 @@ export default function TenantSettingsForm({
           </div>
         </FormField>
       </div>
-
-      <FormField
-        label="لون الهوية"
-        required
-        error={errors.themeColor}
-        hint="يستخدم في أجزاء متعددة من الواجهة والصفحات العامة"
-      >
-        <ColorPicker
-          name="themeColor"
-          value={themeColor}
-          onChange={setThemeColor}
-          disabled={isPending}
-        />
-      </FormField>
 
       <FormField label="نبذة" htmlFor="bio" error={errors.bio}>
         <textarea

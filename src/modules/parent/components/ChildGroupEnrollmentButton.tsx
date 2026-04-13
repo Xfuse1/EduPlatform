@@ -1,12 +1,13 @@
 'use client';
 
-import { Loader2, Plus, Users, X } from "lucide-react";
+import { Loader2, Plus, Search, Users, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn, formatCapacity, formatCurrency } from "@/lib/utils";
-import { enrollChildInGroup } from "@/modules/parent/actions";
+import { enrollChildInGroup, searchGroupsForChild } from "@/modules/parent/actions";
 
 type AvailableGroup = {
   id: string;
@@ -49,18 +50,47 @@ export function ChildGroupEnrollmentButton({
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [slugInput, setSlugInput] = useState("");
+  const [searchedGroups, setSearchedGroups] = useState<AvailableGroup[]>([]);
+  const [searchError, setSearchError] = useState("");
+  const [isSearching, startSearchTransition] = useTransition();
+
   const safeCurrentGroups = currentGroups ?? [];
   const safeAvailableGroups = availableGroups ?? [];
+  const displayGroups = safeAvailableGroups.length > 0 ? safeAvailableGroups : searchedGroups;
 
   const selectedGroup = useMemo(
-    () => safeAvailableGroups.find((group) => group.id === selectedGroupId) ?? null,
-    [safeAvailableGroups, selectedGroupId],
+    () => displayGroups.find((group) => group.id === selectedGroupId) ?? null,
+    [displayGroups, selectedGroupId],
   );
 
   function closeDialog() {
     setIsOpen(false);
     setSelectedGroupId("");
     setError("");
+    setSlugInput("");
+    setSearchedGroups([]);
+    setSearchError("");
+  }
+
+  function handleSlugSearch() {
+    if (!slugInput.trim()) return;
+    setSearchError("");
+    setSearchedGroups([]);
+    setSelectedGroupId("");
+
+    startSearchTransition(async () => {
+      const result = await searchGroupsForChild({ studentId: childId, tenantSlug: slugInput.trim() });
+      if (!result.success) {
+        setSearchError(result.message ?? "تعذر البحث");
+        return;
+      }
+      if (result.groups.length === 0) {
+        setSearchError("لا توجد مجموعات متاحة لهذا الابن في هذا السنتر.");
+        return;
+      }
+      setSearchedGroups(result.groups);
+    });
   }
 
   function handleSubmit() {
@@ -110,6 +140,7 @@ export function ChildGroupEnrollmentButton({
               </div>
 
               <button
+                aria-label="إغلاق"
                 className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"
                 onClick={closeDialog}
                 type="button"
@@ -134,13 +165,40 @@ export function ChildGroupEnrollmentButton({
               </div>
             ) : null}
 
-            {safeAvailableGroups.length === 0 ? (
+            <div className="mb-4 flex gap-2">
+              <Input
+                className="flex-1"
+                dir="ltr"
+                onChange={(e) => { setSlugInput(e.target.value); setSearchError(""); }}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleSlugSearch(); } }}
+                placeholder="ابحث بـ slug السنتر مثل: alamal"
+                value={slugInput}
+              />
+              <Button
+                className="gap-1 shrink-0"
+                disabled={isSearching || !slugInput.trim()}
+                onClick={handleSlugSearch}
+                type="button"
+                variant="outline"
+              >
+                {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                بحث
+              </Button>
+            </div>
+
+            {searchError ? (
+              <p className="mb-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
+                {searchError}
+              </p>
+            ) : null}
+
+            {displayGroups.length === 0 ? (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-                لا توجد مجموعات متاحة حاليًا لهذا الابن في نفس الصف الدراسي.
+                لا توجد مجموعات متاحة. ابحث بـ slug السنتر الخاص بالمدرس لعرض مجموعاته.
               </div>
             ) : (
               <div className="space-y-3">
-                {safeAvailableGroups.map((group) => {
+                {displayGroups.map((group) => {
                   const isSelected = selectedGroupId === group.id;
 
                   return (
@@ -162,6 +220,7 @@ export function ChildGroupEnrollmentButton({
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="text-base font-extrabold text-slate-950 dark:text-white">{group.name}</p>
+                            {/* eslint-disable-next-line react/forbid-dom-props */}
                             <span
                               className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold text-white"
                               style={{ backgroundColor: group.color }}
@@ -213,7 +272,7 @@ export function ChildGroupEnrollmentButton({
               </Button>
               <Button
                 className="w-full gap-2"
-                disabled={isPending || safeAvailableGroups.length === 0 || !selectedGroupId}
+                disabled={isPending || displayGroups.length === 0 || !selectedGroupId}
                 onClick={handleSubmit}
                 type="button"
               >
