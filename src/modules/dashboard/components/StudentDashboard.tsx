@@ -1,18 +1,38 @@
+'use client';
+
+import { useState, useTransition } from "react";
 import { Clock3, Wallet } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { formatArabicDate, formatCurrency, toArabicDigits } from "@/lib/utils";
+import { enrollStudentInGroup } from "@/modules/student/actions";
 
 type StudentDashboardProps = {
   data: Awaited<ReturnType<typeof import("@/modules/dashboard/queries").getStudentDashboardData>>;
+  availableGroups?: Array<{
+    id: string;
+    name: string;
+    subject: string;
+    gradeLevel: string;
+    days: string[];
+    timeStart: string;
+    timeEnd: string;
+    monthlyFee: number;
+    remainingCapacity: number;
+    isFull: boolean;
+    color: string | null;
+  }>;
 };
 
 const groupColors = ["#1A5276", "#2E86C1", "#27AE60"];
 
 import { StudentAssignments } from "./StudentAssignments";
 
-export function StudentDashboard({ data }: StudentDashboardProps) {
+export function StudentDashboard({ data, availableGroups }: StudentDashboardProps) {
+  const pendingAssignments = (data.assignments as Array<{ status: string }>).filter(
+    (assignment) => assignment.status === "pending" || assignment.status === "overdue",
+  );
   const nextSessionDate = data.nextSession
     ? data.nextSession.date.toLocaleDateString("ar-EG", {
         weekday: "long",
@@ -25,7 +45,11 @@ export function StudentDashboard({ data }: StudentDashboardProps) {
   return (
     <div className="space-y-6" dir="rtl">
       {/* Assignments Section */}
-      <StudentAssignments initialAssignments={data.assignments as any} />
+      <StudentAssignments
+        initialAssignments={pendingAssignments as any}
+        title="الواجبات غير المسلمة"
+        emptyMessage="لا توجد واجبات غير مسلمة حالياً"
+      />
 
       <Card className="overflow-hidden bg-[linear-gradient(135deg,_#163b54,_#1A5276_45%,_#2E86C1)] text-white">
         <CardContent className="p-6">
@@ -112,6 +136,80 @@ export function StudentDashboard({ data }: StudentDashboardProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* المجموعات المتاحة للانضمام */}
+      {availableGroups && availableGroups.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>المجموعات المتاحة للانضمام</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2">
+            {availableGroups
+              .filter(g => !data.profile?.enrollments.some(e => e.group.id === g.id))
+              .map((group) => (
+                <div
+                  key={group.id}
+                  className="rounded-[18px] border bg-white p-4 dark:bg-slate-900"
+                  style={{ borderInlineStart: `4px solid ${group.color ?? "#1A5276"}` }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-bold text-slate-900 dark:text-white">{group.name}</p>
+                      <p className="text-sm text-slate-500 mt-1">{group.gradeLevel} — {group.subject}</p>
+                      <p className="text-sm text-slate-500 mt-1">{group.days.join(" • ")}</p>
+                      <p className="text-sm font-semibold text-primary mt-1" dir="ltr">
+                        {group.timeStart} - {group.timeEnd}
+                      </p>
+                    </div>
+                    <div className="text-end">
+                      <p className="text-lg font-extrabold text-primary">{group.monthlyFee} ج</p>
+                      <p className="text-xs text-slate-500">{group.remainingCapacity} مقعد متبقي</p>
+                    </div>
+                  </div>
+
+                  <JoinGroupButton groupId={group.id} isFull={group.isFull} />
+                </div>
+              ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
+
+function JoinGroupButton({ groupId, isFull }: { groupId: string; isFull: boolean }) {
+  const [isPending, startTransition] = useTransition();
+  const [status, setStatus] = useState<'idle' | 'pending' | 'joined'>('idle');
+
+  function handleJoin() {
+    startTransition(async () => {
+      const result = await enrollStudentInGroup({ groupId });
+      if (result.success) setStatus('joined');
+      else alert(result.message);
+    });
+  }
+
+  if (status === 'joined') {
+    return (
+      <div className="mt-3 w-full rounded-xl bg-amber-50 border border-amber-200 text-amber-700 py-2 text-center text-sm font-bold">
+        ⏳ في انتظار موافقة المعلم
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleJoin}
+      disabled={isFull || isPending}
+      className={`mt-3 w-full rounded-xl py-2.5 text-sm font-bold transition ${
+        isFull
+          ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+          : "bg-primary text-white hover:bg-primary/90"
+      }`}
+    >
+      {isPending ? "جاري الإرسال..." : isFull ? "المجموعة ممتلئة" : "طلب الانضمام"}
+    </button>
+  );
+}
+

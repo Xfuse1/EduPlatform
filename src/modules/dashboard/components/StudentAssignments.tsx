@@ -19,6 +19,8 @@ interface StudentAssignment {
   id: string
   title: string
   dueDate: string | Date
+  fileUrl?: string | null
+  fileLink?: string | null
   group: { name: string, subject?: string }
   status: "pending" | "submitted" | "graded" | "overdue"
   submission?: {
@@ -32,13 +34,35 @@ interface StudentAssignment {
   maxGrade?: number
 }
 
-export function StudentAssignments({ initialAssignments = [] }: { initialAssignments?: StudentAssignment[] }) {
+type StudentAssignmentsProps = {
+  initialAssignments?: StudentAssignment[]
+  title?: string
+  emptyMessage?: string
+}
+
+export function StudentAssignments({
+  initialAssignments = [],
+  title = "واجباتي",
+  emptyMessage = "لا توجد واجبات معلقة",
+}: StudentAssignmentsProps) {
   const [assignments, setAssignments] = useState(initialAssignments)
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false)
   const [selectedAssignment, setSelectedAssignment] = useState<StudentAssignment | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submissionFile, setSubmissionFile] = useState<File | null>(null)
   const [submissionNote, setSubmissionNote] = useState("")
+  const [submissionFileName, setSubmissionFileName] = useState("")
+  const [isDragging, setIsDragging] = useState(false)
+
+  const handleFileChange = (file: File | null) => {
+    if (file) {
+      setSubmissionFile(file)
+      setSubmissionFileName(file.name)
+    } else {
+      setSubmissionFile(null)
+      setSubmissionFileName("")
+    }
+  }
 
   const uploadFile = async (file: File, folder: string) => {
     const fileExt = file.name.split('.').pop()
@@ -62,7 +86,8 @@ export function StudentAssignments({ initialAssignments = [] }: { initialAssignm
     setSelectedAssignment(assignment)
     setIsSubmitModalOpen(true)
     setSubmissionFile(null)
-    setSubmissionNote("")
+    setSubmissionFileName("")
+    setSubmissionNote(assignment.submission?.note || "")
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -96,7 +121,7 @@ export function StudentAssignments({ initialAssignments = [] }: { initialAssignm
         submission: submission 
       } : a))
       
-      showToast.success("تم تسليم الواجب بنجاح")
+      showToast.success(selectedAssignment?.status === "submitted" ? "تم تحديث الواجب بنجاح" : "تم تسليم الواجب بنجاح")
       setIsSubmitModalOpen(false)
     } catch (error) {
       console.error("Submission failed:", error)
@@ -127,7 +152,7 @@ export function StudentAssignments({ initialAssignments = [] }: { initialAssignm
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-bold">واجباتي</h2>
+          <h2 className="text-xl font-bold">{title}</h2>
           {pendingCount > 0 && (
             <Badge variant="destructive" className="rounded-full px-2 py-0 h-5 min-w-[20px] justify-center">
               {pendingCount}
@@ -139,10 +164,10 @@ export function StudentAssignments({ initialAssignments = [] }: { initialAssignm
       {assignments.length === 0 ? (
         <Card className="border-dashed flex flex-col items-center justify-center p-8 text-center bg-muted/20">
           <div className="text-4xl mb-4">🎉</div>
-          <p className="text-muted-foreground font-medium">لا توجد واجبات معلقة</p>
+          <p className="text-muted-foreground font-medium">{emptyMessage}</p>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {assignments.map((assignment) => (
             <AssignmentCard
               key={assignment.id}
@@ -156,13 +181,22 @@ export function StudentAssignments({ initialAssignments = [] }: { initialAssignm
 
       {/* Feedback Modal */}
       <Dialog open={feedbackModalOpen} onOpenChange={setFeedbackModalOpen}>
-        <DialogContent className="max-w-2xl" dir="rtl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-purple-600" />
-              تعليق المعلم (الذكاء الاصطناعي)
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-2xl w-[95vw] p-0 overflow-hidden border-none" dir="rtl">
+          <div className="bg-gradient-to-br from-purple-50 via-background to-background dark:from-purple-900/10 dark:via-slate-950 dark:to-slate-950 p-6">
+            <DialogHeader className="mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-2xl">
+                  <Sparkles className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-extrabold flex items-center gap-2">
+                    تقرير التصحيح الذكي
+                    <Badge className="bg-purple-500 hover:bg-purple-600">AI ✨</Badge>
+                  </DialogTitle>
+                  <p className="text-sm text-slate-500 mt-1">تفاصيل وملاحظات شاملة على إجاباتك</p>
+                </div>
+              </div>
+            </DialogHeader>
 
           {currentFeedback && (
             <div className="space-y-6 overflow-y-auto max-h-[70vh] p-2">
@@ -205,49 +239,141 @@ export function StudentAssignments({ initialAssignments = [] }: { initialAssignm
             </div>
           )}
 
-          <div className="pt-4 border-t mt-4">
-            <Button onClick={() => setFeedbackModalOpen(false)} className="w-full">إغلاق</Button>
+            <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <Button onClick={() => setFeedbackModalOpen(false)} variant="outline" className="px-8 rounded-xl font-bold bg-white dark:bg-slate-900">إغلاق التقرير</Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Submit Modal */}
       <Dialog open={isSubmitModalOpen} onOpenChange={setIsSubmitModalOpen}>
-        <DialogContent dir="rtl">
-          <DialogHeader>
-            <DialogTitle>تسليم الواجب</DialogTitle>
-          </DialogHeader>
-          {selectedAssignment && (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label>الواجب</Label>
-                <div className="mt-1 font-bold text-lg">{selectedAssignment.title}</div>
+        <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none" dir="rtl">
+          <div className="bg-gradient-to-br from-primary/10 via-background to-background p-6">
+            <DialogHeader className="mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-primary/10 rounded-2xl">
+                  <Upload className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-bold">
+                    {selectedAssignment?.status === "submitted" ? "تعديل تسليم الواجب" : "تسليم الواجب"}
+                  </DialogTitle>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {selectedAssignment?.status === "submitted" ? "يمكنك تحديث ملف الحل أو الملاحظات" : "قم برفع الحل الخاص بك ليتمكن المعلم من تصحيحه"}
+                  </p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="file">رفع الملف</Label>
-                <Input 
-                  id="file" 
-                  type="file" 
-                  required 
-                  onChange={(e) => setSubmissionFile(e.target.files?.[0] || null)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="note">ملاحظة</Label>
-                <Textarea 
-                  id="note" 
-                  placeholder="أضف ملاحظة للمدرس (اختياري)" 
-                  rows={3} 
-                  value={submissionNote}
-                  onChange={(e) => setSubmissionNote(e.target.value)}
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                <Upload className="h-4 w-4 ml-2" />
-                {isSubmitting ? "جاري الرفع والتسليم..." : "تأكيد التسليم"}
-              </Button>
-            </form>
-          )}
+            </DialogHeader>
+
+            {selectedAssignment && (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 backdrop-blur-sm">
+                  <Label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">الواجب المختار</Label>
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-primary text-white font-bold">
+                      {selectedAssignment.group.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-900 dark:text-white line-clamp-1">{selectedAssignment.title}</div>
+                      <div className="text-xs text-slate-500">{selectedAssignment.group.name}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-slate-700 dark:text-slate-300 font-bold mb-1 block">ملف الحل</Label>
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragging(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) handleFileChange(file);
+                    }}
+                    className={cn(
+                      "group relative cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-8",
+                      isDragging 
+                        ? "border-primary bg-primary/5 ring-4 ring-primary/5" 
+                        : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50",
+                      submissionFile && "border-emerald-500 bg-emerald-50/30 dark:bg-emerald-950/20"
+                    )}
+                    onClick={() => document.getElementById("file-upload")?.click()}
+                  >
+                    <input
+                      id="file-upload"
+                      type="file"
+                      className="hidden"
+                      onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+                      required={!submissionFile}
+                    />
+                    
+                    {submissionFile ? (
+                      <div className="flex flex-col items-center text-center animate-in fade-in zoom-in duration-300">
+                        <div className="h-16 w-16 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center mb-4">
+                          <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <p className="font-bold text-slate-900 dark:text-white max-w-[250px] truncate">{submissionFileName}</p>
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">تم اختيار الملف بنجاح</p>
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          className="mt-4 h-8 text-xs text-slate-400 hover:text-destructive transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFileChange(null);
+                          }}
+                        >
+                          <X className="h-3.5 w-3.5 mr-1" />
+                          تغيير الملف
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center text-center">
+                        <div className="h-16 w-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                          <Upload className="h-8 w-8 text-slate-400 group-hover:text-primary transition-colors" />
+                        </div>
+                        <p className="font-bold text-slate-700 dark:text-slate-200">اسحب الملف هنا أو انقر للإختيار</p>
+                        <p className="text-xs text-slate-400 mt-2 font-medium">يدعم جميع أنواع الملفات (الحد الأقصى 10MB)</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="note" className="text-slate-700 dark:text-slate-300 font-bold block">ملاحظات إضافية</Label>
+                  <Textarea 
+                    id="note" 
+                    placeholder="هل تود إخبار المعلم بشيء عن هذا الواجب؟" 
+                    className="min-h-[100px] bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 rounded-2xl transition-all focus:ring-primary/20"
+                    value={submissionNote}
+                    onChange={(e) => setSubmissionNote(e.target.value)}
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none" 
+                    disabled={isSubmitting || !submissionFile}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin ml-2" />
+                        جاري الرفع...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="h-5 w-5 ml-2" />
+                        {selectedAssignment.status === "submitted" ? "تحديث التسليم" : "تأكيد وإرسال الواجب"}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
@@ -270,16 +396,44 @@ function AssignmentCard({ assignment, onSubmit, onViewFeedback }: { assignment: 
   const dueInfo = getDueStatus(assignment.dueDate)
 
   return (
-    <Card className="overflow-hidden border-r-4 border-r-slate-200 transition-all hover:bg-muted/30">
-      <CardContent className="p-4 space-y-4">
-        <div className="flex flex-col space-y-1">
-          <div className="flex justify-between items-start">
-            <h3 className="font-bold text-slate-900 dark:text-white leading-tight">{assignment.title}</h3>
+    <Card className="group relative overflow-hidden border-none bg-white dark:bg-slate-900 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+      {/* Visual Accent */}
+      <div className={cn(
+        "absolute top-0 right-0 w-1.5 h-full",
+        assignment.status === "pending" ? "bg-amber-400" : 
+        assignment.status === "submitted" ? "bg-emerald-400" :
+        assignment.status === "graded" ? "bg-primary" : 
+        "bg-destructive"
+      )} />
+      
+      <CardContent className="p-5 space-y-5">
+        <div className="flex flex-col space-y-2">
+          <div className="flex justify-between items-start gap-2">
+            <h3 className="font-extrabold text-slate-900 dark:text-white leading-tight text-lg group-hover:text-primary transition-colors">
+              {assignment.title}
+            </h3>
           </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">{assignment.group?.name || assignment.group?.subject}</p>
+          <div className="flex items-center gap-1.5 text-slate-500 font-medium">
+            <div className="h-5 w-5 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+              <BookOpen className="h-3 w-3" />
+            </div>
+            <span className="text-xs uppercase tracking-wide">{assignment.group?.name || assignment.group?.subject}</span>
+          </div>
         </div>
 
-        <div className="flex flex-col space-y-3">
+        {(assignment.fileUrl || assignment.fileLink) && (
+          <a
+            href={assignment.fileUrl || assignment.fileLink || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 rounded-xl border border-sky-100 bg-sky-50/50 dark:bg-sky-950/30 dark:border-sky-900/50 p-2.5 text-xs font-bold text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-all group/link"
+          >
+            <Upload className="h-3.5 w-3.5 group-hover/link:translate-y-[-1px] transition-transform" />
+            عرض ملف المتطلبات
+          </a>
+        )}
+
+        <div className="flex flex-col space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
           <div className="flex items-center justify-between">
             <StatusBadge
               status={assignment.status}
@@ -288,7 +442,7 @@ function AssignmentCard({ assignment, onSubmit, onViewFeedback }: { assignment: 
               gradedByAi={assignment.submission?.gradedByAi}
             />
             {(assignment.status === "pending" || assignment.status === "overdue") && (
-              <div className={cn("flex items-center gap-1 text-[11px] font-bold", dueInfo.color)}>
+              <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 dark:bg-slate-800/50 text-[11px] font-bold shadow-sm", dueInfo.color)}>
                 <dueInfo.icon className="h-3 w-3" />
                 {dueInfo.label}
               </div>
@@ -296,12 +450,18 @@ function AssignmentCard({ assignment, onSubmit, onViewFeedback }: { assignment: 
           </div>
 
           {assignment.status === "graded" && (
-            <div className="space-y-2">
+            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-500">
               {/* تعليق المعلم */}
               {assignment.submission?.teacherComment && (
-                <div className="mt-2 p-3 bg-green-950 border border-green-700 rounded-xl">
-                  <p className="text-xs text-green-400 font-bold mb-1">💬 تعليق المعلم:</p>
-                  <p className="text-sm text-green-200">{assignment.submission.teacherComment}</p>
+                <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl relative overflow-hidden">
+                   <div className="absolute top-0 right-0 p-1">
+                      <CheckCircle2 className="h-3 w-3 text-emerald-200 dark:text-emerald-800" />
+                   </div>
+                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-black mb-1 flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" />
+                    تعليق المعلم:
+                  </p>
+                  <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{assignment.submission?.teacherComment}</p>
                 </div>
               )}
 
@@ -309,22 +469,38 @@ function AssignmentCard({ assignment, onSubmit, onViewFeedback }: { assignment: 
               {assignment.submission?.aiFeedback && (
                 <Button 
                   variant="outline" 
-                  className="w-full text-xs h-9 bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 font-bold gap-2" 
+                  className="w-full text-xs h-10 bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 border-purple-100 hover:from-purple-100 hover:to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20 dark:text-purple-300 dark:border-purple-800 font-bold gap-2 rounded-xl shadow-sm transition-all active:scale-95" 
                   onClick={onViewFeedback}
                 >
-                  <Sparkles className="h-3 w-3" />
-                  عرض ملاحظات المعلم الذكي ✨
+                  <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+                  تقرير التصحيح الذكي ✨
                 </Button>
               )}
             </div>
           )}
-        </div>
 
-        {(assignment.status === "pending" || assignment.status === "overdue") && (
-          <Button variant="default" className="w-full mt-2 font-bold" onClick={onSubmit}>
-            تسليم الواجب
-          </Button>
-        )}
+          {(assignment.status === "pending" || assignment.status === "overdue") && (
+            <Button 
+              variant="default" 
+              className="w-full h-11 font-bold rounded-xl shadow-lg shadow-primary/10 transition-all hover:shadow-primary/20 active:scale-[0.98]" 
+              onClick={onSubmit}
+            >
+              <Upload className="h-4 w-4 ml-2" />
+              تسليم الواجب الآن
+            </Button>
+          )}
+
+          {assignment.status === "submitted" && (
+            <Button 
+              variant="outline" 
+              className="w-full h-11 font-bold rounded-xl border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-400 dark:hover:bg-emerald-950/30 transition-all active:scale-[0.98]" 
+              onClick={onSubmit}
+            >
+              <X className="h-4 w-4 ml-2 rotate-45" />
+              تعديل الحل المسلم
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   )
