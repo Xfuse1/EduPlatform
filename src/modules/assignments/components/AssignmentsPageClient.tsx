@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, Calendar, Plus, Users, Search, ClipboardList } from "lucide-react";
+import { BookOpen, Calendar, Plus, Users, Search, ClipboardList, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null);
+  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
 
   const filtered = assignments.filter((a) => {
     const matchesGroup = filterGroupId === "all" || a.groupId === filterGroupId;
@@ -41,6 +42,24 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
 
   const handleAdd = (newAssignment: any) => {
       setAssignments([newAssignment, ...assignments]);
+  };
+
+  const handleUpdate = (updated: any) => {
+    setAssignments(assignments.map(a => a.id === updated.id ? { ...a, ...updated } : a));
+    setEditingAssignment(null);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("هل أنت متأكد من حذف هذا الواجب؟")) return;
+    
+    try {
+      const res = await fetch(`/api/assignments/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setAssignments(assignments.filter(a => a.id !== id));
+      }
+    } catch (error) {
+      console.error("Failed to delete assignment:", error);
+    }
   };
 
   return (
@@ -89,12 +108,34 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
           <Card key={assignment.id} className="group relative transition hover:-translate-y-1">
             <CardContent className="pt-6 space-y-5">
               <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
+                <div className="space-y-1 flex-1">
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary transition">{assignment.title}</h3>
                   <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
                       <BookOpen className="h-4 w-4" />
                       {assignment.group.name}
                   </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingAssignment(assignment);
+                    }}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-primary hover:text-primary transition-colors"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(assignment.id);
+                    }}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-rose-500 hover:text-rose-500 transition-colors"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </div>
 
@@ -134,10 +175,15 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
       </div>
 
       <AddAssignmentModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        isOpen={isModalOpen || !!editingAssignment} 
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingAssignment(null);
+        }} 
         groups={groups}
         onAdd={handleAdd}
+        onUpdate={handleUpdate}
+        initialData={editingAssignment}
       />
 
       <AssignmentSubmissionsModal
