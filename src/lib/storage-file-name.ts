@@ -2,6 +2,7 @@ function sanitizeFileNamePart(value: string) {
   const sanitized = value
     .normalize("NFKC")
     .trim()
+    .replace(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/g, "") // إزالة العربية
     .replace(/\s+/g, "-")
     .replace(/[<>:"/\\|?*\u0000-\u001F]+/g, "")
     .replace(/\.+$/g, "")

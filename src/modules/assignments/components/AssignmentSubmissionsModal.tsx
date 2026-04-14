@@ -204,7 +204,7 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
                                             )}
                                         </div>
                                         
-                                        {assignment?.answerKeyUrl && !sub.grade && (
+                                        {assignment?.answerKeyUrl && (
                                             <Button 
                                                 variant="outline" 
                                                 className="h-8 px-3 text-[10px] bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 gap-1 font-bold"

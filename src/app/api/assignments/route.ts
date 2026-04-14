@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, description, groupId, dueDate, fileUrl, answerKeyUrl } = body;
+    const { title, description, groupId, dueDate, fileUrl, answerKeyUrl, maxGrade } = body;
 
     const assignment = await db.assignment.create({
       data: {
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
         dueDate: dueDate ? new Date(dueDate) : null,
         fileUrl,
         answerKeyUrl,
+        maxGrade: maxGrade || 100,
       },
       include: {
         group: { select: { name: true } },
