@@ -174,7 +174,7 @@ export default function GroupForm({
   )
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [feeType, setFeeType] = useState<'monthly' | 'per_session' | 'installments' | 'full_course'>('monthly')
-  const [educationStage, setEducationStage] = useState<EducationStage | ''>(initialGradeLevelState.stage ?? '')
+  const [educationStage, setEducationStage] = useState<EducationStage | ''>((initialGradeLevelState.stage as EducationStage | '') || '')
   const [gradeYear, setGradeYear] = useState(initialGradeLevelState.year)
   const gradeYearOptions = educationStage ? getEducationYears(educationStage) : []
   const gradeLevelValue = educationStage && gradeYear ? formatGradeLevel(educationStage, Number(gradeYear)) : ''
@@ -220,7 +220,7 @@ export default function GroupForm({
     })
 
     setScheduleErrors((currentErrors) => {
-      const nextErrors = currentErrors.length > 0
+      const nextErrors: ScheduleEntryErrors = currentErrors.length > 0
         ? currentErrors.map((entry) => ({ ...entry }))
         : Array.from({ length: scheduleEntries.length }, () => ({}))
 
