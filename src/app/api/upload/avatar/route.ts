@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
 
-// Supabase client بصلاحيات الـ service role
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Supabase client بصلاحيات الـ service role — lazy init to avoid build-time crash
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function POST(req: Request) {
   const user = await getCurrentUser();
@@ -38,6 +40,7 @@ export async function POST(req: Request) {
     const path = `${user.id}/avatar.${ext}`;
 
     // رفع الصورة لـ Supabase Storage
+    const supabase = getSupabase();
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(path, buffer, {
