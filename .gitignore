@@ -5,3 +5,6 @@ node_modules
 .codex-dev.err
 .codex-dev.log
 tsconfig.tsbuildinfo
+*.tmp*
+*.dll
+*.node
