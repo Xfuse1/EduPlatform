@@ -28,6 +28,26 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const students = await db.groupStudent.findMany({
+      where: { groupId, status: "ACTIVE" },
+      select: { studentId: true },
+    });
+
+    if (students.length > 0) {
+      await db.notification.createMany({
+        data: students.map((s) => ({
+          tenantId: user.tenantId,
+          userId: s.studentId,
+          type: "ASSIGNMENT_DUE" as const,
+          message: `📚 تم إضافة واجب جديد: ${title} في مجموعة ${assignment.group.name}`,
+          channel: "PUSH" as const,
+          status: "QUEUED" as const,
+          recipientPhone: "",
+        })),
+        skipDuplicates: true,
+      });
+    }
+
     return NextResponse.json({ success: true, assignment });
   } catch (error) {
     console.error("Assignment error:", error);

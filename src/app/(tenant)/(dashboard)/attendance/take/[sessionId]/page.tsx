@@ -1,4 +1,6 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { Plus } from 'lucide-react'
 import { requireAuth } from '@/lib/auth'
 import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
@@ -45,6 +47,16 @@ export default async function TakeAttendancePage({ params }: Props) {
           sessionId={sessionId}
           students={data.students}
         />
+
+        <div className="mt-6">
+          <Link
+            href={`/teacher/assignments?groupId=${data.session.group.id}&autoOpen=true`}
+            className="flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-colors px-6 py-4 text-primary font-bold"
+          >
+            <Plus className="h-5 w-5" />
+            إضافة واجب لهذه الحصة
+          </Link>
+        </div>
       </div>
     </div>
   )

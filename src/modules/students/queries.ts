@@ -240,7 +240,7 @@ export const getStudents = cache(async (
                 some: {
                   groupId: filters.groupId,
                   status: {
-                    in: ["ACTIVE", "WAITLIST"],
+                    in: ["ACTIVE", "WAITLIST", "PENDING"],
                   },
                 },
               },
@@ -262,7 +262,7 @@ export const getStudents = cache(async (
         groupStudents: {
           where: {
             status: {
-              in: ["ACTIVE", "WAITLIST"],
+              in: ["ACTIVE", "WAITLIST", "PENDING"],
             },
           },
           include: {
@@ -296,41 +296,77 @@ export const getStudents = cache(async (
       },
     });
 
-    const mappedStudents = students.map((student) => {
+    const mappedStudents = students.flatMap((student) => {
+      // If a student is in multiple groups, we might want to see each enrollment if pending
+      // For now, let's map them but ensure we handle the PENDING status correctly.
+      
       const latestPayment = student.payments[0];
       const paymentStatus = toStudentPaymentStatus(latestPayment?.status);
       const attendedCount = student.attendances.filter((record) => record.status === "PRESENT" || record.status === "LATE").length;
       const attendance = student.attendances.length > 0 ? Math.round((attendedCount / student.attendances.length) * 100) : 0;
       const parent = student.childStudents[0]?.parent;
-      const primaryGroup = student.groupStudents[0]?.group;
-
-      return {
-        id: student.id,
-        name: student.name,
-        phone: student.phone.startsWith("student-") ? "" : student.phone,
-        studentPhone: student.phone.startsWith("student-") ? "" : student.phone,
-        parentName: parent?.name ?? student.parentName ?? "",
-        parentPhone: parent?.phone ?? student.parentPhone ?? "",
-        parentId: parent?.id,
-        grade: student.gradeLevel ?? "غير محدد",
-        gradeLevel: student.gradeLevel,
-        group: student.groupStudents.map((enrollment) => enrollment.group.name).join(" - ") || "غير محدد",
-        groupId: primaryGroup?.id ?? "",
-        paymentStatus,
-        attendance,
-        amountDue: latestPayment && latestPayment.status !== "PAID" ? latestPayment.amount : 0,
-        groups: student.groupStudents.map((enrollment) => ({
-          id: enrollment.group.id,
-          name: enrollment.group.name,
-        })),
-      };
+      
+      return student.groupStudents.map(enrollment => {
+        const primaryGroup = enrollment.group;
+        return {
+          id: student.id,
+          name: student.name,
+          phone: student.phone.startsWith("student-") ? "" : student.phone,
+          studentPhone: student.phone.startsWith("student-") ? "" : student.phone,
+          parentName: parent?.name ?? student.parentName ?? "",
+          parentPhone: parent?.phone ?? student.parentPhone ?? "",
+          parentId: parent?.id,
+          grade: student.gradeLevel ?? "غير محدد",
+          gradeLevel: student.gradeLevel,
+          group: primaryGroup.name,
+          groupId: primaryGroup.id,
+          enrollmentStatus: enrollment.status,
+          paymentStatus,
+          attendance,
+          amountDue: latestPayment && latestPayment.status !== "PAID" ? latestPayment.amount : 0,
+        };
+      });
     });
 
-    if (filters.paymentStatus) {
-      return mappedStudents.filter((student) => student.paymentStatus === filters.paymentStatus);
+    // If student has no groups, they won't appear in the list above due to map over groupStudents.
+    // Let's add them back if they have no groups.
+    const studentWithNoGroups = students.filter(s => s.groupStudents.length === 0);
+    const mappedNoGroups = studentWithNoGroups.map(student => {
+       const latestPayment = student.payments[0];
+       const paymentStatus = toStudentPaymentStatus(latestPayment?.status);
+       const attendedCount = student.attendances.filter((record) => record.status === "PRESENT" || record.status === "LATE").length;
+       const attendance = student.attendances.length > 0 ? Math.round((attendedCount / student.attendances.length) * 100) : 0;
+       const parent = student.childStudents[0]?.parent;
+       return {
+          id: student.id,
+          name: student.name,
+          phone: student.phone.startsWith("student-") ? "" : student.phone,
+          studentPhone: student.phone.startsWith("student-") ? "" : student.phone,
+          parentName: parent?.name ?? student.parentName ?? "",
+          parentPhone: parent?.phone ?? student.parentPhone ?? "",
+          parentId: parent?.id,
+          grade: student.gradeLevel ?? "غير محدد",
+          gradeLevel: student.gradeLevel,
+          group: "غير محدد",
+          groupId: "",
+          enrollmentStatus: "NONE",
+          paymentStatus,
+          attendance,
+          amountDue: latestPayment && latestPayment.status !== "PAID" ? latestPayment.amount : 0,
+       };
+    });
+
+    const finalStudents = [...mappedStudents, ...mappedNoGroups];
+
+    if (filters.search) {
+      // already filtered by db but good to be sure if mapping changed things
     }
 
-    return mappedStudents;
+    if (filters.paymentStatus) {
+      return finalStudents.filter((student) => student.paymentStatus === filters.paymentStatus);
+    }
+
+    return finalStudents;
   } catch (error) {
     console.error("DB getStudents failed, using mock:", error);
   }

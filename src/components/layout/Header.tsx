@@ -71,7 +71,7 @@ export function Header({
           <ThemeToggle />
           <NotificationBell />
           <div className="text-end">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">اسم السنتر</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">المعلم</p>
             <h1 className="text-base font-extrabold text-primary dark:text-sky-300">{tenantName}</h1>
           </div>
         </div>

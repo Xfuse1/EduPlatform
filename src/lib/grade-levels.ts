@@ -1,4 +1,4 @@
-﻿export type EducationStage = "PRIMARY" | "PREPARATORY" | "SECONDARY" | "UNIVERSITY";
+export type EducationStage = "PRIMARY" | "PREPARATORY" | "SECONDARY" | "UNIVERSITY";
 
 export type GradeLevelSelection = {
   stage: EducationStage;
@@ -58,7 +58,7 @@ export const EDUCATION_STAGE_OPTIONS: EducationStageConfig[] = [
     label: "جامعة",
     formattedLabel: "الجامعية",
     prefixLabel: "الفرقة",
-    yearCount: 4,
+    yearCount: 5,
     aliases: ["جامعه", "جامعة", "جامعي", "جامعية", "فرقة", "فرقه"],
   },
 ];

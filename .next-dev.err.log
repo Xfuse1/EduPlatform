@@ -1,0 +1,38 @@
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\DELL\Eduplatform\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\DELL\Eduplatform\EduPlatform\package-lock.json
+
+[browser] Failed to fetch notifications: TypeError: Failed to fetch
+    at fetchNotifications (src/components/layout/NotificationBell.tsx:55:27)
+    at NotificationBell.useEffect (src/components/layout/NotificationBell.tsx:66:5)
+  53 |       setIsLoading(true);
+  54 |       try {
+> 55 |         const res = await fetch("/api/notifications");
+     |                           ^
+  56 |         if (!res.ok) return;
+  57 |         const data = await res.json();
+  58 |         setNotifications(data); (src/components/layout/NotificationBell.tsx:60:17)
+Error: Route "/api/students/[studentId]/status" used `params.studentId`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at PATCH (src\app\api\students\[studentId]\status\route.ts:21:29)
+  19 |       await db.groupStudent.updateMany({
+  20 |         where: {
+> 21 |           studentId: params.studentId,
+     |                             ^
+  22 |           groupId: groupId,
+  23 |         },
+  24 |         data: {
+Error: Route "/api/students/[studentId]/status" used `params.studentId`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at PATCH (src\app\api\students\[studentId]\status\route.ts:21:29)
+  19 |       await db.groupStudent.updateMany({
+  20 |         where: {
+> 21 |           studentId: params.studentId,
+     |                             ^
+  22 |           groupId: groupId,
+  23 |         },
+  24 |         data: {
+[browser] GoTrueClient@sb-tbcxiuckxvboppyvmjca-auth-token:1 (2.100.1) 2026-04-13T12:41:45.871Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key. (src/lib/supabase/client.ts:7:30)
+[browser] GoTrueClient@sb-tbcxiuckxvboppyvmjca-auth-token:2 (2.100.1) 2026-04-13T12:43:51.014Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key. (src/lib/supabase/client.ts:7:30)
+[browser] GoTrueClient@sb-tbcxiuckxvboppyvmjca-auth-token:3 (2.100.1) 2026-04-13T12:43:51.032Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key. (src/lib/supabase/client.ts:7:30)

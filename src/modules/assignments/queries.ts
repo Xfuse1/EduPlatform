@@ -85,6 +85,8 @@ export const getAssignmentsByStudent = cache(async (studentId: string) => {
       }
       return {
         ...a,
+        fileUrl: a.fileUrl ?? null,
+        fileLink: a.fileLink ?? null,
         submission,
         status,
       };

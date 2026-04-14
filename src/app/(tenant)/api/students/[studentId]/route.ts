@@ -5,6 +5,7 @@ import { errorResponse, forbidden, notFound, successResponse } from '@/lib/api-r
 import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
 import { getStudentById } from '@/modules/students/queries'
+import { deleteStudent } from '@/modules/students/actions'
 
 type RouteProps = {
   params: Promise<{
@@ -40,6 +41,33 @@ export async function GET(request: NextRequest, { params }: RouteProps) {
     return errorResponse(
       'STUDENT_FETCH_FAILED',
       error instanceof Error ? error.message : 'تعذر جلب الطالب',
+      400,
+    )
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: RouteProps) {
+  try {
+    const [{ studentId }, tenant, user] = await Promise.all([
+      params,
+      requireTenant(),
+      requireAuth(request),
+    ])
+
+    if (user.role !== 'MANAGER' && user.role !== 'ADMIN') {
+      return forbidden('لا تملك بصلاحية حذف الطلاب')
+    }
+
+    await deleteStudent(tenant.id, studentId)
+    return successResponse({ message: 'تم حذف الطالب بنجاح' })
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return errorResponse('UNAUTHORIZED', error.message, 401)
+    }
+
+    return errorResponse(
+      'STUDENT_DELETE_FAILED',
+      error instanceof Error ? error.message : 'تعذر حذف الطالب',
       400,
     )
   }

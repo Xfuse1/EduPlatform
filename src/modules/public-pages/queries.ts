@@ -41,7 +41,9 @@ export const getOpenGroups = cache(async (tenantId: string) => {
       include: {
         _count: {
           select: {
-            groupStudents: true,
+            groupStudents: {
+              where: { status: "ACTIVE" }
+            },
           },
         },
       },

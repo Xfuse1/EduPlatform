@@ -1,7 +1,8 @@
 'use client';
 
-import { BookOpen, Calendar, Plus, Users, Search, ClipboardList, Loader2, Trash2, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { BookOpen, Calendar, Plus, Users, Search, ClipboardList, Loader2, Trash2, CheckCircle2, Pencil } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,13 +29,23 @@ interface AssignmentsPageClientProps {
 }
 
 export function AssignmentsPageClient({ initialAssignments, groups }: AssignmentsPageClientProps) {
+  const searchParams = useSearchParams();
   const [assignments, setAssignments] = useState(initialAssignments);
   const [filterGroupId, setFilterGroupId] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null);
   const [deletingAssignmentId, setDeletingAssignmentId] = useState<string | null>(null);
+  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const normalizedQuery = normalizeArabicText(searchQuery);
+
+  useEffect(() => {
+    const autoOpen = searchParams.get("autoOpen");
+    
+    if (autoOpen === "true") {
+      setIsModalOpen(true);
+    }
+  }, [searchParams]);
 
   const filtered = assignments.filter((a) => {
     const matchesGroup = filterGroupId === "all" || a.groupId === filterGroupId;
@@ -48,6 +59,13 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
 
   const handleAdd = (newAssignment: any) => {
       setAssignments((currentAssignments) => [newAssignment, ...currentAssignments]);
+  };
+
+  const handleUpdate = (updated: any) => {
+    setAssignments((currentAssignments) => 
+      currentAssignments.map(a => a.id === updated.id ? { ...a, ...updated } : a)
+    );
+    setEditingAssignment(null);
   };
 
   const handleDelete = async (assignmentId: string, assignmentTitle: string) => {
@@ -130,26 +148,35 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
           <Card key={assignment.id} className="group relative transition hover:-translate-y-1">
             <CardContent className="pt-6 space-y-5">
               <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
+                <div className="space-y-1 flex-1">
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary transition">{assignment.title}</h3>
                   <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
                       <BookOpen className="h-4 w-4" />
                       {assignment.group.name}
                   </div>
                 </div>
-                <Button
-                  aria-label={`حذف الواجب ${assignment.title}`}
-                  variant="ghost"
-                  className="h-9 w-9 shrink-0 rounded-xl border border-rose-200 bg-rose-50 p-0 text-rose-600 hover:bg-rose-100 hover:text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-950/50"
-                  onClick={() => handleDelete(assignment.id, assignment.title)}
-                  disabled={deletingAssignmentId === assignment.id}
-                >
-                  {deletingAssignmentId === assignment.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    className="h-9 w-9 shrink-0 rounded-xl border border-slate-200 bg-white p-0 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                    onClick={() => setEditingAssignment(assignment)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    aria-label={`حذف الواجب ${assignment.title}`}
+                    variant="ghost"
+                    className="h-9 w-9 shrink-0 rounded-xl border border-rose-200 bg-rose-50 p-0 text-rose-600 hover:bg-rose-100 hover:text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-950/50"
+                    onClick={() => handleDelete(assignment.id, assignment.title)}
+                    disabled={deletingAssignmentId === assignment.id}
+                  >
+                    {deletingAssignmentId === assignment.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
 
               <div className="flex flex-wrap gap-4 text-sm font-medium">
@@ -163,7 +190,7 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
                   </div>
                   <div className="flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-2 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">
                       <CheckCircle2 className="h-4 w-4" />
-                      <span className="text-xs">{toArabicDigits(assignment.submissions?.filter((submission) => submission.grade !== null).length ?? 0)} {'\u062A\u0645 \u062A\u0635\u062D\u064A\u062D'}</span>
+                      <span className="text-xs">{toArabicDigits(assignment.submissions?.filter((submission) => submission.grade !== null).length ?? 0)} تم تصحيح</span>
                   </div>
               </div>
 
@@ -192,10 +219,15 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
       </div>
 
       <AddAssignmentModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        isOpen={isModalOpen || !!editingAssignment} 
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingAssignment(null);
+        }} 
         groups={groups}
         onAdd={handleAdd}
+        onUpdate={handleUpdate}
+        initialData={editingAssignment}
       />
 
       <AssignmentSubmissionsModal
@@ -205,4 +237,3 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
     </div>
   );
 }
-

@@ -37,6 +37,9 @@ export function PaymentForm({ students }: PaymentFormProps) {
   const [selectedStudentId, setSelectedStudentId] = useState<string>('')
   const [selectedMethod, setSelectedMethod] = useState<string>('CASH')
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('offline')
+  const [paymentType, setPaymentType] = useState<'full' | 'partial'>('full')
+  const [partialAmount, setPartialAmount] = useState<string>('')
+  const [totalAmount, setTotalAmount] = useState<string>('')
   const router = useRouter()
 
   const currentMonth = new Date().toISOString().slice(0, 7)
@@ -153,21 +156,96 @@ export function PaymentForm({ students }: PaymentFormProps) {
         </select>
       </div>
 
-      {/* المبلغ */}
+      {/* نوع الدفع */}
       <div>
-        <label htmlFor="amount" className={labelClass}>
-          المبلغ (جنيه) *
+        <label className={labelClass}>نوع الدفع *</label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setPaymentType('full')}
+            className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-colors ${
+              paymentType === 'full'
+                ? 'border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
+                : 'border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-900'
+            }`}
+          >
+            💰 دفع كامل
+          </button>
+          <button
+            type="button"
+            onClick={() => setPaymentType('partial')}
+            className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-2 transition-colors ${
+              paymentType === 'partial'
+                ? 'border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                : 'border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-900'
+            }`}
+          >
+            💳 دفع جزئي
+          </button>
+        </div>
+      </div>
+
+      {/* المبلغ الكلي */}
+      <div>
+        <label htmlFor="totalAmount" className={labelClass}>
+          المبلغ الكلي (جنيه) *
         </label>
         <input
-          id="amount"
-          name="amount"
+          id="totalAmount"
+          name="totalAmount"
           type="number"
           min="1"
           required
-          placeholder="400"
+          placeholder="مثال: 500"
+          value={totalAmount}
+          onChange={(e) => setTotalAmount(e.target.value)}
           className={inputClass}
         />
       </div>
+
+      {/* المبلغ المدفوع — يظهر فقط في الدفع الجزئي */}
+      {paymentType === 'partial' && (
+        <div>
+          <label htmlFor="amount" className={labelClass}>
+            المبلغ المدفوع الآن (جنيه) *
+          </label>
+          <input
+            id="amount"
+            name="amount"
+            type="number"
+            min="1"
+            max={totalAmount || undefined}
+            required
+            placeholder="مثال: 200"
+            value={partialAmount}
+            onChange={(e) => setPartialAmount(e.target.value)}
+            className={inputClass}
+          />
+          {/* المبلغ المتبقي */}
+          {totalAmount && partialAmount && Number(partialAmount) < Number(totalAmount) && (
+            <div className="mt-2 flex items-center justify-between rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-2.5">
+              <span className="text-xs font-bold text-amber-700 dark:text-amber-300">المبلغ المتبقي</span>
+              <span className="text-sm font-extrabold text-amber-700 dark:text-amber-300">
+                {Number(totalAmount) - Number(partialAmount)} جنيه
+              </span>
+            </div>
+          )}
+          {/* تحذير لو المبلغ المدفوع أكبر من الكلي */}
+          {totalAmount && partialAmount && Number(partialAmount) > Number(totalAmount) && (
+            <p className="mt-1 text-xs text-rose-600 font-medium">
+              ⚠️ المبلغ المدفوع لا يمكن أن يتجاوز المبلغ الكلي
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* لو دفع كامل — amount = totalAmount */}
+      {paymentType === 'full' && (
+        <input type="hidden" name="amount" value={totalAmount} />
+      )}
+
+      {/* نوع الدفع مخفي */}
+      <input type="hidden" name="paymentType" value={paymentType} />
 
       {/* الشهر */}
       <div>

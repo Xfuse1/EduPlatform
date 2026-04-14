@@ -1,5 +1,11 @@
+'use client';
+
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowLeft, Clock3, GraduationCap, MapPin, Sparkles, Users } from "lucide-react";
+import { toast } from "sonner";
+
+import { enrollStudentInGroup } from "@/modules/student/actions";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -29,7 +35,32 @@ type TeacherLandingProps = {
   }>;
 };
 
-export function TeacherLanding({ teacher, groups }: TeacherLandingProps) {
+export function TeacherLanding({ 
+  teacher, 
+  groups, 
+  currentUserId, 
+  isStudent 
+}: TeacherLandingProps & { 
+  currentUserId?: string; 
+  isStudent?: boolean; 
+}) {
+  const [enrolledIds, setEnrolledIds] = useState<Set<string>>(new Set());
+  const [isPending, startTransition] = useTransition();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  function handleEnroll(groupId: string) {
+    setLoadingId(groupId);
+    startTransition(async () => {
+      const result = await enrollStudentInGroup({ groupId });
+      if (result.success) {
+        setEnrolledIds(prev => new Set([...prev, groupId]));
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+      setLoadingId(null);
+    });
+  }
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.18),_transparent_28%),linear-gradient(180deg,_#f8fafc_0%,_#eef4f8_100%)] px-4 py-6 sm:px-6 lg:px-8 dark:bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.12),_transparent_20%),linear-gradient(180deg,_#0f172a_0%,_#111827_100%)]">
       <section className="mx-auto max-w-6xl space-y-8">
@@ -147,16 +178,33 @@ export function TeacherLanding({ teacher, groups }: TeacherLandingProps) {
                     الأماكن المتبقية: <span dir="ltr">{toArabicDigits(group.remainingCapacity)}</span>
                   </p>
 
-                  <Link
-                    className={`inline-flex min-h-12 w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-bold transition ${
-                      group.isFull
-                        ? "cursor-not-allowed bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
-                        : "bg-gradient-to-l from-primary to-secondary text-white"
-                    }`}
-                    href={group.isFull ? "#" : "/register"}
-                  >
-                    {group.isFull ? "القائمة ممتلئة" : "سجّل في هذه المجموعة"}
-                  </Link>
+                  {isStudent ? (
+                    <button
+                      type="button"
+                      disabled={group.isFull || enrolledIds.has(group.id) || loadingId === group.id}
+                      onClick={() => handleEnroll(group.id)}
+                      className={`inline-flex min-h-12 w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-bold transition ${
+                        group.isFull || enrolledIds.has(group.id)
+                          ? "cursor-not-allowed bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
+                          : "bg-gradient-to-l from-primary to-secondary text-white hover:opacity-90"
+                      }`}
+                    >
+                      {loadingId === group.id ? "جاري الانضمام..." :
+                       enrolledIds.has(group.id) ? "✅ تم الانضمام" :
+                       group.isFull ? "القائمة ممتلئة" : "انضم لهذه المجموعة"}
+                    </button>
+                  ) : (
+                    <Link
+                      className={`inline-flex min-h-12 w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-bold transition ${
+                        group.isFull
+                          ? "cursor-not-allowed bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
+                          : "bg-gradient-to-l from-primary to-secondary text-white"
+                      }`}
+                      href={group.isFull ? "#" : "/register"}
+                    >
+                      {group.isFull ? "القائمة ممتلئة" : "سجّل في هذه المجموعة"}
+                    </Link>
+                  )}
                 </CardContent>
               </Card>
             );
