@@ -29,11 +29,7 @@ type GroupFormProps = {
   redirectTo?: string
 }
 
-type ScheduleEntryErrors = Array<{
-  day?: string
-  timeStart?: string
-  timeEnd?: string
-}>
+type ScheduleEntryErrors = Array<Record<string, string | undefined>>
 
 type FieldErrorState = Partial<Record<Exclude<keyof GroupCreateInput, 'schedule'> | 'schedule' | 'form', string>>
 
@@ -178,7 +174,7 @@ export default function GroupForm({
   )
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [feeType, setFeeType] = useState<'monthly' | 'per_session' | 'installments' | 'full_course'>('monthly')
-  const [educationStage, setEducationStage] = useState<EducationStage | ''>(initialGradeLevelState.stage)
+  const [educationStage, setEducationStage] = useState<EducationStage | ''>(initialGradeLevelState.stage ?? '')
   const [gradeYear, setGradeYear] = useState(initialGradeLevelState.year)
   const gradeYearOptions = educationStage ? getEducationYears(educationStage) : []
   const gradeLevelValue = educationStage && gradeYear ? formatGradeLevel(educationStage, Number(gradeYear)) : ''
@@ -413,7 +409,7 @@ export default function GroupForm({
           </select>
         </FormField>
 
-        <FormField label={<>القاعة <span className="text-xs font-normal text-slate-400">(اختياري)</span></>} htmlFor="room" error={errors.room}>
+        <FormField label="القاعة (اختياري)" htmlFor="room" error={errors.room}>
           <input
             id="room"
             name="room"
