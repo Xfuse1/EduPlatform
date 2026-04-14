@@ -4,7 +4,6 @@ import { cache } from "react";
 
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { MOCK_TENANT } from "@/lib/mock-data";
 import { TENANT_CONTEXT_COOKIE_NAME } from "@/lib/tenant-context";
 
 export class TenantNotFoundError extends Error {
@@ -40,11 +39,19 @@ export type ResolvedTenant = {
 const SPECIAL_SUBDOMAINS = new Set(["www", "app", "api", "localhost"]);
 
 const FALLBACK_TENANT: ResolvedTenant = {
-  ...MOCK_TENANT,
+  id: "fallback",
+  slug: "default",
+  name: "منصة EduPlatform",
   accountType: "CENTER",
+  themeColor: "#1A5276",
+  plan: "FREE",
   isActive: true,
-  smsQuota: 50,
+  smsQuota: 0,
+  logoUrl: null,
   phone: null,
+  region: null,
+  bio: null,
+  subjects: [],
 };
 
 function extractSubdomain(host: string) {
