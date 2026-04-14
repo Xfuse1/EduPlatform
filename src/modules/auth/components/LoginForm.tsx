@@ -182,7 +182,7 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
                 getInitials(tenant.name)
               )}
             </div>
-            <h1 className="mt-5 text-3xl font-extrabold">{tenant.name}</h1>
+            <h1 className="mt-5 text-3xl font-extrabold">منصة EduPlatform</h1>
             <p className="mt-3 text-sm leading-7 text-white/90">سجّل الدخول برقم الهاتف.</p>
           </div>
         </div>
@@ -252,7 +252,7 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
               getInitials(tenant.name)
             )}
           </div>
-          <h1 className="mt-4 text-2xl font-extrabold">{tenant.name}</h1>
+          <h1 className="mt-4 text-2xl font-extrabold">منصة EduPlatform</h1>
           <p className="mt-2 text-sm text-white/80">
             أدخل الـ PIN لـ <span dir="ltr">{phone}</span>
           </p>
