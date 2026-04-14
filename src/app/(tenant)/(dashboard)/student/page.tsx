@@ -6,6 +6,7 @@ import { requireAuth } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
 import { StudentDashboard } from "@/modules/dashboard/components/StudentDashboard";
 import { getStudentDashboardData } from "@/modules/dashboard/queries";
+import { getOpenGroups } from "@/modules/public-pages/queries";
 
 export default async function StudentDashboardPage() {
   const tenant = await requireTenant();
@@ -15,7 +16,10 @@ export default async function StudentDashboardPage() {
     redirect(user.role === "PARENT" ? "/parent" : "/teacher");
   }
 
-  const data = await getStudentDashboardData(tenant.id, user.id);
+  const [data, availableGroups] = await Promise.all([
+    getStudentDashboardData(tenant.id, user.id),
+    getOpenGroups(tenant.id),
+  ]);
 
-  return <StudentDashboard data={data} />;
+  return <StudentDashboard data={data} availableGroups={availableGroups} />;
 }

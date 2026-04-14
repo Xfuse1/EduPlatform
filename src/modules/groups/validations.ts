@@ -1,4 +1,4 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 
 import {
   GROUP_DAY_VALUES,
@@ -69,14 +69,21 @@ export const groupCreateSchema = z
       z.array(groupScheduleSchema).min(1, "يجب إضافة حصة واحدة على الأقل").max(4, "الحد الأقصى للحصص الأسبوعية هو 4"),
     ),
     maxCapacity: z.coerce
-      .number()
-      .int("الحد الأقصى يجب أن يكون رقمًا صحيحًا")
-      .min(1, "الحد الأدنى للطلاب 1")
-      .max(200, "الحد الأقصى للطلاب 200"),
+      .number({
+        invalid_type_error: "يجب إدخال رقم صحيح",
+        required_error: "عدد الطلاب مطلوب",
+      })
+      .int("يجب أن يكون العدد رقمًا صحيحًا")
+      .min(1, "يجب أن يكون عدد الطلاب 1 على الأقل")
+      .max(200, "الحد الأقصى للطلاب 200 طالب"),
     monthlyFee: z.coerce
-      .number()
-      .int("المصاريف الشهرية يجب أن تكون رقمًا صحيحًا")
-      .min(0, "المصاريف الشهرية لا يمكن أن تكون سالبة"),
+      .number({
+        invalid_type_error: "يجب إدخال رقم صحيح للمصاريف",
+        required_error: "المصاريف مطلوبة",
+      })
+      .int("يجب أن يكون المبلغ رقمًا صحيحًا بدون كسور")
+      .min(0, "المبلغ لا يمكن أن يكون سالبًا")
+      .max(10000, "المبلغ كبير جدًا — الحد الأقصى 10,000 جنيه"),
     color: z.string().trim().regex(hexColorPattern, "اللون يجب أن يكون بصيغة hex مثل #1A5276"),
     room: z.preprocess(
       normalizeOptionalText,

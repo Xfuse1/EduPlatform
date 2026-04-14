@@ -1,5 +1,6 @@
 import type { ResolvedTenant } from "@/lib/tenant";
 import { TeacherLanding } from "@/modules/public-pages/components/TeacherLanding";
+import { getCurrentUser } from "@/lib/auth";
 
 type TenantPublicPageProps = {
   tenant: ResolvedTenant;
@@ -31,10 +32,20 @@ type TenantPublicPageProps = {
 };
 
 export default async function TenantPublicPage(props: TenantPublicPageProps) {
+  const user = await getCurrentUser();
+  const isStudent = user?.role === "STUDENT";
+
   const groups = props.groups.map((group) => ({
     ...group,
     color: group.color ?? undefined,
   }));
 
-  return <TeacherLanding groups={groups} teacher={props.teacher} />;
+  return (
+    <TeacherLanding 
+      groups={groups} 
+      teacher={props.teacher}
+      isStudent={isStudent}
+      currentUserId={user?.id}
+    />
+  );
 }

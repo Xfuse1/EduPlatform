@@ -1,6 +1,7 @@
 'use client';
 
-import { Check, Clock, QrCode, RefreshCcw, User, X } from "lucide-react";
+import { Check, Clock, Plus, QrCode, RefreshCcw, User, X } from "lucide-react";
+import Link from "next/link";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
 
@@ -19,6 +20,7 @@ type Student = {
 
 type Session = {
   id: string;
+  groupId: string;
   title: string;
   status: string;
   qrToken: string | null;
@@ -208,6 +210,16 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
           </div>
         </CardContent>
       </Card>
+
+      <div className="lg:col-span-3">
+        <Link
+          href={`/teacher/assignments?groupId=${session.groupId}&autoOpen=true`}
+          className="flex w-full items-center justify-center gap-3 rounded-2xl bg-primary hover:bg-primary/90 transition-colors px-6 py-4 text-white font-bold shadow-md"
+        >
+          <Plus className="h-5 w-5" />
+          إضافة واجب لهذه الحصة
+        </Link>
+      </div>
     </div>
   );
 }

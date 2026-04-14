@@ -72,14 +72,25 @@ export function ManagerAttendanceTable({ initialRecords }: { initialRecords: Rec
             />
           </div>
           
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <Input
-              type="date"
-              className="ps-10"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-            />
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500">تصفية بالتاريخ</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+              />
+              {dateFilter && (
+                <button
+                  type="button"
+                  onClick={() => setDateFilter("")}
+                  className="h-10 px-3 rounded-xl border border-slate-200 text-sm text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900 whitespace-nowrap"
+                >
+                  مسح
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

@@ -502,3 +502,28 @@ export async function removeFromGroup(studentId: string, groupId: string) {
   );
   revalidatePath("/teacher/groups");
 }
+
+export async function deleteStudent(tenantId: string, studentId: string) {
+  // 1. تحقق من ملكية الحساب للـ tenant
+  const student = await db.user.findFirst({
+    where: { id: studentId, tenantId, role: "STUDENT" },
+  });
+
+  if (!student) {
+    throw new Error("الطالب غير موجود أو لا تملك صلاحية حذفه");
+  }
+
+  // 2. حذف العلاقات أولاً لتجنب مشاكل الـ Foreign Key
+  await db.$transaction([
+    db.groupStudent.deleteMany({ where: { studentId } }),
+    db.parentStudent.deleteMany({ where: { studentId } }),
+    db.attendance.deleteMany({ where: { studentId } }),
+    db.payment.deleteMany({ where: { studentId } }),
+    db.user.delete({ where: { id: studentId } }),
+  ]);
+
+  revalidatePath("/teacher/students");
+  revalidatePath("/teacher/groups");
+  
+  return { success: true };
+}

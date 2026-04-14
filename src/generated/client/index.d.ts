@@ -124,7 +124,9 @@ export type UserRole = (typeof UserRole)[keyof typeof UserRole]
 
 
 export const EnrollmentStatus: {
+  PENDING: 'PENDING',
   ACTIVE: 'ACTIVE',
+  REJECTED: 'REJECTED',
   WAITLIST: 'WAITLIST',
   ARCHIVED: 'ARCHIVED',
   DROPPED: 'DROPPED'
@@ -200,7 +202,10 @@ export const NotificationType: {
   PAYMENT_REMINDER: 'PAYMENT_REMINDER',
   PAYMENT_OVERDUE: 'PAYMENT_OVERDUE',
   CLASS_REMINDER: 'CLASS_REMINDER',
-  ANNOUNCEMENT: 'ANNOUNCEMENT'
+  ANNOUNCEMENT: 'ANNOUNCEMENT',
+  ASSIGNMENT_DUE: 'ASSIGNMENT_DUE',
+  EXAM_PUBLISHED: 'EXAM_PUBLISHED',
+  GRADE_ADDED: 'GRADE_ADDED'
 };
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]

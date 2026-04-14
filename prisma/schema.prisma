@@ -121,11 +121,11 @@ model GroupStudent {
   id         String           @id @default(cuid())
   groupId    String
   studentId  String
-  status     EnrollmentStatus @default(ACTIVE)
-  enrolledAt DateTime         @default(now())
-  droppedAt  DateTime?
-  group      Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  student    User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status     EnrollmentStatus @default(PENDING)
+    enrolledAt DateTime         @default(now())
+    droppedAt  DateTime?
+    group      Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    student    User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, studentId])
   @@index([groupId, status])
@@ -370,7 +370,9 @@ enum UserRole {
 }
 
 enum EnrollmentStatus {
+  PENDING
   ACTIVE
+  REJECTED
   WAITLIST
   ARCHIVED
   DROPPED
@@ -426,6 +428,9 @@ enum NotificationType {
   PAYMENT_OVERDUE
   CLASS_REMINDER
   ANNOUNCEMENT
+  ASSIGNMENT_DUE
+  EXAM_PUBLISHED
+  GRADE_ADDED
 }
 
 enum NotificationChannel {
