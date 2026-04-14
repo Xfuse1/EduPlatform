@@ -131,7 +131,7 @@ function getGeminiModels(): string[] {
     return [modelFromSingle];
   }
 
-  return ["gemini-2.5-flash"];
+  return ["gemini-2.5-flash-lite"];
 }
 
 async function callGeminiModel(params: {
@@ -209,7 +209,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { assignmentFileUrl, answerKeyUrl, submissionFileUrl } = body ?? {};
+    const { assignmentFileUrl, answerKeyUrl, submissionFileUrl, maxGrade } = body ?? {};
 
     if (!assignmentFileUrl || !answerKeyUrl || !submissionFileUrl) {
       return NextResponse.json({ error: "Missing required file URLs" }, { status: 400 });
@@ -225,19 +225,26 @@ export async function POST(req: NextRequest) {
       extractTextFromFileUrl(submissionFileUrl),
     ]);
 
-    const userPrompt = `## نموذج إجابة المعلم (مرجعك الوحيد للتصحيح):
-${answerKeyText}
-
-## الأسئلة:
+    const userPrompt = `## الأسئلة:
 ${questionsText}
+
+## نموذج إجابة المعلم (للفهم والمعنى فقط، ليس للمطابقة الحرفية):
+${answerKeyText}
 
 ## إجابة الطالب:
 ${studentAnswerText}
 
-## المطلوب:
-قارن إجابة الطالب بنموذج الإجابة فقط وأعطِ النتيجة.
-يجب أن يكون ردك JSON صالح فقط بدون أي نص إضافي أو backticks أو أسطر جديدة داخل القيم.
-{"grade":75,"feedback":[{"question":1,"score":15,"maxScore":20,"comment":"تعليق قصير"}],"summary":"ملخص قصير"}`;
+## تعليمات التصحيح:
+- تحقق أولاً: هل الملف يحتوي على إجابات للأسئلة المطروحة؟
+- إذا كان الملف لا علاقة له بالأسئلة (CV، موضوع مختلف، فارغ)، أعطِ درجة 0 واكتب سبباً واضحاً
+- إذا كانت إجابة الطالب تعطي نفس المعنى الصحيح بأسلوبه الخاص، أعطِه الدرجة كاملة
+- لا تخصم درجات بسبب اختلاف الصياغة أو الأسلوب إذا كان المعنى صحيحاً
+
+## الدرجة النهائية للواجب: ${maxGrade || 100} درجة
+- وزّع الدرجات على الأسئلة بحيث يكون مجموعها ${maxGrade || 100} درجة كحد أقصى
+
+يجب أن يكون ردك JSON صالح فقط:
+{"grade":${maxGrade || 100},"feedback":[{"question":1,"score":${Math.round((maxGrade || 100) / 4)},"maxScore":${Math.round((maxGrade || 100) / 4)},"comment":"تعليق"}],"summary":"ملخص"}`;
 
     const models = getGeminiModels();
     const prompt = `${SYSTEM_PROMPT}\n\n${userPrompt}`;
@@ -302,6 +309,13 @@ ${studentAnswerText}
     }
 
     const result = JSON.parse(jsonText);
+
+    // احسب الدرجة من مجموع الـ scores بدل ما نثق في الـ AI
+    if (result.feedback && Array.isArray(result.feedback)) {
+      const totalScore = result.feedback.reduce((sum: number, item: any) => sum + (item.score || 0), 0);
+      result.grade = Math.min(totalScore, maxGrade || 100);
+    }
+
     return NextResponse.json(result);
   } catch (error) {
     console.error("AI Grade error:", error);

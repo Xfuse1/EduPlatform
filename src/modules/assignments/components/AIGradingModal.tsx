@@ -57,6 +57,7 @@ export function AIGradingModal({
           assignmentFileUrl: assignment.fileUrl,
           answerKeyUrl: assignment.answerKeyUrl,
           submissionFileUrl: submission.fileUrl,
+          maxGrade: assignment.maxGrade || 100,
         }),
       });
 
@@ -119,7 +120,7 @@ export function AIGradingModal({
                   </div>
                   <div>
                     <h3 className="font-bold text-purple-900 dark:text-purple-100">الدرجة النهائية المقترحة</h3>
-                    <p className="text-xs text-purple-600 dark:text-purple-400">من 100 درجة</p>
+                    <p className="text-xs text-purple-600 dark:text-purple-400">من {assignment.maxGrade || 100} درجة</p>
                   </div>
                 </div>
                 <CheckCircle2 className="h-6 w-6 text-emerald-500" />

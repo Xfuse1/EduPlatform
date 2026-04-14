@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
+import { showToast } from "@/components/ui/Toast";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -37,6 +38,7 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
     fileLink: initialData?.fileUrl && !initialData.fileUrl.includes('supabase') ? initialData.fileUrl : "",
     file: null as File | null,
     answerKeyFile: null as File | null,
+    maxGrade: initialData?.maxGrade || 100,
   });
 
   // Re-initialize form when initialData changes or modal opens
@@ -50,6 +52,7 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
         fileLink: initialData?.fileUrl && !initialData.fileUrl.includes('supabase') ? initialData.fileUrl : "",
         file: null,
         answerKeyFile: null,
+        maxGrade: initialData?.maxGrade || 100,
       });
     }
   }, [isOpen, initialData, groups]);
@@ -105,7 +108,8 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
         file: undefined, 
         answerKeyFile: undefined,
         fileUrl,
-        answerKeyUrl 
+        answerKeyUrl,
+        maxGrade: formData.maxGrade,
       }; 
       
       const isEditing = !!initialData?.id;
@@ -122,14 +126,20 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
         const result = await res.json();
         if (isEditing) {
           onUpdate?.(result.assignment);
+          showToast.success("تم تحديث الواجب بنجاح");
         } else {
           onAdd?.(result.assignment);
+          showToast.success("تم إضافة الواجب بنجاح");
         }
         onClose();
-        setFormData({ title: "", description: "", groupId: groups[0]?.id || "", dueDate: "", fileLink: "", file: null, answerKeyFile: null });
+        setFormData({ title: "", description: "", groupId: groups[0]?.id || "", dueDate: "", fileLink: "", file: null, answerKeyFile: null, maxGrade: 100 });
+      } else {
+        const errorData = await res.json();
+        showToast.error(errorData.error || "حدث خطأ أثناء حفظ الواجب");
       }
-    } catch (error) {
-      console.error("Failed to add assignment:", error);
+    } catch (error: any) {
+      console.error("Failed to add/update assignment:", error);
+      showToast.error(error.message || "حدث خطأ غير متوقع");
     } finally {
       setLoading(false);
     }
@@ -195,6 +205,24 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
             </div>
           </div>
 
+          {/* الدرجة النهائية */}
+          <div className="space-y-2">
+            <Label htmlFor="maxGrade" className="text-sm font-bold text-slate-700 dark:text-slate-200">
+              الدرجة النهائية للواجب
+              <span className="mr-2 text-xs font-normal text-slate-400">(سيصحح الـ AI بناءً عليها)</span>
+            </Label>
+            <Input
+              id="maxGrade"
+              type="number"
+              min={1}
+              max={1000}
+              required
+              className="min-h-12 text-sm"
+              value={formData.maxGrade}
+              onChange={(e) => setFormData({ ...formData, maxGrade: Number(e.target.value) })}
+            />
+          </div>
+
           {/* الوصف */}
           <div className="space-y-2">
             <Label htmlFor="description" className="text-sm font-bold text-slate-700 dark:text-slate-200">
@@ -242,6 +270,17 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
               <div className="flex-1 border-t border-slate-200 dark:border-slate-700" />
             </div>
 
+            {/* عرض الملف الحالي إن وجد */}
+            {initialData?.fileUrl && !formData.file && (
+              <div className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-800 rounded-lg px-3 py-2 flex items-center gap-2">
+                <FileText className="h-3 w-3 text-primary" />
+                <span>الملف الحالي: </span>
+                <a href={initialData.fileUrl} target="_blank" rel="noreferrer" className="text-primary underline truncate max-w-[200px]">
+                  {decodeURIComponent(initialData.fileUrl.split('/').pop() || 'عرض الملف')}
+                </a>
+              </div>
+            )}
+
             {/* ملف الأسئلة */}
             <div className="space-y-2">
               <Label htmlFor="file" className="text-xs text-slate-500 font-bold flex items-center gap-1">
@@ -281,6 +320,13 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
               />
             </div>
           </div>
+            {/* عرض ملف الإجابات الحالي إن وجد */}
+            {initialData?.answerKeyUrl && !formData.answerKeyFile && (
+              <div className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2 flex items-center gap-2">
+                <Lock className="h-3 w-3" />
+                <span>نموذج الإجابة الحالي محفوظ ✓</span>
+              </div>
+            )}
 
           {/* أزرار */}
           <div className="flex gap-3 pt-2">
