@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
-import { getLegacyGroupScheduleFields } from "@/modules/groups/schedule";
+import { getMinutesFromTime, getLegacyGroupScheduleFields, parseStoredGroupSchedule } from "@/modules/groups/schedule";
 import { groupCreateSchema, normalizeGroupFormData, parseGroupFormData } from "@/modules/groups/validations";
 
 function canManageGroups(role: string) {
@@ -66,6 +66,55 @@ function revalidateGroupPaths(groupId?: string) {
   }
 }
 
+function doTimesOverlap(startA: string, endA: string, startB: string, endB: string) {
+  const a0 = getMinutesFromTime(startA);
+  const a1 = getMinutesFromTime(endA);
+  const b0 = getMinutesFromTime(startB);
+  const b1 = getMinutesFromTime(endB);
+
+  if (a0 === null || a1 === null || b0 === null || b1 === null) return false;
+  return a0 < b1 && b0 < a1;
+}
+
+async function checkScheduleConflict(
+  tenantId: string,
+  schedule: Array<{ day: string; timeStart: string; timeEnd: string }>,
+  excludeGroupId?: string,
+): Promise<string | null> {
+  const existingGroups = await db.group.findMany({
+    where: {
+      tenantId,
+      isActive: true,
+      ...(excludeGroupId ? { id: { not: excludeGroupId } } : {}),
+    },
+    select: {
+      name: true,
+      days: true,
+      timeStart: true,
+      timeEnd: true,
+      schedule: true,
+    },
+  });
+
+  for (const entry of schedule) {
+    for (const group of existingGroups) {
+      const groupSchedule = parseStoredGroupSchedule(group.schedule, {
+        days: group.days,
+        timeStart: group.timeStart,
+        timeEnd: group.timeEnd,
+      });
+
+      for (const slot of groupSchedule) {
+        if (slot.day === entry.day && doTimesOverlap(entry.timeStart, entry.timeEnd, slot.timeStart, slot.timeEnd)) {
+          return `يوجد تعارض مع مجموعة "${group.name}" في نفس اليوم والوقت`;
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
 export async function createGroup(formData: FormData): Promise<GroupActionResult> {
   try {
     const user = await requireAuth();
@@ -82,6 +131,12 @@ export async function createGroup(formData: FormData): Promise<GroupActionResult
     }
 
     const payload = getPayload(formData);
+
+    const conflict = await checkScheduleConflict(tenant.id, payload.schedule);
+    if (conflict) {
+      return { success: false, message: conflict };
+    }
+
     const createdGroup = await db.group.create({
       data: {
         tenantId: tenant.id,
@@ -164,6 +219,12 @@ export async function updateGroup(
     }
 
     const payload = getPayload(formData);
+
+    const conflict = await checkScheduleConflict(tenant.id, payload.schedule, groupId);
+    if (conflict) {
+      return { success: false, message: conflict };
+    }
+
     await db.group.update({
       where: {
         id: groupId,

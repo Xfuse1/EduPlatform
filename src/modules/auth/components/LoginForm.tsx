@@ -96,6 +96,7 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
   const [actualTenantId, setActualTenantId] = useState<string | undefined>();
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [sendingOtp, setSendingOtp] = useState(false);
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
   // Note: intentionally NOT resetting OTP state on unmount
@@ -282,10 +283,11 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
 
         <button
           type="button"
-          onClick={async () => { setStep("phone"); setPin(""); setError(""); await sendOtp(actualTenantId); }}
-          className="w-full text-center text-sm text-sky-300 transition hover:text-sky-200 hover:underline"
+          onClick={async () => { setPin(""); setError(""); setSendingOtp(true); await sendOtp(actualTenantId); setSendingOtp(false); }}
+          disabled={sendingOtp}
+          className="w-full text-center text-sm text-sky-300 transition hover:text-sky-200 hover:underline disabled:cursor-wait disabled:opacity-50"
         >
-          نسيت الـ PIN؟ — ادخل برمز OTP بدلاً منه
+          {sendingOtp ? "جارٍ إرسال كود التحقق..." : "نسيت الـ PIN؟ — ادخل برمز OTP بدلاً منه"}
         </button>
 
         <button
@@ -296,6 +298,8 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
           ← تغيير رقم الهاتف
         </button>
       </CardContent>
+
+      <div id="recaptcha-container-login" ref={recaptchaContainerRef} />
     </Card>
   );
 }

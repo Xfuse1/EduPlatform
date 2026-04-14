@@ -11,6 +11,77 @@ const arabicDaysByIndex = ["الأحد", "الاثنين", "الثلاثاء", "
 
 const englishDaysByIndex = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
 
+const ARABIC_MONTH_NAMES = [
+  "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+  "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
+] as const;
+
+function getLast6Months() {
+  const now = new Date();
+  const months: Array<{ year: number; month: number; label: string; start: Date; end: Date }> = [];
+
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const end = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    months.push({
+      year: d.getFullYear(),
+      month: d.getMonth(),
+      label: ARABIC_MONTH_NAMES[d.getMonth()],
+      start: d,
+      end,
+    });
+  }
+
+  return months;
+}
+
+export const getMonthlyRevenueSeries = cache(async (tenantId: string) => {
+  try {
+    const months = getLast6Months();
+    const payments = await db.payment.findMany({
+      where: {
+        tenantId,
+        status: "PAID",
+        createdAt: { gte: months[0].start },
+      },
+      select: { amount: true, createdAt: true },
+    });
+
+    return months.map((m) => {
+      const total = payments
+        .filter((p) => p.createdAt >= m.start && p.createdAt < m.end)
+        .reduce((sum, p) => sum + p.amount, 0);
+      return { month: m.label, revenue: total };
+    });
+  } catch (error) {
+    console.error("getMonthlyRevenueSeries failed:", error);
+    return [];
+  }
+});
+
+export const getMonthlyAttendanceSeries = cache(async (tenantId: string) => {
+  try {
+    const months = getLast6Months();
+    const records = await db.attendance.findMany({
+      where: {
+        tenantId,
+        markedAt: { gte: months[0].start },
+      },
+      select: { status: true, markedAt: true },
+    });
+
+    return months.map((m) => {
+      const monthRecords = records.filter((r) => r.markedAt >= m.start && r.markedAt < m.end);
+      const present = monthRecords.filter((r) => r.status === "PRESENT" || r.status === "LATE").length;
+      const rate = monthRecords.length > 0 ? Math.round((present / monthRecords.length) * 100) : 0;
+      return { month: m.label, rate };
+    });
+  } catch (error) {
+    console.error("getMonthlyAttendanceSeries failed:", error);
+    return [];
+  }
+});
+
 function getNextDateForDay(dayName: string, fromDate: Date) {
   const normalized = dayName.toLowerCase().trim();
   
@@ -117,7 +188,7 @@ export const getAssignmentsByParent = cache(async (tenantId: string, parentId: s
 
 export const getTeacherDashboardData = cache(async (tenantId: string) => {
   try {
-    const [revenue, todaySessions, students, attendance, tenant, overduePayments, repeatedAbsences] = await Promise.all([
+    const [revenue, todaySessions, students, attendance, tenant, overduePayments, repeatedAbsences, revenueSeries, attendanceSeries] = await Promise.all([
       getRevenueSummary(tenantId),
       getTodaySessions(tenantId),
       getStudentCountSummary(tenantId),
@@ -165,6 +236,8 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
           },
         },
       }),
+      getMonthlyRevenueSeries(tenantId),
+      getMonthlyAttendanceSeries(tenantId),
     ]);
 
     const absenceStudents =
@@ -219,6 +292,8 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
       attendance,
       todaySessions,
       alerts: [...paymentAlerts, ...absenceAlerts],
+      revenueSeries,
+      attendanceSeries,
     };
   } catch (error) {
     console.error("DB getTeacherDashboardData failed, using fallback:", error);
@@ -246,6 +321,8 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
     attendance,
     todaySessions,
     alerts: [],
+    revenueSeries: [],
+    attendanceSeries: [],
   };
 });
 
