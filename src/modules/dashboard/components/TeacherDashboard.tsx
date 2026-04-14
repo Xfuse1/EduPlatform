@@ -90,7 +90,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
         })}
       </section>
 
-      <TeacherDashboardCharts />
+      <TeacherDashboardCharts revenueData={data.revenueSeries} attendanceData={data.attendanceSeries} />
 
       <section className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
         <Card>
