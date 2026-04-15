@@ -1,5 +1,7 @@
 'use server';
 
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { z } from "zod";
@@ -84,6 +86,80 @@ export async function verifyOtp(tenantId: string, payload: unknown) {
   const redirectTo = getDashboardRouteForRole(user.role);
 
   return { user, session, redirectTo };
+}
+
+export async function registerStudentAction(formData: FormData): Promise<ActionResult> {
+  const tenant = await requireTenant();
+  const phoneResult = phoneSchema.safeParse(formData.get("phone"));
+  const idTokenResult = z.string().trim().min(1).safeParse(formData.get("idToken"));
+  const nameResult = z.string().trim().min(2, "الاسم يجب أن يكون حرفين على الأقل").safeParse(formData.get("studentName"));
+  const gradeLevel = (formData.get("gradeLevel") as string | null)?.trim() ?? "";
+
+  if (!phoneResult.success || !idTokenResult.success) {
+    return { success: false, message: "بيانات غير صالحة" };
+  }
+
+  if (!nameResult.success) {
+    return { success: false, message: nameResult.error.issues[0]?.message ?? "الاسم غير صحيح" };
+  }
+
+  const actualTenantId = formData.get("actualTenantId");
+  const tenantId = (typeof actualTenantId === "string" && actualTenantId) ? actualTenantId : tenant.id;
+
+  try {
+    const verified = await verifyFirebasePhoneIdToken(idTokenResult.data);
+    const normalizedPhone = phoneResult.data;
+
+    if (verified.phoneNumber !== normalizedPhone) {
+      return { success: false, message: "رقم الهاتف لا يطابق الكود المرسل" };
+    }
+
+    const existing = await db.user.findFirst({
+      where: { phone: normalizedPhone, tenantId },
+      select: { id: true, role: true, pinHash: true },
+    });
+
+    if (existing) {
+      const session = await createAuthSession({ id: existing.id, tenantId });
+      const cookieStore = await cookies();
+      setAuthSessionCookie(cookieStore, session.token, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+      return {
+        success: true,
+        role: existing.role as ActionResult["role"],
+        redirectTo: redirectMap[existing.role] ?? "/student",
+        hasPin: !!existing.pinHash,
+      };
+    }
+
+    const newStudent = await db.user.create({
+      data: {
+        id: randomUUID(),
+        tenantId,
+        phone: normalizedPhone,
+        name: nameResult.data,
+        gradeLevel: gradeLevel || null,
+        role: "STUDENT",
+        isActive: true,
+      },
+      select: { id: true, pinHash: true },
+    });
+
+    const session = await createAuthSession({ id: newStudent.id, tenantId });
+    const cookieStore = await cookies();
+    setAuthSessionCookie(cookieStore, session.token, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+
+    revalidatePath("/student");
+
+    return {
+      success: true,
+      role: "STUDENT",
+      redirectTo: "/student",
+      hasPin: false,
+    };
+  } catch (error) {
+    console.error("registerStudentAction failed:", error);
+    return { success: false, message: "تعذر إنشاء الحساب" };
+  }
 }
 
 export async function verifyOTPAction(formData: FormData): Promise<ActionResult> {
