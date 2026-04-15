@@ -62,17 +62,31 @@ export function AIGradingModal({
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("AI Grading failed. Response from server:", errorData);
-        throw new Error(errorData.error || "فشل التصحيح");
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await response.json();
+          console.error("AI Grading failed. Response from server:", errorData);
+          throw new Error(errorData.error || "فشل التصحيح");
+        } else {
+          const text = await response.text();
+          console.error("AI Grading failed with non-JSON response:", text.substring(0, 100));
+          throw new Error(`خطأ في السيرفر (Status: ${response.status})`);
+        }
       }
 
-      const data = await response.json();
-      setResult(data);
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        setResult(data);
+      } else {
+        const text = await response.text();
+        console.error("Unexpected non-JSON success response:", text.substring(0, 100));
+        throw new Error("استجابة غير صالحة من السيرفر");
+      }
     } catch (err: any) {
-      console.error("AI Grading Error:", err);
+      console.error("AI Grading Error Details:", err);
       setError(err.message || "حدث خطأ غير متوقع");
-      showToast.error("فشل التصحيح الآلي");
+      showToast.error(err.message || "فشل التصحيح الآلي");
     } finally {
       requestInFlightRef.current = false;
       setLoading(false);

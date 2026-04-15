@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-const pdfParse = require("pdf-parse/lib/pdf-parse.js");
-const mammoth = require("mammoth");
+console.log("Loading /api/ai-grade module...");
+// const pdfParse = require("pdf-parse/lib/pdf-parse.js");
+// const mammoth = require("mammoth");
 
 const NETWORK_RETRYABLE_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
 const MODEL_FALLBACK_STATUS_CODES = new Set([404, 408, 429, 500, 502, 503, 504]);
@@ -101,6 +102,8 @@ async function extractTextFromFileUrl(url: string): Promise<string> {
 
   const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
   const extension = getFileExtension(url);
+  const mammoth = require("mammoth");
+  const pdfParse = require("pdf-parse/lib/pdf-parse.js");
   const buffer = Buffer.from(await response.arrayBuffer());
 
   if (isPdfFile(extension, contentType)) {
