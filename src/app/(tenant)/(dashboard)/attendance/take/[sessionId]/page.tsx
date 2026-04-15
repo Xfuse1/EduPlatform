@@ -1,9 +1,10 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import { requireAuth } from '@/lib/auth'
 import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
+import { formatTimeRange12Hour } from '@/lib/utils'
 import { getSessionAttendance } from '@/modules/attendance/queries'
 import { AttendanceSheet } from '@/modules/attendance/components/AttendanceSheet'
 
@@ -40,7 +41,7 @@ export default async function TakeAttendancePage({ params }: Props) {
           {data.session.group.name}
         </h1>
         <p className="text-sm text-muted-foreground mb-4 text-start">
-          {data.session.group.timeStart} — {data.session.group.timeEnd}
+          {formatTimeRange12Hour(data.session.group.timeStart, data.session.group.timeEnd)}
         </p>
 
         <AttendanceSheet

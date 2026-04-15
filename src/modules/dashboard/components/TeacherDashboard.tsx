@@ -1,8 +1,7 @@
 import { AlertTriangle, ArrowUpLeft, CalendarClock, CheckCircle2, DollarSign, Users } from "lucide-react";
-import Link from "next/link";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency, getSessionStatusLabel, toArabicDigits } from "@/lib/utils";
+import { formatCurrency, formatTimeRange12Hour, getSessionStatusLabel, toArabicDigits } from "@/lib/utils";
 import { TeacherDashboardCharts } from "@/modules/dashboard/components/TeacherDashboardCharts";
 
 type TeacherDashboardProps = {
@@ -17,7 +16,7 @@ const statCardStyles = [
   "from-[#16A085] to-[#45B39D] dark:from-[#117A65] dark:to-[#48C9B0]",
 ] as const;
 
-const statIcons = [DollarSign, AlertTriangle, Users, CheckCircle2] as const;
+const statIcons = [DollarSign, Users, CheckCircle2, AlertTriangle] as const;
 
 function SessionBadge({ status }: { status: string }) {
   const label = getSessionStatusLabel(status);
@@ -38,11 +37,6 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
       hint: `${data.revenue.change >= 0 ? "ارتفاع" : "انخفاض"} ${toArabicDigits(Math.abs(data.revenue.change))}%`,
     },
     {
-      title: "المتأخرات",
-      value: formatCurrency(data.outstanding.total),
-      hint: `${toArabicDigits(data.outstanding.count)} طالب بحاجة للمتابعة`,
-    },
-    {
       title: "إجمالي الطلاب",
       value: toArabicDigits(data.students.total),
       hint: `${toArabicDigits(data.students.recent)} طالب جديد هذا الشهر`,
@@ -52,6 +46,11 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
       value: `${toArabicDigits(data.attendance.rate)}%`,
       hint: `تحسن بمقدار ${toArabicDigits(Math.abs(data.attendance.change))}%`,
     },
+    {
+      title: "المتأخرات",
+      value: formatCurrency(data.outstanding.total),
+      hint: `${toArabicDigits(data.outstanding.count)} طالب بحاجة للمتابعة`,
+    },
   ];
 
   return (
@@ -60,7 +59,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
         <p className="text-start text-sm font-semibold text-white/75">لوحة المعلم</p>
         <h1 className="mt-3 text-start text-3xl font-extrabold">مرحبًا، {displayTeacherName}</h1>
         <p className="mt-3 max-w-2xl text-start text-sm leading-7 text-white/85">
-          كل مؤشرات اليوم بين يديك: الحضور، التحصيل، الحصص، والتنبيهات المهمة.
+          كل مؤشرات اليوم بين يديك: الحضور، التحصيل، الحصص.
         </p>
       </section>
 
@@ -90,9 +89,9 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
         })}
       </section>
 
-      <TeacherDashboardCharts />
+      <TeacherDashboardCharts revenueData={data.revenueSeries} attendanceData={data.attendanceSeries} />
 
-      <section className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+      <section>
         <Card>
           <CardHeader>
             <CardTitle className="text-start">حصص اليوم</CardTitle>
@@ -115,45 +114,10 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
                       <p className="text-start text-lg font-bold text-slate-900 dark:text-white">{session.group.name}</p>
                       <p className="flex items-center gap-2 text-start text-sm text-slate-500 dark:text-slate-400">
                         <CalendarClock className="h-4 w-4" />
-                        <span dir="ltr">
-                          {session.timeStart} - {session.timeEnd}
-                        </span>
+                        <span dir="ltr">{formatTimeRange12Hour(session.timeStart, session.timeEnd)}</span>
                       </p>
                     </div>
                     <SessionBadge status={session.status} />
-                  </div>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-start">التنبيهات</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {data.alerts.length === 0 ? (
-              <div className="rounded-[16px] bg-slate-50 p-6 text-start text-sm text-slate-500 dark:bg-slate-900 dark:text-slate-300">
-                لا توجد تنبيهات حالية
-              </div>
-            ) : (
-              data.alerts.map((alert) => (
-                <div key={alert.id} className="rounded-[18px] border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/20">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
-                      <AlertTriangle className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-start font-bold text-amber-900 dark:text-amber-200">{alert.message}</p>
-                      <p className="mt-2 text-start text-sm text-amber-800 dark:text-amber-300">{formatCurrency(alert.amount)}</p>
-                      <Link
-                        className="touch-target mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 sm:w-auto"
-                        href={`/payments?student=${encodeURIComponent(alert.studentName)}&status=OVERDUE`}
-                      >
-                        متابعة التحصيل
-                      </Link>
-                    </div>
                   </div>
                 </div>
               ))
@@ -164,4 +128,3 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
     </div>
   );
 }
-

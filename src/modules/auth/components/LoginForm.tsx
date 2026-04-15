@@ -30,6 +30,19 @@ function getInitials(name: string) {
     .join("");
 }
 
+function sanitizeNextPath(value?: string) {
+  if (!value) {
+    return "";
+  }
+
+  const normalized = value.trim();
+  if (!normalized.startsWith("/") || normalized.startsWith("//")) {
+    return "";
+  }
+
+  return normalized;
+}
+
 // ─── PIN Pad ──────────────────────────────────────────────────────────────────
 function PinPad({ value, onChange, disabled = false }: { value: string; onChange: (v: string) => void; disabled?: boolean }) {
   const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"];
@@ -88,14 +101,16 @@ function PinPad({ value, onChange, disabled = false }: { value: string; onChange
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export function LoginForm({ tenant }: { tenant: TenantSummary }) {
+export function LoginForm({ tenant, nextPath }: { tenant: TenantSummary; nextPath?: string }) {
   const router = useRouter();
+  const safeNextPath = sanitizeNextPath(nextPath);
   const [step, setStep] = useState<LoginStep>("phone");
   const [phone, setPhone] = useState("");
   const [pin, setPin] = useState("");
   const [actualTenantId, setActualTenantId] = useState<string | undefined>();
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [sendingOtp, setSendingOtp] = useState(false);
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
   // Note: intentionally NOT resetting OTP state on unmount
@@ -139,7 +154,9 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
         return;
       }
 
-      const verifyUrl = `/verify?phone=${encodeURIComponent(phone)}${tenantId ? `&tenantId=${encodeURIComponent(tenantId)}` : ""}`;
+      const verifyUrl = `/verify?phone=${encodeURIComponent(phone)}${tenantId ? `&tenantId=${encodeURIComponent(tenantId)}` : ""}${
+        safeNextPath ? `&next=${encodeURIComponent(safeNextPath)}` : ""
+      }`;
       router.push(verifyUrl);
     } catch (err) {
       console.error("[LoginForm] sendOTP failed:", err);
@@ -159,7 +176,7 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
         setPin("");
         return;
       }
-      window.location.replace(result.redirectTo ?? "/teacher");
+      window.location.replace(safeNextPath || result.redirectTo || "/teacher");
     });
   };
 
@@ -182,7 +199,7 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
                 getInitials(tenant.name)
               )}
             </div>
-            <h1 className="mt-5 text-3xl font-extrabold">{tenant.name}</h1>
+            <h1 className="mt-5 text-3xl font-extrabold">منصة EduPlatform</h1>
             <p className="mt-3 text-sm leading-7 text-white/90">سجّل الدخول برقم الهاتف.</p>
           </div>
         </div>
@@ -252,7 +269,7 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
               getInitials(tenant.name)
             )}
           </div>
-          <h1 className="mt-4 text-2xl font-extrabold">{tenant.name}</h1>
+          <h1 className="mt-4 text-2xl font-extrabold">منصة EduPlatform</h1>
           <p className="mt-2 text-sm text-white/80">
             أدخل الـ PIN لـ <span dir="ltr">{phone}</span>
           </p>
@@ -282,10 +299,11 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
 
         <button
           type="button"
-          onClick={async () => { setStep("phone"); setPin(""); setError(""); await sendOtp(actualTenantId); }}
-          className="w-full text-center text-sm text-sky-300 transition hover:text-sky-200 hover:underline"
+          onClick={async () => { setPin(""); setError(""); setSendingOtp(true); await sendOtp(actualTenantId); setSendingOtp(false); }}
+          disabled={sendingOtp}
+          className="w-full text-center text-sm text-sky-300 transition hover:text-sky-200 hover:underline disabled:cursor-wait disabled:opacity-50"
         >
-          نسيت الـ PIN؟ — ادخل برمز OTP بدلاً منه
+          {sendingOtp ? "جارٍ إرسال كود التحقق..." : "نسيت الـ PIN؟ — ادخل برمز OTP بدلاً منه"}
         </button>
 
         <button
@@ -296,6 +314,8 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
           ← تغيير رقم الهاتف
         </button>
       </CardContent>
+
+      <div id="recaptcha-container-login" ref={recaptchaContainerRef} />
     </Card>
   );
 }

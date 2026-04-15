@@ -1,7 +1,6 @@
 import { cache } from "react";
 
 import { db } from "@/lib/db";
-import { MOCK_TODAY_SESSIONS } from "@/lib/mock-data";
 import { parseStoredGroupSchedule } from "@/modules/groups/schedule";
 
 const dayValueByIndex = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
@@ -110,11 +109,7 @@ export const getTodaySessions = cache(async (tenantId: string) => {
     console.error("DB getTodaySessions failed, using mock:", error);
   }
 
-  return MOCK_TODAY_SESSIONS.map((session) => ({
-    ...session,
-    attendanceCount: 0,
-    totalStudents: 0,
-  }));
+  return [];
 });
 export const getAttendanceOverview = cache(async (tenantId: string) => {
   try {

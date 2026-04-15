@@ -7,6 +7,7 @@ import { ScheduleTimeline } from "@/components/data-display/ScheduleTimeline";
 import { StatsCard } from "@/components/data-display/StatsCard";
 import { requireAuth } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
+import { formatTimeRange12Hour } from "@/lib/utils";
 import { getTeacherScheduleItems } from "@/modules/groups/queries";
 
 export default async function CenterSchedulePage() {
@@ -32,7 +33,7 @@ export default async function CenterSchedulePage() {
           id: item.id,
           title: item.subject,
           dayLabel: item.day,
-          timeLabel: `${item.timeStart} - ${item.timeEnd}`,
+          timeLabel: formatTimeRange12Hour(item.timeStart, item.timeEnd),
           location: item.room,
           statusLabel: item.isToday ? "اليوم" : undefined,
           accentColor: item.color,

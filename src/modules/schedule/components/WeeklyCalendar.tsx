@@ -1,4 +1,5 @@
 import type { DayOfWeek } from '@/types'
+import { formatTime12Hour, formatTimeRange12Hour } from '@/lib/utils'
 
 type ScheduleEntry = {
   id: string
@@ -46,10 +47,6 @@ const DAY_ORDER: DayOfWeek[] = [
 
 const numberFormatter = new Intl.NumberFormat('ar-EG')
 
-function toArabicDigits(value: string) {
-  return value.replace(/\d/g, (digit) => numberFormatter.format(Number(digit)))
-}
-
 export default function WeeklyCalendar({ schedule }: WeeklyCalendarProps) {
   return (
     <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
@@ -76,7 +73,7 @@ export default function WeeklyCalendar({ schedule }: WeeklyCalendarProps) {
               className="grid grid-cols-[110px_repeat(7,minmax(0,1fr))] border-b border-slate-100 last:border-b-0 dark:border-slate-900"
             >
               <div className="px-4 py-5 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                {toArabicDigits(timeSlot)}
+                {formatTime12Hour(timeSlot)}
               </div>
 
               {DAY_ORDER.map((day) => {
@@ -125,8 +122,7 @@ export default function WeeklyCalendar({ schedule }: WeeklyCalendarProps) {
 
                             <div className="space-y-1 text-xs text-slate-600 dark:text-slate-300">
                               <p>
-                                {toArabicDigits(entry.timeStart)} -{' '}
-                                {toArabicDigits(entry.timeEnd)}
+                                {formatTimeRange12Hour(entry.timeStart, entry.timeEnd)}
                               </p>
                               <p>
                                 {numberFormatter.format(entry.studentCount)} /{' '}

@@ -34,7 +34,7 @@ export function ManagerAttendanceTable({ initialRecords }: { initialRecords: Rec
     const header = "اسم الطالب,المجموعة,التاريخ,الحالة,الطريقة,وقت التسجيل\n";
     const body = filteredRecords
       .map((r) => 
-        `${r.studentName},${r.groupName},${new Date(r.date).toLocaleDateString('ar-EG')},${r.status},${r.method},${new Date(r.markedAt).toLocaleTimeString('ar-EG')}`
+        `${r.studentName},${r.groupName},${new Date(r.date).toLocaleDateString('ar-EG')},${r.status},${r.method},${new Date(r.markedAt).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true })}`
       )
       .join("\n");
       

@@ -321,8 +321,8 @@ model Exam {
   maxGrade    Int              @default(100)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
-  group       Group            @relation(fields: [groupId], references: [id])
-  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+  group       Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   questions   ExamQuestion[]
   submissions ExamSubmission[]
 }
@@ -336,7 +336,7 @@ model ExamQuestion {
   correctAnswer String?
   grade         Int          @default(10)
   order         Int          @default(0)
-  exam          Exam         @relation(fields: [examId], references: [id])
+  exam          Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
 }
 
 model ExamSubmission {
@@ -351,7 +351,7 @@ model ExamSubmission {
   gradedByAi     Boolean  @default(false)
   submittedAt    DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  exam           Exam     @relation(fields: [examId], references: [id])
+  exam           Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
   student        User     @relation(fields: [studentId], references: [id])
 }
 

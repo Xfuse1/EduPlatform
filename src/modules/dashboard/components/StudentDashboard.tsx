@@ -5,7 +5,7 @@ import { Clock3, Wallet } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { formatArabicDate, formatCurrency, toArabicDigits } from "@/lib/utils";
+import { formatArabicDate, formatCurrency, formatTimeRange12Hour, toArabicDigits } from "@/lib/utils";
 import { enrollStudentInGroup } from "@/modules/student/actions";
 
 type StudentDashboardProps = {
@@ -61,7 +61,7 @@ export function StudentDashboard({ data, availableGroups }: StudentDashboardProp
               <p className="flex items-center gap-2 text-sm text-white/85">
                 <Clock3 className="h-4 w-4" />
                 <span dir="ltr">
-                  {data.nextSession.timeStart} - {data.nextSession.timeEnd}
+                  {formatTimeRange12Hour(data.nextSession.timeStart, data.nextSession.timeEnd)}
                 </span>
               </p>
               <div className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-bold">متبقي يومان على الحصة</div>
@@ -126,7 +126,7 @@ export function StudentDashboard({ data, availableGroups }: StudentDashboardProp
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{enrollment.group.days.join(" • ")}</p>
                 <p className="mt-2 text-sm font-semibold text-primary dark:text-sky-300">
                   <span dir="ltr">
-                    {enrollment.group.timeStart} - {enrollment.group.timeEnd}
+                    {formatTimeRange12Hour(enrollment.group.timeStart, enrollment.group.timeEnd)}
                   </span>
                 </p>
               </div>
@@ -158,7 +158,7 @@ export function StudentDashboard({ data, availableGroups }: StudentDashboardProp
                       <p className="text-sm text-slate-500 mt-1">{group.gradeLevel} — {group.subject}</p>
                       <p className="text-sm text-slate-500 mt-1">{group.days.join(" • ")}</p>
                       <p className="text-sm font-semibold text-primary mt-1" dir="ltr">
-                        {group.timeStart} - {group.timeEnd}
+                        {formatTimeRange12Hour(group.timeStart, group.timeEnd)}
                       </p>
                     </div>
                     <div className="text-end">

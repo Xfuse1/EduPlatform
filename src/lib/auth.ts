@@ -7,7 +7,6 @@ import type { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { verifyFirebasePhoneIdToken } from "@/lib/firebase-admin";
-import { getMockUserByToken } from "@/lib/mock-data";
 
 export type SessionUser = {
   id: string;
@@ -92,10 +91,6 @@ function toSessionUser(user: {
   };
 }
 
-function getFallbackUserByToken(token?: string | null) {
-  if (!token) return null;
-  return getMockUserByToken(token);
-}
 
 export async function verifyOTP(phone: string, idToken: string, tenantId: string): Promise<VerifyOTPResult> {
   const verified = await verifyFirebasePhoneIdToken(idToken);
@@ -152,10 +147,6 @@ export async function getCurrentUser() {
 
     return toSessionUser(session.user);
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("DB getCurrentUser failed, using mock:", error);
-      return getFallbackUserByToken(token);
-    }
     console.error("DB getCurrentUser failed:", error);
     return null;
   }
