@@ -1,8 +1,9 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import { notFound, redirect } from "next/navigation";
 
 import { requireAuth } from "@/lib/auth";
+import { formatTimeRange12Hour } from "@/lib/utils";
 import { getSessionWithStudents } from "@/modules/attendance/queries";
 import { SessionManagement } from "@/modules/attendance/components/SessionManagement";
 
@@ -27,7 +28,7 @@ export default async function SessionPage({ params }: { params: Promise<{ sessio
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">إدارة الحضور</h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            {session.title} — {session.timeStart} : {session.timeEnd}
+            {session.title} — {formatTimeRange12Hour(session.timeStart, session.timeEnd, " : ")}
           </p>
         </div>
       </div>

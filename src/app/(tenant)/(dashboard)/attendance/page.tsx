@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { requireAuth } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
-import { getSessionStatusLabel, toArabicDigits } from "@/lib/utils";
+import { formatTimeRange12Hour, getSessionStatusLabel, toArabicDigits } from "@/lib/utils";
 import { getAttendanceSessionsList, getAllAttendanceRecords } from "@/modules/attendance/queries";
 import { ManagerAttendanceTable } from "@/modules/attendance/components/ManagerAttendanceTable";
 import { StartSessionButton } from "@/modules/attendance/components/StartSessionButton";
@@ -55,7 +55,7 @@ export default async function AttendancePage() {
                       <span className="flex items-center gap-2">
                         <Clock3 className="h-4 w-4" />
                         <span dir="ltr">
-                          {session.timeStart} - {session.timeEnd}
+                          {formatTimeRange12Hour(session.timeStart, session.timeEnd)}
                         </span>
                       </span>
                       {session.status === "SCHEDULED" ? (

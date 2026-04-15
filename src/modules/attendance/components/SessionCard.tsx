@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import Badge from '@/components/data-display/Badge'
+import { formatTimeRange12Hour } from '@/lib/utils'
 
 // ── B-02: SessionCard ────────────────────────────────────────────────────────
 
@@ -54,7 +55,7 @@ export function SessionCard({ session }: SessionCardProps) {
               {session.group.name}
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 text-start">
-              {session.group.timeStart} — {session.group.timeEnd}
+              {formatTimeRange12Hour(session.group.timeStart, session.group.timeEnd)}
             </p>
           </div>
 

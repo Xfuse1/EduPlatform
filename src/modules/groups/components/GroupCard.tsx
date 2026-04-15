@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { formatTimeRange12Hour } from '@/lib/utils'
 import type { DayOfWeek } from '@/types'
 
 type GroupCardProps = {
@@ -36,10 +37,6 @@ const DAY_LABELS: Record<DayOfWeek, string> = {
   friday: 'الجمعة',
 }
 
-function toArabicDigits(value: string) {
-  return value.replace(/\d/g, (digit) => numberFormatter.format(Number(digit)))
-}
-
 function isDayOfWeek(day: string): day is DayOfWeek {
   return day in DAY_LABELS
 }
@@ -57,7 +54,7 @@ function formatDays(days: string[]) {
 export default function GroupCard({ group }: GroupCardProps) {
   const occupancyText = `${numberFormatter.format(group.studentCount)} / ${numberFormatter.format(group.maxCapacity)}`
   const feeText = `${numberFormatter.format(group.monthlyFee)} ج.م`
-  const timeText = `${toArabicDigits(group.timeStart)} - ${toArabicDigits(group.timeEnd)}`
+  const timeText = formatTimeRange12Hour(group.timeStart, group.timeEnd)
 
   return (
     <article

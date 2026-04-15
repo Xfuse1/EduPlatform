@@ -2,8 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { MessageSquare, Search } from "lucide-react";
-import { useSession } from "@/modules/auth/hooks/useSession";
-import { Button } from "@/components/ui/button";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,6 +30,8 @@ type StudentItem = {
   group: string;
   groupId: string;
   enrollmentStatus?: string;
+  studentStatus: "ACTIVE" | "SUSPENDED";
+  consecutiveAbsences: number;
   paymentStatus: StudentPaymentStatus;
   attendance: number;
   amountDue: number;
@@ -58,7 +58,6 @@ const filters: Array<{ label: string; value: FilterValue }> = [
 ];
 
 export function StudentsPageClient({ students, groups }: { students: StudentItem[]; groups: GroupOption[] }) {
-  const { data: session } = useSession();
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterValue>("ALL");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -250,9 +249,9 @@ export function StudentsPageClient({ students, groups }: { students: StudentItem
                     <button
                       type="button"
                       onClick={() => setOpenStatusId(openStatusId === student.id ? null : student.id)}
-                      className={`flex items-center gap-1 rounded-full px-3 py-2 text-xs font-bold ${statusBadge(student.enrollmentStatus)}`}
+                      className={`flex items-center gap-1 rounded-full px-3 py-2 text-xs font-bold ${statusBadge(student.studentStatus)}`}
                     >
-                      {statusLabel(student.enrollmentStatus)}
+                      {statusLabel(student.studentStatus)}
                       <span className="text-[10px]">▼</span>
                     </button>
 
@@ -358,6 +357,9 @@ export function StudentsPageClient({ students, groups }: { students: StudentItem
               </div>
 
               <p className="text-sm text-slate-600 dark:text-slate-300">{student.group}</p>
+              <p className="text-sm font-bold text-amber-700 dark:text-amber-300">
+                الغياب المتتالي: {toArabicDigits(student.consecutiveAbsences)} حصة
+              </p>
 
               <div className="flex items-center justify-between gap-4">
                 <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-900">

@@ -10,6 +10,19 @@ import { setPinAction } from "@/modules/auth/pin-actions";
 
 const OTP_LENGTH = 6;
 
+function sanitizeNextPath(value?: string) {
+  if (!value) {
+    return "";
+  }
+
+  const normalized = value.trim();
+  if (!normalized.startsWith("/") || normalized.startsWith("//")) {
+    return "";
+  }
+
+  return normalized;
+}
+
 // ─── PIN Setup Prompt ─────────────────────────────────────────────────────────
 function PinSetupPrompt({ redirectTo }: { redirectTo: string }) {
   const [pin, setPin] = useState("");
@@ -128,7 +141,18 @@ function PinSetupPrompt({ redirectTo }: { redirectTo: string }) {
   );
 }
 
-export function OTPInput({ phone, tenantName, actualTenantId }: { phone: string; tenantName: string; actualTenantId?: string }) {
+export function OTPInput({
+  phone,
+  tenantName,
+  actualTenantId,
+  nextPath,
+}: {
+  phone: string;
+  tenantName: string;
+  actualTenantId?: string;
+  nextPath?: string;
+}) {
+  const safeNextPath = sanitizeNextPath(nextPath);
   const [digits, setDigits] = useState<string[]>(Array.from({ length: OTP_LENGTH }, () => ""));
   const [error, setError] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(60);
@@ -178,9 +202,9 @@ export function OTPInput({ phone, tenantName, actualTenantId }: { phone: string;
 
           // Only show PIN setup if user doesn't have one yet
           if (result.hasPin) {
-            window.location.replace(result.redirectTo ?? "/teacher");
+            window.location.replace(safeNextPath || result.redirectTo || "/teacher");
           } else {
-            setPinSetupRedirectTo(result.redirectTo ?? "/teacher");
+            setPinSetupRedirectTo(safeNextPath || result.redirectTo || "/teacher");
           }
         } catch (err: unknown) {
           console.error("OTP confirm failed:", err);
@@ -197,7 +221,7 @@ export function OTPInput({ phone, tenantName, actualTenantId }: { phone: string;
         }
       });
     }
-  }, [code, digits, phone]);
+  }, [actualTenantId, code, digits, phone, safeNextPath]);
 
   const handleChange = (index: number, value: string) => {
     const nextValue = value.replace(/\D/g, "").slice(-1);

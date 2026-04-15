@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency, toArabicDigits, cn } from "@/lib/utils";
+import { formatCurrency, formatTime12Hour, toArabicDigits, cn } from "@/lib/utils";
 import { showToast } from "@/components/ui/Toast";
 
 type ParentDashboardProps = {
@@ -140,7 +140,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                   <div key={child.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
-                        {child.nextSession.timeStart.split(':')[0]}
+                        {formatTime12Hour(child.nextSession.timeStart)}
                       </div>
                       <div>
                         <p className="text-sm font-bold text-slate-900 dark:text-white">{child.nextSession.group.name}</p>
@@ -285,7 +285,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                           {child.nextSession ? `${child.nextSession.group.name}` : "لا توجد حصة قادمة"}
                         </p>
                         {child.nextSession && (
-                          <p className="mt-1 text-xs text-slate-500 font-medium">{formatSessionDate(child.nextSession.date)} • {child.nextSession.timeStart}</p>
+                          <p className="mt-1 text-xs text-slate-500 font-medium">{formatSessionDate(child.nextSession.date)} • {formatTime12Hour(child.nextSession.timeStart)}</p>
                         )}
                       </div>
                       <Button 

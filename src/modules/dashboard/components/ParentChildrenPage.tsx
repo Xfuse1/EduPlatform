@@ -3,7 +3,7 @@ import { CalendarClock, CheckCircle2, CreditCard, GraduationCap, School } from "
 import EmptyState from "@/components/shared/EmptyState";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { formatCurrency, toArabicDigits } from "@/lib/utils";
+import { formatCurrency, formatTime12Hour, toArabicDigits } from "@/lib/utils";
 import { LinkChildForm } from "@/modules/parent/components/LinkChildForm";
 import { ChildGroupEnrollmentButton } from "@/modules/parent/components/ChildGroupEnrollmentButton";
 import { RemoveChildButton } from "@/modules/parent/components/RemoveChildButton";
@@ -142,7 +142,7 @@ export function ParentChildrenPage({ data }: ParentChildrenPageProps) {
                   <div>
                     <p className="font-bold text-slate-900 dark:text-white">الحصة القادمة</p>
                     <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                      {child.nextSession ? `${child.nextSession.group.name} - ${child.nextSession.timeStart}` : "لا توجد حصة قادمة"}
+                      {child.nextSession ? `${child.nextSession.group.name} - ${formatTime12Hour(child.nextSession.timeStart)}` : "لا توجد حصة قادمة"}
                     </p>
                     {child.nextSession ? (
                       <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">{formatSessionDate(child.nextSession.date)}</p>

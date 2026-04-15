@@ -34,7 +34,7 @@ export function QRScanner() {
       setResult({
         success: true,
         sessionName: "الرياضيات - المجموعة أ",
-        time: new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })
+        time: new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit", hour12: true })
       })
       showToast.success("تم تسجيل حضورك بنجاح")
     } else {

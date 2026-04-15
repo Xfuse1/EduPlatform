@@ -1,5 +1,7 @@
 import { CalendarDays } from "lucide-react";
 
+import { formatTime12Hour } from "@/lib/utils";
+
 type StudentScheduleSession = {
   id: string;
   subject: string;
@@ -16,18 +18,8 @@ type StudentScheduleProps = {
 
 const orderedDays = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"] as const;
 
-function toArabicDigits(value: string) {
-  const arabicDigits = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
-
-  return value.replace(/\d/g, (digit) => arabicDigits[Number(digit)] ?? digit);
-}
-
 function formatArabicTime(value: string) {
-  const [time, meridiem] = value.split(" ");
-  const [hours, minutes] = time.split(":");
-  const suffix = meridiem === "PM" ? "م" : "ص";
-
-  return `${toArabicDigits(hours)}:${toArabicDigits(minutes)} ${suffix}`;
+  return formatTime12Hour(value);
 }
 
 function getStatus(session: StudentScheduleSession, todayDay: string | undefined) {
@@ -89,7 +81,7 @@ export function StudentSchedule({ sessions }: StudentScheduleProps) {
         <p className="text-start text-sm font-semibold text-white/80">حصصك هذا الأسبوع</p>
         <h1 className="mt-2 text-start text-3xl font-extrabold">جدولي الأسبوعي</h1>
         <p className="mt-3 max-w-2xl text-start text-sm leading-7 text-white/85">
-          تابع مواعيد حصصك بسهولة مع إبراز حصص اليوم أولاً وتنظيم واضح لكل يوم.
+          تابع مواعيد حصصك بسهولة مع إبراز حصص اليوم أولًا وتنظيم واضح لكل يوم.
         </p>
       </header>
 
@@ -142,7 +134,6 @@ export function StudentSchedule({ sessions }: StudentScheduleProps) {
                         {status.label}
                       </div>
                     </div>
-
                   </article>
                 );
               })}

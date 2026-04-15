@@ -7,6 +7,7 @@ import { ScheduleTimeline } from "@/components/data-display/ScheduleTimeline";
 import { OfflineState } from "@/components/shared/OfflineState";
 import { requireAuth } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
+import { formatTimeRange12Hour } from "@/lib/utils";
 import { getSessionAttendance, getTodaySessions } from "@/modules/attendance/queries";
 
 export default async function CenterAttendancePage() {
@@ -30,7 +31,7 @@ export default async function CenterAttendancePage() {
             id: session.id,
             title: session.group.name,
             subtitle: session.status === "IN_PROGRESS" ? "جارية الآن" : "مجدولة اليوم",
-            timeLabel: `${session.timeStart} - ${session.timeEnd}`,
+            timeLabel: formatTimeRange12Hour(session.timeStart, session.timeEnd),
             statusLabel: session.status === "IN_PROGRESS" ? "مباشر" : "اليوم",
             accentColor: session.status === "IN_PROGRESS" ? "#0F766E" : "#2E86C1",
           }))}
