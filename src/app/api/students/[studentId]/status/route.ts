@@ -4,8 +4,9 @@ import { db } from "@/lib/db";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { studentId: string } }
+  { params }: { params: Promise<{ studentId: string }> }
 ) {
+  const { studentId } = await params;
   const user = await getCurrentUser();
   if (!user || !["TEACHER", "ASSISTANT"].includes(user.role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,7 +19,7 @@ export async function PATCH(
       // تحديث حالة الانضمام للمجموعة
       await db.groupStudent.updateMany({
         where: {
-          studentId: params.studentId,
+          studentId: studentId,
           groupId: groupId,
         },
         data: {
@@ -28,7 +29,7 @@ export async function PATCH(
     } else {
       // تحديث حالة الطالب العامة
       await db.user.update({
-        where: { id: params.studentId },
+        where: { id: studentId },
         data: { isActive: status === "ACTIVE" },
       });
     }
