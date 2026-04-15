@@ -174,6 +174,7 @@ export default function GroupForm({
   )
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [feeType, setFeeType] = useState<'monthly' | 'per_session' | 'installments' | 'full_course'>('monthly')
+  const [monthlyFeeValue, setMonthlyFeeValue] = useState(mode === 'edit' ? String(initialValues.monthlyFee) : '')
   const [educationStage, setEducationStage] = useState<EducationStage | ''>((initialGradeLevelState.stage as EducationStage | '') || '')
   const [gradeYear, setGradeYear] = useState(initialGradeLevelState.year)
   const gradeYearOptions = educationStage ? getEducationYears(educationStage) : []
@@ -513,9 +514,10 @@ export default function GroupForm({
             <input
               id="monthlyFee"
               name="monthlyFee"
-              type="number"
-              min={0}
-              defaultValue={mode === 'edit' ? String(initialValues.monthlyFee) : ''}
+              type="text"
+              inputMode="numeric"
+              value={monthlyFeeValue}
+              onChange={(e) => setMonthlyFeeValue(e.target.value.replace(/\D/g, ''))}
               placeholder="مثال: 500"
               className={inputClassName}
               aria-invalid={Boolean(errors.monthlyFee)}

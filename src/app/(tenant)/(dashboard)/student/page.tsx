@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { requireAuth } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
+import { getGradeLevelKey } from "@/lib/grade-levels";
 import { StudentDashboard } from "@/modules/dashboard/components/StudentDashboard";
 import { getStudentDashboardData } from "@/modules/dashboard/queries";
 import { getOpenGroups } from "@/modules/public-pages/queries";
@@ -16,10 +17,15 @@ export default async function StudentDashboardPage() {
     redirect(user.role === "PARENT" ? "/parent" : "/teacher");
   }
 
-  const [data, availableGroups] = await Promise.all([
+  const [data, allGroups] = await Promise.all([
     getStudentDashboardData(tenant.id, user.id),
     getOpenGroups(tenant.id),
   ]);
+
+  const studentGradeLevelKey = getGradeLevelKey(data.profile?.student?.gradeLevel ?? "");
+  const availableGroups = studentGradeLevelKey
+    ? allGroups.filter((g) => getGradeLevelKey(g.gradeLevel) === studentGradeLevelKey)
+    : allGroups;
 
   return <StudentDashboard data={data} availableGroups={availableGroups} />;
 }

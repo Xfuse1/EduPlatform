@@ -524,6 +524,64 @@ export async function deleteStudent(tenantId: string, studentId: string) {
 
   revalidatePath("/teacher/students");
   revalidatePath("/teacher/groups");
-  
+
   return { success: true };
+}
+
+export async function findStudentByPhone(phone: string): Promise<{
+  found: boolean;
+  student?: { id: string; name: string; phone: string; gradeLevel: string | null };
+  message?: string;
+}> {
+  try {
+    const tenant = await requireTenant();
+    const normalized = normalizeEgyptPhone(phone.trim());
+
+    if (!/^01\d{9}$/.test(normalized)) {
+      return { found: false, message: "رقم الهاتف غير صحيح" };
+    }
+
+    const student = await db.user.findFirst({
+      where: { tenantId: tenant.id, phone: normalized, role: "STUDENT" },
+      select: { id: true, name: true, phone: true, gradeLevel: true },
+    });
+
+    if (!student) {
+      return { found: false };
+    }
+
+    return {
+      found: true,
+      student: {
+        id: student.id,
+        name: student.name,
+        phone: student.phone.startsWith("student-") ? "" : student.phone,
+        gradeLevel: student.gradeLevel,
+      },
+    };
+  } catch (error) {
+    console.error("findStudentByPhone failed:", error);
+    return { found: false, message: "تعذر البحث حاليًا" };
+  }
+}
+
+export async function enrollExistingStudent(studentId: string, groupId: string): Promise<{ success: boolean; message?: string }> {
+  try {
+    const tenant = await requireTenant();
+
+    const student = await db.user.findFirst({
+      where: { id: studentId, tenantId: tenant.id, role: "STUDENT" },
+      select: { id: true },
+    });
+
+    if (!student) {
+      return { success: false, message: "الطالب غير موجود" };
+    }
+
+    await enrollInGroup(studentId, groupId);
+    return { success: true };
+  } catch (error) {
+    console.error("enrollExistingStudent failed:", error);
+    return { success: false, message: "تعذر إضافة الطالب للمجموعة" };
+  }
 }

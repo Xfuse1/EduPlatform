@@ -16,7 +16,7 @@ type TenantSummary = {
   themeColor: string;
 };
 
-type LoginStep = "phone" | "pin" | "otp";
+type LoginStep = "phone" | "pin" | "otp" | "register";
 
 const PIN_MIN_LENGTH = 4;
 const PIN_MAX_LENGTH = 8;
@@ -111,6 +111,8 @@ export function LoginForm({ tenant, nextPath }: { tenant: TenantSummary; nextPat
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const [sendingOtp, setSendingOtp] = useState(false);
+  const [registerName, setRegisterName] = useState("");
+  const [registerGrade, setRegisterGrade] = useState("");
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
   // Note: intentionally NOT resetting OTP state on unmount
@@ -128,7 +130,7 @@ export function LoginForm({ tenant, nextPath }: { tenant: TenantSummary; nextPat
       const { hasPin, exists, actualTenantId: tid } = await checkUserPin(phone);
 
       if (!exists) {
-        setError("لا يوجد حساب مرتبط بهذا الرقم");
+        setStep("register");
         return;
       }
 
@@ -144,7 +146,7 @@ export function LoginForm({ tenant, nextPath }: { tenant: TenantSummary; nextPat
     });
   };
 
-  const sendOtp = async (tenantId?: string) => {
+  const sendOtp = async (tenantId?: string, registerMode?: { name: string; grade: string }) => {
     try {
       const { sendFirebasePhoneOtp } = await import("@/modules/auth/lib/firebasePhoneOtp");
       const result = await sendFirebasePhoneOtp(phone, "recaptcha-container-login");
@@ -154,10 +156,15 @@ export function LoginForm({ tenant, nextPath }: { tenant: TenantSummary; nextPat
         return;
       }
 
-      const verifyUrl = `/verify?phone=${encodeURIComponent(phone)}${tenantId ? `&tenantId=${encodeURIComponent(tenantId)}` : ""}${
-        safeNextPath ? `&next=${encodeURIComponent(safeNextPath)}` : ""
-      }`;
-      router.push(verifyUrl);
+      const params = new URLSearchParams({ phone });
+      if (tenantId) params.set("tenantId", tenantId);
+      if (safeNextPath) params.set("next", safeNextPath);
+      if (registerMode) {
+        params.set("mode", "register");
+        params.set("studentName", registerMode.name);
+        params.set("gradeLevel", registerMode.grade);
+      }
+      router.push(`/verify?${params.toString()}`);
     } catch (err) {
       console.error("[LoginForm] sendOTP failed:", err);
       setError("تعذر إرسال كود التحقق. تأكد من رقم الهاتف وحاول مرة أخرى.");
@@ -246,6 +253,91 @@ export function LoginForm({ tenant, nextPath }: { tenant: TenantSummary; nextPat
         <div className="border-t border-slate-100 px-6 py-4 text-center text-sm font-semibold text-slate-500 dark:border-slate-800 dark:text-slate-400">
           منصة EduPlatform
         </div>
+
+        <div id="recaptcha-container-login" ref={recaptchaContainerRef} />
+      </Card>
+    );
+  }
+
+  // ─── Register Step ───────────────────────────────────────────────────────────
+  if (step === "register") {
+    const handleRegisterSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      if (registerName.trim().length < 2) { setError("الاسم يجب أن يكون حرفين على الأقل"); return; }
+      setError("");
+      setSendingOtp(true);
+      sendOtp(undefined, { name: registerName.trim(), grade: registerGrade.trim() })
+        .finally(() => setSendingOtp(false));
+    };
+
+    return (
+      <Card className="overflow-hidden rounded-[24px] border-white/30 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
+        <div
+          className="relative overflow-hidden px-6 pb-7 pt-8 sm:px-8"
+          style={{ background: `linear-gradient(135deg, ${tenant.themeColor}, #2E86C1 55%, #6FB3D2)` }}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.22),_transparent_32%)]" />
+          <div className="relative text-center text-white">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-white/30 bg-white/15 text-2xl font-extrabold shadow-lg backdrop-blur">
+              {tenant.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img alt={tenant.name} className="h-full w-full rounded-full object-cover" src={tenant.logoUrl} />
+              ) : (
+                getInitials(tenant.name)
+              )}
+            </div>
+            <h1 className="mt-4 text-2xl font-extrabold">إنشاء حساب طالب</h1>
+            <p className="mt-2 text-sm text-white/80">أدخل بياناتك لإنشاء حسابك</p>
+          </div>
+        </div>
+
+        <CardContent className="p-6 sm:p-8">
+          <form className="space-y-4" onSubmit={handleRegisterSubmit}>
+            <div>
+              <Label htmlFor="registerPhone">رقم الهاتف</Label>
+              <Input dir="ltr" id="registerPhone" value={phone} disabled className="font-semibold" />
+            </div>
+
+            <div>
+              <Label htmlFor="registerName">الاسم الكامل</Label>
+              <Input
+                id="registerName"
+                placeholder="أدخل اسمك الكامل"
+                value={registerName}
+                onChange={(e) => { setRegisterName(e.target.value); setError(""); }}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="registerGrade">الصف الدراسي (اختياري)</Label>
+              <Input
+                id="registerGrade"
+                placeholder="مثال: الثالث الثانوي"
+                value={registerGrade}
+                onChange={(e) => setRegisterGrade(e.target.value)}
+              />
+            </div>
+
+            {error ? (
+              <p className="rounded-[16px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200">
+                {error}
+              </p>
+            ) : null}
+
+            <Button className="w-full gap-2 text-base" disabled={sendingOtp || isPending} type="submit">
+              <span>{sendingOtp ? "جارٍ إرسال الكود..." : "إرسال كود التحقق"}</span>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+
+            <button
+              type="button"
+              onClick={() => { setStep("phone"); setError(""); }}
+              className="w-full text-center text-sm text-slate-500 transition hover:text-slate-700"
+            >
+              ← رجوع لتسجيل الدخول
+            </button>
+          </form>
+        </CardContent>
 
         <div id="recaptcha-container-login" ref={recaptchaContainerRef} />
       </Card>

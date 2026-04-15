@@ -4,7 +4,7 @@ import { CheckCircle2, Delete, ShieldCheck, TimerReset } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { verifyOTPAction } from "@/modules/auth/actions";
+import { registerStudentAction, verifyOTPAction } from "@/modules/auth/actions";
 import { setPinAction } from "@/modules/auth/pin-actions";
 // OTP send/confirm now use the unified firebasePhoneOtp lib to avoid module-chunk split issues
 
@@ -146,11 +146,17 @@ export function OTPInput({
   tenantName,
   actualTenantId,
   nextPath,
+  mode,
+  studentName,
+  gradeLevel,
 }: {
   phone: string;
   tenantName: string;
   actualTenantId?: string;
   nextPath?: string;
+  mode?: string;
+  studentName?: string;
+  gradeLevel?: string;
 }) {
   const safeNextPath = sanitizeNextPath(nextPath);
   const [digits, setDigits] = useState<string[]>(Array.from({ length: OTP_LENGTH }, () => ""));
@@ -191,7 +197,14 @@ export function OTPInput({
           formData.set("idToken", idToken);
           if (actualTenantId) formData.set("actualTenantId", actualTenantId);
 
-          const result = await verifyOTPAction(formData);
+          let result;
+          if (mode === "register") {
+            formData.set("studentName", studentName ?? "");
+            formData.set("gradeLevel", gradeLevel ?? "");
+            result = await registerStudentAction(formData);
+          } else {
+            result = await verifyOTPAction(formData);
+          }
 
           if (!result.success) {
             setError(result.message ?? "تعذر التحقق من الكود");
