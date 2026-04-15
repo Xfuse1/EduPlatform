@@ -2,6 +2,7 @@ import { cache } from "react";
 
 import { db } from "@/lib/db";
 import { getGradeLevelKey } from "@/lib/grade-levels";
+import { formatTimeRange12Hour } from "@/lib/utils";
 import { getAssignmentsByStudent } from "@/modules/assignments/queries";
 import { getAttendanceOverview, getStudentAttendanceSnapshot, getTodaySessions } from "@/modules/attendance/queries";
 import { getRevenueSummary, getStudentPaymentSnapshot } from "@/modules/payments/queries";
@@ -581,7 +582,7 @@ export const getCenterDashboardData = cache(async (tenantId: string) => {
       sessionName: session.group.name,
       attendedCount: session.attendanceCount,
       totalCount: session.totalStudents,
-      timeLabel: `${session.timeStart} - ${session.timeEnd}`,
+      timeLabel: formatTimeRange12Hour(session.timeStart, session.timeEnd),
       groupName: session.group.name,
       status: session.status,
     })),

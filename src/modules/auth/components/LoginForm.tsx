@@ -30,6 +30,19 @@ function getInitials(name: string) {
     .join("");
 }
 
+function sanitizeNextPath(value?: string) {
+  if (!value) {
+    return "";
+  }
+
+  const normalized = value.trim();
+  if (!normalized.startsWith("/") || normalized.startsWith("//")) {
+    return "";
+  }
+
+  return normalized;
+}
+
 // ─── PIN Pad ──────────────────────────────────────────────────────────────────
 function PinPad({ value, onChange, disabled = false }: { value: string; onChange: (v: string) => void; disabled?: boolean }) {
   const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"];
@@ -88,8 +101,9 @@ function PinPad({ value, onChange, disabled = false }: { value: string; onChange
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export function LoginForm({ tenant }: { tenant: TenantSummary }) {
+export function LoginForm({ tenant, nextPath }: { tenant: TenantSummary; nextPath?: string }) {
   const router = useRouter();
+  const safeNextPath = sanitizeNextPath(nextPath);
   const [step, setStep] = useState<LoginStep>("phone");
   const [phone, setPhone] = useState("");
   const [pin, setPin] = useState("");
@@ -140,7 +154,9 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
         return;
       }
 
-      const verifyUrl = `/verify?phone=${encodeURIComponent(phone)}${tenantId ? `&tenantId=${encodeURIComponent(tenantId)}` : ""}`;
+      const verifyUrl = `/verify?phone=${encodeURIComponent(phone)}${tenantId ? `&tenantId=${encodeURIComponent(tenantId)}` : ""}${
+        safeNextPath ? `&next=${encodeURIComponent(safeNextPath)}` : ""
+      }`;
       router.push(verifyUrl);
     } catch (err) {
       console.error("[LoginForm] sendOTP failed:", err);
@@ -160,7 +176,7 @@ export function LoginForm({ tenant }: { tenant: TenantSummary }) {
         setPin("");
         return;
       }
-      window.location.replace(result.redirectTo ?? "/teacher");
+      window.location.replace(safeNextPath || result.redirectTo || "/teacher");
     });
   };
 

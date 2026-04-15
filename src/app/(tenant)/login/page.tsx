@@ -5,8 +5,13 @@ import { ChevronRight } from "lucide-react";
 import { requireTenant } from "@/lib/tenant";
 import { LoginForm } from "@/modules/auth/components/LoginForm";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
   const tenant = await requireTenant();
+  const params = await searchParams;
 
   return (
     <main
@@ -26,7 +31,7 @@ export default async function LoginPage() {
           <p className="text-sm font-bold leading-7 text-white">سجّل دخولك برقم هاتفك — سنعرف حسابك تلقائياً</p>
         </div>
         <div className="login-form-shell">
-          <LoginForm tenant={tenant} />
+          <LoginForm tenant={tenant} nextPath={params.next} />
         </div>
       </div>
     </main>

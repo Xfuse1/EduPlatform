@@ -55,6 +55,59 @@ export function formatDate(value: string | Date) {
   }).format(new Date(value));
 }
 
+function parseTimeTo24Hour(value: string) {
+  const normalized = value.trim();
+
+  const twentyFourHourMatch = normalized.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+  if (twentyFourHourMatch) {
+    return {
+      hours24: Number(twentyFourHourMatch[1]),
+      minutes: Number(twentyFourHourMatch[2]),
+    };
+  }
+
+  const twelveHourMatch = normalized.match(/^([1-9]|1[0-2]):([0-5]\d)\s*(AM|PM|ص|م)$/i);
+  if (!twelveHourMatch) {
+    return null;
+  }
+
+  const rawHours = Number(twelveHourMatch[1]) % 12;
+  const suffix = twelveHourMatch[3].toUpperCase();
+  const isPm = suffix === "PM" || suffix === "م";
+
+  return {
+    hours24: isPm ? rawHours + 12 : rawHours,
+    minutes: Number(twelveHourMatch[2]),
+  };
+}
+
+export function formatTime12Hour(value: string, options?: { useArabicDigits?: boolean; meridiem?: "ar" | "en" }) {
+  const parsed = parseTimeTo24Hour(value);
+  if (!parsed) {
+    return value;
+  }
+
+  const useArabicDigits = options?.useArabicDigits ?? true;
+  const meridiemFormat = options?.meridiem ?? "ar";
+  const hours12 = parsed.hours24 % 12 || 12;
+  const suffix = meridiemFormat === "en" ? (parsed.hours24 >= 12 ? "PM" : "AM") : parsed.hours24 >= 12 ? "م" : "ص";
+  const formatted = `${hours12.toString().padStart(2, "0")}:${parsed.minutes.toString().padStart(2, "0")}`;
+
+  return `${useArabicDigits ? toArabicDigits(formatted) : formatted} ${suffix}`;
+}
+
+export function formatTimeRange12Hour(start: string, end: string, separator = " - ") {
+  return `${formatTime12Hour(start)}${separator}${formatTime12Hour(end)}`;
+}
+
+export function formatClockTime(value: string | Date) {
+  return new Intl.DateTimeFormat("ar-EG", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date(value));
+}
+
 export function normalizeEgyptianPhone(value: string) {
   const normalized = normalizeEgyptPhone(value);
 

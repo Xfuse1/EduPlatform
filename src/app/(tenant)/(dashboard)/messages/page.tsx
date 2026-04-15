@@ -238,7 +238,7 @@ export default function MessagesPage() {
     const now = new Date()
     const diff = now.getTime() - date.getTime()
     if (diff < 1000 * 60 * 60 * 24) {
-      return date.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })
+      return date.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit", hour12: true })
     }
     if (diff < 1000 * 60 * 60 * 24 * 2) {
       return "أمس"
@@ -372,7 +372,7 @@ export default function MessagesPage() {
                           "text-[9px] mt-1 block",
                           isMe ? "text-white/60" : "text-slate-400"
                         )}>
-                          {m.createdAt.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
+                          {m.createdAt.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit", hour12: true })}
                         </span>
                       </div>
                     </div>

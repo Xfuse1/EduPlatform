@@ -121,7 +121,7 @@ export function StudentExamsPageClient({ initialExams = [] }: StudentExamsPageCl
                         {exam.status === "upcoming" && (
                             <div className="text-center space-y-1">
                                 <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">تاريخ البداية</span>
-                                <span className="block text-sm font-extrabold text-slate-700 dark:text-slate-300">{new Date(exam.examDate).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span className="block text-sm font-extrabold text-slate-700 dark:text-slate-300">{new Date(exam.examDate).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
                             </div>
                         )}
                         
