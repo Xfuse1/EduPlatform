@@ -159,7 +159,7 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
       ) : (
         <Button className="w-full gap-2 sm:w-auto" onClick={() => setOpen(true)} type="button">
           <Plus className="h-4 w-4" />
-          <span>+ إضافة طالب</span>
+          <span>إضافة طالب</span>
         </Button>
       )}
 

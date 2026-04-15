@@ -9,7 +9,7 @@ import { enrollStudentInGroup } from "@/modules/student/actions";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { formatCapacity, formatCurrency, toArabicDigits } from "@/lib/utils";
+import { formatCapacity, formatCurrency, formatTimeRange12Hour, toArabicDigits } from "@/lib/utils";
 
 type TeacherLandingProps = {
   teacher: {
@@ -161,7 +161,7 @@ export function TeacherLanding({
                   <p className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                     <Clock3 className="h-4 w-4" />
                     <span dir="ltr">
-                      {group.timeStart} - {group.timeEnd}
+                      {formatTimeRange12Hour(group.timeStart, group.timeEnd)}
                     </span>
                   </p>
 

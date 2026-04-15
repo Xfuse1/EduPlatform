@@ -6,7 +6,7 @@ import { useMemo, useState, useTransition } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { cn, formatCapacity, formatCurrency } from "@/lib/utils";
+import { cn, formatCapacity, formatCurrency, formatTimeRange12Hour } from "@/lib/utils";
 import { enrollChildInGroup, searchGroupsForChild } from "@/modules/parent/actions";
 
 type AvailableGroup = {
@@ -232,7 +232,7 @@ export function ChildGroupEnrollmentButton({
                             {group.gradeLevel} - {group.days.join("، ")}
                           </p>
                           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            {group.timeStart} - {group.timeEnd}
+                            {formatTimeRange12Hour(group.timeStart, group.timeEnd)}
                             {group.room ? ` - ${group.room}` : ""}
                           </p>
                         </div>

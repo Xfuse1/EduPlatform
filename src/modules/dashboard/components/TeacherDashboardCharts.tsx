@@ -13,23 +13,7 @@ import {
   YAxis,
 } from "recharts";
 
-const revenueData = [
-  { month: "أكتوبر", revenue: 12500 },
-  { month: "نوفمبر", revenue: 14200 },
-  { month: "ديسمبر", revenue: 11800 },
-  { month: "يناير", revenue: 16500 },
-  { month: "فبراير", revenue: 15200 },
-  { month: "مارس", revenue: 18250 },
-] as const;
-
-const attendanceData = [
-  { month: "أكتوبر", rate: 82 },
-  { month: "نوفمبر", rate: 88 },
-  { month: "ديسمبر", rate: 79 },
-  { month: "يناير", rate: 91 },
-  { month: "فبراير", rate: 87 },
-  { month: "مارس", rate: 92 },
-] as const;
+type ChartDataPoint = { month: string; revenue?: number; rate?: number };
 
 function toArabicDigits(value: number | string) {
   const arabicDigits = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
@@ -89,53 +73,78 @@ function ChartCard({ title, children }: { title: string; children: ReactNode }) 
   );
 }
 
-export function TeacherDashboardCharts() {
+function EmptyChart({ message }: { message: string }) {
+  return (
+    <div className="flex h-full items-center justify-center text-sm text-slate-400 dark:text-slate-500">
+      {message}
+    </div>
+  );
+}
+
+export function TeacherDashboardCharts({
+  revenueData = [],
+  attendanceData = [],
+}: {
+  revenueData?: ChartDataPoint[];
+  attendanceData?: ChartDataPoint[];
+} = {}) {
   const axisStyle = { fill: "var(--chart-text)", fontSize: 12 };
+
+  const hasRevenue = revenueData.length > 0 && revenueData.some((d) => (d.revenue ?? 0) > 0);
+  const hasAttendance = attendanceData.length > 0 && attendanceData.some((d) => (d.rate ?? 0) > 0);
 
   return (
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
       <ChartCard title="إيرادات آخر 6 أشهر">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={revenueData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />
-            <XAxis axisLine={false} dataKey="month" tick={axisStyle} tickLine={false} />
-            <YAxis
-              axisLine={false}
-              tick={axisStyle}
-              tickFormatter={(value: number) => formatCurrencyLabel(value)}
-              tickLine={false}
-              width={88}
-            />
-            <Tooltip content={<ChartTooltip formatter={(value) => `الإيرادات: ${formatCurrencyLabel(value)}`} />} />
-            <Area
-              dataKey="revenue"
-              fill="var(--chart-primary-fill)"
-              stroke="var(--chart-primary)"
-              strokeWidth={3}
-              type="monotone"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        {hasRevenue ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={revenueData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />
+              <XAxis axisLine={false} dataKey="month" tick={axisStyle} tickLine={false} />
+              <YAxis
+                axisLine={false}
+                tick={axisStyle}
+                tickFormatter={(value: number) => formatCurrencyLabel(value)}
+                tickLine={false}
+                width={88}
+              />
+              <Tooltip content={<ChartTooltip formatter={(value) => `الإيرادات: ${formatCurrencyLabel(value)}`} />} />
+              <Area
+                dataKey="revenue"
+                fill="var(--chart-primary-fill)"
+                stroke="var(--chart-primary)"
+                strokeWidth={3}
+                type="monotone"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <EmptyChart message="لا توجد بيانات إيرادات بعد" />
+        )}
       </ChartCard>
 
       <ChartCard title="نسبة الحضور الشهرية">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={attendanceData} margin={{ top: 8, right: 16, left: 24, bottom: 0 }}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />
-            <XAxis axisLine={false} dataKey="month" tick={axisStyle} tickLine={false} />
-            <YAxis
-              axisLine={false}
-              domain={[0, 100]}
-              tickMargin={12}
-              tick={axisStyle}
-              tickFormatter={(value: number) => formatPercentageLabel(value)}
-              tickLine={false}
-              width={72}
-            />
-            <Tooltip content={<ChartTooltip formatter={(value) => `نسبة الحضور: ${formatPercentageLabel(value)}`} />} />
-            <Bar dataKey="rate" fill="var(--chart-success)" radius={[10, 10, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        {hasAttendance ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={attendanceData} margin={{ top: 8, right: 16, left: 24, bottom: 0 }}>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />
+              <XAxis axisLine={false} dataKey="month" tick={axisStyle} tickLine={false} />
+              <YAxis
+                axisLine={false}
+                domain={[0, 100]}
+                tickMargin={12}
+                tick={axisStyle}
+                tickFormatter={(value: number) => formatPercentageLabel(value)}
+                tickLine={false}
+                width={72}
+              />
+              <Tooltip content={<ChartTooltip formatter={(value) => `نسبة الحضور: ${formatPercentageLabel(value)}`} />} />
+              <Bar dataKey="rate" fill="var(--chart-success)" radius={[10, 10, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <EmptyChart message="لا توجد بيانات حضور بعد" />
+        )}
       </ChartCard>
     </section>
   );

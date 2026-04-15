@@ -5,7 +5,7 @@ import { NotificationCenter } from "@/components/data-display/NotificationCenter
 import { ScheduleTimeline } from "@/components/data-display/ScheduleTimeline";
 import { StatsCard } from "@/components/data-display/StatsCard";
 import { TeacherDashboardCharts } from "@/modules/dashboard/components/TeacherDashboardCharts";
-import { formatCurrency, toArabicDigits } from "@/lib/utils";
+import { formatCurrency, formatTimeRange12Hour, toArabicDigits } from "@/lib/utils";
 
 export function CenterDashboard({
   centerName,
@@ -41,7 +41,7 @@ export function CenterDashboard({
             id: item.id,
             title: item.subject,
             dayLabel: item.day,
-            timeLabel: `${item.timeStart} - ${item.timeEnd}`,
+            timeLabel: formatTimeRange12Hour(item.timeStart, item.timeEnd),
             location: item.room,
             statusLabel: item.isToday ? "اليوم" : undefined,
             accentColor: item.color,

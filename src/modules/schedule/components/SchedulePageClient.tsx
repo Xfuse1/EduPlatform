@@ -4,7 +4,7 @@ import { CalendarDays, Clock, ArrowRight, Video, FileCheck, Users, BookOpen, Gra
 import Link from "next/link";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { cn, toArabicDigits } from "@/lib/utils";
+import { cn, formatClockTime, formatTime12Hour, toArabicDigits } from "@/lib/utils";
 
 type SchedulePageClientProps = {
   todaySessions: any[];
@@ -13,11 +13,7 @@ type SchedulePageClientProps = {
 };
 
 function formatArabicTime(value: string) {
-  const [time, meridiem] = value.split(" ");
-  if (!time || !meridiem) return value;
-  const [hours, minutes] = time.split(":");
-  const suffix = meridiem === "PM" ? "م" : "ص";
-  return `${toArabicDigits(hours)}:${toArabicDigits(minutes)} ${suffix}`;
+  return formatTime12Hour(value);
 }
 
 export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomework }: SchedulePageClientProps) {
@@ -169,7 +165,7 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                       <span className="text-[10px] text-slate-400">{format(new Date(sub.submittedAt), 'HH:mm', { locale: ar })}</span>
+                       <span className="text-[10px] text-slate-400">{formatClockTime(new Date(sub.submittedAt))}</span>
                        <Send className="h-4 w-4 text-orange-500" />
                     </div>
                   </Link>

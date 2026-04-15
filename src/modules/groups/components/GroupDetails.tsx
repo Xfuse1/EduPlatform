@@ -17,6 +17,7 @@ import {
 import {
   formatCurrency,
   formatDate,
+  formatTimeRange12Hour,
   formatPhone,
 } from '@/lib/utils'
 
@@ -436,7 +437,7 @@ export default function GroupDetails({
                       {formatDate(session.date)}
                     </p>
                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                      {session.timeStart} - {session.timeEnd}
+                      {formatTimeRange12Hour(session.timeStart, session.timeEnd)}
                     </p>
                   </div>
 

@@ -1,7 +1,7 @@
 import { BookOpen, CheckCircle2, Clock3, GraduationCap, Users } from "lucide-react";
 
 import { Progress } from "@/components/ui/progress";
-import { cn, formatCapacity, formatCurrency, toArabicDigits } from "@/lib/utils";
+import { cn, formatCapacity, formatCurrency, formatTimeRange12Hour, toArabicDigits } from "@/lib/utils";
 
 type GroupOption = {
   id: string;
@@ -103,7 +103,7 @@ export function GroupSelector({
                   <p className="flex items-center gap-2 rounded-2xl border border-white/6 bg-white/[0.04] px-3 py-3 text-sm text-slate-300">
                     <Clock3 className="h-4 w-4 text-sky-300" />
                     <span dir="ltr">
-                      {group.timeStart} - {group.timeEnd}
+                      {formatTimeRange12Hour(group.timeStart, group.timeEnd)}
                     </span>
                   </p>
 
