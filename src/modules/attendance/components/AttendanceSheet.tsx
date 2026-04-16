@@ -9,7 +9,7 @@ import { markAttendance } from '@/modules/attendance/actions'
 interface Student {
   id: string
   name: string
-  attendanceStatus: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED'
+  attendanceStatus: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'NOT_ENROLLED'
   paymentStatus: 'PAID' | 'PARTIAL' | 'PENDING' | 'OVERDUE'
 }
 
