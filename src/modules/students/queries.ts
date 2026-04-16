@@ -374,6 +374,9 @@ export const getStudents = cache(async (
         if (status === "PRESENT" || status === "LATE") {
           break;
         }
+        if (!status) {
+          break;
+        }
 
         streak += 1;
       }
@@ -390,7 +393,7 @@ export const getStudents = cache(async (
 
       return student.groupStudents.map((enrollment) => {
         const consecutiveAbsences = getConsecutiveAbsences(student.id, enrollment.group.id, enrollment.enrolledAt);
-        const studentStatus = !student.isActive || consecutiveAbsences >= 1 ? "SUSPENDED" : "ACTIVE";
+        const studentStatus = !student.isActive ? "SUSPENDED" : "ACTIVE";
 
         return {
           id: student.id,

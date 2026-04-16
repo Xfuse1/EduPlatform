@@ -45,7 +45,11 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
             title: examToEdit.title,
             description: examToEdit.description || "",
             groupId: examToEdit.groupId,
-            examDate: new Date(examToEdit.startAt).toISOString().slice(0, 16),
+            examDate: (() => {
+              const d = new Date(examToEdit.startAt);
+              d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+              return d.toISOString().slice(0, 16);
+            })(),
             durationMinutes: String(examToEdit.duration),
             maxScore: String(examToEdit.maxGrade),
         });
@@ -91,7 +95,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
         title: formData.title,
         description: formData.description,
         groupId: formData.groupId,
-        startAt: formData.examDate,
+        startAt: new Date(formData.examDate).toISOString(),
         duration: parseInt(formData.durationMinutes),
         maxGrade: parseInt(formData.maxScore),
         questions: questions.map(q => ({

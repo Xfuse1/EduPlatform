@@ -119,7 +119,12 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
                       </div>
                       <div>
                         <h4 className="font-bold text-slate-900 dark:text-white">{exam.title}</h4>
-                        <p className="text-xs text-slate-500">{exam.description || 'لا يوجد وصف'}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-xs text-slate-500">{exam.description || 'لا يوجد وصف'}</p>
+                          <span className="text-[10px] font-bold text-primary bg-primary/5 px-1.5 rounded">
+                            {formatClockTime(new Date(exam.startAt))}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <ArrowRight className="h-4 w-4 text-slate-300" />
