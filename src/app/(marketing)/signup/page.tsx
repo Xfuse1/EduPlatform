@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Check, CheckCircle2, CircleAlert, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { createTeacherSignup, checkSubdomainAvailability } from "@/modules/marketing/actions";
 
 import { Button } from "@/components/ui/button";
@@ -125,6 +126,7 @@ function mapSignupOtpError(error: unknown) {
 }
 
 export default function TeacherSignupPage() {
+  const searchParams = useSearchParams();
   const [isReady, setIsReady] = useState(false);
   const [currentStep, setCurrentStep] = useState<SignupStep>(1);
   const [form, setForm] = useState<FormState>({
@@ -151,6 +153,11 @@ export default function TeacherSignupPage() {
   const subdomainCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    const phone = searchParams.get("phone") ?? "";
+    if (phone && !form.phone) {
+      setForm((current) => ({ ...current, phone }));
+    }
+
     setIsReady(true);
 
     return () => {
@@ -158,7 +165,7 @@ export default function TeacherSignupPage() {
         window.clearTimeout(verifyTimerRef.current);
       }
     };
-  }, []);
+  }, [searchParams, form.phone]);
 
   useEffect(() => {
     if (currentStep !== 3 || isVerified) {
@@ -714,6 +721,12 @@ export default function TeacherSignupPage() {
             ولي أمر وتريد تسجيل ابنك؟{" "}
             <Link href="/parent-register" className="font-bold text-sky-300 transition hover:text-sky-200 hover:underline">
               أنشئ حساب ولي أمر
+            </Link>
+          </p>
+          <p className="mt-2 text-sm text-slate-400">
+            طالب وتريد إنشاء حساب؟{" "}
+            <Link href="/register" className="font-bold text-sky-300 transition hover:text-sky-200 hover:underline">
+              أنشئ حساب طالب
             </Link>
           </p>
         </div>

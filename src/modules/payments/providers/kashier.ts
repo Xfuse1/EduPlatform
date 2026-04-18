@@ -45,7 +45,7 @@ export function createKashierCheckoutUrl(params: KashierOrderParams): string {
   url.searchParams.set('hash', hash)
   url.searchParams.set('redirectUrl', params.callbackUrl)
   url.searchParams.set('webhookUrl', params.webhookUrl)
-  url.searchParams.set('allowedMethods', 'card,bank_installments')
+  url.searchParams.set('allowedMethods', 'card,bank_installments,mobile_wallet,service_bill')
   url.searchParams.set('display', params.studentName)
   url.searchParams.set(
     'mode',

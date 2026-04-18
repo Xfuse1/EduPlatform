@@ -10,30 +10,33 @@ datasource db {
 }
 
 model Tenant {
-  id            String         @id @default(cuid())
-  slug          String         @unique
-  name          String
-  plan          Plan           @default(FREE)
-  planExpiresAt DateTime?
-  logoUrl       String?
-  themeColor    String         @default("#1A5276")
-  phone         String?
-  region        String?
-  bio           String?
-  subjects      String[]
-  isActive      Boolean        @default(true)
-  smsQuota      Int            @default(50)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  assignments   Assignment[]
-  attendances   Attendance[]
-  exams         Exam[]
-  groups        Group[]
-  messages      Message[]
-  notifications Notification[]
-  payments      Payment[]
-  sessions      Session[]
-  users         User[]
+  id                    String                 @id @default(cuid())
+  slug                  String                 @unique
+  name                  String
+  plan                  Plan                   @default(FREE)
+  planExpiresAt         DateTime?
+  logoUrl               String?
+  themeColor            String                 @default("#1A5276")
+  phone                 String?
+  region                String?
+  bio                   String?
+  subjects              String[]
+  isActive              Boolean                @default(true)
+  smsQuota              Int                    @default(50)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  assignments           Assignment[]
+  attendances           Attendance[]
+  exams                 Exam[]
+  groups                Group[]
+  messages              Message[]
+  notifications         Notification[]
+  payments              Payment[]
+  sessions              Session[]
+  users                 User[]
+  teacherSubscription   TeacherSubscription?
+  studentBalances       StudentBalance[]
+  balanceTransactions   BalanceTransaction[]
 
   @@index([slug])
 }
@@ -53,6 +56,8 @@ model User {
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   pinHash               String?
+  email                 String?
+  settings              Json?                  @default("{}")
   assignmentSubmissions AssignmentSubmission[]
   markedAttendances     Attendance[]           @relation("MarkedByAttendance")
   attendances           Attendance[]           @relation("StudentAttendance")
@@ -66,9 +71,9 @@ model User {
   childStudents         ParentStudent[]        @relation("StudentRelation")
   recordedPayments      Payment[]              @relation("RecordedPayments")
   payments              Payment[]              @relation("StudentPayments")
-  email                 String?
-  settings              Json?                  @default("{}")
   tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  studentBalance        StudentBalance?        @relation("StudentBalance")
+  parentBalance         StudentBalance[]       @relation("ParentBalance")
 
   @@unique([tenantId, phone])
   @@index([tenantId])
@@ -178,25 +183,28 @@ model Attendance {
 }
 
 model Payment {
-  id                String        @id @default(cuid())
-  tenantId          String
-  studentId         String
-  amount            Int
-  month             String
-  status            PaymentStatus @default(PENDING)
-  method            PaymentMethod @default(CASH)
-  installmentNumber Int?
-  installmentTotal  Int?
-  receiptNumber     String?       @unique
-  receiptUrl        String?
-  paidAt            DateTime?
-  recordedById      String?
-  notes             String?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  recordedBy        User?         @relation("RecordedPayments", fields: [recordedById], references: [id])
-  student           User          @relation("StudentPayments", fields: [studentId], references: [id], onDelete: Cascade)
-  tenant            Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                   String         @id @default(cuid())
+  tenantId             String
+  studentId            String
+  amount               Int
+  month                String
+  status               PaymentStatus  @default(PENDING)
+  method               PaymentMethod  @default(CASH)
+  installmentNumber    Int?
+  installmentTotal     Int?
+  receiptNumber        String?        @unique
+  receiptUrl           String?
+  paidAt               DateTime?
+  recordedById         String?
+  notes                String?
+  paymentGateway       PaymentGateway @default(KASHIER)
+  transactionId        String?
+  teacherApiUsed       Boolean        @default(false)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  recordedBy           User?          @relation("RecordedPayments", fields: [recordedById], references: [id])
+  student              User           @relation("StudentPayments", fields: [studentId], references: [id], onDelete: Cascade)
+  tenant               Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, studentId])
   @@index([tenantId, month])
@@ -450,4 +458,94 @@ enum QuestionType {
   MCQ
   ESSAY
   TRUE_FALSE
+}
+
+// ── Teacher Subscription Models ────────────────────────────────────────────
+
+model TeacherSubscription {
+  id             String            @id @default(cuid())
+  tenantId       String            @unique
+  subscriptionPlan SubscriptionPlan @default(STARTER)
+  billingCycle   BillingCycle      @default(MONTHLY)
+  amount         Int
+  isActive       Boolean           @default(true)
+  nextBillingAt  DateTime
+  cancelledAt    DateTime?
+  kashierApiKey  String?           @db.VarChar(500)
+  kashierMerId   String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  tenant         Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, isActive])
+  @@index([nextBillingAt])
+}
+
+// ── Student Balance / Wallet Models ────────────────────────────────────────
+
+model StudentBalance {
+  id               String                 @id @default(cuid())
+  tenantId         String
+  studentId        String
+  parentId         String?
+  balance          Int                    @default(0)
+  lastRechargedAt  DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  student          User                   @relation("StudentBalance", fields: [studentId], references: [id], onDelete: Cascade)
+  parent           User?                  @relation("ParentBalance", fields: [parentId], references: [id], onDelete: SetNull)
+  tenant           Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  transactions     BalanceTransaction[]
+
+  @@unique([tenantId, studentId])
+  @@index([tenantId, studentId])
+  @@index([tenantId, parentId])
+}
+
+model BalanceTransaction {
+  id               String             @id @default(cuid())
+  tenantId         String
+  balanceId        String
+  type             TransactionType
+  amount           Int
+  reason           String
+  relatedPaymentId String?
+  status           TransactionStatus  @default(COMPLETED)
+  createdAt        DateTime           @default(now())
+  balance          StudentBalance     @relation(fields: [balanceId], references: [id], onDelete: Cascade)
+  tenant           Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, balanceId])
+  @@index([balanceId, createdAt])
+  @@index([status, createdAt])
+}
+
+// ── Enums ─────────────────────────────────────────────────────────────────
+
+enum SubscriptionPlan {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentGateway {
+  KASHIER
+  INTERNAL_BALANCE
 }

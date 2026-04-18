@@ -3,7 +3,13 @@ import { ChevronRight } from "lucide-react";
 
 import { ParentRegisterLauncher } from "@/modules/public-pages/components/ParentRegisterLauncher";
 
-export default function ParentRegisterPage() {
+export default async function ParentRegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ phone?: string }>;
+}) {
+  const params = await searchParams;
+
   return (
     <main
       className="relative flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.22),_transparent_30%),linear-gradient(145deg,_#0f2740_0%,_#1A5276_45%,_#dbeafe_120%)] px-4 py-8 sm:px-6"
@@ -18,7 +24,7 @@ export default function ParentRegisterPage() {
       </Link>
 
       <div className="w-full max-w-[500px] font-[Cairo]">
-        <ParentRegisterLauncher />
+        <ParentRegisterLauncher initialPhone={params.phone} />
       </div>
     </main>
   );
