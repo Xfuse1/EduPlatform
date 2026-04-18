@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, CheckCheck, CheckCircle, XCircle, BookOpen, Star, CreditCard, Calendar, LucideIcon, Loader2 } from "lucide-react";
+import { Bell, CheckCheck, CheckCircle, XCircle, BookOpen, Star, CreditCard, Calendar, LucideIcon, Loader2, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -115,15 +115,24 @@ export function NotificationBell() {
                   لديك {unreadCount} تنبيهات غير مقروءة
                 </p>
               </div>
-              {unreadCount > 0 && (
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1 ml-2"
+                  >
+                    <CheckCheck className="h-3 w-3" />
+                    اقرأ الكل
+                  </button>
+                )}
                 <button
-                  onClick={markAllAsRead}
-                  className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
+                  onClick={() => setIsOpen(false)}
+                  className="h-8 w-8 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-200 dark:text-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all active:scale-95"
+                  aria-label="إغلاق"
                 >
-                  <CheckCheck className="h-3 w-3" />
-                  اقرأ الكل
+                  <X className="h-5 w-5" strokeWidth={3} />
                 </button>
-              )}
+              </div>
             </div>
 
             {/* List */}

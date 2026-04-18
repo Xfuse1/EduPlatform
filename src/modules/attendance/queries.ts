@@ -55,7 +55,7 @@ export const getTodaySessions = cache(async (tenantId: string) => {
           scheduleEntry,
         };
       })
-      .filter((item): item is { group: (typeof groups)[number]; scheduleEntry: { day: string; timeStart: string; timeEnd: string } } => item !== null);
+      .filter((item): item is NonNullable<typeof item> => item !== null);
 
     const sessions = await Promise.all(
       matchingGroups.map(async ({ group, scheduleEntry }) => {
@@ -224,7 +224,9 @@ export const getSessionWithStudents = cache(async (sessionId: string) => {
           include: {
             groupStudents: {
               where: { status: "ACTIVE" },
-              include: {
+              select: {
+                studentId: true,
+                enrolledAt: true,
                 student: {
                   select: { id: true, name: true, phone: true },
                 },
@@ -262,7 +264,7 @@ export const getSessionWithStudents = cache(async (sessionId: string) => {
         id: id,
         name: gs ? gs.student.name : (guestInfo ? guestInfo.name : "طالب غير معروف"),
         phone: gs ? gs.student.phone : (guestInfo ? guestInfo.phone : ""),
-        status: record ? record.status : "ABSENT",
+        status: record ? record.status : (gs && gs.enrolledAt > session.date ? "NOT_ENROLLED" : "ABSENT"),
         method: record ? record.method : "MANUAL",
         markedAt: record ? record.markedAt : null,
       };

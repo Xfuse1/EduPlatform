@@ -102,7 +102,7 @@ export function StudentExamsPageClient({ initialExams = [] }: StudentExamsPageCl
                     <div className="flex flex-wrap gap-2.5">
                         <div className="flex items-center gap-2 rounded-[10px] bg-slate-50 px-3 py-1.5 text-slate-700 border border-slate-100 dark:bg-slate-800/50 dark:border-slate-800 dark:text-slate-300">
                             <Calendar className="h-4 w-4 text-primary" />
-                            <span className="text-xs font-bold leading-none">{new Date(exam.examDate).toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'short' })}</span>
+                            <span className="text-xs font-bold leading-none">{new Date(exam.examDate).toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'Africa/Cairo' })}</span>
                         </div>
                         <div className="flex items-center gap-2 rounded-[10px] bg-sky-50 px-3 py-1.5 text-sky-700 border border-sky-100 dark:bg-sky-900/30 dark:border-sky-800/50 dark:text-sky-300">
                             <Clock className="h-4 w-4 text-sky-500" />
@@ -121,7 +121,7 @@ export function StudentExamsPageClient({ initialExams = [] }: StudentExamsPageCl
                         {exam.status === "upcoming" && (
                             <div className="text-center space-y-1">
                                 <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">تاريخ البداية</span>
-                                <span className="block text-sm font-extrabold text-slate-700 dark:text-slate-300">{new Date(exam.examDate).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
+                                <span className="block text-sm font-extrabold text-slate-700 dark:text-slate-300">{new Date(exam.examDate).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Africa/Cairo' })}</span>
                             </div>
                         )}
                         

@@ -182,7 +182,11 @@ export function ExamsPageClient({ initialExams = [], groups }: ExamsPageClientPr
               <div className="flex flex-wrap gap-3 pt-2 text-sm font-medium">
                 <div className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                   <Calendar className="h-4 w-4 text-primary" />
-                  <span className="text-xs">{new Date(exam.examDate).toLocaleDateString("ar-EG")}</span>
+                  <span className="text-xs">
+                    {new Date(exam.examDate).toLocaleDateString("ar-EG", { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'Africa/Cairo' })}
+                    {" - "}
+                    {new Date(exam.examDate).toLocaleTimeString("ar-EG", { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Africa/Cairo' })}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
