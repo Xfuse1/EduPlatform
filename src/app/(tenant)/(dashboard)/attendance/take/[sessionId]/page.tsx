@@ -1,4 +1,4 @@
-﻿import Link from 'next/link'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import { requireAuth } from '@/lib/auth'
@@ -46,7 +46,7 @@ export default async function TakeAttendancePage({ params }: Props) {
 
         <AttendanceSheet
           sessionId={sessionId}
-          students={data.students}
+          students={data.students.filter((s: any) => s.attendanceStatus !== 'NOT_ENROLLED')}
         />
 
         <div className="mt-6">

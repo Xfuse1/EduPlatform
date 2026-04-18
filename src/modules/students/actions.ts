@@ -84,11 +84,11 @@ function validateStudentInput(input: NormalizedStudentInput, requireStudentId = 
     return "اسم الطالب يجب أن يكون حرفين على الأقل";
   }
 
-  if (!/^01\d{9}$/.test(input.parentPhone)) {
+  if (input.parentPhone && !/^01\d{9}$/.test(input.parentPhone)) {
     return "رقم هاتف ولي الأمر غير صحيح";
   }
 
-  if (!input.parentName || input.parentName.length < 2) {
+  if (input.parentName && input.parentName.length < 2) {
     return "اسم ولي الأمر مطلوب";
   }
 
@@ -263,7 +263,9 @@ async function createStudentForTenant(tenantId: string, input: NormalizedStudent
       }
     }
 
-    const parent = await upsertParent(tenantId, input.parentName, input.parentPhone);
+    const parent = input.parentPhone
+      ? await upsertParent(tenantId, input.parentName, input.parentPhone)
+      : null;
 
     const student = await db.user.create({
       data: {
@@ -282,7 +284,7 @@ async function createStudentForTenant(tenantId: string, input: NormalizedStudent
       },
     });
 
-    await syncParentLink(parent.id, student.id);
+    if (parent) await syncParentLink(parent.id, student.id);
 
     if (input.groupIds.length > 0) {
       await syncGroupMemberships(tenantId, student.id, input.groupIds);
@@ -352,7 +354,9 @@ async function updateStudentForTenant(tenantId: string, input: NormalizedStudent
       }
     }
 
-    const parent = await upsertParent(tenantId, input.parentName, input.parentPhone);
+    const parent = input.parentPhone
+      ? await upsertParent(tenantId, input.parentName, input.parentPhone)
+      : null;
 
     await db.user.update({
       where: {
@@ -367,7 +371,7 @@ async function updateStudentForTenant(tenantId: string, input: NormalizedStudent
       },
     });
 
-    await syncParentLink(parent.id, existingStudent.id);
+    if (parent) await syncParentLink(parent.id, existingStudent.id);
 
     if (input.syncGroups || input.hasExplicitGroupSelection) {
       await syncGroupMemberships(tenantId, existingStudent.id, input.groupIds);

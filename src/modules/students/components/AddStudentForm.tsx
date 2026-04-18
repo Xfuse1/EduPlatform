@@ -34,7 +34,7 @@ type FormState = {
   parentName: string;
   parentPhone: string;
   gradeLevel: string;
-  groupId: string;
+  groupIds: string[];
 };
 
 const emptyFormState: FormState = {
@@ -43,7 +43,7 @@ const emptyFormState: FormState = {
   parentName: "",
   parentPhone: "",
   gradeLevel: "",
-  groupId: "",
+  groupIds: [],
 };
 
 function buildInitialState(student?: EditableStudent): FormState {
@@ -54,7 +54,7 @@ function buildInitialState(student?: EditableStudent): FormState {
     parentName: student.parentName,
     parentPhone: student.parentPhone,
     gradeLevel: student.gradeLevel,
-    groupId: student.groupId,
+    groupIds: student.groupId ? [student.groupId] : [],
   };
 }
 
@@ -125,6 +125,24 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
     setSuccessMessage("");
   };
 
+  const handleGroupSelection = (groupId: string) => {
+    setFormState((current) => {
+      const isSelected = current.groupIds.includes(groupId);
+      const updated = isSelected
+        ? current.groupIds.filter((id) => id !== groupId)
+        : [...current.groupIds, groupId];
+      
+      return { ...current, groupIds: updated };
+    });
+  };
+
+  const handleSelectAllGroups = () => {
+    setFormState((current) => ({
+      ...current,
+      groupIds: current.groupIds.length === groups.length ? [] : groups.map((g) => g.id),
+    }));
+  };
+
   // ─── Phone lookup ─────────────────────────────────────────────────────────────
   const handlePhoneLookup = () => {
     if (!/^01\d{9}$/.test(lookupPhone)) {
@@ -169,7 +187,6 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
     });
   };
 
-  // ─── Create new student ───────────────────────────────────────────────────────
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -180,7 +197,7 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
       formData.set("parentName", formState.parentName);
       formData.set("parentPhone", formState.parentPhone);
       formData.set("gradeLevel", formState.gradeLevel);
-      formData.set("groupId", formState.groupId);
+      formState.groupIds.forEach((id) => formData.append("groupIds", id));
 
       const result = isEditMode && student
         ? await (() => { formData.set("studentId", student.id); return updateStudent(formData); })()
@@ -385,21 +402,50 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor={isEditMode ? `groupId-${student?.id}` : "groupId"}>اختيار المجموعة</Label>
-                  <select
-                    className={selectClassName}
-                    id={isEditMode ? `groupId-${student?.id}` : "groupId"}
-                    onChange={(e) => handleChange("groupId", e.target.value)}
-                    value={formState.groupId}
-                  >
-                    <option value="">بدون مجموعة</option>
-                    {availableGroups.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.name} - الأماكن المتاحة: {g.remainingCapacity}
-                      </option>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>اختيار المجموعات</Label>
+                    <button
+                      type="button"
+                      onClick={handleSelectAllGroups}
+                      className="text-xs font-bold text-primary hover:underline"
+                    >
+                      {formState.groupIds.length === groups.length ? "إلغاء الكل" : "اختيار كل المجموعات"}
+                    </button>
+                  </div>
+                  
+                  <div className="grid gap-2 max-h-[200px] overflow-y-auto p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                    {groups.map((group) => (
+                      <label 
+                        key={group.id} 
+                        className={cn(
+                          "flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer",
+                          formState.groupIds.includes(group.id)
+                            ? "bg-primary/10 border-primary dark:bg-sky-400/10 dark:border-sky-400"
+                            : "bg-white border-slate-200 hover:border-slate-300 dark:bg-slate-950 dark:border-slate-800"
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded-md border-slate-300 text-primary focus:ring-primary"
+                            checked={formState.groupIds.includes(group.id)}
+                            onChange={() => handleGroupSelection(group.id)}
+                          />
+                          <div>
+                            <p className="text-sm font-bold text-slate-900 dark:text-white">{group.name}</p>
+                            <p className="text-[10px] text-slate-500">الأماكن المتاحة: {group.remainingCapacity}</p>
+                          </div>
+                        </div>
+                        {group.isFull && !formState.groupIds.includes(group.id) && (
+                          <span className="text-[10px] bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full font-bold">مكتملة</span>
+                        )}
+                      </label>
                     ))}
-                  </select>
+                    {groups.length === 0 && (
+                      <p className="text-center py-4 text-xs text-slate-400 font-bold">لا توجد مجموعات متاحة حالياً</p>
+                    )}
+                  </div>
                 </div>
               </div>
 

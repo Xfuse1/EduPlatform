@@ -105,6 +105,7 @@ export function formatClockTime(value: string | Date) {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
+    timeZone: "Africa/Cairo",
   }).format(new Date(value));
 }
 

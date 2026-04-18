@@ -320,33 +320,32 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
 
       {/* Submission Detail Modal */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden flex flex-col rounded-[24px]" dir="rtl">
-          <DialogHeader className="p-6 border-b bg-slate-50/50 dark:bg-slate-900/50">
+        <DialogContent className="max-w-4xl max-h-[95vh] p-0 overflow-hidden flex flex-col border-none shadow-2xl rounded-[32px] bg-slate-50 dark:bg-slate-950" dir="rtl">
+          <DialogHeader className="px-8 py-6 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                 <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-                    <Users className="h-6 w-6" />
+              <div className="flex items-center gap-5">
+                 <div className="h-14 w-14 rounded-2xl bg-primary/5 flex items-center justify-center text-primary group transition-all hover:bg-primary/10">
+                    <Users className="h-7 w-7 transition-transform group-hover:scale-110" />
                  </div>
                  <div>
-                    <DialogTitle className="text-xl font-extrabold">{selectedSubmission?.student.name}</DialogTitle>
-                    <p className="text-sm text-slate-500 font-bold">مراجعة إجابات الطالب ورصد الدرجة</p>
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white leading-none">{selectedSubmission?.student.name}</h2>
+                    <p className="text-sm font-bold text-slate-400 mt-2">مراجعة الإجابات وتسجيل الدرجة</p>
                  </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                  <Button
                    onClick={handleApproveAutoGrade}
                    disabled={isAutoApproving || isAiGrading}
                    variant="outline"
-                   className="rounded-xl border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400 font-bold min-h-0 h-10 py-0"
+                   className="h-11 px-5 rounded-2xl border-slate-200 text-slate-600 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 font-bold hover:border-primary/30 hover:text-primary transition-all shadow-sm"
                  >
                     {isAutoApproving ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : <ClipboardCheck className="h-4 w-4 ml-2" />}
-                    اعتماد التصحيح التلقائي
+                    تصحيح تلقائي
                  </Button>
                  <Button 
                     onClick={handleAiGrade} 
                     disabled={isAiGrading || isAutoApproving}
-                    variant="outline" 
-                    className="rounded-xl border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-400 font-bold min-h-0 h-10 py-0"
+                    className="h-11 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200 dark:shadow-none transition-all active:scale-95"
                  >
                     {isAiGrading ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : <Sparkles className="h-4 w-4 ml-2" />}
                     تصحيح بالـ AI
@@ -355,135 +354,194 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
             </div>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-slate-200">
-            <div className="space-y-8">
-              {exam.questions.map((question, index) => {
-                const studentAnswer = selectedSubmission?.answers[question.id];
-                const normalizedStudentTf = normalizeTrueFalse(studentAnswer);
-                const normalizedCorrectTf = normalizeTrueFalse(question.correctAnswer);
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-8 space-y-10 scrollbar-none">
+            {exam.questions.map((question, index) => {
+              const studentAnswer = selectedSubmission?.answers[question.id];
+              const normalizedStudentTf = normalizeTrueFalse(studentAnswer);
+              const normalizedCorrectTf = normalizeTrueFalse(question.correctAnswer);
 
-                return (
-                  <div key={question.id} className="border border-slate-700 rounded-2xl p-5 space-y-4 bg-slate-900/50">
-                    
-                    {/* رأس السؤال */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-slate-400">س {index + 1}</span>
-                      <span className="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-300">
-                        {question.grade} درجة
-                      </span>
+              return (
+                <div key={question.id} className="relative group">
+                  {/* Vertical Line Connector */}
+                  {index < exam.questions.length - 1 && (
+                    <div className="absolute top-12 bottom-[-40px] right-6 w-0.5 bg-slate-100 dark:bg-slate-800 z-0" />
+                  )}
+
+                  <div className="relative z-10 flex gap-6">
+                    {/* Number Circle */}
+                    <div className="flex-shrink-0">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border-2 border-slate-100 text-lg font-black text-slate-300 dark:bg-slate-900 dark:border-slate-800 transition-all group-hover:border-primary group-hover:text-primary">
+                        {toArabicDigits(index + 1)}
+                      </div>
                     </div>
 
-                    {/* نص السؤال */}
-                    <p className="text-base font-semibold text-white">{question.questionText}</p>
+                    <div className="flex-1 min-w-0 space-y-5">
+                      {/* Question Text and Grade */}
+                      <div className="flex items-start justify-between gap-4">
+                        <p className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-relaxed pt-1 break-all">
+                          {question.questionText}
+                        </p>
+                        <Badge variant="outline" className="h-8 rounded-xl border-slate-100 bg-white px-3 font-bold text-slate-400 dark:bg-slate-900 dark:border-slate-800">
+                          {toArabicDigits(question.grade)} درجة
+                        </Badge>
+                      </div>
 
-                    {/* MCQ — الخيارات في grid */}
-                    {question.type === 'MCQ' && (
-                      <div className="grid grid-cols-2 gap-2">
-                        {Array.isArray(question.options) && question.options.map((opt, i) => (
-                          <div key={i} className={`rounded-xl px-4 py-2 text-sm text-center border
-                            ${opt === question.correctAnswer 
-                              ? 'border-green-500 bg-green-950 text-green-300' 
-                              : opt === studentAnswer 
-                                ? 'border-red-500 bg-red-950 text-red-300'
-                                : 'border-slate-700 bg-slate-800 text-slate-400'
-                            }`}>
-                            {opt}
+                      {/* Options & Answers */}
+                      <div className="pr-2">
+                        {/* MCQ */}
+                        {question.type === 'MCQ' && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {Array.isArray(question.options) && question.options.map((opt, i) => {
+                              const isCorrect = opt === question.correctAnswer;
+                              const isStudentChoice = opt === studentAnswer;
+                              
+                              return (
+                                <div 
+                                  key={i} 
+                                  className={`flex items-center gap-3 rounded-2xl p-4 border transition-all
+                                    ${isCorrect 
+                                      ? 'border-emerald-500/20 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400' 
+                                      : isStudentChoice
+                                        ? 'border-red-500/20 bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-400'
+                                        : 'border-white bg-white text-slate-500 dark:border-slate-900 dark:bg-slate-900'
+                                    }`}
+                                >
+                                  <div className={`h-2.5 w-2.5 rounded-full ${isCorrect ? 'bg-emerald-500' : isStudentChoice ? 'bg-red-500' : 'bg-slate-200 dark:bg-slate-800'}`} />
+                                  <span className="flex-1 font-bold">{opt}</span>
+                                  {isStudentChoice && (
+                                    <Badge className={`${isCorrect ? 'bg-emerald-500' : 'bg-red-500'} text-white text-[10px] rounded-full border-none px-2 py-0`}>إجابة الطالب</Badge>
+                                  )}
+                                  {isCorrect && !isStudentChoice && (
+                                    <span className="text-[10px] font-bold text-emerald-600 uppercase">صحيحة</span>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        )}
 
-                    {question.type === 'TRUE_FALSE' && (
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          { value: "true", label: "صح" },
-                          { value: "false", label: "خطأ" },
-                        ].map((option) => {
-                          const isCorrectOption = option.value === normalizedCorrectTf;
-                          const isStudentOption = option.value === normalizedStudentTf;
+                        {/* TRUE_FALSE */}
+                        {question.type === 'TRUE_FALSE' && (
+                          <div className="flex gap-4">
+                            {[
+                              { value: "true", label: "صح" },
+                              { value: "false", label: "خطأ" },
+                            ].map((option) => {
+                              const isCorrect = option.value === normalizedCorrectTf;
+                              const isStudentChoice = option.value === normalizedStudentTf;
 
-                          return (
-                            <div key={option.value} className={`rounded-xl px-4 py-2 text-sm text-center border
-                              ${isCorrectOption
-                                ? 'border-green-500 bg-green-950 text-green-300'
-                                : isStudentOption
-                                  ? 'border-red-500 bg-red-950 text-red-300'
-                                  : 'border-slate-700 bg-slate-800 text-slate-400'
-                              }`}>
-                              {option.label}
+                              return (
+                                <div 
+                                  key={option.value} 
+                                  className={`flex-1 flex items-center justify-center gap-3 rounded-2xl p-4 border transition-all font-bold
+                                    ${isCorrect 
+                                      ? 'border-emerald-500/20 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400' 
+                                      : isStudentChoice
+                                        ? 'border-red-500/20 bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-400'
+                                        : 'border-white bg-white text-slate-500 dark:border-slate-900 dark:bg-slate-900'
+                                    }`}
+                                >
+                                  {option.label}
+                                  {isStudentChoice && (
+                                    <Badge className={`${isCorrect ? 'bg-emerald-500' : 'bg-red-500'} text-white text-[9px] rounded-full border-none`}>إجابة الطالب</Badge>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* ESSAY */}
+                        {question.type === 'ESSAY' && (
+                          <div className="space-y-4">
+                            <div className="relative overflow-hidden rounded-2xl bg-white border-r-4 border-slate-100 p-5 dark:bg-slate-900 dark:border-slate-800">
+                               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">إجابة الطالب</p>
+                               <p className="text-base font-bold text-slate-800 dark:text-slate-200 whitespace-pre-wrap break-all leading-relaxed">
+                                  {studentAnswer || <span className="italic text-slate-400">(بدون إجابة)</span>}
+                               </p>
                             </div>
-                          );
-                        })}
+                            <div className="relative overflow-hidden rounded-2xl bg-emerald-50/30 border-r-4 border-emerald-500/20 p-5 dark:bg-emerald-950/10 dark:border-emerald-900/30">
+                               <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-3">الإجابة النموذجية</p>
+                               <p className="text-base font-bold text-emerald-800 dark:text-emerald-300 whitespace-pre-wrap break-all leading-relaxed">
+                                  {question.correctAnswer}
+                                </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-
-                    {/* ESSAY — إجابة الطالب والنموذجية */}
-                    {question.type === 'ESSAY' && (
-                      <div className="space-y-2">
-                        <div className="rounded-xl p-3 bg-slate-800 border border-slate-600">
-                          <p className="text-xs text-slate-400 mb-1">إجابة الطالب</p>
-                          <p className="text-sm text-white">{studentAnswer || "(بدون إجابة)"}</p>
-                        </div>
-                        <div className="rounded-xl p-3 bg-slate-800 border border-green-800">
-                          <p className="text-xs text-green-400 mb-1">الإجابة النموذجية</p>
-                          <p className="text-sm text-slate-300">{question.correctAnswer}</p>
-                        </div>
-                      </div>
-                    )}
-
+                    </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
 
-          <DialogFooter className="p-6 border-t bg-slate-50/50 dark:bg-slate-900/50 flex flex-col gap-4">
-              <div className="w-full space-y-4">
+          <DialogFooter className="px-8 py-8 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-6">
+              <div className="w-full space-y-6">
                  {selectedSubmission?.aiFeedback && (
-                    <div className="p-3 bg-blue-950 border border-blue-700 rounded-xl mt-2 overflow-hidden">
-                      <p className="text-xs text-blue-400 font-bold mb-1 flex items-center gap-2">
-                        <Sparkles className="h-3 w-3" />
-                        🤖 تقييم الذكاء الاصطناعي:
-                      </p>
-                      <p className="text-sm text-blue-200 leading-relaxed mb-2">{selectedSubmission.aiFeedback}</p>
-                      <div className="flex items-center justify-between border-t border-blue-800/50 pt-2">
-                         <p className="text-xs text-blue-400">الدرجة المقترحة: <span className="font-bold text-blue-200">{toArabicDigits(selectedSubmission.aiGrade || 0)}</span></p>
+                    <div className="group relative p-6 bg-slate-50 border border-slate-100 rounded-[24px] dark:bg-slate-950 dark:border-slate-800 overflow-hidden">
+                      <div className="absolute top-0 right-0 h-full w-1.5 bg-indigo-500 opacity-20" />
+                      <div className="flex items-center gap-2 mb-3">
+                         <div className="h-6 w-6 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center dark:bg-indigo-900/30 dark:text-indigo-400">
+                           <Sparkles className="h-3.5 w-3.5" />
+                         </div>
+                         <p className="text-xs font-black text-indigo-600 dark:text-indigo-400 tracking-wide uppercase">تقييم الذكاء الاصطناعي</p>
                       </div>
+                      <p className="text-sm font-bold text-slate-700 dark:text-slate-200 leading-relaxed mb-4 whitespace-pre-wrap">
+                        {selectedSubmission.aiFeedback}
+                      </p>
+                      <Badge className="bg-indigo-50 text-indigo-700 border-indigo-100 rounded-xl px-4 py-1.5 dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800">
+                         الدرجة المقترحة: <span className="text-lg font-black mr-2">{toArabicDigits(selectedSubmission.aiGrade || 0)}</span>
+                      </Badge>
                     </div>
                  )}
-                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <div className="col-span-1 space-y-2">
-                       <label className="text-sm font-bold text-slate-600">الدرجة النهائية</label>
-                       <Input 
-                         type="number" 
-                         value={localGrade ?? 0} 
-                         onChange={(e) => setLocalGrade(parseInt(e.target.value) || 0)}
-                         placeholder="0"
-                         className="h-12 text-center text-xl font-extrabold text-primary bg-white rounded-xl dark:bg-slate-900"
-                       />
-                    </div>
-                    <div className="col-span-3 space-y-2">
-                       <label className="text-sm font-bold text-slate-600">تعليق المعلم (اختياري)</label>
+                 
+                 <div className="flex flex-col md:flex-row gap-6 items-end">
+                    <div className="flex-1 space-y-3">
+                       <label className="text-sm font-black text-slate-500 dark:text-slate-400 pr-2">تعليق المعلم (اختياري)</label>
                        <Input 
                          value={localComment || ""}
                          onChange={(e) => setLocalComment(e.target.value)}
                          placeholder="اكتب ملاحظاتك للطالب هنا..."
-                         className="h-12 bg-white rounded-xl dark:bg-slate-900"
+                         className="h-14 bg-slate-50 rounded-2xl border-none focus:ring-4 focus:ring-primary/5 transition-all text-sm font-bold px-6 dark:bg-slate-950 dark:text-white"
+                       />
+                    </div>
+                    
+                    <div className="w-full md:w-32 space-y-3">
+                       <label className="text-sm font-black text-slate-500 dark:text-slate-400 text-center block">الدرجة</label>
+                       <Input 
+                         type="number" 
+                         value={localGrade ?? 0} 
+                         onChange={(e) => setLocalGrade(parseInt(e.target.value) || 0)}
+                         className="h-14 text-center text-2xl font-black text-primary bg-slate-50 rounded-2xl border-none focus:ring-4 focus:ring-primary/5 transition-all dark:bg-slate-950 dark:text-white"
                        />
                     </div>
                  </div>
-                <div className="flex gap-3">
-                   <Button 
-                     onClick={handleSaveGrade} 
-                     disabled={isSaving}
-                     className="flex-1 h-14 rounded-2xl bg-primary text-white font-extrabold text-lg shadow-lg shadow-primary/20 transition-all active:scale-[0.98]"
-                   >
-                      {isSaving ? <Loader2 className="h-5 w-5 animate-spin ml-2" /> : <Save className="h-5 w-5 ml-2" />}
-                      حفظ واعتماد النتيجة
-                   </Button>
-                   <Button variant="outline" onClick={() => setIsDetailOpen(false)} className="h-14 px-8 rounded-2xl font-bold">إلغاء</Button>
-                </div>
-             </div>
+
+                 <div className="flex gap-4">
+                    <Button 
+                      onClick={handleSaveGrade} 
+                      disabled={isSaving}
+                      className="flex-[2.5] h-16 rounded-[20px] bg-primary hover:bg-primary/90 text-white font-black text-lg shadow-2xl shadow-primary/20 transition-all active:scale-95 group"
+                    >
+                       {isSaving ? (
+                         <Loader2 className="h-6 w-6 animate-spin" />
+                       ) : (
+                         <div className="flex items-center gap-3">
+                           <Save className="h-6 w-6 transition-transform group-hover:-translate-y-0.5" />
+                           حفظ واعتماد النتيجة النهائية
+                         </div>
+                       )}
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => setIsDetailOpen(false)} 
+                      className="flex-1 h-16 rounded-[20px] font-bold text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-all"
+                    >
+                      إلغاء
+                    </Button>
+                 </div>
+              </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
