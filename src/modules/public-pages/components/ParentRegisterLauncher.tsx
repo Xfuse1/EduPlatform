@@ -40,8 +40,8 @@ function validateForm(form: FormState): FormErrors {
   return errors;
 }
 
-export function ParentRegisterLauncher() {
-  const [form, setForm] = useState<FormState>({ parentName: "", phone: "" });
+export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string }) {
+  const [form, setForm] = useState<FormState>({ parentName: "", phone: initialPhone ?? "" });
   const [errors, setErrors] = useState<FormErrors>({});
   const [pageError, setPageError] = useState("");
   const [resolvedAccount, setResolvedAccount] = useState<ResolvedAccount | null>(null);

@@ -353,3 +353,197 @@ export async function savePayment(input: {
     }
   }
 }
+
+// ── Balance & Subscription Actions (جديد) ──────────────────────────────────
+
+/**
+ * خصم من رصيد الطالب/ولي الأمر وتسجيل الدفع
+ * يُستخدم عند الدفع من الرصيد الداخلي
+ */
+export async function debitStudentBalance(input: {
+  studentId: string
+  amount: number
+  month: string
+  reason: string
+}) {
+  try {
+    const tenant = await requireTenant()
+    const user = await requireAuth()
+
+    // استيراد الدوال من balance.ts
+    const { debitBalance } = await import('./providers/balance')
+
+    // خصم من الرصيد
+    const { transaction } = await debitBalance(
+      input.studentId,
+      input.amount,
+      input.reason,
+    )
+
+    // تسجيل الدفع
+    const count = await db.payment.count({ where: { tenantId: tenant.id } })
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+    const receiptNumber = `RCP-${tenant.slug}-${date}-${String(count + 1).padStart(4, '0')}`
+
+    const payment = await db.payment.create({
+      data: {
+        tenantId: tenant.id,
+        studentId: input.studentId,
+        amount: input.amount,
+        month: input.month,
+        status: 'PAID',
+        method: 'CARD', // استخدمنا الرصيد الداخلي
+        receiptNumber,
+        recordedById: user.id,
+        paymentGateway: 'INTERNAL_BALANCE',
+        paidAt: new Date(),
+      },
+      include: { student: { select: { name: true } } },
+    })
+
+    revalidatePath('/payments')
+
+    return {
+      success: true,
+      message: 'تم الدفع بنجاح من الرصيد',
+      payment: mapPaymentToClientItem(payment),
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'فشل خصم الرصيد',
+    }
+  }
+}
+
+/**
+ * إضافة رصيد للطالب بعد دفع ناجح عبر Kashier
+ */
+export async function creditBalanceAfterPayment(input: {
+  studentId: string
+  amount: number
+  relatedPaymentId?: string
+  reason?: string
+}) {
+  try {
+    const tenant = await requireTenant()
+    await requireAuth()
+
+    const { creditBalance } = await import('./providers/balance')
+
+    const result = await creditBalance(
+      input.studentId,
+      input.amount,
+      input.reason ?? 'إضافة رصيد عبر Kashier',
+      input.relatedPaymentId,
+    )
+
+    revalidatePath('/dashboard')
+
+    return {
+      success: true,
+      message: 'تم إضافة الرصيد بنجاح',
+      balance: result.balance,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'فشل إضافة الرصيد',
+    }
+  }
+}
+
+/**
+ * إضافة Kashier API للمعلم
+ */
+export async function addTeacherKashierApi(input: {
+  kashierApiKey: string
+  kashierMerId: string
+}) {
+  try {
+    const tenant = await requireTenant()
+    await requireAuth()
+
+    const { addKashierApiCredentials } = await import('./providers/subscription')
+
+    const result = await addKashierApiCredentials(
+      input.kashierApiKey,
+      input.kashierMerId,
+    )
+
+    revalidatePath('/settings')
+
+    return result
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'فشل حفظ بيانات Kashier',
+    }
+  }
+}
+
+/**
+ * إنشاء اشتراك جديد للمعلم بعد دفع ناجح
+ */
+export async function createTeacherSubscriptionPayment(input: {
+  subscriptionPlan: 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE'
+  billingCycle: 'MONTHLY' | 'YEARLY'
+  amount: number
+  transactionId: string
+}) {
+  try {
+    const tenant = await requireTenant()
+    const user = await requireAuth()
+
+    const { createTeacherSubscription, SUBSCRIPTION_PLANS } = await import(
+      './providers/subscription'
+    )
+
+    // التحقق من صحة المبلغ
+    const planConfig = SUBSCRIPTION_PLANS[input.subscriptionPlan]
+    const expectedAmount =
+      input.billingCycle === 'MONTHLY'
+        ? planConfig.monthlyPrice
+        : planConfig.yearlyPrice
+
+    if (input.amount !== expectedAmount && input.subscriptionPlan !== 'ENTERPRISE') {
+      throw new Error('المبلغ المدفوع لا يتطابق مع سعر الخطة')
+    }
+
+    // إنشاء الاشتراك
+    const subscription = await createTeacherSubscription(
+      input.subscriptionPlan,
+      input.billingCycle,
+    )
+
+    // تسجيل دفعة الاشتراك في DB
+    const payment = await db.payment.create({
+      data: {
+        tenantId: tenant.id,
+        studentId: user.id, // نستخدم studentId لتخزين معرف المدرس
+        amount: input.amount,
+        month: new Date().toISOString().slice(0, 7), // YYYY-MM
+        status: 'PAID',
+        method: 'CARD',
+        receiptNumber: `SUB-${tenant.slug}-${input.subscriptionPlan}-${Date.now()}`,
+        recordedById: user.id,
+        transactionId: input.transactionId,
+        paidAt: new Date(),
+        notes: `Subscription: ${input.subscriptionPlan} (${input.billingCycle})`,
+      },
+    })
+
+    revalidatePath('/dashboard')
+
+    return {
+      success: true,
+      message: 'تم تفعيل الاشتراك بنجاح',
+      subscription,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'فشل إنشاء الاشتراك',
+    }
+  }
+}

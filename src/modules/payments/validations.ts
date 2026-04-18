@@ -52,3 +52,54 @@ export const kashierWebhookSchema = z.object({
 })
 
 export type KashierWebhookPayload = z.infer<typeof kashierWebhookSchema>
+
+// ── Balance Validations (جديد) ────────────────────────────────────────────────
+
+/**
+ * Schema لإضافة رصيد جديد عبر Kashier
+ */
+export const rechargeBalanceSchema = z.object({
+  amount: z
+    .number()
+    .int('المبلغ لازم يكون رقم صحيح')
+    .positive('المبلغ لازم يكون موجب')
+    .max(1000000, 'المبلغ الأقصى 10 مليون جنيه'),
+  description: z.string().max(200).optional(),
+})
+
+export type RechargeBalanceInput = z.infer<typeof rechargeBalanceSchema>
+
+/**
+ * Schema لخصم من رصيد الطالب/ولي الأمر (داخلي)
+ */
+export const debitBalanceSchema = z.object({
+  studentId: z.string().min(1, 'الطالب مطلوب'),
+  amount: z
+    .number()
+    .int('المبلغ لازم يكون رقم صحيح')
+    .positive('المبلغ لازم يكون موجب'),
+  reason: z.string().min(1, 'السبب مطلوب').max(200),
+  relatedPaymentId: z.string().optional(),
+})
+
+export type DebitBalanceInput = z.infer<typeof debitBalanceSchema>
+
+/**
+ * Schema لإضافة Kashier API للمعلم
+ */
+export const addKashierApiSchema = z.object({
+  kashierApiKey: z.string().min(10, 'مفتاح API غير صحيح').max(500),
+  kashierMerId: z.string().min(1, 'معرف التاجر مطلوب').max(100),
+})
+
+export type AddKashierApiInput = z.infer<typeof addKashierApiSchema>
+
+/**
+ * Schema لتحديث خطة الاشتراك للمعلم
+ */
+export const updateSubscriptionSchema = z.object({
+  subscriptionPlan: z.enum(['STARTER', 'PROFESSIONAL', 'ENTERPRISE']),
+  billingCycle: z.enum(['MONTHLY', 'YEARLY']),
+})
+
+export type UpdateSubscriptionInput = z.infer<typeof updateSubscriptionSchema>
