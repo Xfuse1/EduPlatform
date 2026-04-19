@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { headers } from "next/headers";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { requireTenant } from "@/lib/tenant";
@@ -12,6 +13,9 @@ export default async function LoginPage({
 }) {
   const tenant = await requireTenant();
   const params = await searchParams;
+  const headerStore = await headers();
+  const host = headerStore.get("host") ?? "";
+  const isMainDomain = !host.includes(".") || host.startsWith("localhost");
 
   return (
     <main
@@ -31,7 +35,7 @@ export default async function LoginPage({
           <p className="text-sm font-bold leading-7 text-white">سجّل دخولك برقم هاتفك — سنعرف حسابك تلقائياً</p>
         </div>
         <div className="login-form-shell">
-          <LoginForm tenant={tenant} nextPath={params.next} />
+          <LoginForm tenant={tenant} nextPath={params.next} isMainDomain={isMainDomain} />
         </div>
       </div>
     </main>

@@ -102,7 +102,11 @@ function PinPad({ value, onChange, disabled = false }: { value: string; onChange
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export function LoginForm({ tenant, nextPath }: { tenant: TenantSummary; nextPath?: string }) {
+export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
+  tenant: TenantSummary;
+  nextPath?: string;
+  isMainDomain?: boolean;
+}) {
   const router = useRouter();
   const safeNextPath = sanitizeNextPath(nextPath);
   const [step, setStep] = useState<LoginStep>("phone");
@@ -260,29 +264,34 @@ export function LoginForm({ tenant, nextPath }: { tenant: TenantSummary; nextPat
               <div className="space-y-4 bg-white px-6 py-6 dark:bg-slate-950">
                 <p className="text-sm text-slate-600 dark:text-slate-300">هل تريد إنشاء حساب طالب، حساب ولي أمر، أم حساب معلم؟</p>
                 <DialogFooter className="flex flex-col gap-3 px-0 pb-3 pt-2 sm:flex-row">
-                  <Button
-                    className="flex-1 min-w-0"
-                    type="button"
-                    onClick={() => router.push(`/register?phone=${encodeURIComponent(phone)}`)}
-                  >
+                  {!isMainDomain && (
+                    <Button
+                      className="flex-1 min-w-0"
+                      type="button"
+                      onClick={() => router.push(`/register?phone=${encodeURIComponent(phone)}`)}
+                    >
                     إنشاء حساب طالب
-                  </Button>
-                  <Button
-                    className="flex-1 min-w-0"
-                    type="button"
-                    variant="outline"
-                    onClick={() => router.push(`/parent-register?phone=${encodeURIComponent(phone)}`)}
-                  >
+                    </Button>
+                  )}
+                  {!isMainDomain && (
+                    <Button
+                      className="flex-1 min-w-0"
+                      type="button"
+                      variant="outline"
+                      onClick={() => router.push(`/parent-register?phone=${encodeURIComponent(phone)}`)}
+                    >
                     إنشاء حساب ولي أمر
-                  </Button>
-                  <Button
-                    className="flex-1 min-w-0"
-                    type="button"
-                    variant="ghost"
-                    onClick={() => router.push(`/signup?phone=${encodeURIComponent(phone)}`)}
-                  >
+                    </Button>
+                  )}
+                  {isMainDomain && (
+                    <Button
+                      className="flex-1 min-w-0"
+                      type="button"
+                      onClick={() => router.push(`/signup?phone=${encodeURIComponent(phone)}`)}
+                    >
                     إنشاء حساب معلم
-                  </Button>
+                    </Button>
+                  )}
                 </DialogFooter>
               </div>
             </DialogContent>
