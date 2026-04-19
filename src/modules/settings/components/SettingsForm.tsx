@@ -87,7 +87,7 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl }: {
 
       if (!saveRes.ok) throw new Error("فشل حفظ الصورة");
 
-      setAvatarUrl(data.url);
+      setAvatarUrl(`${data.url}?t=${Date.now()}`);
       showToast("success", "تم تحديث الصورة بنجاح ✓");
     } catch (error) {
       showToast("error", error instanceof Error ? error.message : "فشل رفع الصورة");
@@ -229,9 +229,23 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl }: {
               </div>
 
               <div className="sm:col-span-2">
-                <Label htmlFor="slug">الرابط الخاص</Label>
-                <Input className="bg-slate-50 text-slate-500 dark:bg-slate-900 dark:text-slate-400" id="slug" readOnly value={`${tenant.slug}.eduplatform.com`} />
-                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">لا يمكن تغيير الرابط بعد الإنشاء</p>
+                <Label>رابط صفحتك الشخصية</Label>
+                <div className="mt-1 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
+                  <span className="flex-1 text-sm font-mono text-slate-700 dark:text-slate-300" dir="ltr">
+                    {tenant.slug}.eduplatform.com
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`https://${tenant.slug}.eduplatform.com`);
+                      showToast("success", "✅ تم نسخ الرابط");
+                    }}
+                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white transition hover:opacity-90"
+                  >
+                    نسخ الرابط
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-slate-500">أرسل هذا الرابط للطلاب وأولياء الأمور للتسجيل في سنترك</p>
               </div>
 
             </div>

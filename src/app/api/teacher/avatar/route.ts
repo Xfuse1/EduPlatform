@@ -15,10 +15,16 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "رابط الصورة غير صحيح" }, { status: 400 });
     }
 
-    await db.user.update({
-      where: { id: user.id },
-      data: { avatarUrl },
-    });
+    await Promise.all([
+      db.user.update({
+        where: { id: user.id },
+        data: { avatarUrl },
+      }),
+      db.tenant.update({
+        where: { id: user.tenantId },
+        data: { logoUrl: avatarUrl },
+      }),
+    ]);
 
     return NextResponse.json({ success: true });
   } catch (error) {
