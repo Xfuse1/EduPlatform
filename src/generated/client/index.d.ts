@@ -98,6 +98,21 @@ export type ExamQuestion = $Result.DefaultSelection<Prisma.$ExamQuestionPayload>
  * 
  */
 export type ExamSubmission = $Result.DefaultSelection<Prisma.$ExamSubmissionPayload>
+/**
+ * Model TeacherSubscription
+ * 
+ */
+export type TeacherSubscription = $Result.DefaultSelection<Prisma.$TeacherSubscriptionPayload>
+/**
+ * Model StudentBalance
+ * 
+ */
+export type StudentBalance = $Result.DefaultSelection<Prisma.$StudentBalancePayload>
+/**
+ * Model BalanceTransaction
+ * 
+ */
+export type BalanceTransaction = $Result.DefaultSelection<Prisma.$BalanceTransactionPayload>
 
 /**
  * Enums
@@ -238,6 +253,49 @@ export const QuestionType: {
 
 export type QuestionType = (typeof QuestionType)[keyof typeof QuestionType]
 
+
+export const SubscriptionPlan: {
+  STARTER: 'STARTER',
+  PROFESSIONAL: 'PROFESSIONAL',
+  ENTERPRISE: 'ENTERPRISE'
+};
+
+export type SubscriptionPlan = (typeof SubscriptionPlan)[keyof typeof SubscriptionPlan]
+
+
+export const BillingCycle: {
+  MONTHLY: 'MONTHLY',
+  YEARLY: 'YEARLY'
+};
+
+export type BillingCycle = (typeof BillingCycle)[keyof typeof BillingCycle]
+
+
+export const TransactionType: {
+  CREDIT: 'CREDIT',
+  DEBIT: 'DEBIT'
+};
+
+export type TransactionType = (typeof TransactionType)[keyof typeof TransactionType]
+
+
+export const TransactionStatus: {
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  REFUNDED: 'REFUNDED'
+};
+
+export type TransactionStatus = (typeof TransactionStatus)[keyof typeof TransactionStatus]
+
+
+export const PaymentGateway: {
+  KASHIER: 'KASHIER',
+  INTERNAL_BALANCE: 'INTERNAL_BALANCE'
+};
+
+export type PaymentGateway = (typeof PaymentGateway)[keyof typeof PaymentGateway]
+
 }
 
 export type Plan = $Enums.Plan
@@ -291,6 +349,26 @@ export const NotificationStatus: typeof $Enums.NotificationStatus
 export type QuestionType = $Enums.QuestionType
 
 export const QuestionType: typeof $Enums.QuestionType
+
+export type SubscriptionPlan = $Enums.SubscriptionPlan
+
+export const SubscriptionPlan: typeof $Enums.SubscriptionPlan
+
+export type BillingCycle = $Enums.BillingCycle
+
+export const BillingCycle: typeof $Enums.BillingCycle
+
+export type TransactionType = $Enums.TransactionType
+
+export const TransactionType: typeof $Enums.TransactionType
+
+export type TransactionStatus = $Enums.TransactionStatus
+
+export const TransactionStatus: typeof $Enums.TransactionStatus
+
+export type PaymentGateway = $Enums.PaymentGateway
+
+export const PaymentGateway: typeof $Enums.PaymentGateway
 
 /**
  * ##  Prisma Client ʲˢ
@@ -579,6 +657,36 @@ export class PrismaClient<
     * ```
     */
   get examSubmission(): Prisma.ExamSubmissionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.teacherSubscription`: Exposes CRUD operations for the **TeacherSubscription** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TeacherSubscriptions
+    * const teacherSubscriptions = await prisma.teacherSubscription.findMany()
+    * ```
+    */
+  get teacherSubscription(): Prisma.TeacherSubscriptionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.studentBalance`: Exposes CRUD operations for the **StudentBalance** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more StudentBalances
+    * const studentBalances = await prisma.studentBalance.findMany()
+    * ```
+    */
+  get studentBalance(): Prisma.StudentBalanceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.balanceTransaction`: Exposes CRUD operations for the **BalanceTransaction** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BalanceTransactions
+    * const balanceTransactions = await prisma.balanceTransaction.findMany()
+    * ```
+    */
+  get balanceTransaction(): Prisma.BalanceTransactionDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1036,7 +1144,10 @@ export namespace Prisma {
     Message: 'Message',
     Exam: 'Exam',
     ExamQuestion: 'ExamQuestion',
-    ExamSubmission: 'ExamSubmission'
+    ExamSubmission: 'ExamSubmission',
+    TeacherSubscription: 'TeacherSubscription',
+    StudentBalance: 'StudentBalance',
+    BalanceTransaction: 'BalanceTransaction'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1055,7 +1166,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "tenant" | "user" | "parentStudent" | "group" | "groupStudent" | "session" | "attendance" | "payment" | "notification" | "oTP" | "authSession" | "assignment" | "assignmentSubmission" | "message" | "exam" | "examQuestion" | "examSubmission"
+      modelProps: "tenant" | "user" | "parentStudent" | "group" | "groupStudent" | "session" | "attendance" | "payment" | "notification" | "oTP" | "authSession" | "assignment" | "assignmentSubmission" | "message" | "exam" | "examQuestion" | "examSubmission" | "teacherSubscription" | "studentBalance" | "balanceTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2317,6 +2428,228 @@ export namespace Prisma {
           }
         }
       }
+      TeacherSubscription: {
+        payload: Prisma.$TeacherSubscriptionPayload<ExtArgs>
+        fields: Prisma.TeacherSubscriptionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TeacherSubscriptionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherSubscriptionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TeacherSubscriptionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherSubscriptionPayload>
+          }
+          findFirst: {
+            args: Prisma.TeacherSubscriptionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherSubscriptionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TeacherSubscriptionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherSubscriptionPayload>
+          }
+          findMany: {
+            args: Prisma.TeacherSubscriptionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherSubscriptionPayload>[]
+          }
+          create: {
+            args: Prisma.TeacherSubscriptionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherSubscriptionPayload>
+          }
+          createMany: {
+            args: Prisma.TeacherSubscriptionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TeacherSubscriptionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherSubscriptionPayload>[]
+          }
+          delete: {
+            args: Prisma.TeacherSubscriptionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherSubscriptionPayload>
+          }
+          update: {
+            args: Prisma.TeacherSubscriptionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherSubscriptionPayload>
+          }
+          deleteMany: {
+            args: Prisma.TeacherSubscriptionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TeacherSubscriptionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TeacherSubscriptionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherSubscriptionPayload>[]
+          }
+          upsert: {
+            args: Prisma.TeacherSubscriptionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherSubscriptionPayload>
+          }
+          aggregate: {
+            args: Prisma.TeacherSubscriptionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTeacherSubscription>
+          }
+          groupBy: {
+            args: Prisma.TeacherSubscriptionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TeacherSubscriptionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TeacherSubscriptionCountArgs<ExtArgs>
+            result: $Utils.Optional<TeacherSubscriptionCountAggregateOutputType> | number
+          }
+        }
+      }
+      StudentBalance: {
+        payload: Prisma.$StudentBalancePayload<ExtArgs>
+        fields: Prisma.StudentBalanceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StudentBalanceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StudentBalancePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StudentBalanceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StudentBalancePayload>
+          }
+          findFirst: {
+            args: Prisma.StudentBalanceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StudentBalancePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StudentBalanceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StudentBalancePayload>
+          }
+          findMany: {
+            args: Prisma.StudentBalanceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StudentBalancePayload>[]
+          }
+          create: {
+            args: Prisma.StudentBalanceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StudentBalancePayload>
+          }
+          createMany: {
+            args: Prisma.StudentBalanceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StudentBalanceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StudentBalancePayload>[]
+          }
+          delete: {
+            args: Prisma.StudentBalanceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StudentBalancePayload>
+          }
+          update: {
+            args: Prisma.StudentBalanceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StudentBalancePayload>
+          }
+          deleteMany: {
+            args: Prisma.StudentBalanceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StudentBalanceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.StudentBalanceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StudentBalancePayload>[]
+          }
+          upsert: {
+            args: Prisma.StudentBalanceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StudentBalancePayload>
+          }
+          aggregate: {
+            args: Prisma.StudentBalanceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStudentBalance>
+          }
+          groupBy: {
+            args: Prisma.StudentBalanceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StudentBalanceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StudentBalanceCountArgs<ExtArgs>
+            result: $Utils.Optional<StudentBalanceCountAggregateOutputType> | number
+          }
+        }
+      }
+      BalanceTransaction: {
+        payload: Prisma.$BalanceTransactionPayload<ExtArgs>
+        fields: Prisma.BalanceTransactionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BalanceTransactionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BalanceTransactionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BalanceTransactionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BalanceTransactionPayload>
+          }
+          findFirst: {
+            args: Prisma.BalanceTransactionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BalanceTransactionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BalanceTransactionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BalanceTransactionPayload>
+          }
+          findMany: {
+            args: Prisma.BalanceTransactionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BalanceTransactionPayload>[]
+          }
+          create: {
+            args: Prisma.BalanceTransactionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BalanceTransactionPayload>
+          }
+          createMany: {
+            args: Prisma.BalanceTransactionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BalanceTransactionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BalanceTransactionPayload>[]
+          }
+          delete: {
+            args: Prisma.BalanceTransactionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BalanceTransactionPayload>
+          }
+          update: {
+            args: Prisma.BalanceTransactionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BalanceTransactionPayload>
+          }
+          deleteMany: {
+            args: Prisma.BalanceTransactionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BalanceTransactionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BalanceTransactionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BalanceTransactionPayload>[]
+          }
+          upsert: {
+            args: Prisma.BalanceTransactionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BalanceTransactionPayload>
+          }
+          aggregate: {
+            args: Prisma.BalanceTransactionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBalanceTransaction>
+          }
+          groupBy: {
+            args: Prisma.BalanceTransactionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BalanceTransactionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BalanceTransactionCountArgs<ExtArgs>
+            result: $Utils.Optional<BalanceTransactionCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2430,6 +2763,9 @@ export namespace Prisma {
     exam?: ExamOmit
     examQuestion?: ExamQuestionOmit
     examSubmission?: ExamSubmissionOmit
+    teacherSubscription?: TeacherSubscriptionOmit
+    studentBalance?: StudentBalanceOmit
+    balanceTransaction?: BalanceTransactionOmit
   }
 
   /* Types for Logging */
@@ -2519,6 +2855,8 @@ export namespace Prisma {
     payments: number
     sessions: number
     users: number
+    studentBalances: number
+    balanceTransactions: number
   }
 
   export type TenantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2531,6 +2869,8 @@ export namespace Prisma {
     payments?: boolean | TenantCountOutputTypeCountPaymentsArgs
     sessions?: boolean | TenantCountOutputTypeCountSessionsArgs
     users?: boolean | TenantCountOutputTypeCountUsersArgs
+    studentBalances?: boolean | TenantCountOutputTypeCountStudentBalancesArgs
+    balanceTransactions?: boolean | TenantCountOutputTypeCountBalanceTransactionsArgs
   }
 
   // Custom InputTypes
@@ -2607,6 +2947,20 @@ export namespace Prisma {
     where?: UserWhereInput
   }
 
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountStudentBalancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StudentBalanceWhereInput
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountBalanceTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BalanceTransactionWhereInput
+  }
+
 
   /**
    * Count Type UserCountOutputType
@@ -2626,6 +2980,8 @@ export namespace Prisma {
     childStudents: number
     recordedPayments: number
     payments: number
+    studentBalance: number
+    parentBalance: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2642,6 +2998,8 @@ export namespace Prisma {
     childStudents?: boolean | UserCountOutputTypeCountChildStudentsArgs
     recordedPayments?: boolean | UserCountOutputTypeCountRecordedPaymentsArgs
     payments?: boolean | UserCountOutputTypeCountPaymentsArgs
+    studentBalance?: boolean | UserCountOutputTypeCountStudentBalanceArgs
+    parentBalance?: boolean | UserCountOutputTypeCountParentBalanceArgs
   }
 
   // Custom InputTypes
@@ -2744,6 +3102,20 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PaymentWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountStudentBalanceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StudentBalanceWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountParentBalanceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StudentBalanceWhereInput
   }
 
 
@@ -2913,6 +3285,37 @@ export namespace Prisma {
    */
   export type ExamCountOutputTypeCountSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ExamSubmissionWhereInput
+  }
+
+
+  /**
+   * Count Type StudentBalanceCountOutputType
+   */
+
+  export type StudentBalanceCountOutputType = {
+    transactions: number
+  }
+
+  export type StudentBalanceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    transactions?: boolean | StudentBalanceCountOutputTypeCountTransactionsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * StudentBalanceCountOutputType without action
+   */
+  export type StudentBalanceCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalanceCountOutputType
+     */
+    select?: StudentBalanceCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * StudentBalanceCountOutputType without action
+   */
+  export type StudentBalanceCountOutputTypeCountTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BalanceTransactionWhereInput
   }
 
 
@@ -3203,6 +3606,9 @@ export namespace Prisma {
     payments?: boolean | Tenant$paymentsArgs<ExtArgs>
     sessions?: boolean | Tenant$sessionsArgs<ExtArgs>
     users?: boolean | Tenant$usersArgs<ExtArgs>
+    teacherSubscription?: boolean | Tenant$teacherSubscriptionArgs<ExtArgs>
+    studentBalances?: boolean | Tenant$studentBalancesArgs<ExtArgs>
+    balanceTransactions?: boolean | Tenant$balanceTransactionsArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
@@ -3271,6 +3677,9 @@ export namespace Prisma {
     payments?: boolean | Tenant$paymentsArgs<ExtArgs>
     sessions?: boolean | Tenant$sessionsArgs<ExtArgs>
     users?: boolean | Tenant$usersArgs<ExtArgs>
+    teacherSubscription?: boolean | Tenant$teacherSubscriptionArgs<ExtArgs>
+    studentBalances?: boolean | Tenant$studentBalancesArgs<ExtArgs>
+    balanceTransactions?: boolean | Tenant$balanceTransactionsArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TenantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -3288,6 +3697,9 @@ export namespace Prisma {
       payments: Prisma.$PaymentPayload<ExtArgs>[]
       sessions: Prisma.$SessionPayload<ExtArgs>[]
       users: Prisma.$UserPayload<ExtArgs>[]
+      teacherSubscription: Prisma.$TeacherSubscriptionPayload<ExtArgs> | null
+      studentBalances: Prisma.$StudentBalancePayload<ExtArgs>[]
+      balanceTransactions: Prisma.$BalanceTransactionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3708,6 +4120,9 @@ export namespace Prisma {
     payments<T extends Tenant$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sessions<T extends Tenant$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     users<T extends Tenant$usersArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    teacherSubscription<T extends Tenant$teacherSubscriptionArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$teacherSubscriptionArgs<ExtArgs>>): Prisma__TeacherSubscriptionClient<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    studentBalances<T extends Tenant$studentBalancesArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$studentBalancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    balanceTransactions<T extends Tenant$balanceTransactionsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$balanceTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4356,6 +4771,73 @@ export namespace Prisma {
   }
 
   /**
+   * Tenant.teacherSubscription
+   */
+  export type Tenant$teacherSubscriptionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionInclude<ExtArgs> | null
+    where?: TeacherSubscriptionWhereInput
+  }
+
+  /**
+   * Tenant.studentBalances
+   */
+  export type Tenant$studentBalancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+    where?: StudentBalanceWhereInput
+    orderBy?: StudentBalanceOrderByWithRelationInput | StudentBalanceOrderByWithRelationInput[]
+    cursor?: StudentBalanceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StudentBalanceScalarFieldEnum | StudentBalanceScalarFieldEnum[]
+  }
+
+  /**
+   * Tenant.balanceTransactions
+   */
+  export type Tenant$balanceTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+    where?: BalanceTransactionWhereInput
+    orderBy?: BalanceTransactionOrderByWithRelationInput | BalanceTransactionOrderByWithRelationInput[]
+    cursor?: BalanceTransactionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BalanceTransactionScalarFieldEnum | BalanceTransactionScalarFieldEnum[]
+  }
+
+  /**
    * Tenant without action
    */
   export type TenantDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4636,6 +5118,8 @@ export namespace Prisma {
     recordedPayments?: boolean | User$recordedPaymentsArgs<ExtArgs>
     payments?: boolean | User$paymentsArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    studentBalance?: boolean | User$studentBalanceArgs<ExtArgs>
+    parentBalance?: boolean | User$parentBalanceArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -4714,6 +5198,8 @@ export namespace Prisma {
     recordedPayments?: boolean | User$recordedPaymentsArgs<ExtArgs>
     payments?: boolean | User$paymentsArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    studentBalance?: boolean | User$studentBalanceArgs<ExtArgs>
+    parentBalance?: boolean | User$parentBalanceArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4740,6 +5226,8 @@ export namespace Prisma {
       recordedPayments: Prisma.$PaymentPayload<ExtArgs>[]
       payments: Prisma.$PaymentPayload<ExtArgs>[]
       tenant: Prisma.$TenantPayload<ExtArgs>
+      studentBalance: Prisma.$StudentBalancePayload<ExtArgs>[]
+      parentBalance: Prisma.$StudentBalancePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -5166,6 +5654,8 @@ export namespace Prisma {
     recordedPayments<T extends User$recordedPaymentsArgs<ExtArgs> = {}>(args?: Subset<T, User$recordedPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     payments<T extends User$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    studentBalance<T extends User$studentBalanceArgs<ExtArgs> = {}>(args?: Subset<T, User$studentBalanceArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    parentBalance<T extends User$parentBalanceArgs<ExtArgs> = {}>(args?: Subset<T, User$parentBalanceArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5916,6 +6406,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PaymentScalarFieldEnum | PaymentScalarFieldEnum[]
+  }
+
+  /**
+   * User.studentBalance
+   */
+  export type User$studentBalanceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+    where?: StudentBalanceWhereInput
+    orderBy?: StudentBalanceOrderByWithRelationInput | StudentBalanceOrderByWithRelationInput[]
+    cursor?: StudentBalanceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StudentBalanceScalarFieldEnum | StudentBalanceScalarFieldEnum[]
+  }
+
+  /**
+   * User.parentBalance
+   */
+  export type User$parentBalanceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+    where?: StudentBalanceWhereInput
+    orderBy?: StudentBalanceOrderByWithRelationInput | StudentBalanceOrderByWithRelationInput[]
+    cursor?: StudentBalanceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StudentBalanceScalarFieldEnum | StudentBalanceScalarFieldEnum[]
   }
 
   /**
@@ -11881,6 +12419,9 @@ export namespace Prisma {
     paidAt: Date | null
     recordedById: string | null
     notes: string | null
+    paymentGateway: $Enums.PaymentGateway | null
+    transactionId: string | null
+    teacherApiUsed: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -11900,6 +12441,9 @@ export namespace Prisma {
     paidAt: Date | null
     recordedById: string | null
     notes: string | null
+    paymentGateway: $Enums.PaymentGateway | null
+    transactionId: string | null
+    teacherApiUsed: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -11919,6 +12463,9 @@ export namespace Prisma {
     paidAt: number
     recordedById: number
     notes: number
+    paymentGateway: number
+    transactionId: number
+    teacherApiUsed: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -11952,6 +12499,9 @@ export namespace Prisma {
     paidAt?: true
     recordedById?: true
     notes?: true
+    paymentGateway?: true
+    transactionId?: true
+    teacherApiUsed?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -11971,6 +12521,9 @@ export namespace Prisma {
     paidAt?: true
     recordedById?: true
     notes?: true
+    paymentGateway?: true
+    transactionId?: true
+    teacherApiUsed?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -11990,6 +12543,9 @@ export namespace Prisma {
     paidAt?: true
     recordedById?: true
     notes?: true
+    paymentGateway?: true
+    transactionId?: true
+    teacherApiUsed?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -12096,6 +12652,9 @@ export namespace Prisma {
     paidAt: Date | null
     recordedById: string | null
     notes: string | null
+    paymentGateway: $Enums.PaymentGateway
+    transactionId: string | null
+    teacherApiUsed: boolean
     createdAt: Date
     updatedAt: Date
     _count: PaymentCountAggregateOutputType | null
@@ -12134,6 +12693,9 @@ export namespace Prisma {
     paidAt?: boolean
     recordedById?: boolean
     notes?: boolean
+    paymentGateway?: boolean
+    transactionId?: boolean
+    teacherApiUsed?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     recordedBy?: boolean | Payment$recordedByArgs<ExtArgs>
@@ -12156,6 +12718,9 @@ export namespace Prisma {
     paidAt?: boolean
     recordedById?: boolean
     notes?: boolean
+    paymentGateway?: boolean
+    transactionId?: boolean
+    teacherApiUsed?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     recordedBy?: boolean | Payment$recordedByArgs<ExtArgs>
@@ -12178,6 +12743,9 @@ export namespace Prisma {
     paidAt?: boolean
     recordedById?: boolean
     notes?: boolean
+    paymentGateway?: boolean
+    transactionId?: boolean
+    teacherApiUsed?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     recordedBy?: boolean | Payment$recordedByArgs<ExtArgs>
@@ -12200,11 +12768,14 @@ export namespace Prisma {
     paidAt?: boolean
     recordedById?: boolean
     notes?: boolean
+    paymentGateway?: boolean
+    transactionId?: boolean
+    teacherApiUsed?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type PaymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "studentId" | "amount" | "month" | "status" | "method" | "installmentNumber" | "installmentTotal" | "receiptNumber" | "receiptUrl" | "paidAt" | "recordedById" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["payment"]>
+  export type PaymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "studentId" | "amount" | "month" | "status" | "method" | "installmentNumber" | "installmentTotal" | "receiptNumber" | "receiptUrl" | "paidAt" | "recordedById" | "notes" | "paymentGateway" | "transactionId" | "teacherApiUsed" | "createdAt" | "updatedAt", ExtArgs["result"]["payment"]>
   export type PaymentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     recordedBy?: boolean | Payment$recordedByArgs<ExtArgs>
     student?: boolean | UserDefaultArgs<ExtArgs>
@@ -12243,6 +12814,9 @@ export namespace Prisma {
       paidAt: Date | null
       recordedById: string | null
       notes: string | null
+      paymentGateway: $Enums.PaymentGateway
+      transactionId: string | null
+      teacherApiUsed: boolean
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["payment"]>
@@ -12685,6 +13259,9 @@ export namespace Prisma {
     readonly paidAt: FieldRef<"Payment", 'DateTime'>
     readonly recordedById: FieldRef<"Payment", 'String'>
     readonly notes: FieldRef<"Payment", 'String'>
+    readonly paymentGateway: FieldRef<"Payment", 'PaymentGateway'>
+    readonly transactionId: FieldRef<"Payment", 'String'>
+    readonly teacherApiUsed: FieldRef<"Payment", 'Boolean'>
     readonly createdAt: FieldRef<"Payment", 'DateTime'>
     readonly updatedAt: FieldRef<"Payment", 'DateTime'>
   }
@@ -23490,6 +24067,3537 @@ export namespace Prisma {
 
 
   /**
+   * Model TeacherSubscription
+   */
+
+  export type AggregateTeacherSubscription = {
+    _count: TeacherSubscriptionCountAggregateOutputType | null
+    _avg: TeacherSubscriptionAvgAggregateOutputType | null
+    _sum: TeacherSubscriptionSumAggregateOutputType | null
+    _min: TeacherSubscriptionMinAggregateOutputType | null
+    _max: TeacherSubscriptionMaxAggregateOutputType | null
+  }
+
+  export type TeacherSubscriptionAvgAggregateOutputType = {
+    amount: number | null
+  }
+
+  export type TeacherSubscriptionSumAggregateOutputType = {
+    amount: number | null
+  }
+
+  export type TeacherSubscriptionMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    subscriptionPlan: $Enums.SubscriptionPlan | null
+    billingCycle: $Enums.BillingCycle | null
+    amount: number | null
+    isActive: boolean | null
+    nextBillingAt: Date | null
+    cancelledAt: Date | null
+    kashierApiKey: string | null
+    kashierMerId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TeacherSubscriptionMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    subscriptionPlan: $Enums.SubscriptionPlan | null
+    billingCycle: $Enums.BillingCycle | null
+    amount: number | null
+    isActive: boolean | null
+    nextBillingAt: Date | null
+    cancelledAt: Date | null
+    kashierApiKey: string | null
+    kashierMerId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TeacherSubscriptionCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    subscriptionPlan: number
+    billingCycle: number
+    amount: number
+    isActive: number
+    nextBillingAt: number
+    cancelledAt: number
+    kashierApiKey: number
+    kashierMerId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TeacherSubscriptionAvgAggregateInputType = {
+    amount?: true
+  }
+
+  export type TeacherSubscriptionSumAggregateInputType = {
+    amount?: true
+  }
+
+  export type TeacherSubscriptionMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    subscriptionPlan?: true
+    billingCycle?: true
+    amount?: true
+    isActive?: true
+    nextBillingAt?: true
+    cancelledAt?: true
+    kashierApiKey?: true
+    kashierMerId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TeacherSubscriptionMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    subscriptionPlan?: true
+    billingCycle?: true
+    amount?: true
+    isActive?: true
+    nextBillingAt?: true
+    cancelledAt?: true
+    kashierApiKey?: true
+    kashierMerId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TeacherSubscriptionCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    subscriptionPlan?: true
+    billingCycle?: true
+    amount?: true
+    isActive?: true
+    nextBillingAt?: true
+    cancelledAt?: true
+    kashierApiKey?: true
+    kashierMerId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TeacherSubscriptionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TeacherSubscription to aggregate.
+     */
+    where?: TeacherSubscriptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeacherSubscriptions to fetch.
+     */
+    orderBy?: TeacherSubscriptionOrderByWithRelationInput | TeacherSubscriptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TeacherSubscriptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeacherSubscriptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeacherSubscriptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TeacherSubscriptions
+    **/
+    _count?: true | TeacherSubscriptionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TeacherSubscriptionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TeacherSubscriptionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TeacherSubscriptionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TeacherSubscriptionMaxAggregateInputType
+  }
+
+  export type GetTeacherSubscriptionAggregateType<T extends TeacherSubscriptionAggregateArgs> = {
+        [P in keyof T & keyof AggregateTeacherSubscription]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTeacherSubscription[P]>
+      : GetScalarType<T[P], AggregateTeacherSubscription[P]>
+  }
+
+
+
+
+  export type TeacherSubscriptionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TeacherSubscriptionWhereInput
+    orderBy?: TeacherSubscriptionOrderByWithAggregationInput | TeacherSubscriptionOrderByWithAggregationInput[]
+    by: TeacherSubscriptionScalarFieldEnum[] | TeacherSubscriptionScalarFieldEnum
+    having?: TeacherSubscriptionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TeacherSubscriptionCountAggregateInputType | true
+    _avg?: TeacherSubscriptionAvgAggregateInputType
+    _sum?: TeacherSubscriptionSumAggregateInputType
+    _min?: TeacherSubscriptionMinAggregateInputType
+    _max?: TeacherSubscriptionMaxAggregateInputType
+  }
+
+  export type TeacherSubscriptionGroupByOutputType = {
+    id: string
+    tenantId: string
+    subscriptionPlan: $Enums.SubscriptionPlan
+    billingCycle: $Enums.BillingCycle
+    amount: number
+    isActive: boolean
+    nextBillingAt: Date
+    cancelledAt: Date | null
+    kashierApiKey: string | null
+    kashierMerId: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: TeacherSubscriptionCountAggregateOutputType | null
+    _avg: TeacherSubscriptionAvgAggregateOutputType | null
+    _sum: TeacherSubscriptionSumAggregateOutputType | null
+    _min: TeacherSubscriptionMinAggregateOutputType | null
+    _max: TeacherSubscriptionMaxAggregateOutputType | null
+  }
+
+  type GetTeacherSubscriptionGroupByPayload<T extends TeacherSubscriptionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TeacherSubscriptionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TeacherSubscriptionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TeacherSubscriptionGroupByOutputType[P]>
+            : GetScalarType<T[P], TeacherSubscriptionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TeacherSubscriptionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    subscriptionPlan?: boolean
+    billingCycle?: boolean
+    amount?: boolean
+    isActive?: boolean
+    nextBillingAt?: boolean
+    cancelledAt?: boolean
+    kashierApiKey?: boolean
+    kashierMerId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["teacherSubscription"]>
+
+  export type TeacherSubscriptionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    subscriptionPlan?: boolean
+    billingCycle?: boolean
+    amount?: boolean
+    isActive?: boolean
+    nextBillingAt?: boolean
+    cancelledAt?: boolean
+    kashierApiKey?: boolean
+    kashierMerId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["teacherSubscription"]>
+
+  export type TeacherSubscriptionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    subscriptionPlan?: boolean
+    billingCycle?: boolean
+    amount?: boolean
+    isActive?: boolean
+    nextBillingAt?: boolean
+    cancelledAt?: boolean
+    kashierApiKey?: boolean
+    kashierMerId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["teacherSubscription"]>
+
+  export type TeacherSubscriptionSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    subscriptionPlan?: boolean
+    billingCycle?: boolean
+    amount?: boolean
+    isActive?: boolean
+    nextBillingAt?: boolean
+    cancelledAt?: boolean
+    kashierApiKey?: boolean
+    kashierMerId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TeacherSubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "subscriptionPlan" | "billingCycle" | "amount" | "isActive" | "nextBillingAt" | "cancelledAt" | "kashierApiKey" | "kashierMerId" | "createdAt" | "updatedAt", ExtArgs["result"]["teacherSubscription"]>
+  export type TeacherSubscriptionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type TeacherSubscriptionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type TeacherSubscriptionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+
+  export type $TeacherSubscriptionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TeacherSubscription"
+    objects: {
+      tenant: Prisma.$TenantPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      subscriptionPlan: $Enums.SubscriptionPlan
+      billingCycle: $Enums.BillingCycle
+      amount: number
+      isActive: boolean
+      nextBillingAt: Date
+      cancelledAt: Date | null
+      kashierApiKey: string | null
+      kashierMerId: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["teacherSubscription"]>
+    composites: {}
+  }
+
+  type TeacherSubscriptionGetPayload<S extends boolean | null | undefined | TeacherSubscriptionDefaultArgs> = $Result.GetResult<Prisma.$TeacherSubscriptionPayload, S>
+
+  type TeacherSubscriptionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TeacherSubscriptionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TeacherSubscriptionCountAggregateInputType | true
+    }
+
+  export interface TeacherSubscriptionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TeacherSubscription'], meta: { name: 'TeacherSubscription' } }
+    /**
+     * Find zero or one TeacherSubscription that matches the filter.
+     * @param {TeacherSubscriptionFindUniqueArgs} args - Arguments to find a TeacherSubscription
+     * @example
+     * // Get one TeacherSubscription
+     * const teacherSubscription = await prisma.teacherSubscription.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TeacherSubscriptionFindUniqueArgs>(args: SelectSubset<T, TeacherSubscriptionFindUniqueArgs<ExtArgs>>): Prisma__TeacherSubscriptionClient<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TeacherSubscription that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TeacherSubscriptionFindUniqueOrThrowArgs} args - Arguments to find a TeacherSubscription
+     * @example
+     * // Get one TeacherSubscription
+     * const teacherSubscription = await prisma.teacherSubscription.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TeacherSubscriptionFindUniqueOrThrowArgs>(args: SelectSubset<T, TeacherSubscriptionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TeacherSubscriptionClient<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TeacherSubscription that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherSubscriptionFindFirstArgs} args - Arguments to find a TeacherSubscription
+     * @example
+     * // Get one TeacherSubscription
+     * const teacherSubscription = await prisma.teacherSubscription.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TeacherSubscriptionFindFirstArgs>(args?: SelectSubset<T, TeacherSubscriptionFindFirstArgs<ExtArgs>>): Prisma__TeacherSubscriptionClient<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TeacherSubscription that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherSubscriptionFindFirstOrThrowArgs} args - Arguments to find a TeacherSubscription
+     * @example
+     * // Get one TeacherSubscription
+     * const teacherSubscription = await prisma.teacherSubscription.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TeacherSubscriptionFindFirstOrThrowArgs>(args?: SelectSubset<T, TeacherSubscriptionFindFirstOrThrowArgs<ExtArgs>>): Prisma__TeacherSubscriptionClient<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TeacherSubscriptions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherSubscriptionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TeacherSubscriptions
+     * const teacherSubscriptions = await prisma.teacherSubscription.findMany()
+     * 
+     * // Get first 10 TeacherSubscriptions
+     * const teacherSubscriptions = await prisma.teacherSubscription.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const teacherSubscriptionWithIdOnly = await prisma.teacherSubscription.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TeacherSubscriptionFindManyArgs>(args?: SelectSubset<T, TeacherSubscriptionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TeacherSubscription.
+     * @param {TeacherSubscriptionCreateArgs} args - Arguments to create a TeacherSubscription.
+     * @example
+     * // Create one TeacherSubscription
+     * const TeacherSubscription = await prisma.teacherSubscription.create({
+     *   data: {
+     *     // ... data to create a TeacherSubscription
+     *   }
+     * })
+     * 
+     */
+    create<T extends TeacherSubscriptionCreateArgs>(args: SelectSubset<T, TeacherSubscriptionCreateArgs<ExtArgs>>): Prisma__TeacherSubscriptionClient<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TeacherSubscriptions.
+     * @param {TeacherSubscriptionCreateManyArgs} args - Arguments to create many TeacherSubscriptions.
+     * @example
+     * // Create many TeacherSubscriptions
+     * const teacherSubscription = await prisma.teacherSubscription.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TeacherSubscriptionCreateManyArgs>(args?: SelectSubset<T, TeacherSubscriptionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TeacherSubscriptions and returns the data saved in the database.
+     * @param {TeacherSubscriptionCreateManyAndReturnArgs} args - Arguments to create many TeacherSubscriptions.
+     * @example
+     * // Create many TeacherSubscriptions
+     * const teacherSubscription = await prisma.teacherSubscription.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TeacherSubscriptions and only return the `id`
+     * const teacherSubscriptionWithIdOnly = await prisma.teacherSubscription.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TeacherSubscriptionCreateManyAndReturnArgs>(args?: SelectSubset<T, TeacherSubscriptionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TeacherSubscription.
+     * @param {TeacherSubscriptionDeleteArgs} args - Arguments to delete one TeacherSubscription.
+     * @example
+     * // Delete one TeacherSubscription
+     * const TeacherSubscription = await prisma.teacherSubscription.delete({
+     *   where: {
+     *     // ... filter to delete one TeacherSubscription
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TeacherSubscriptionDeleteArgs>(args: SelectSubset<T, TeacherSubscriptionDeleteArgs<ExtArgs>>): Prisma__TeacherSubscriptionClient<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TeacherSubscription.
+     * @param {TeacherSubscriptionUpdateArgs} args - Arguments to update one TeacherSubscription.
+     * @example
+     * // Update one TeacherSubscription
+     * const teacherSubscription = await prisma.teacherSubscription.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TeacherSubscriptionUpdateArgs>(args: SelectSubset<T, TeacherSubscriptionUpdateArgs<ExtArgs>>): Prisma__TeacherSubscriptionClient<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TeacherSubscriptions.
+     * @param {TeacherSubscriptionDeleteManyArgs} args - Arguments to filter TeacherSubscriptions to delete.
+     * @example
+     * // Delete a few TeacherSubscriptions
+     * const { count } = await prisma.teacherSubscription.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TeacherSubscriptionDeleteManyArgs>(args?: SelectSubset<T, TeacherSubscriptionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TeacherSubscriptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherSubscriptionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TeacherSubscriptions
+     * const teacherSubscription = await prisma.teacherSubscription.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TeacherSubscriptionUpdateManyArgs>(args: SelectSubset<T, TeacherSubscriptionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TeacherSubscriptions and returns the data updated in the database.
+     * @param {TeacherSubscriptionUpdateManyAndReturnArgs} args - Arguments to update many TeacherSubscriptions.
+     * @example
+     * // Update many TeacherSubscriptions
+     * const teacherSubscription = await prisma.teacherSubscription.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TeacherSubscriptions and only return the `id`
+     * const teacherSubscriptionWithIdOnly = await prisma.teacherSubscription.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TeacherSubscriptionUpdateManyAndReturnArgs>(args: SelectSubset<T, TeacherSubscriptionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TeacherSubscription.
+     * @param {TeacherSubscriptionUpsertArgs} args - Arguments to update or create a TeacherSubscription.
+     * @example
+     * // Update or create a TeacherSubscription
+     * const teacherSubscription = await prisma.teacherSubscription.upsert({
+     *   create: {
+     *     // ... data to create a TeacherSubscription
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TeacherSubscription we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TeacherSubscriptionUpsertArgs>(args: SelectSubset<T, TeacherSubscriptionUpsertArgs<ExtArgs>>): Prisma__TeacherSubscriptionClient<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TeacherSubscriptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherSubscriptionCountArgs} args - Arguments to filter TeacherSubscriptions to count.
+     * @example
+     * // Count the number of TeacherSubscriptions
+     * const count = await prisma.teacherSubscription.count({
+     *   where: {
+     *     // ... the filter for the TeacherSubscriptions we want to count
+     *   }
+     * })
+    **/
+    count<T extends TeacherSubscriptionCountArgs>(
+      args?: Subset<T, TeacherSubscriptionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TeacherSubscriptionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TeacherSubscription.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherSubscriptionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TeacherSubscriptionAggregateArgs>(args: Subset<T, TeacherSubscriptionAggregateArgs>): Prisma.PrismaPromise<GetTeacherSubscriptionAggregateType<T>>
+
+    /**
+     * Group by TeacherSubscription.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherSubscriptionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TeacherSubscriptionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TeacherSubscriptionGroupByArgs['orderBy'] }
+        : { orderBy?: TeacherSubscriptionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TeacherSubscriptionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTeacherSubscriptionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TeacherSubscription model
+   */
+  readonly fields: TeacherSubscriptionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TeacherSubscription.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TeacherSubscriptionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TeacherSubscription model
+   */
+  interface TeacherSubscriptionFieldRefs {
+    readonly id: FieldRef<"TeacherSubscription", 'String'>
+    readonly tenantId: FieldRef<"TeacherSubscription", 'String'>
+    readonly subscriptionPlan: FieldRef<"TeacherSubscription", 'SubscriptionPlan'>
+    readonly billingCycle: FieldRef<"TeacherSubscription", 'BillingCycle'>
+    readonly amount: FieldRef<"TeacherSubscription", 'Int'>
+    readonly isActive: FieldRef<"TeacherSubscription", 'Boolean'>
+    readonly nextBillingAt: FieldRef<"TeacherSubscription", 'DateTime'>
+    readonly cancelledAt: FieldRef<"TeacherSubscription", 'DateTime'>
+    readonly kashierApiKey: FieldRef<"TeacherSubscription", 'String'>
+    readonly kashierMerId: FieldRef<"TeacherSubscription", 'String'>
+    readonly createdAt: FieldRef<"TeacherSubscription", 'DateTime'>
+    readonly updatedAt: FieldRef<"TeacherSubscription", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TeacherSubscription findUnique
+   */
+  export type TeacherSubscriptionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which TeacherSubscription to fetch.
+     */
+    where: TeacherSubscriptionWhereUniqueInput
+  }
+
+  /**
+   * TeacherSubscription findUniqueOrThrow
+   */
+  export type TeacherSubscriptionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which TeacherSubscription to fetch.
+     */
+    where: TeacherSubscriptionWhereUniqueInput
+  }
+
+  /**
+   * TeacherSubscription findFirst
+   */
+  export type TeacherSubscriptionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which TeacherSubscription to fetch.
+     */
+    where?: TeacherSubscriptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeacherSubscriptions to fetch.
+     */
+    orderBy?: TeacherSubscriptionOrderByWithRelationInput | TeacherSubscriptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TeacherSubscriptions.
+     */
+    cursor?: TeacherSubscriptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeacherSubscriptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeacherSubscriptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TeacherSubscriptions.
+     */
+    distinct?: TeacherSubscriptionScalarFieldEnum | TeacherSubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * TeacherSubscription findFirstOrThrow
+   */
+  export type TeacherSubscriptionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which TeacherSubscription to fetch.
+     */
+    where?: TeacherSubscriptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeacherSubscriptions to fetch.
+     */
+    orderBy?: TeacherSubscriptionOrderByWithRelationInput | TeacherSubscriptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TeacherSubscriptions.
+     */
+    cursor?: TeacherSubscriptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeacherSubscriptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeacherSubscriptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TeacherSubscriptions.
+     */
+    distinct?: TeacherSubscriptionScalarFieldEnum | TeacherSubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * TeacherSubscription findMany
+   */
+  export type TeacherSubscriptionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which TeacherSubscriptions to fetch.
+     */
+    where?: TeacherSubscriptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeacherSubscriptions to fetch.
+     */
+    orderBy?: TeacherSubscriptionOrderByWithRelationInput | TeacherSubscriptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TeacherSubscriptions.
+     */
+    cursor?: TeacherSubscriptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeacherSubscriptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeacherSubscriptions.
+     */
+    skip?: number
+    distinct?: TeacherSubscriptionScalarFieldEnum | TeacherSubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * TeacherSubscription create
+   */
+  export type TeacherSubscriptionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TeacherSubscription.
+     */
+    data: XOR<TeacherSubscriptionCreateInput, TeacherSubscriptionUncheckedCreateInput>
+  }
+
+  /**
+   * TeacherSubscription createMany
+   */
+  export type TeacherSubscriptionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TeacherSubscriptions.
+     */
+    data: TeacherSubscriptionCreateManyInput | TeacherSubscriptionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TeacherSubscription createManyAndReturn
+   */
+  export type TeacherSubscriptionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * The data used to create many TeacherSubscriptions.
+     */
+    data: TeacherSubscriptionCreateManyInput | TeacherSubscriptionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TeacherSubscription update
+   */
+  export type TeacherSubscriptionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TeacherSubscription.
+     */
+    data: XOR<TeacherSubscriptionUpdateInput, TeacherSubscriptionUncheckedUpdateInput>
+    /**
+     * Choose, which TeacherSubscription to update.
+     */
+    where: TeacherSubscriptionWhereUniqueInput
+  }
+
+  /**
+   * TeacherSubscription updateMany
+   */
+  export type TeacherSubscriptionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TeacherSubscriptions.
+     */
+    data: XOR<TeacherSubscriptionUpdateManyMutationInput, TeacherSubscriptionUncheckedUpdateManyInput>
+    /**
+     * Filter which TeacherSubscriptions to update
+     */
+    where?: TeacherSubscriptionWhereInput
+    /**
+     * Limit how many TeacherSubscriptions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TeacherSubscription updateManyAndReturn
+   */
+  export type TeacherSubscriptionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * The data used to update TeacherSubscriptions.
+     */
+    data: XOR<TeacherSubscriptionUpdateManyMutationInput, TeacherSubscriptionUncheckedUpdateManyInput>
+    /**
+     * Filter which TeacherSubscriptions to update
+     */
+    where?: TeacherSubscriptionWhereInput
+    /**
+     * Limit how many TeacherSubscriptions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TeacherSubscription upsert
+   */
+  export type TeacherSubscriptionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TeacherSubscription to update in case it exists.
+     */
+    where: TeacherSubscriptionWhereUniqueInput
+    /**
+     * In case the TeacherSubscription found by the `where` argument doesn't exist, create a new TeacherSubscription with this data.
+     */
+    create: XOR<TeacherSubscriptionCreateInput, TeacherSubscriptionUncheckedCreateInput>
+    /**
+     * In case the TeacherSubscription was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TeacherSubscriptionUpdateInput, TeacherSubscriptionUncheckedUpdateInput>
+  }
+
+  /**
+   * TeacherSubscription delete
+   */
+  export type TeacherSubscriptionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter which TeacherSubscription to delete.
+     */
+    where: TeacherSubscriptionWhereUniqueInput
+  }
+
+  /**
+   * TeacherSubscription deleteMany
+   */
+  export type TeacherSubscriptionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TeacherSubscriptions to delete
+     */
+    where?: TeacherSubscriptionWhereInput
+    /**
+     * Limit how many TeacherSubscriptions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TeacherSubscription without action
+   */
+  export type TeacherSubscriptionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherSubscription
+     */
+    select?: TeacherSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherSubscription
+     */
+    omit?: TeacherSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherSubscriptionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model StudentBalance
+   */
+
+  export type AggregateStudentBalance = {
+    _count: StudentBalanceCountAggregateOutputType | null
+    _avg: StudentBalanceAvgAggregateOutputType | null
+    _sum: StudentBalanceSumAggregateOutputType | null
+    _min: StudentBalanceMinAggregateOutputType | null
+    _max: StudentBalanceMaxAggregateOutputType | null
+  }
+
+  export type StudentBalanceAvgAggregateOutputType = {
+    balance: number | null
+  }
+
+  export type StudentBalanceSumAggregateOutputType = {
+    balance: number | null
+  }
+
+  export type StudentBalanceMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    studentId: string | null
+    parentId: string | null
+    balance: number | null
+    lastRechargedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StudentBalanceMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    studentId: string | null
+    parentId: string | null
+    balance: number | null
+    lastRechargedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StudentBalanceCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    studentId: number
+    parentId: number
+    balance: number
+    lastRechargedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type StudentBalanceAvgAggregateInputType = {
+    balance?: true
+  }
+
+  export type StudentBalanceSumAggregateInputType = {
+    balance?: true
+  }
+
+  export type StudentBalanceMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    studentId?: true
+    parentId?: true
+    balance?: true
+    lastRechargedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StudentBalanceMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    studentId?: true
+    parentId?: true
+    balance?: true
+    lastRechargedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StudentBalanceCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    studentId?: true
+    parentId?: true
+    balance?: true
+    lastRechargedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type StudentBalanceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StudentBalance to aggregate.
+     */
+    where?: StudentBalanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StudentBalances to fetch.
+     */
+    orderBy?: StudentBalanceOrderByWithRelationInput | StudentBalanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StudentBalanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StudentBalances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StudentBalances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned StudentBalances
+    **/
+    _count?: true | StudentBalanceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: StudentBalanceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: StudentBalanceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StudentBalanceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StudentBalanceMaxAggregateInputType
+  }
+
+  export type GetStudentBalanceAggregateType<T extends StudentBalanceAggregateArgs> = {
+        [P in keyof T & keyof AggregateStudentBalance]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStudentBalance[P]>
+      : GetScalarType<T[P], AggregateStudentBalance[P]>
+  }
+
+
+
+
+  export type StudentBalanceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StudentBalanceWhereInput
+    orderBy?: StudentBalanceOrderByWithAggregationInput | StudentBalanceOrderByWithAggregationInput[]
+    by: StudentBalanceScalarFieldEnum[] | StudentBalanceScalarFieldEnum
+    having?: StudentBalanceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StudentBalanceCountAggregateInputType | true
+    _avg?: StudentBalanceAvgAggregateInputType
+    _sum?: StudentBalanceSumAggregateInputType
+    _min?: StudentBalanceMinAggregateInputType
+    _max?: StudentBalanceMaxAggregateInputType
+  }
+
+  export type StudentBalanceGroupByOutputType = {
+    id: string
+    tenantId: string
+    studentId: string
+    parentId: string | null
+    balance: number
+    lastRechargedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: StudentBalanceCountAggregateOutputType | null
+    _avg: StudentBalanceAvgAggregateOutputType | null
+    _sum: StudentBalanceSumAggregateOutputType | null
+    _min: StudentBalanceMinAggregateOutputType | null
+    _max: StudentBalanceMaxAggregateOutputType | null
+  }
+
+  type GetStudentBalanceGroupByPayload<T extends StudentBalanceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StudentBalanceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StudentBalanceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StudentBalanceGroupByOutputType[P]>
+            : GetScalarType<T[P], StudentBalanceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StudentBalanceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    studentId?: boolean
+    parentId?: boolean
+    balance?: boolean
+    lastRechargedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    student?: boolean | UserDefaultArgs<ExtArgs>
+    parent?: boolean | StudentBalance$parentArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    transactions?: boolean | StudentBalance$transactionsArgs<ExtArgs>
+    _count?: boolean | StudentBalanceCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["studentBalance"]>
+
+  export type StudentBalanceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    studentId?: boolean
+    parentId?: boolean
+    balance?: boolean
+    lastRechargedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    student?: boolean | UserDefaultArgs<ExtArgs>
+    parent?: boolean | StudentBalance$parentArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["studentBalance"]>
+
+  export type StudentBalanceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    studentId?: boolean
+    parentId?: boolean
+    balance?: boolean
+    lastRechargedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    student?: boolean | UserDefaultArgs<ExtArgs>
+    parent?: boolean | StudentBalance$parentArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["studentBalance"]>
+
+  export type StudentBalanceSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    studentId?: boolean
+    parentId?: boolean
+    balance?: boolean
+    lastRechargedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type StudentBalanceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "studentId" | "parentId" | "balance" | "lastRechargedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["studentBalance"]>
+  export type StudentBalanceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    student?: boolean | UserDefaultArgs<ExtArgs>
+    parent?: boolean | StudentBalance$parentArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    transactions?: boolean | StudentBalance$transactionsArgs<ExtArgs>
+    _count?: boolean | StudentBalanceCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type StudentBalanceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    student?: boolean | UserDefaultArgs<ExtArgs>
+    parent?: boolean | StudentBalance$parentArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type StudentBalanceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    student?: boolean | UserDefaultArgs<ExtArgs>
+    parent?: boolean | StudentBalance$parentArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+
+  export type $StudentBalancePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "StudentBalance"
+    objects: {
+      student: Prisma.$UserPayload<ExtArgs>
+      parent: Prisma.$UserPayload<ExtArgs> | null
+      tenant: Prisma.$TenantPayload<ExtArgs>
+      transactions: Prisma.$BalanceTransactionPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      studentId: string
+      parentId: string | null
+      balance: number
+      lastRechargedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["studentBalance"]>
+    composites: {}
+  }
+
+  type StudentBalanceGetPayload<S extends boolean | null | undefined | StudentBalanceDefaultArgs> = $Result.GetResult<Prisma.$StudentBalancePayload, S>
+
+  type StudentBalanceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<StudentBalanceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: StudentBalanceCountAggregateInputType | true
+    }
+
+  export interface StudentBalanceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StudentBalance'], meta: { name: 'StudentBalance' } }
+    /**
+     * Find zero or one StudentBalance that matches the filter.
+     * @param {StudentBalanceFindUniqueArgs} args - Arguments to find a StudentBalance
+     * @example
+     * // Get one StudentBalance
+     * const studentBalance = await prisma.studentBalance.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StudentBalanceFindUniqueArgs>(args: SelectSubset<T, StudentBalanceFindUniqueArgs<ExtArgs>>): Prisma__StudentBalanceClient<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one StudentBalance that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {StudentBalanceFindUniqueOrThrowArgs} args - Arguments to find a StudentBalance
+     * @example
+     * // Get one StudentBalance
+     * const studentBalance = await prisma.studentBalance.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StudentBalanceFindUniqueOrThrowArgs>(args: SelectSubset<T, StudentBalanceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StudentBalanceClient<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StudentBalance that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StudentBalanceFindFirstArgs} args - Arguments to find a StudentBalance
+     * @example
+     * // Get one StudentBalance
+     * const studentBalance = await prisma.studentBalance.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StudentBalanceFindFirstArgs>(args?: SelectSubset<T, StudentBalanceFindFirstArgs<ExtArgs>>): Prisma__StudentBalanceClient<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StudentBalance that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StudentBalanceFindFirstOrThrowArgs} args - Arguments to find a StudentBalance
+     * @example
+     * // Get one StudentBalance
+     * const studentBalance = await prisma.studentBalance.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StudentBalanceFindFirstOrThrowArgs>(args?: SelectSubset<T, StudentBalanceFindFirstOrThrowArgs<ExtArgs>>): Prisma__StudentBalanceClient<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more StudentBalances that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StudentBalanceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all StudentBalances
+     * const studentBalances = await prisma.studentBalance.findMany()
+     * 
+     * // Get first 10 StudentBalances
+     * const studentBalances = await prisma.studentBalance.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const studentBalanceWithIdOnly = await prisma.studentBalance.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends StudentBalanceFindManyArgs>(args?: SelectSubset<T, StudentBalanceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a StudentBalance.
+     * @param {StudentBalanceCreateArgs} args - Arguments to create a StudentBalance.
+     * @example
+     * // Create one StudentBalance
+     * const StudentBalance = await prisma.studentBalance.create({
+     *   data: {
+     *     // ... data to create a StudentBalance
+     *   }
+     * })
+     * 
+     */
+    create<T extends StudentBalanceCreateArgs>(args: SelectSubset<T, StudentBalanceCreateArgs<ExtArgs>>): Prisma__StudentBalanceClient<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many StudentBalances.
+     * @param {StudentBalanceCreateManyArgs} args - Arguments to create many StudentBalances.
+     * @example
+     * // Create many StudentBalances
+     * const studentBalance = await prisma.studentBalance.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StudentBalanceCreateManyArgs>(args?: SelectSubset<T, StudentBalanceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many StudentBalances and returns the data saved in the database.
+     * @param {StudentBalanceCreateManyAndReturnArgs} args - Arguments to create many StudentBalances.
+     * @example
+     * // Create many StudentBalances
+     * const studentBalance = await prisma.studentBalance.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many StudentBalances and only return the `id`
+     * const studentBalanceWithIdOnly = await prisma.studentBalance.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StudentBalanceCreateManyAndReturnArgs>(args?: SelectSubset<T, StudentBalanceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a StudentBalance.
+     * @param {StudentBalanceDeleteArgs} args - Arguments to delete one StudentBalance.
+     * @example
+     * // Delete one StudentBalance
+     * const StudentBalance = await prisma.studentBalance.delete({
+     *   where: {
+     *     // ... filter to delete one StudentBalance
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StudentBalanceDeleteArgs>(args: SelectSubset<T, StudentBalanceDeleteArgs<ExtArgs>>): Prisma__StudentBalanceClient<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one StudentBalance.
+     * @param {StudentBalanceUpdateArgs} args - Arguments to update one StudentBalance.
+     * @example
+     * // Update one StudentBalance
+     * const studentBalance = await prisma.studentBalance.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StudentBalanceUpdateArgs>(args: SelectSubset<T, StudentBalanceUpdateArgs<ExtArgs>>): Prisma__StudentBalanceClient<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more StudentBalances.
+     * @param {StudentBalanceDeleteManyArgs} args - Arguments to filter StudentBalances to delete.
+     * @example
+     * // Delete a few StudentBalances
+     * const { count } = await prisma.studentBalance.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StudentBalanceDeleteManyArgs>(args?: SelectSubset<T, StudentBalanceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StudentBalances.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StudentBalanceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many StudentBalances
+     * const studentBalance = await prisma.studentBalance.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StudentBalanceUpdateManyArgs>(args: SelectSubset<T, StudentBalanceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StudentBalances and returns the data updated in the database.
+     * @param {StudentBalanceUpdateManyAndReturnArgs} args - Arguments to update many StudentBalances.
+     * @example
+     * // Update many StudentBalances
+     * const studentBalance = await prisma.studentBalance.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more StudentBalances and only return the `id`
+     * const studentBalanceWithIdOnly = await prisma.studentBalance.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends StudentBalanceUpdateManyAndReturnArgs>(args: SelectSubset<T, StudentBalanceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one StudentBalance.
+     * @param {StudentBalanceUpsertArgs} args - Arguments to update or create a StudentBalance.
+     * @example
+     * // Update or create a StudentBalance
+     * const studentBalance = await prisma.studentBalance.upsert({
+     *   create: {
+     *     // ... data to create a StudentBalance
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the StudentBalance we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StudentBalanceUpsertArgs>(args: SelectSubset<T, StudentBalanceUpsertArgs<ExtArgs>>): Prisma__StudentBalanceClient<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of StudentBalances.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StudentBalanceCountArgs} args - Arguments to filter StudentBalances to count.
+     * @example
+     * // Count the number of StudentBalances
+     * const count = await prisma.studentBalance.count({
+     *   where: {
+     *     // ... the filter for the StudentBalances we want to count
+     *   }
+     * })
+    **/
+    count<T extends StudentBalanceCountArgs>(
+      args?: Subset<T, StudentBalanceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StudentBalanceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a StudentBalance.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StudentBalanceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StudentBalanceAggregateArgs>(args: Subset<T, StudentBalanceAggregateArgs>): Prisma.PrismaPromise<GetStudentBalanceAggregateType<T>>
+
+    /**
+     * Group by StudentBalance.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StudentBalanceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StudentBalanceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StudentBalanceGroupByArgs['orderBy'] }
+        : { orderBy?: StudentBalanceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StudentBalanceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStudentBalanceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the StudentBalance model
+   */
+  readonly fields: StudentBalanceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for StudentBalance.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StudentBalanceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    student<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    parent<T extends StudentBalance$parentArgs<ExtArgs> = {}>(args?: Subset<T, StudentBalance$parentArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    transactions<T extends StudentBalance$transactionsArgs<ExtArgs> = {}>(args?: Subset<T, StudentBalance$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the StudentBalance model
+   */
+  interface StudentBalanceFieldRefs {
+    readonly id: FieldRef<"StudentBalance", 'String'>
+    readonly tenantId: FieldRef<"StudentBalance", 'String'>
+    readonly studentId: FieldRef<"StudentBalance", 'String'>
+    readonly parentId: FieldRef<"StudentBalance", 'String'>
+    readonly balance: FieldRef<"StudentBalance", 'Int'>
+    readonly lastRechargedAt: FieldRef<"StudentBalance", 'DateTime'>
+    readonly createdAt: FieldRef<"StudentBalance", 'DateTime'>
+    readonly updatedAt: FieldRef<"StudentBalance", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * StudentBalance findUnique
+   */
+  export type StudentBalanceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+    /**
+     * Filter, which StudentBalance to fetch.
+     */
+    where: StudentBalanceWhereUniqueInput
+  }
+
+  /**
+   * StudentBalance findUniqueOrThrow
+   */
+  export type StudentBalanceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+    /**
+     * Filter, which StudentBalance to fetch.
+     */
+    where: StudentBalanceWhereUniqueInput
+  }
+
+  /**
+   * StudentBalance findFirst
+   */
+  export type StudentBalanceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+    /**
+     * Filter, which StudentBalance to fetch.
+     */
+    where?: StudentBalanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StudentBalances to fetch.
+     */
+    orderBy?: StudentBalanceOrderByWithRelationInput | StudentBalanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StudentBalances.
+     */
+    cursor?: StudentBalanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StudentBalances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StudentBalances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StudentBalances.
+     */
+    distinct?: StudentBalanceScalarFieldEnum | StudentBalanceScalarFieldEnum[]
+  }
+
+  /**
+   * StudentBalance findFirstOrThrow
+   */
+  export type StudentBalanceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+    /**
+     * Filter, which StudentBalance to fetch.
+     */
+    where?: StudentBalanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StudentBalances to fetch.
+     */
+    orderBy?: StudentBalanceOrderByWithRelationInput | StudentBalanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StudentBalances.
+     */
+    cursor?: StudentBalanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StudentBalances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StudentBalances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StudentBalances.
+     */
+    distinct?: StudentBalanceScalarFieldEnum | StudentBalanceScalarFieldEnum[]
+  }
+
+  /**
+   * StudentBalance findMany
+   */
+  export type StudentBalanceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+    /**
+     * Filter, which StudentBalances to fetch.
+     */
+    where?: StudentBalanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StudentBalances to fetch.
+     */
+    orderBy?: StudentBalanceOrderByWithRelationInput | StudentBalanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing StudentBalances.
+     */
+    cursor?: StudentBalanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StudentBalances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StudentBalances.
+     */
+    skip?: number
+    distinct?: StudentBalanceScalarFieldEnum | StudentBalanceScalarFieldEnum[]
+  }
+
+  /**
+   * StudentBalance create
+   */
+  export type StudentBalanceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a StudentBalance.
+     */
+    data: XOR<StudentBalanceCreateInput, StudentBalanceUncheckedCreateInput>
+  }
+
+  /**
+   * StudentBalance createMany
+   */
+  export type StudentBalanceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many StudentBalances.
+     */
+    data: StudentBalanceCreateManyInput | StudentBalanceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StudentBalance createManyAndReturn
+   */
+  export type StudentBalanceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * The data used to create many StudentBalances.
+     */
+    data: StudentBalanceCreateManyInput | StudentBalanceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StudentBalance update
+   */
+  export type StudentBalanceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a StudentBalance.
+     */
+    data: XOR<StudentBalanceUpdateInput, StudentBalanceUncheckedUpdateInput>
+    /**
+     * Choose, which StudentBalance to update.
+     */
+    where: StudentBalanceWhereUniqueInput
+  }
+
+  /**
+   * StudentBalance updateMany
+   */
+  export type StudentBalanceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update StudentBalances.
+     */
+    data: XOR<StudentBalanceUpdateManyMutationInput, StudentBalanceUncheckedUpdateManyInput>
+    /**
+     * Filter which StudentBalances to update
+     */
+    where?: StudentBalanceWhereInput
+    /**
+     * Limit how many StudentBalances to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StudentBalance updateManyAndReturn
+   */
+  export type StudentBalanceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * The data used to update StudentBalances.
+     */
+    data: XOR<StudentBalanceUpdateManyMutationInput, StudentBalanceUncheckedUpdateManyInput>
+    /**
+     * Filter which StudentBalances to update
+     */
+    where?: StudentBalanceWhereInput
+    /**
+     * Limit how many StudentBalances to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StudentBalance upsert
+   */
+  export type StudentBalanceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the StudentBalance to update in case it exists.
+     */
+    where: StudentBalanceWhereUniqueInput
+    /**
+     * In case the StudentBalance found by the `where` argument doesn't exist, create a new StudentBalance with this data.
+     */
+    create: XOR<StudentBalanceCreateInput, StudentBalanceUncheckedCreateInput>
+    /**
+     * In case the StudentBalance was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StudentBalanceUpdateInput, StudentBalanceUncheckedUpdateInput>
+  }
+
+  /**
+   * StudentBalance delete
+   */
+  export type StudentBalanceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+    /**
+     * Filter which StudentBalance to delete.
+     */
+    where: StudentBalanceWhereUniqueInput
+  }
+
+  /**
+   * StudentBalance deleteMany
+   */
+  export type StudentBalanceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StudentBalances to delete
+     */
+    where?: StudentBalanceWhereInput
+    /**
+     * Limit how many StudentBalances to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * StudentBalance.parent
+   */
+  export type StudentBalance$parentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * StudentBalance.transactions
+   */
+  export type StudentBalance$transactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+    where?: BalanceTransactionWhereInput
+    orderBy?: BalanceTransactionOrderByWithRelationInput | BalanceTransactionOrderByWithRelationInput[]
+    cursor?: BalanceTransactionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BalanceTransactionScalarFieldEnum | BalanceTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * StudentBalance without action
+   */
+  export type StudentBalanceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StudentBalance
+     */
+    select?: StudentBalanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StudentBalance
+     */
+    omit?: StudentBalanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentBalanceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model BalanceTransaction
+   */
+
+  export type AggregateBalanceTransaction = {
+    _count: BalanceTransactionCountAggregateOutputType | null
+    _avg: BalanceTransactionAvgAggregateOutputType | null
+    _sum: BalanceTransactionSumAggregateOutputType | null
+    _min: BalanceTransactionMinAggregateOutputType | null
+    _max: BalanceTransactionMaxAggregateOutputType | null
+  }
+
+  export type BalanceTransactionAvgAggregateOutputType = {
+    amount: number | null
+  }
+
+  export type BalanceTransactionSumAggregateOutputType = {
+    amount: number | null
+  }
+
+  export type BalanceTransactionMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    balanceId: string | null
+    type: $Enums.TransactionType | null
+    amount: number | null
+    reason: string | null
+    relatedPaymentId: string | null
+    status: $Enums.TransactionStatus | null
+    createdAt: Date | null
+  }
+
+  export type BalanceTransactionMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    balanceId: string | null
+    type: $Enums.TransactionType | null
+    amount: number | null
+    reason: string | null
+    relatedPaymentId: string | null
+    status: $Enums.TransactionStatus | null
+    createdAt: Date | null
+  }
+
+  export type BalanceTransactionCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    balanceId: number
+    type: number
+    amount: number
+    reason: number
+    relatedPaymentId: number
+    status: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type BalanceTransactionAvgAggregateInputType = {
+    amount?: true
+  }
+
+  export type BalanceTransactionSumAggregateInputType = {
+    amount?: true
+  }
+
+  export type BalanceTransactionMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    balanceId?: true
+    type?: true
+    amount?: true
+    reason?: true
+    relatedPaymentId?: true
+    status?: true
+    createdAt?: true
+  }
+
+  export type BalanceTransactionMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    balanceId?: true
+    type?: true
+    amount?: true
+    reason?: true
+    relatedPaymentId?: true
+    status?: true
+    createdAt?: true
+  }
+
+  export type BalanceTransactionCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    balanceId?: true
+    type?: true
+    amount?: true
+    reason?: true
+    relatedPaymentId?: true
+    status?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type BalanceTransactionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BalanceTransaction to aggregate.
+     */
+    where?: BalanceTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BalanceTransactions to fetch.
+     */
+    orderBy?: BalanceTransactionOrderByWithRelationInput | BalanceTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BalanceTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BalanceTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BalanceTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BalanceTransactions
+    **/
+    _count?: true | BalanceTransactionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BalanceTransactionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BalanceTransactionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BalanceTransactionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BalanceTransactionMaxAggregateInputType
+  }
+
+  export type GetBalanceTransactionAggregateType<T extends BalanceTransactionAggregateArgs> = {
+        [P in keyof T & keyof AggregateBalanceTransaction]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBalanceTransaction[P]>
+      : GetScalarType<T[P], AggregateBalanceTransaction[P]>
+  }
+
+
+
+
+  export type BalanceTransactionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BalanceTransactionWhereInput
+    orderBy?: BalanceTransactionOrderByWithAggregationInput | BalanceTransactionOrderByWithAggregationInput[]
+    by: BalanceTransactionScalarFieldEnum[] | BalanceTransactionScalarFieldEnum
+    having?: BalanceTransactionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BalanceTransactionCountAggregateInputType | true
+    _avg?: BalanceTransactionAvgAggregateInputType
+    _sum?: BalanceTransactionSumAggregateInputType
+    _min?: BalanceTransactionMinAggregateInputType
+    _max?: BalanceTransactionMaxAggregateInputType
+  }
+
+  export type BalanceTransactionGroupByOutputType = {
+    id: string
+    tenantId: string
+    balanceId: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    relatedPaymentId: string | null
+    status: $Enums.TransactionStatus
+    createdAt: Date
+    _count: BalanceTransactionCountAggregateOutputType | null
+    _avg: BalanceTransactionAvgAggregateOutputType | null
+    _sum: BalanceTransactionSumAggregateOutputType | null
+    _min: BalanceTransactionMinAggregateOutputType | null
+    _max: BalanceTransactionMaxAggregateOutputType | null
+  }
+
+  type GetBalanceTransactionGroupByPayload<T extends BalanceTransactionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BalanceTransactionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BalanceTransactionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BalanceTransactionGroupByOutputType[P]>
+            : GetScalarType<T[P], BalanceTransactionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BalanceTransactionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    balanceId?: boolean
+    type?: boolean
+    amount?: boolean
+    reason?: boolean
+    relatedPaymentId?: boolean
+    status?: boolean
+    createdAt?: boolean
+    balance?: boolean | StudentBalanceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["balanceTransaction"]>
+
+  export type BalanceTransactionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    balanceId?: boolean
+    type?: boolean
+    amount?: boolean
+    reason?: boolean
+    relatedPaymentId?: boolean
+    status?: boolean
+    createdAt?: boolean
+    balance?: boolean | StudentBalanceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["balanceTransaction"]>
+
+  export type BalanceTransactionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    balanceId?: boolean
+    type?: boolean
+    amount?: boolean
+    reason?: boolean
+    relatedPaymentId?: boolean
+    status?: boolean
+    createdAt?: boolean
+    balance?: boolean | StudentBalanceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["balanceTransaction"]>
+
+  export type BalanceTransactionSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    balanceId?: boolean
+    type?: boolean
+    amount?: boolean
+    reason?: boolean
+    relatedPaymentId?: boolean
+    status?: boolean
+    createdAt?: boolean
+  }
+
+  export type BalanceTransactionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "balanceId" | "type" | "amount" | "reason" | "relatedPaymentId" | "status" | "createdAt", ExtArgs["result"]["balanceTransaction"]>
+  export type BalanceTransactionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    balance?: boolean | StudentBalanceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type BalanceTransactionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    balance?: boolean | StudentBalanceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type BalanceTransactionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    balance?: boolean | StudentBalanceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+
+  export type $BalanceTransactionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BalanceTransaction"
+    objects: {
+      balance: Prisma.$StudentBalancePayload<ExtArgs>
+      tenant: Prisma.$TenantPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      balanceId: string
+      type: $Enums.TransactionType
+      amount: number
+      reason: string
+      relatedPaymentId: string | null
+      status: $Enums.TransactionStatus
+      createdAt: Date
+    }, ExtArgs["result"]["balanceTransaction"]>
+    composites: {}
+  }
+
+  type BalanceTransactionGetPayload<S extends boolean | null | undefined | BalanceTransactionDefaultArgs> = $Result.GetResult<Prisma.$BalanceTransactionPayload, S>
+
+  type BalanceTransactionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BalanceTransactionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BalanceTransactionCountAggregateInputType | true
+    }
+
+  export interface BalanceTransactionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BalanceTransaction'], meta: { name: 'BalanceTransaction' } }
+    /**
+     * Find zero or one BalanceTransaction that matches the filter.
+     * @param {BalanceTransactionFindUniqueArgs} args - Arguments to find a BalanceTransaction
+     * @example
+     * // Get one BalanceTransaction
+     * const balanceTransaction = await prisma.balanceTransaction.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BalanceTransactionFindUniqueArgs>(args: SelectSubset<T, BalanceTransactionFindUniqueArgs<ExtArgs>>): Prisma__BalanceTransactionClient<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BalanceTransaction that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BalanceTransactionFindUniqueOrThrowArgs} args - Arguments to find a BalanceTransaction
+     * @example
+     * // Get one BalanceTransaction
+     * const balanceTransaction = await prisma.balanceTransaction.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BalanceTransactionFindUniqueOrThrowArgs>(args: SelectSubset<T, BalanceTransactionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BalanceTransactionClient<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BalanceTransaction that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BalanceTransactionFindFirstArgs} args - Arguments to find a BalanceTransaction
+     * @example
+     * // Get one BalanceTransaction
+     * const balanceTransaction = await prisma.balanceTransaction.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BalanceTransactionFindFirstArgs>(args?: SelectSubset<T, BalanceTransactionFindFirstArgs<ExtArgs>>): Prisma__BalanceTransactionClient<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BalanceTransaction that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BalanceTransactionFindFirstOrThrowArgs} args - Arguments to find a BalanceTransaction
+     * @example
+     * // Get one BalanceTransaction
+     * const balanceTransaction = await prisma.balanceTransaction.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BalanceTransactionFindFirstOrThrowArgs>(args?: SelectSubset<T, BalanceTransactionFindFirstOrThrowArgs<ExtArgs>>): Prisma__BalanceTransactionClient<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BalanceTransactions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BalanceTransactionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BalanceTransactions
+     * const balanceTransactions = await prisma.balanceTransaction.findMany()
+     * 
+     * // Get first 10 BalanceTransactions
+     * const balanceTransactions = await prisma.balanceTransaction.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const balanceTransactionWithIdOnly = await prisma.balanceTransaction.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BalanceTransactionFindManyArgs>(args?: SelectSubset<T, BalanceTransactionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BalanceTransaction.
+     * @param {BalanceTransactionCreateArgs} args - Arguments to create a BalanceTransaction.
+     * @example
+     * // Create one BalanceTransaction
+     * const BalanceTransaction = await prisma.balanceTransaction.create({
+     *   data: {
+     *     // ... data to create a BalanceTransaction
+     *   }
+     * })
+     * 
+     */
+    create<T extends BalanceTransactionCreateArgs>(args: SelectSubset<T, BalanceTransactionCreateArgs<ExtArgs>>): Prisma__BalanceTransactionClient<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BalanceTransactions.
+     * @param {BalanceTransactionCreateManyArgs} args - Arguments to create many BalanceTransactions.
+     * @example
+     * // Create many BalanceTransactions
+     * const balanceTransaction = await prisma.balanceTransaction.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BalanceTransactionCreateManyArgs>(args?: SelectSubset<T, BalanceTransactionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BalanceTransactions and returns the data saved in the database.
+     * @param {BalanceTransactionCreateManyAndReturnArgs} args - Arguments to create many BalanceTransactions.
+     * @example
+     * // Create many BalanceTransactions
+     * const balanceTransaction = await prisma.balanceTransaction.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BalanceTransactions and only return the `id`
+     * const balanceTransactionWithIdOnly = await prisma.balanceTransaction.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BalanceTransactionCreateManyAndReturnArgs>(args?: SelectSubset<T, BalanceTransactionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BalanceTransaction.
+     * @param {BalanceTransactionDeleteArgs} args - Arguments to delete one BalanceTransaction.
+     * @example
+     * // Delete one BalanceTransaction
+     * const BalanceTransaction = await prisma.balanceTransaction.delete({
+     *   where: {
+     *     // ... filter to delete one BalanceTransaction
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BalanceTransactionDeleteArgs>(args: SelectSubset<T, BalanceTransactionDeleteArgs<ExtArgs>>): Prisma__BalanceTransactionClient<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BalanceTransaction.
+     * @param {BalanceTransactionUpdateArgs} args - Arguments to update one BalanceTransaction.
+     * @example
+     * // Update one BalanceTransaction
+     * const balanceTransaction = await prisma.balanceTransaction.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BalanceTransactionUpdateArgs>(args: SelectSubset<T, BalanceTransactionUpdateArgs<ExtArgs>>): Prisma__BalanceTransactionClient<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BalanceTransactions.
+     * @param {BalanceTransactionDeleteManyArgs} args - Arguments to filter BalanceTransactions to delete.
+     * @example
+     * // Delete a few BalanceTransactions
+     * const { count } = await prisma.balanceTransaction.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BalanceTransactionDeleteManyArgs>(args?: SelectSubset<T, BalanceTransactionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BalanceTransactions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BalanceTransactionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BalanceTransactions
+     * const balanceTransaction = await prisma.balanceTransaction.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BalanceTransactionUpdateManyArgs>(args: SelectSubset<T, BalanceTransactionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BalanceTransactions and returns the data updated in the database.
+     * @param {BalanceTransactionUpdateManyAndReturnArgs} args - Arguments to update many BalanceTransactions.
+     * @example
+     * // Update many BalanceTransactions
+     * const balanceTransaction = await prisma.balanceTransaction.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BalanceTransactions and only return the `id`
+     * const balanceTransactionWithIdOnly = await prisma.balanceTransaction.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BalanceTransactionUpdateManyAndReturnArgs>(args: SelectSubset<T, BalanceTransactionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BalanceTransaction.
+     * @param {BalanceTransactionUpsertArgs} args - Arguments to update or create a BalanceTransaction.
+     * @example
+     * // Update or create a BalanceTransaction
+     * const balanceTransaction = await prisma.balanceTransaction.upsert({
+     *   create: {
+     *     // ... data to create a BalanceTransaction
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BalanceTransaction we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BalanceTransactionUpsertArgs>(args: SelectSubset<T, BalanceTransactionUpsertArgs<ExtArgs>>): Prisma__BalanceTransactionClient<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BalanceTransactions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BalanceTransactionCountArgs} args - Arguments to filter BalanceTransactions to count.
+     * @example
+     * // Count the number of BalanceTransactions
+     * const count = await prisma.balanceTransaction.count({
+     *   where: {
+     *     // ... the filter for the BalanceTransactions we want to count
+     *   }
+     * })
+    **/
+    count<T extends BalanceTransactionCountArgs>(
+      args?: Subset<T, BalanceTransactionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BalanceTransactionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BalanceTransaction.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BalanceTransactionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BalanceTransactionAggregateArgs>(args: Subset<T, BalanceTransactionAggregateArgs>): Prisma.PrismaPromise<GetBalanceTransactionAggregateType<T>>
+
+    /**
+     * Group by BalanceTransaction.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BalanceTransactionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BalanceTransactionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BalanceTransactionGroupByArgs['orderBy'] }
+        : { orderBy?: BalanceTransactionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BalanceTransactionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBalanceTransactionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BalanceTransaction model
+   */
+  readonly fields: BalanceTransactionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BalanceTransaction.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BalanceTransactionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    balance<T extends StudentBalanceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, StudentBalanceDefaultArgs<ExtArgs>>): Prisma__StudentBalanceClient<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BalanceTransaction model
+   */
+  interface BalanceTransactionFieldRefs {
+    readonly id: FieldRef<"BalanceTransaction", 'String'>
+    readonly tenantId: FieldRef<"BalanceTransaction", 'String'>
+    readonly balanceId: FieldRef<"BalanceTransaction", 'String'>
+    readonly type: FieldRef<"BalanceTransaction", 'TransactionType'>
+    readonly amount: FieldRef<"BalanceTransaction", 'Int'>
+    readonly reason: FieldRef<"BalanceTransaction", 'String'>
+    readonly relatedPaymentId: FieldRef<"BalanceTransaction", 'String'>
+    readonly status: FieldRef<"BalanceTransaction", 'TransactionStatus'>
+    readonly createdAt: FieldRef<"BalanceTransaction", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BalanceTransaction findUnique
+   */
+  export type BalanceTransactionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which BalanceTransaction to fetch.
+     */
+    where: BalanceTransactionWhereUniqueInput
+  }
+
+  /**
+   * BalanceTransaction findUniqueOrThrow
+   */
+  export type BalanceTransactionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which BalanceTransaction to fetch.
+     */
+    where: BalanceTransactionWhereUniqueInput
+  }
+
+  /**
+   * BalanceTransaction findFirst
+   */
+  export type BalanceTransactionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which BalanceTransaction to fetch.
+     */
+    where?: BalanceTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BalanceTransactions to fetch.
+     */
+    orderBy?: BalanceTransactionOrderByWithRelationInput | BalanceTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BalanceTransactions.
+     */
+    cursor?: BalanceTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BalanceTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BalanceTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BalanceTransactions.
+     */
+    distinct?: BalanceTransactionScalarFieldEnum | BalanceTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * BalanceTransaction findFirstOrThrow
+   */
+  export type BalanceTransactionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which BalanceTransaction to fetch.
+     */
+    where?: BalanceTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BalanceTransactions to fetch.
+     */
+    orderBy?: BalanceTransactionOrderByWithRelationInput | BalanceTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BalanceTransactions.
+     */
+    cursor?: BalanceTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BalanceTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BalanceTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BalanceTransactions.
+     */
+    distinct?: BalanceTransactionScalarFieldEnum | BalanceTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * BalanceTransaction findMany
+   */
+  export type BalanceTransactionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which BalanceTransactions to fetch.
+     */
+    where?: BalanceTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BalanceTransactions to fetch.
+     */
+    orderBy?: BalanceTransactionOrderByWithRelationInput | BalanceTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BalanceTransactions.
+     */
+    cursor?: BalanceTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BalanceTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BalanceTransactions.
+     */
+    skip?: number
+    distinct?: BalanceTransactionScalarFieldEnum | BalanceTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * BalanceTransaction create
+   */
+  export type BalanceTransactionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a BalanceTransaction.
+     */
+    data: XOR<BalanceTransactionCreateInput, BalanceTransactionUncheckedCreateInput>
+  }
+
+  /**
+   * BalanceTransaction createMany
+   */
+  export type BalanceTransactionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BalanceTransactions.
+     */
+    data: BalanceTransactionCreateManyInput | BalanceTransactionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BalanceTransaction createManyAndReturn
+   */
+  export type BalanceTransactionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * The data used to create many BalanceTransactions.
+     */
+    data: BalanceTransactionCreateManyInput | BalanceTransactionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BalanceTransaction update
+   */
+  export type BalanceTransactionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a BalanceTransaction.
+     */
+    data: XOR<BalanceTransactionUpdateInput, BalanceTransactionUncheckedUpdateInput>
+    /**
+     * Choose, which BalanceTransaction to update.
+     */
+    where: BalanceTransactionWhereUniqueInput
+  }
+
+  /**
+   * BalanceTransaction updateMany
+   */
+  export type BalanceTransactionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BalanceTransactions.
+     */
+    data: XOR<BalanceTransactionUpdateManyMutationInput, BalanceTransactionUncheckedUpdateManyInput>
+    /**
+     * Filter which BalanceTransactions to update
+     */
+    where?: BalanceTransactionWhereInput
+    /**
+     * Limit how many BalanceTransactions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BalanceTransaction updateManyAndReturn
+   */
+  export type BalanceTransactionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * The data used to update BalanceTransactions.
+     */
+    data: XOR<BalanceTransactionUpdateManyMutationInput, BalanceTransactionUncheckedUpdateManyInput>
+    /**
+     * Filter which BalanceTransactions to update
+     */
+    where?: BalanceTransactionWhereInput
+    /**
+     * Limit how many BalanceTransactions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BalanceTransaction upsert
+   */
+  export type BalanceTransactionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the BalanceTransaction to update in case it exists.
+     */
+    where: BalanceTransactionWhereUniqueInput
+    /**
+     * In case the BalanceTransaction found by the `where` argument doesn't exist, create a new BalanceTransaction with this data.
+     */
+    create: XOR<BalanceTransactionCreateInput, BalanceTransactionUncheckedCreateInput>
+    /**
+     * In case the BalanceTransaction was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BalanceTransactionUpdateInput, BalanceTransactionUncheckedUpdateInput>
+  }
+
+  /**
+   * BalanceTransaction delete
+   */
+  export type BalanceTransactionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+    /**
+     * Filter which BalanceTransaction to delete.
+     */
+    where: BalanceTransactionWhereUniqueInput
+  }
+
+  /**
+   * BalanceTransaction deleteMany
+   */
+  export type BalanceTransactionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BalanceTransactions to delete
+     */
+    where?: BalanceTransactionWhereInput
+    /**
+     * Limit how many BalanceTransactions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BalanceTransaction without action
+   */
+  export type BalanceTransactionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -23642,6 +27750,9 @@ export namespace Prisma {
     paidAt: 'paidAt',
     recordedById: 'recordedById',
     notes: 'notes',
+    paymentGateway: 'paymentGateway',
+    transactionId: 'transactionId',
+    teacherApiUsed: 'teacherApiUsed',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -23786,6 +27897,53 @@ export namespace Prisma {
   };
 
   export type ExamSubmissionScalarFieldEnum = (typeof ExamSubmissionScalarFieldEnum)[keyof typeof ExamSubmissionScalarFieldEnum]
+
+
+  export const TeacherSubscriptionScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    subscriptionPlan: 'subscriptionPlan',
+    billingCycle: 'billingCycle',
+    amount: 'amount',
+    isActive: 'isActive',
+    nextBillingAt: 'nextBillingAt',
+    cancelledAt: 'cancelledAt',
+    kashierApiKey: 'kashierApiKey',
+    kashierMerId: 'kashierMerId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TeacherSubscriptionScalarFieldEnum = (typeof TeacherSubscriptionScalarFieldEnum)[keyof typeof TeacherSubscriptionScalarFieldEnum]
+
+
+  export const StudentBalanceScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    studentId: 'studentId',
+    parentId: 'parentId',
+    balance: 'balance',
+    lastRechargedAt: 'lastRechargedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type StudentBalanceScalarFieldEnum = (typeof StudentBalanceScalarFieldEnum)[keyof typeof StudentBalanceScalarFieldEnum]
+
+
+  export const BalanceTransactionScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    balanceId: 'balanceId',
+    type: 'type',
+    amount: 'amount',
+    reason: 'reason',
+    relatedPaymentId: 'relatedPaymentId',
+    status: 'status',
+    createdAt: 'createdAt'
+  };
+
+  export type BalanceTransactionScalarFieldEnum = (typeof BalanceTransactionScalarFieldEnum)[keyof typeof BalanceTransactionScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -24031,6 +28189,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'PaymentGateway'
+   */
+  export type EnumPaymentGatewayFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentGateway'>
+    
+
+
+  /**
+   * Reference to a field of type 'PaymentGateway[]'
+   */
+  export type ListEnumPaymentGatewayFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentGateway[]'>
+    
+
+
+  /**
    * Reference to a field of type 'NotificationType'
    */
   export type EnumNotificationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationType'>
@@ -24087,6 +28259,62 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'SubscriptionPlan'
+   */
+  export type EnumSubscriptionPlanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionPlan'>
+    
+
+
+  /**
+   * Reference to a field of type 'SubscriptionPlan[]'
+   */
+  export type ListEnumSubscriptionPlanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionPlan[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'BillingCycle'
+   */
+  export type EnumBillingCycleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingCycle'>
+    
+
+
+  /**
+   * Reference to a field of type 'BillingCycle[]'
+   */
+  export type ListEnumBillingCycleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingCycle[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TransactionType'
+   */
+  export type EnumTransactionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TransactionType'>
+    
+
+
+  /**
+   * Reference to a field of type 'TransactionType[]'
+   */
+  export type ListEnumTransactionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TransactionType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TransactionStatus'
+   */
+  export type EnumTransactionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TransactionStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'TransactionStatus[]'
+   */
+  export type ListEnumTransactionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TransactionStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -24131,6 +28359,9 @@ export namespace Prisma {
     payments?: PaymentListRelationFilter
     sessions?: SessionListRelationFilter
     users?: UserListRelationFilter
+    teacherSubscription?: XOR<TeacherSubscriptionNullableScalarRelationFilter, TeacherSubscriptionWhereInput> | null
+    studentBalances?: StudentBalanceListRelationFilter
+    balanceTransactions?: BalanceTransactionListRelationFilter
   }
 
   export type TenantOrderByWithRelationInput = {
@@ -24158,6 +28389,9 @@ export namespace Prisma {
     payments?: PaymentOrderByRelationAggregateInput
     sessions?: SessionOrderByRelationAggregateInput
     users?: UserOrderByRelationAggregateInput
+    teacherSubscription?: TeacherSubscriptionOrderByWithRelationInput
+    studentBalances?: StudentBalanceOrderByRelationAggregateInput
+    balanceTransactions?: BalanceTransactionOrderByRelationAggregateInput
   }
 
   export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -24188,6 +28422,9 @@ export namespace Prisma {
     payments?: PaymentListRelationFilter
     sessions?: SessionListRelationFilter
     users?: UserListRelationFilter
+    teacherSubscription?: XOR<TeacherSubscriptionNullableScalarRelationFilter, TeacherSubscriptionWhereInput> | null
+    studentBalances?: StudentBalanceListRelationFilter
+    balanceTransactions?: BalanceTransactionListRelationFilter
   }, "id" | "slug">
 
   export type TenantOrderByWithAggregationInput = {
@@ -24268,6 +28505,8 @@ export namespace Prisma {
     recordedPayments?: PaymentListRelationFilter
     payments?: PaymentListRelationFilter
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    studentBalance?: StudentBalanceListRelationFilter
+    parentBalance?: StudentBalanceListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -24301,6 +28540,8 @@ export namespace Prisma {
     recordedPayments?: PaymentOrderByRelationAggregateInput
     payments?: PaymentOrderByRelationAggregateInput
     tenant?: TenantOrderByWithRelationInput
+    studentBalance?: StudentBalanceOrderByRelationAggregateInput
+    parentBalance?: StudentBalanceOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -24338,6 +28579,8 @@ export namespace Prisma {
     recordedPayments?: PaymentListRelationFilter
     payments?: PaymentListRelationFilter
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    studentBalance?: StudentBalanceListRelationFilter
+    parentBalance?: StudentBalanceListRelationFilter
   }, "id" | "tenantId_phone">
 
   export type UserOrderByWithAggregationInput = {
@@ -24852,6 +29095,9 @@ export namespace Prisma {
     paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
     recordedById?: StringNullableFilter<"Payment"> | string | null
     notes?: StringNullableFilter<"Payment"> | string | null
+    paymentGateway?: EnumPaymentGatewayFilter<"Payment"> | $Enums.PaymentGateway
+    transactionId?: StringNullableFilter<"Payment"> | string | null
+    teacherApiUsed?: BoolFilter<"Payment"> | boolean
     createdAt?: DateTimeFilter<"Payment"> | Date | string
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
     recordedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -24874,6 +29120,9 @@ export namespace Prisma {
     paidAt?: SortOrderInput | SortOrder
     recordedById?: SortOrderInput | SortOrder
     notes?: SortOrderInput | SortOrder
+    paymentGateway?: SortOrder
+    transactionId?: SortOrderInput | SortOrder
+    teacherApiUsed?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     recordedBy?: UserOrderByWithRelationInput
@@ -24899,6 +29148,9 @@ export namespace Prisma {
     paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
     recordedById?: StringNullableFilter<"Payment"> | string | null
     notes?: StringNullableFilter<"Payment"> | string | null
+    paymentGateway?: EnumPaymentGatewayFilter<"Payment"> | $Enums.PaymentGateway
+    transactionId?: StringNullableFilter<"Payment"> | string | null
+    teacherApiUsed?: BoolFilter<"Payment"> | boolean
     createdAt?: DateTimeFilter<"Payment"> | Date | string
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
     recordedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -24921,6 +29173,9 @@ export namespace Prisma {
     paidAt?: SortOrderInput | SortOrder
     recordedById?: SortOrderInput | SortOrder
     notes?: SortOrderInput | SortOrder
+    paymentGateway?: SortOrder
+    transactionId?: SortOrderInput | SortOrder
+    teacherApiUsed?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: PaymentCountOrderByAggregateInput
@@ -24948,6 +29203,9 @@ export namespace Prisma {
     paidAt?: DateTimeNullableWithAggregatesFilter<"Payment"> | Date | string | null
     recordedById?: StringNullableWithAggregatesFilter<"Payment"> | string | null
     notes?: StringNullableWithAggregatesFilter<"Payment"> | string | null
+    paymentGateway?: EnumPaymentGatewayWithAggregatesFilter<"Payment"> | $Enums.PaymentGateway
+    transactionId?: StringNullableWithAggregatesFilter<"Payment"> | string | null
+    teacherApiUsed?: BoolWithAggregatesFilter<"Payment"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
   }
@@ -25689,6 +29947,260 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"ExamSubmission"> | Date | string
   }
 
+  export type TeacherSubscriptionWhereInput = {
+    AND?: TeacherSubscriptionWhereInput | TeacherSubscriptionWhereInput[]
+    OR?: TeacherSubscriptionWhereInput[]
+    NOT?: TeacherSubscriptionWhereInput | TeacherSubscriptionWhereInput[]
+    id?: StringFilter<"TeacherSubscription"> | string
+    tenantId?: StringFilter<"TeacherSubscription"> | string
+    subscriptionPlan?: EnumSubscriptionPlanFilter<"TeacherSubscription"> | $Enums.SubscriptionPlan
+    billingCycle?: EnumBillingCycleFilter<"TeacherSubscription"> | $Enums.BillingCycle
+    amount?: IntFilter<"TeacherSubscription"> | number
+    isActive?: BoolFilter<"TeacherSubscription"> | boolean
+    nextBillingAt?: DateTimeFilter<"TeacherSubscription"> | Date | string
+    cancelledAt?: DateTimeNullableFilter<"TeacherSubscription"> | Date | string | null
+    kashierApiKey?: StringNullableFilter<"TeacherSubscription"> | string | null
+    kashierMerId?: StringNullableFilter<"TeacherSubscription"> | string | null
+    createdAt?: DateTimeFilter<"TeacherSubscription"> | Date | string
+    updatedAt?: DateTimeFilter<"TeacherSubscription"> | Date | string
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }
+
+  export type TeacherSubscriptionOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    subscriptionPlan?: SortOrder
+    billingCycle?: SortOrder
+    amount?: SortOrder
+    isActive?: SortOrder
+    nextBillingAt?: SortOrder
+    cancelledAt?: SortOrderInput | SortOrder
+    kashierApiKey?: SortOrderInput | SortOrder
+    kashierMerId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    tenant?: TenantOrderByWithRelationInput
+  }
+
+  export type TeacherSubscriptionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tenantId?: string
+    AND?: TeacherSubscriptionWhereInput | TeacherSubscriptionWhereInput[]
+    OR?: TeacherSubscriptionWhereInput[]
+    NOT?: TeacherSubscriptionWhereInput | TeacherSubscriptionWhereInput[]
+    subscriptionPlan?: EnumSubscriptionPlanFilter<"TeacherSubscription"> | $Enums.SubscriptionPlan
+    billingCycle?: EnumBillingCycleFilter<"TeacherSubscription"> | $Enums.BillingCycle
+    amount?: IntFilter<"TeacherSubscription"> | number
+    isActive?: BoolFilter<"TeacherSubscription"> | boolean
+    nextBillingAt?: DateTimeFilter<"TeacherSubscription"> | Date | string
+    cancelledAt?: DateTimeNullableFilter<"TeacherSubscription"> | Date | string | null
+    kashierApiKey?: StringNullableFilter<"TeacherSubscription"> | string | null
+    kashierMerId?: StringNullableFilter<"TeacherSubscription"> | string | null
+    createdAt?: DateTimeFilter<"TeacherSubscription"> | Date | string
+    updatedAt?: DateTimeFilter<"TeacherSubscription"> | Date | string
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }, "id" | "tenantId">
+
+  export type TeacherSubscriptionOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    subscriptionPlan?: SortOrder
+    billingCycle?: SortOrder
+    amount?: SortOrder
+    isActive?: SortOrder
+    nextBillingAt?: SortOrder
+    cancelledAt?: SortOrderInput | SortOrder
+    kashierApiKey?: SortOrderInput | SortOrder
+    kashierMerId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TeacherSubscriptionCountOrderByAggregateInput
+    _avg?: TeacherSubscriptionAvgOrderByAggregateInput
+    _max?: TeacherSubscriptionMaxOrderByAggregateInput
+    _min?: TeacherSubscriptionMinOrderByAggregateInput
+    _sum?: TeacherSubscriptionSumOrderByAggregateInput
+  }
+
+  export type TeacherSubscriptionScalarWhereWithAggregatesInput = {
+    AND?: TeacherSubscriptionScalarWhereWithAggregatesInput | TeacherSubscriptionScalarWhereWithAggregatesInput[]
+    OR?: TeacherSubscriptionScalarWhereWithAggregatesInput[]
+    NOT?: TeacherSubscriptionScalarWhereWithAggregatesInput | TeacherSubscriptionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TeacherSubscription"> | string
+    tenantId?: StringWithAggregatesFilter<"TeacherSubscription"> | string
+    subscriptionPlan?: EnumSubscriptionPlanWithAggregatesFilter<"TeacherSubscription"> | $Enums.SubscriptionPlan
+    billingCycle?: EnumBillingCycleWithAggregatesFilter<"TeacherSubscription"> | $Enums.BillingCycle
+    amount?: IntWithAggregatesFilter<"TeacherSubscription"> | number
+    isActive?: BoolWithAggregatesFilter<"TeacherSubscription"> | boolean
+    nextBillingAt?: DateTimeWithAggregatesFilter<"TeacherSubscription"> | Date | string
+    cancelledAt?: DateTimeNullableWithAggregatesFilter<"TeacherSubscription"> | Date | string | null
+    kashierApiKey?: StringNullableWithAggregatesFilter<"TeacherSubscription"> | string | null
+    kashierMerId?: StringNullableWithAggregatesFilter<"TeacherSubscription"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"TeacherSubscription"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"TeacherSubscription"> | Date | string
+  }
+
+  export type StudentBalanceWhereInput = {
+    AND?: StudentBalanceWhereInput | StudentBalanceWhereInput[]
+    OR?: StudentBalanceWhereInput[]
+    NOT?: StudentBalanceWhereInput | StudentBalanceWhereInput[]
+    id?: StringFilter<"StudentBalance"> | string
+    tenantId?: StringFilter<"StudentBalance"> | string
+    studentId?: StringFilter<"StudentBalance"> | string
+    parentId?: StringNullableFilter<"StudentBalance"> | string | null
+    balance?: IntFilter<"StudentBalance"> | number
+    lastRechargedAt?: DateTimeNullableFilter<"StudentBalance"> | Date | string | null
+    createdAt?: DateTimeFilter<"StudentBalance"> | Date | string
+    updatedAt?: DateTimeFilter<"StudentBalance"> | Date | string
+    student?: XOR<UserScalarRelationFilter, UserWhereInput>
+    parent?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    transactions?: BalanceTransactionListRelationFilter
+  }
+
+  export type StudentBalanceOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    studentId?: SortOrder
+    parentId?: SortOrderInput | SortOrder
+    balance?: SortOrder
+    lastRechargedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    student?: UserOrderByWithRelationInput
+    parent?: UserOrderByWithRelationInput
+    tenant?: TenantOrderByWithRelationInput
+    transactions?: BalanceTransactionOrderByRelationAggregateInput
+  }
+
+  export type StudentBalanceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tenantId_studentId?: StudentBalanceTenantIdStudentIdCompoundUniqueInput
+    AND?: StudentBalanceWhereInput | StudentBalanceWhereInput[]
+    OR?: StudentBalanceWhereInput[]
+    NOT?: StudentBalanceWhereInput | StudentBalanceWhereInput[]
+    tenantId?: StringFilter<"StudentBalance"> | string
+    studentId?: StringFilter<"StudentBalance"> | string
+    parentId?: StringNullableFilter<"StudentBalance"> | string | null
+    balance?: IntFilter<"StudentBalance"> | number
+    lastRechargedAt?: DateTimeNullableFilter<"StudentBalance"> | Date | string | null
+    createdAt?: DateTimeFilter<"StudentBalance"> | Date | string
+    updatedAt?: DateTimeFilter<"StudentBalance"> | Date | string
+    student?: XOR<UserScalarRelationFilter, UserWhereInput>
+    parent?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    transactions?: BalanceTransactionListRelationFilter
+  }, "id" | "tenantId_studentId">
+
+  export type StudentBalanceOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    studentId?: SortOrder
+    parentId?: SortOrderInput | SortOrder
+    balance?: SortOrder
+    lastRechargedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: StudentBalanceCountOrderByAggregateInput
+    _avg?: StudentBalanceAvgOrderByAggregateInput
+    _max?: StudentBalanceMaxOrderByAggregateInput
+    _min?: StudentBalanceMinOrderByAggregateInput
+    _sum?: StudentBalanceSumOrderByAggregateInput
+  }
+
+  export type StudentBalanceScalarWhereWithAggregatesInput = {
+    AND?: StudentBalanceScalarWhereWithAggregatesInput | StudentBalanceScalarWhereWithAggregatesInput[]
+    OR?: StudentBalanceScalarWhereWithAggregatesInput[]
+    NOT?: StudentBalanceScalarWhereWithAggregatesInput | StudentBalanceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"StudentBalance"> | string
+    tenantId?: StringWithAggregatesFilter<"StudentBalance"> | string
+    studentId?: StringWithAggregatesFilter<"StudentBalance"> | string
+    parentId?: StringNullableWithAggregatesFilter<"StudentBalance"> | string | null
+    balance?: IntWithAggregatesFilter<"StudentBalance"> | number
+    lastRechargedAt?: DateTimeNullableWithAggregatesFilter<"StudentBalance"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"StudentBalance"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"StudentBalance"> | Date | string
+  }
+
+  export type BalanceTransactionWhereInput = {
+    AND?: BalanceTransactionWhereInput | BalanceTransactionWhereInput[]
+    OR?: BalanceTransactionWhereInput[]
+    NOT?: BalanceTransactionWhereInput | BalanceTransactionWhereInput[]
+    id?: StringFilter<"BalanceTransaction"> | string
+    tenantId?: StringFilter<"BalanceTransaction"> | string
+    balanceId?: StringFilter<"BalanceTransaction"> | string
+    type?: EnumTransactionTypeFilter<"BalanceTransaction"> | $Enums.TransactionType
+    amount?: IntFilter<"BalanceTransaction"> | number
+    reason?: StringFilter<"BalanceTransaction"> | string
+    relatedPaymentId?: StringNullableFilter<"BalanceTransaction"> | string | null
+    status?: EnumTransactionStatusFilter<"BalanceTransaction"> | $Enums.TransactionStatus
+    createdAt?: DateTimeFilter<"BalanceTransaction"> | Date | string
+    balance?: XOR<StudentBalanceScalarRelationFilter, StudentBalanceWhereInput>
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }
+
+  export type BalanceTransactionOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    balanceId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    reason?: SortOrder
+    relatedPaymentId?: SortOrderInput | SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    balance?: StudentBalanceOrderByWithRelationInput
+    tenant?: TenantOrderByWithRelationInput
+  }
+
+  export type BalanceTransactionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: BalanceTransactionWhereInput | BalanceTransactionWhereInput[]
+    OR?: BalanceTransactionWhereInput[]
+    NOT?: BalanceTransactionWhereInput | BalanceTransactionWhereInput[]
+    tenantId?: StringFilter<"BalanceTransaction"> | string
+    balanceId?: StringFilter<"BalanceTransaction"> | string
+    type?: EnumTransactionTypeFilter<"BalanceTransaction"> | $Enums.TransactionType
+    amount?: IntFilter<"BalanceTransaction"> | number
+    reason?: StringFilter<"BalanceTransaction"> | string
+    relatedPaymentId?: StringNullableFilter<"BalanceTransaction"> | string | null
+    status?: EnumTransactionStatusFilter<"BalanceTransaction"> | $Enums.TransactionStatus
+    createdAt?: DateTimeFilter<"BalanceTransaction"> | Date | string
+    balance?: XOR<StudentBalanceScalarRelationFilter, StudentBalanceWhereInput>
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }, "id">
+
+  export type BalanceTransactionOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    balanceId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    reason?: SortOrder
+    relatedPaymentId?: SortOrderInput | SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    _count?: BalanceTransactionCountOrderByAggregateInput
+    _avg?: BalanceTransactionAvgOrderByAggregateInput
+    _max?: BalanceTransactionMaxOrderByAggregateInput
+    _min?: BalanceTransactionMinOrderByAggregateInput
+    _sum?: BalanceTransactionSumOrderByAggregateInput
+  }
+
+  export type BalanceTransactionScalarWhereWithAggregatesInput = {
+    AND?: BalanceTransactionScalarWhereWithAggregatesInput | BalanceTransactionScalarWhereWithAggregatesInput[]
+    OR?: BalanceTransactionScalarWhereWithAggregatesInput[]
+    NOT?: BalanceTransactionScalarWhereWithAggregatesInput | BalanceTransactionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"BalanceTransaction"> | string
+    tenantId?: StringWithAggregatesFilter<"BalanceTransaction"> | string
+    balanceId?: StringWithAggregatesFilter<"BalanceTransaction"> | string
+    type?: EnumTransactionTypeWithAggregatesFilter<"BalanceTransaction"> | $Enums.TransactionType
+    amount?: IntWithAggregatesFilter<"BalanceTransaction"> | number
+    reason?: StringWithAggregatesFilter<"BalanceTransaction"> | string
+    relatedPaymentId?: StringNullableWithAggregatesFilter<"BalanceTransaction"> | string | null
+    status?: EnumTransactionStatusWithAggregatesFilter<"BalanceTransaction"> | $Enums.TransactionStatus
+    createdAt?: DateTimeWithAggregatesFilter<"BalanceTransaction"> | Date | string
+  }
+
   export type TenantCreateInput = {
     id?: string
     slug: string
@@ -25714,6 +30226,9 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutTenantInput
     sessions?: SessionCreateNestedManyWithoutTenantInput
     users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateInput = {
@@ -25741,6 +30256,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
     sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUpdateInput = {
@@ -25768,6 +30286,9 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutTenantNestedInput
     sessions?: SessionUpdateManyWithoutTenantNestedInput
     users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateInput = {
@@ -25795,6 +30316,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantCreateManyInput = {
@@ -25881,6 +30405,8 @@ export namespace Prisma {
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -25913,6 +30439,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserUpdateInput = {
@@ -25945,6 +30473,8 @@ export namespace Prisma {
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -25977,6 +30507,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -26521,6 +31053,9 @@ export namespace Prisma {
     receiptUrl?: string | null
     paidAt?: Date | string | null
     notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     recordedBy?: UserCreateNestedOneWithoutRecordedPaymentsInput
@@ -26543,6 +31078,9 @@ export namespace Prisma {
     paidAt?: Date | string | null
     recordedById?: string | null
     notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -26559,6 +31097,9 @@ export namespace Prisma {
     receiptUrl?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recordedBy?: UserUpdateOneWithoutRecordedPaymentsNestedInput
@@ -26581,6 +31122,9 @@ export namespace Prisma {
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     recordedById?: NullableStringFieldUpdateOperationsInput | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26600,6 +31144,9 @@ export namespace Prisma {
     paidAt?: Date | string | null
     recordedById?: string | null
     notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -26616,6 +31163,9 @@ export namespace Prisma {
     receiptUrl?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26635,6 +31185,9 @@ export namespace Prisma {
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     recordedById?: NullableStringFieldUpdateOperationsInput | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -27420,6 +31973,270 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type TeacherSubscriptionCreateInput = {
+    id?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    billingCycle?: $Enums.BillingCycle
+    amount: number
+    isActive?: boolean
+    nextBillingAt: Date | string
+    cancelledAt?: Date | string | null
+    kashierApiKey?: string | null
+    kashierMerId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant: TenantCreateNestedOneWithoutTeacherSubscriptionInput
+  }
+
+  export type TeacherSubscriptionUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    billingCycle?: $Enums.BillingCycle
+    amount: number
+    isActive?: boolean
+    nextBillingAt: Date | string
+    cancelledAt?: Date | string | null
+    kashierApiKey?: string | null
+    kashierMerId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TeacherSubscriptionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    billingCycle?: EnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle
+    amount?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    nextBillingAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    kashierApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    kashierMerId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneRequiredWithoutTeacherSubscriptionNestedInput
+  }
+
+  export type TeacherSubscriptionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    billingCycle?: EnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle
+    amount?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    nextBillingAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    kashierApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    kashierMerId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeacherSubscriptionCreateManyInput = {
+    id?: string
+    tenantId: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    billingCycle?: $Enums.BillingCycle
+    amount: number
+    isActive?: boolean
+    nextBillingAt: Date | string
+    cancelledAt?: Date | string | null
+    kashierApiKey?: string | null
+    kashierMerId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TeacherSubscriptionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    billingCycle?: EnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle
+    amount?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    nextBillingAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    kashierApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    kashierMerId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeacherSubscriptionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    billingCycle?: EnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle
+    amount?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    nextBillingAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    kashierApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    kashierMerId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StudentBalanceCreateInput = {
+    id?: string
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    student: UserCreateNestedOneWithoutStudentBalanceInput
+    parent?: UserCreateNestedOneWithoutParentBalanceInput
+    tenant: TenantCreateNestedOneWithoutStudentBalancesInput
+    transactions?: BalanceTransactionCreateNestedManyWithoutBalanceInput
+  }
+
+  export type StudentBalanceUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    studentId: string
+    parentId?: string | null
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    transactions?: BalanceTransactionUncheckedCreateNestedManyWithoutBalanceInput
+  }
+
+  export type StudentBalanceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    student?: UserUpdateOneRequiredWithoutStudentBalanceNestedInput
+    parent?: UserUpdateOneWithoutParentBalanceNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutStudentBalancesNestedInput
+    transactions?: BalanceTransactionUpdateManyWithoutBalanceNestedInput
+  }
+
+  export type StudentBalanceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    studentId?: StringFieldUpdateOperationsInput | string
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: BalanceTransactionUncheckedUpdateManyWithoutBalanceNestedInput
+  }
+
+  export type StudentBalanceCreateManyInput = {
+    id?: string
+    tenantId: string
+    studentId: string
+    parentId?: string | null
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StudentBalanceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StudentBalanceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    studentId?: StringFieldUpdateOperationsInput | string
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BalanceTransactionCreateInput = {
+    id?: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    relatedPaymentId?: string | null
+    status?: $Enums.TransactionStatus
+    createdAt?: Date | string
+    balance: StudentBalanceCreateNestedOneWithoutTransactionsInput
+    tenant: TenantCreateNestedOneWithoutBalanceTransactionsInput
+  }
+
+  export type BalanceTransactionUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    balanceId: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    relatedPaymentId?: string | null
+    status?: $Enums.TransactionStatus
+    createdAt?: Date | string
+  }
+
+  export type BalanceTransactionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balance?: StudentBalanceUpdateOneRequiredWithoutTransactionsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutBalanceTransactionsNestedInput
+  }
+
+  export type BalanceTransactionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    balanceId?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BalanceTransactionCreateManyInput = {
+    id?: string
+    tenantId: string
+    balanceId: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    relatedPaymentId?: string | null
+    status?: $Enums.TransactionStatus
+    createdAt?: Date | string
+  }
+
+  export type BalanceTransactionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BalanceTransactionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    balanceId?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -27557,6 +32374,23 @@ export namespace Prisma {
     none?: UserWhereInput
   }
 
+  export type TeacherSubscriptionNullableScalarRelationFilter = {
+    is?: TeacherSubscriptionWhereInput | null
+    isNot?: TeacherSubscriptionWhereInput | null
+  }
+
+  export type StudentBalanceListRelationFilter = {
+    every?: StudentBalanceWhereInput
+    some?: StudentBalanceWhereInput
+    none?: StudentBalanceWhereInput
+  }
+
+  export type BalanceTransactionListRelationFilter = {
+    every?: BalanceTransactionWhereInput
+    some?: BalanceTransactionWhereInput
+    none?: BalanceTransactionWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -27595,6 +32429,14 @@ export namespace Prisma {
   }
 
   export type UserOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type StudentBalanceOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type BalanceTransactionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -28340,6 +33182,13 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type EnumPaymentGatewayFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentGateway | EnumPaymentGatewayFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentGateway[] | ListEnumPaymentGatewayFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentGateway[] | ListEnumPaymentGatewayFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentGatewayFilter<$PrismaModel> | $Enums.PaymentGateway
+  }
+
   export type PaymentCountOrderByAggregateInput = {
     id?: SortOrder
     tenantId?: SortOrder
@@ -28355,6 +33204,9 @@ export namespace Prisma {
     paidAt?: SortOrder
     recordedById?: SortOrder
     notes?: SortOrder
+    paymentGateway?: SortOrder
+    transactionId?: SortOrder
+    teacherApiUsed?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -28380,6 +33232,9 @@ export namespace Prisma {
     paidAt?: SortOrder
     recordedById?: SortOrder
     notes?: SortOrder
+    paymentGateway?: SortOrder
+    transactionId?: SortOrder
+    teacherApiUsed?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -28399,6 +33254,9 @@ export namespace Prisma {
     paidAt?: SortOrder
     recordedById?: SortOrder
     notes?: SortOrder
+    paymentGateway?: SortOrder
+    transactionId?: SortOrder
+    teacherApiUsed?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -28443,6 +33301,16 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type EnumPaymentGatewayWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentGateway | EnumPaymentGatewayFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentGateway[] | ListEnumPaymentGatewayFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentGateway[] | ListEnumPaymentGatewayFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentGatewayWithAggregatesFilter<$PrismaModel> | $Enums.PaymentGateway
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPaymentGatewayFilter<$PrismaModel>
+    _max?: NestedEnumPaymentGatewayFilter<$PrismaModel>
   }
 
   export type EnumNotificationTypeFilter<$PrismaModel = never> = {
@@ -28934,6 +33802,222 @@ export namespace Prisma {
     aiGrade?: SortOrder
   }
 
+  export type EnumSubscriptionPlanFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionPlan | EnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionPlanFilter<$PrismaModel> | $Enums.SubscriptionPlan
+  }
+
+  export type EnumBillingCycleFilter<$PrismaModel = never> = {
+    equals?: $Enums.BillingCycle | EnumBillingCycleFieldRefInput<$PrismaModel>
+    in?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel>
+    not?: NestedEnumBillingCycleFilter<$PrismaModel> | $Enums.BillingCycle
+  }
+
+  export type TeacherSubscriptionCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    subscriptionPlan?: SortOrder
+    billingCycle?: SortOrder
+    amount?: SortOrder
+    isActive?: SortOrder
+    nextBillingAt?: SortOrder
+    cancelledAt?: SortOrder
+    kashierApiKey?: SortOrder
+    kashierMerId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TeacherSubscriptionAvgOrderByAggregateInput = {
+    amount?: SortOrder
+  }
+
+  export type TeacherSubscriptionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    subscriptionPlan?: SortOrder
+    billingCycle?: SortOrder
+    amount?: SortOrder
+    isActive?: SortOrder
+    nextBillingAt?: SortOrder
+    cancelledAt?: SortOrder
+    kashierApiKey?: SortOrder
+    kashierMerId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TeacherSubscriptionMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    subscriptionPlan?: SortOrder
+    billingCycle?: SortOrder
+    amount?: SortOrder
+    isActive?: SortOrder
+    nextBillingAt?: SortOrder
+    cancelledAt?: SortOrder
+    kashierApiKey?: SortOrder
+    kashierMerId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TeacherSubscriptionSumOrderByAggregateInput = {
+    amount?: SortOrder
+  }
+
+  export type EnumSubscriptionPlanWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionPlan | EnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionPlanWithAggregatesFilter<$PrismaModel> | $Enums.SubscriptionPlan
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSubscriptionPlanFilter<$PrismaModel>
+    _max?: NestedEnumSubscriptionPlanFilter<$PrismaModel>
+  }
+
+  export type EnumBillingCycleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BillingCycle | EnumBillingCycleFieldRefInput<$PrismaModel>
+    in?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel>
+    not?: NestedEnumBillingCycleWithAggregatesFilter<$PrismaModel> | $Enums.BillingCycle
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBillingCycleFilter<$PrismaModel>
+    _max?: NestedEnumBillingCycleFilter<$PrismaModel>
+  }
+
+  export type StudentBalanceTenantIdStudentIdCompoundUniqueInput = {
+    tenantId: string
+    studentId: string
+  }
+
+  export type StudentBalanceCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    studentId?: SortOrder
+    parentId?: SortOrder
+    balance?: SortOrder
+    lastRechargedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StudentBalanceAvgOrderByAggregateInput = {
+    balance?: SortOrder
+  }
+
+  export type StudentBalanceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    studentId?: SortOrder
+    parentId?: SortOrder
+    balance?: SortOrder
+    lastRechargedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StudentBalanceMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    studentId?: SortOrder
+    parentId?: SortOrder
+    balance?: SortOrder
+    lastRechargedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StudentBalanceSumOrderByAggregateInput = {
+    balance?: SortOrder
+  }
+
+  export type EnumTransactionTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransactionType | EnumTransactionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransactionTypeFilter<$PrismaModel> | $Enums.TransactionType
+  }
+
+  export type EnumTransactionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransactionStatus | EnumTransactionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransactionStatusFilter<$PrismaModel> | $Enums.TransactionStatus
+  }
+
+  export type StudentBalanceScalarRelationFilter = {
+    is?: StudentBalanceWhereInput
+    isNot?: StudentBalanceWhereInput
+  }
+
+  export type BalanceTransactionCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    balanceId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    reason?: SortOrder
+    relatedPaymentId?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BalanceTransactionAvgOrderByAggregateInput = {
+    amount?: SortOrder
+  }
+
+  export type BalanceTransactionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    balanceId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    reason?: SortOrder
+    relatedPaymentId?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BalanceTransactionMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    balanceId?: SortOrder
+    type?: SortOrder
+    amount?: SortOrder
+    reason?: SortOrder
+    relatedPaymentId?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BalanceTransactionSumOrderByAggregateInput = {
+    amount?: SortOrder
+  }
+
+  export type EnumTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransactionType | EnumTransactionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransactionTypeWithAggregatesFilter<$PrismaModel> | $Enums.TransactionType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTransactionTypeFilter<$PrismaModel>
+    _max?: NestedEnumTransactionTypeFilter<$PrismaModel>
+  }
+
+  export type EnumTransactionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransactionStatus | EnumTransactionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransactionStatusWithAggregatesFilter<$PrismaModel> | $Enums.TransactionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTransactionStatusFilter<$PrismaModel>
+    _max?: NestedEnumTransactionStatusFilter<$PrismaModel>
+  }
+
   export type TenantCreatesubjectsInput = {
     set: string[]
   }
@@ -29001,6 +34085,26 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
+  export type TeacherSubscriptionCreateNestedOneWithoutTenantInput = {
+    create?: XOR<TeacherSubscriptionCreateWithoutTenantInput, TeacherSubscriptionUncheckedCreateWithoutTenantInput>
+    connectOrCreate?: TeacherSubscriptionCreateOrConnectWithoutTenantInput
+    connect?: TeacherSubscriptionWhereUniqueInput
+  }
+
+  export type StudentBalanceCreateNestedManyWithoutTenantInput = {
+    create?: XOR<StudentBalanceCreateWithoutTenantInput, StudentBalanceUncheckedCreateWithoutTenantInput> | StudentBalanceCreateWithoutTenantInput[] | StudentBalanceUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutTenantInput | StudentBalanceCreateOrConnectWithoutTenantInput[]
+    createMany?: StudentBalanceCreateManyTenantInputEnvelope
+    connect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+  }
+
+  export type BalanceTransactionCreateNestedManyWithoutTenantInput = {
+    create?: XOR<BalanceTransactionCreateWithoutTenantInput, BalanceTransactionUncheckedCreateWithoutTenantInput> | BalanceTransactionCreateWithoutTenantInput[] | BalanceTransactionUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: BalanceTransactionCreateOrConnectWithoutTenantInput | BalanceTransactionCreateOrConnectWithoutTenantInput[]
+    createMany?: BalanceTransactionCreateManyTenantInputEnvelope
+    connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+  }
+
   export type AssignmentUncheckedCreateNestedManyWithoutTenantInput = {
     create?: XOR<AssignmentCreateWithoutTenantInput, AssignmentUncheckedCreateWithoutTenantInput> | AssignmentCreateWithoutTenantInput[] | AssignmentUncheckedCreateWithoutTenantInput[]
     connectOrCreate?: AssignmentCreateOrConnectWithoutTenantInput | AssignmentCreateOrConnectWithoutTenantInput[]
@@ -29062,6 +34166,26 @@ export namespace Prisma {
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput | UserCreateOrConnectWithoutTenantInput[]
     createMany?: UserCreateManyTenantInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput = {
+    create?: XOR<TeacherSubscriptionCreateWithoutTenantInput, TeacherSubscriptionUncheckedCreateWithoutTenantInput>
+    connectOrCreate?: TeacherSubscriptionCreateOrConnectWithoutTenantInput
+    connect?: TeacherSubscriptionWhereUniqueInput
+  }
+
+  export type StudentBalanceUncheckedCreateNestedManyWithoutTenantInput = {
+    create?: XOR<StudentBalanceCreateWithoutTenantInput, StudentBalanceUncheckedCreateWithoutTenantInput> | StudentBalanceCreateWithoutTenantInput[] | StudentBalanceUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutTenantInput | StudentBalanceCreateOrConnectWithoutTenantInput[]
+    createMany?: StudentBalanceCreateManyTenantInputEnvelope
+    connect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+  }
+
+  export type BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput = {
+    create?: XOR<BalanceTransactionCreateWithoutTenantInput, BalanceTransactionUncheckedCreateWithoutTenantInput> | BalanceTransactionCreateWithoutTenantInput[] | BalanceTransactionUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: BalanceTransactionCreateOrConnectWithoutTenantInput | BalanceTransactionCreateOrConnectWithoutTenantInput[]
+    createMany?: BalanceTransactionCreateManyTenantInputEnvelope
+    connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -29227,6 +34351,44 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type TeacherSubscriptionUpdateOneWithoutTenantNestedInput = {
+    create?: XOR<TeacherSubscriptionCreateWithoutTenantInput, TeacherSubscriptionUncheckedCreateWithoutTenantInput>
+    connectOrCreate?: TeacherSubscriptionCreateOrConnectWithoutTenantInput
+    upsert?: TeacherSubscriptionUpsertWithoutTenantInput
+    disconnect?: TeacherSubscriptionWhereInput | boolean
+    delete?: TeacherSubscriptionWhereInput | boolean
+    connect?: TeacherSubscriptionWhereUniqueInput
+    update?: XOR<XOR<TeacherSubscriptionUpdateToOneWithWhereWithoutTenantInput, TeacherSubscriptionUpdateWithoutTenantInput>, TeacherSubscriptionUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type StudentBalanceUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<StudentBalanceCreateWithoutTenantInput, StudentBalanceUncheckedCreateWithoutTenantInput> | StudentBalanceCreateWithoutTenantInput[] | StudentBalanceUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutTenantInput | StudentBalanceCreateOrConnectWithoutTenantInput[]
+    upsert?: StudentBalanceUpsertWithWhereUniqueWithoutTenantInput | StudentBalanceUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: StudentBalanceCreateManyTenantInputEnvelope
+    set?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    disconnect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    delete?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    connect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    update?: StudentBalanceUpdateWithWhereUniqueWithoutTenantInput | StudentBalanceUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: StudentBalanceUpdateManyWithWhereWithoutTenantInput | StudentBalanceUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: StudentBalanceScalarWhereInput | StudentBalanceScalarWhereInput[]
+  }
+
+  export type BalanceTransactionUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<BalanceTransactionCreateWithoutTenantInput, BalanceTransactionUncheckedCreateWithoutTenantInput> | BalanceTransactionCreateWithoutTenantInput[] | BalanceTransactionUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: BalanceTransactionCreateOrConnectWithoutTenantInput | BalanceTransactionCreateOrConnectWithoutTenantInput[]
+    upsert?: BalanceTransactionUpsertWithWhereUniqueWithoutTenantInput | BalanceTransactionUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: BalanceTransactionCreateManyTenantInputEnvelope
+    set?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    disconnect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    delete?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    update?: BalanceTransactionUpdateWithWhereUniqueWithoutTenantInput | BalanceTransactionUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: BalanceTransactionUpdateManyWithWhereWithoutTenantInput | BalanceTransactionUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: BalanceTransactionScalarWhereInput | BalanceTransactionScalarWhereInput[]
+  }
+
   export type AssignmentUncheckedUpdateManyWithoutTenantNestedInput = {
     create?: XOR<AssignmentCreateWithoutTenantInput, AssignmentUncheckedCreateWithoutTenantInput> | AssignmentCreateWithoutTenantInput[] | AssignmentUncheckedCreateWithoutTenantInput[]
     connectOrCreate?: AssignmentCreateOrConnectWithoutTenantInput | AssignmentCreateOrConnectWithoutTenantInput[]
@@ -29353,6 +34515,44 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput = {
+    create?: XOR<TeacherSubscriptionCreateWithoutTenantInput, TeacherSubscriptionUncheckedCreateWithoutTenantInput>
+    connectOrCreate?: TeacherSubscriptionCreateOrConnectWithoutTenantInput
+    upsert?: TeacherSubscriptionUpsertWithoutTenantInput
+    disconnect?: TeacherSubscriptionWhereInput | boolean
+    delete?: TeacherSubscriptionWhereInput | boolean
+    connect?: TeacherSubscriptionWhereUniqueInput
+    update?: XOR<XOR<TeacherSubscriptionUpdateToOneWithWhereWithoutTenantInput, TeacherSubscriptionUpdateWithoutTenantInput>, TeacherSubscriptionUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<StudentBalanceCreateWithoutTenantInput, StudentBalanceUncheckedCreateWithoutTenantInput> | StudentBalanceCreateWithoutTenantInput[] | StudentBalanceUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutTenantInput | StudentBalanceCreateOrConnectWithoutTenantInput[]
+    upsert?: StudentBalanceUpsertWithWhereUniqueWithoutTenantInput | StudentBalanceUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: StudentBalanceCreateManyTenantInputEnvelope
+    set?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    disconnect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    delete?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    connect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    update?: StudentBalanceUpdateWithWhereUniqueWithoutTenantInput | StudentBalanceUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: StudentBalanceUpdateManyWithWhereWithoutTenantInput | StudentBalanceUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: StudentBalanceScalarWhereInput | StudentBalanceScalarWhereInput[]
+  }
+
+  export type BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<BalanceTransactionCreateWithoutTenantInput, BalanceTransactionUncheckedCreateWithoutTenantInput> | BalanceTransactionCreateWithoutTenantInput[] | BalanceTransactionUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: BalanceTransactionCreateOrConnectWithoutTenantInput | BalanceTransactionCreateOrConnectWithoutTenantInput[]
+    upsert?: BalanceTransactionUpsertWithWhereUniqueWithoutTenantInput | BalanceTransactionUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: BalanceTransactionCreateManyTenantInputEnvelope
+    set?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    disconnect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    delete?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    update?: BalanceTransactionUpdateWithWhereUniqueWithoutTenantInput | BalanceTransactionUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: BalanceTransactionUpdateManyWithWhereWithoutTenantInput | BalanceTransactionUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: BalanceTransactionScalarWhereInput | BalanceTransactionScalarWhereInput[]
+  }
+
   export type AssignmentSubmissionCreateNestedManyWithoutStudentInput = {
     create?: XOR<AssignmentSubmissionCreateWithoutStudentInput, AssignmentSubmissionUncheckedCreateWithoutStudentInput> | AssignmentSubmissionCreateWithoutStudentInput[] | AssignmentSubmissionUncheckedCreateWithoutStudentInput[]
     connectOrCreate?: AssignmentSubmissionCreateOrConnectWithoutStudentInput | AssignmentSubmissionCreateOrConnectWithoutStudentInput[]
@@ -29450,6 +34650,20 @@ export namespace Prisma {
     connect?: TenantWhereUniqueInput
   }
 
+  export type StudentBalanceCreateNestedManyWithoutStudentInput = {
+    create?: XOR<StudentBalanceCreateWithoutStudentInput, StudentBalanceUncheckedCreateWithoutStudentInput> | StudentBalanceCreateWithoutStudentInput[] | StudentBalanceUncheckedCreateWithoutStudentInput[]
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutStudentInput | StudentBalanceCreateOrConnectWithoutStudentInput[]
+    createMany?: StudentBalanceCreateManyStudentInputEnvelope
+    connect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+  }
+
+  export type StudentBalanceCreateNestedManyWithoutParentInput = {
+    create?: XOR<StudentBalanceCreateWithoutParentInput, StudentBalanceUncheckedCreateWithoutParentInput> | StudentBalanceCreateWithoutParentInput[] | StudentBalanceUncheckedCreateWithoutParentInput[]
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutParentInput | StudentBalanceCreateOrConnectWithoutParentInput[]
+    createMany?: StudentBalanceCreateManyParentInputEnvelope
+    connect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+  }
+
   export type AssignmentSubmissionUncheckedCreateNestedManyWithoutStudentInput = {
     create?: XOR<AssignmentSubmissionCreateWithoutStudentInput, AssignmentSubmissionUncheckedCreateWithoutStudentInput> | AssignmentSubmissionCreateWithoutStudentInput[] | AssignmentSubmissionUncheckedCreateWithoutStudentInput[]
     connectOrCreate?: AssignmentSubmissionCreateOrConnectWithoutStudentInput | AssignmentSubmissionCreateOrConnectWithoutStudentInput[]
@@ -29539,6 +34753,20 @@ export namespace Prisma {
     connectOrCreate?: PaymentCreateOrConnectWithoutStudentInput | PaymentCreateOrConnectWithoutStudentInput[]
     createMany?: PaymentCreateManyStudentInputEnvelope
     connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+  }
+
+  export type StudentBalanceUncheckedCreateNestedManyWithoutStudentInput = {
+    create?: XOR<StudentBalanceCreateWithoutStudentInput, StudentBalanceUncheckedCreateWithoutStudentInput> | StudentBalanceCreateWithoutStudentInput[] | StudentBalanceUncheckedCreateWithoutStudentInput[]
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutStudentInput | StudentBalanceCreateOrConnectWithoutStudentInput[]
+    createMany?: StudentBalanceCreateManyStudentInputEnvelope
+    connect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+  }
+
+  export type StudentBalanceUncheckedCreateNestedManyWithoutParentInput = {
+    create?: XOR<StudentBalanceCreateWithoutParentInput, StudentBalanceUncheckedCreateWithoutParentInput> | StudentBalanceCreateWithoutParentInput[] | StudentBalanceUncheckedCreateWithoutParentInput[]
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutParentInput | StudentBalanceCreateOrConnectWithoutParentInput[]
+    createMany?: StudentBalanceCreateManyParentInputEnvelope
+    connect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
   }
 
   export type EnumUserRoleFieldUpdateOperationsInput = {
@@ -29735,6 +34963,34 @@ export namespace Prisma {
     update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutUsersInput, TenantUpdateWithoutUsersInput>, TenantUncheckedUpdateWithoutUsersInput>
   }
 
+  export type StudentBalanceUpdateManyWithoutStudentNestedInput = {
+    create?: XOR<StudentBalanceCreateWithoutStudentInput, StudentBalanceUncheckedCreateWithoutStudentInput> | StudentBalanceCreateWithoutStudentInput[] | StudentBalanceUncheckedCreateWithoutStudentInput[]
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutStudentInput | StudentBalanceCreateOrConnectWithoutStudentInput[]
+    upsert?: StudentBalanceUpsertWithWhereUniqueWithoutStudentInput | StudentBalanceUpsertWithWhereUniqueWithoutStudentInput[]
+    createMany?: StudentBalanceCreateManyStudentInputEnvelope
+    set?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    disconnect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    delete?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    connect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    update?: StudentBalanceUpdateWithWhereUniqueWithoutStudentInput | StudentBalanceUpdateWithWhereUniqueWithoutStudentInput[]
+    updateMany?: StudentBalanceUpdateManyWithWhereWithoutStudentInput | StudentBalanceUpdateManyWithWhereWithoutStudentInput[]
+    deleteMany?: StudentBalanceScalarWhereInput | StudentBalanceScalarWhereInput[]
+  }
+
+  export type StudentBalanceUpdateManyWithoutParentNestedInput = {
+    create?: XOR<StudentBalanceCreateWithoutParentInput, StudentBalanceUncheckedCreateWithoutParentInput> | StudentBalanceCreateWithoutParentInput[] | StudentBalanceUncheckedCreateWithoutParentInput[]
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutParentInput | StudentBalanceCreateOrConnectWithoutParentInput[]
+    upsert?: StudentBalanceUpsertWithWhereUniqueWithoutParentInput | StudentBalanceUpsertWithWhereUniqueWithoutParentInput[]
+    createMany?: StudentBalanceCreateManyParentInputEnvelope
+    set?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    disconnect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    delete?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    connect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    update?: StudentBalanceUpdateWithWhereUniqueWithoutParentInput | StudentBalanceUpdateWithWhereUniqueWithoutParentInput[]
+    updateMany?: StudentBalanceUpdateManyWithWhereWithoutParentInput | StudentBalanceUpdateManyWithWhereWithoutParentInput[]
+    deleteMany?: StudentBalanceScalarWhereInput | StudentBalanceScalarWhereInput[]
+  }
+
   export type AssignmentSubmissionUncheckedUpdateManyWithoutStudentNestedInput = {
     create?: XOR<AssignmentSubmissionCreateWithoutStudentInput, AssignmentSubmissionUncheckedCreateWithoutStudentInput> | AssignmentSubmissionCreateWithoutStudentInput[] | AssignmentSubmissionUncheckedCreateWithoutStudentInput[]
     connectOrCreate?: AssignmentSubmissionCreateOrConnectWithoutStudentInput | AssignmentSubmissionCreateOrConnectWithoutStudentInput[]
@@ -29915,6 +35171,34 @@ export namespace Prisma {
     update?: PaymentUpdateWithWhereUniqueWithoutStudentInput | PaymentUpdateWithWhereUniqueWithoutStudentInput[]
     updateMany?: PaymentUpdateManyWithWhereWithoutStudentInput | PaymentUpdateManyWithWhereWithoutStudentInput[]
     deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
+  }
+
+  export type StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput = {
+    create?: XOR<StudentBalanceCreateWithoutStudentInput, StudentBalanceUncheckedCreateWithoutStudentInput> | StudentBalanceCreateWithoutStudentInput[] | StudentBalanceUncheckedCreateWithoutStudentInput[]
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutStudentInput | StudentBalanceCreateOrConnectWithoutStudentInput[]
+    upsert?: StudentBalanceUpsertWithWhereUniqueWithoutStudentInput | StudentBalanceUpsertWithWhereUniqueWithoutStudentInput[]
+    createMany?: StudentBalanceCreateManyStudentInputEnvelope
+    set?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    disconnect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    delete?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    connect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    update?: StudentBalanceUpdateWithWhereUniqueWithoutStudentInput | StudentBalanceUpdateWithWhereUniqueWithoutStudentInput[]
+    updateMany?: StudentBalanceUpdateManyWithWhereWithoutStudentInput | StudentBalanceUpdateManyWithWhereWithoutStudentInput[]
+    deleteMany?: StudentBalanceScalarWhereInput | StudentBalanceScalarWhereInput[]
+  }
+
+  export type StudentBalanceUncheckedUpdateManyWithoutParentNestedInput = {
+    create?: XOR<StudentBalanceCreateWithoutParentInput, StudentBalanceUncheckedCreateWithoutParentInput> | StudentBalanceCreateWithoutParentInput[] | StudentBalanceUncheckedCreateWithoutParentInput[]
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutParentInput | StudentBalanceCreateOrConnectWithoutParentInput[]
+    upsert?: StudentBalanceUpsertWithWhereUniqueWithoutParentInput | StudentBalanceUpsertWithWhereUniqueWithoutParentInput[]
+    createMany?: StudentBalanceCreateManyParentInputEnvelope
+    set?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    disconnect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    delete?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    connect?: StudentBalanceWhereUniqueInput | StudentBalanceWhereUniqueInput[]
+    update?: StudentBalanceUpdateWithWhereUniqueWithoutParentInput | StudentBalanceUpdateWithWhereUniqueWithoutParentInput[]
+    updateMany?: StudentBalanceUpdateManyWithWhereWithoutParentInput | StudentBalanceUpdateManyWithWhereWithoutParentInput[]
+    deleteMany?: StudentBalanceScalarWhereInput | StudentBalanceScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutParentStudentsInput = {
@@ -30402,6 +35686,10 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type EnumPaymentGatewayFieldUpdateOperationsInput = {
+    set?: $Enums.PaymentGateway
+  }
+
   export type UserUpdateOneWithoutRecordedPaymentsNestedInput = {
     create?: XOR<UserCreateWithoutRecordedPaymentsInput, UserUncheckedCreateWithoutRecordedPaymentsInput>
     connectOrCreate?: UserCreateOrConnectWithoutRecordedPaymentsInput
@@ -30780,6 +36068,150 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutExamSubmissionsInput, UserUpdateWithoutExamSubmissionsInput>, UserUncheckedUpdateWithoutExamSubmissionsInput>
   }
 
+  export type TenantCreateNestedOneWithoutTeacherSubscriptionInput = {
+    create?: XOR<TenantCreateWithoutTeacherSubscriptionInput, TenantUncheckedCreateWithoutTeacherSubscriptionInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutTeacherSubscriptionInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type EnumSubscriptionPlanFieldUpdateOperationsInput = {
+    set?: $Enums.SubscriptionPlan
+  }
+
+  export type EnumBillingCycleFieldUpdateOperationsInput = {
+    set?: $Enums.BillingCycle
+  }
+
+  export type TenantUpdateOneRequiredWithoutTeacherSubscriptionNestedInput = {
+    create?: XOR<TenantCreateWithoutTeacherSubscriptionInput, TenantUncheckedCreateWithoutTeacherSubscriptionInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutTeacherSubscriptionInput
+    upsert?: TenantUpsertWithoutTeacherSubscriptionInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutTeacherSubscriptionInput, TenantUpdateWithoutTeacherSubscriptionInput>, TenantUncheckedUpdateWithoutTeacherSubscriptionInput>
+  }
+
+  export type UserCreateNestedOneWithoutStudentBalanceInput = {
+    create?: XOR<UserCreateWithoutStudentBalanceInput, UserUncheckedCreateWithoutStudentBalanceInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStudentBalanceInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutParentBalanceInput = {
+    create?: XOR<UserCreateWithoutParentBalanceInput, UserUncheckedCreateWithoutParentBalanceInput>
+    connectOrCreate?: UserCreateOrConnectWithoutParentBalanceInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type TenantCreateNestedOneWithoutStudentBalancesInput = {
+    create?: XOR<TenantCreateWithoutStudentBalancesInput, TenantUncheckedCreateWithoutStudentBalancesInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutStudentBalancesInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type BalanceTransactionCreateNestedManyWithoutBalanceInput = {
+    create?: XOR<BalanceTransactionCreateWithoutBalanceInput, BalanceTransactionUncheckedCreateWithoutBalanceInput> | BalanceTransactionCreateWithoutBalanceInput[] | BalanceTransactionUncheckedCreateWithoutBalanceInput[]
+    connectOrCreate?: BalanceTransactionCreateOrConnectWithoutBalanceInput | BalanceTransactionCreateOrConnectWithoutBalanceInput[]
+    createMany?: BalanceTransactionCreateManyBalanceInputEnvelope
+    connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+  }
+
+  export type BalanceTransactionUncheckedCreateNestedManyWithoutBalanceInput = {
+    create?: XOR<BalanceTransactionCreateWithoutBalanceInput, BalanceTransactionUncheckedCreateWithoutBalanceInput> | BalanceTransactionCreateWithoutBalanceInput[] | BalanceTransactionUncheckedCreateWithoutBalanceInput[]
+    connectOrCreate?: BalanceTransactionCreateOrConnectWithoutBalanceInput | BalanceTransactionCreateOrConnectWithoutBalanceInput[]
+    createMany?: BalanceTransactionCreateManyBalanceInputEnvelope
+    connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+  }
+
+  export type UserUpdateOneRequiredWithoutStudentBalanceNestedInput = {
+    create?: XOR<UserCreateWithoutStudentBalanceInput, UserUncheckedCreateWithoutStudentBalanceInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStudentBalanceInput
+    upsert?: UserUpsertWithoutStudentBalanceInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutStudentBalanceInput, UserUpdateWithoutStudentBalanceInput>, UserUncheckedUpdateWithoutStudentBalanceInput>
+  }
+
+  export type UserUpdateOneWithoutParentBalanceNestedInput = {
+    create?: XOR<UserCreateWithoutParentBalanceInput, UserUncheckedCreateWithoutParentBalanceInput>
+    connectOrCreate?: UserCreateOrConnectWithoutParentBalanceInput
+    upsert?: UserUpsertWithoutParentBalanceInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutParentBalanceInput, UserUpdateWithoutParentBalanceInput>, UserUncheckedUpdateWithoutParentBalanceInput>
+  }
+
+  export type TenantUpdateOneRequiredWithoutStudentBalancesNestedInput = {
+    create?: XOR<TenantCreateWithoutStudentBalancesInput, TenantUncheckedCreateWithoutStudentBalancesInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutStudentBalancesInput
+    upsert?: TenantUpsertWithoutStudentBalancesInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutStudentBalancesInput, TenantUpdateWithoutStudentBalancesInput>, TenantUncheckedUpdateWithoutStudentBalancesInput>
+  }
+
+  export type BalanceTransactionUpdateManyWithoutBalanceNestedInput = {
+    create?: XOR<BalanceTransactionCreateWithoutBalanceInput, BalanceTransactionUncheckedCreateWithoutBalanceInput> | BalanceTransactionCreateWithoutBalanceInput[] | BalanceTransactionUncheckedCreateWithoutBalanceInput[]
+    connectOrCreate?: BalanceTransactionCreateOrConnectWithoutBalanceInput | BalanceTransactionCreateOrConnectWithoutBalanceInput[]
+    upsert?: BalanceTransactionUpsertWithWhereUniqueWithoutBalanceInput | BalanceTransactionUpsertWithWhereUniqueWithoutBalanceInput[]
+    createMany?: BalanceTransactionCreateManyBalanceInputEnvelope
+    set?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    disconnect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    delete?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    update?: BalanceTransactionUpdateWithWhereUniqueWithoutBalanceInput | BalanceTransactionUpdateWithWhereUniqueWithoutBalanceInput[]
+    updateMany?: BalanceTransactionUpdateManyWithWhereWithoutBalanceInput | BalanceTransactionUpdateManyWithWhereWithoutBalanceInput[]
+    deleteMany?: BalanceTransactionScalarWhereInput | BalanceTransactionScalarWhereInput[]
+  }
+
+  export type BalanceTransactionUncheckedUpdateManyWithoutBalanceNestedInput = {
+    create?: XOR<BalanceTransactionCreateWithoutBalanceInput, BalanceTransactionUncheckedCreateWithoutBalanceInput> | BalanceTransactionCreateWithoutBalanceInput[] | BalanceTransactionUncheckedCreateWithoutBalanceInput[]
+    connectOrCreate?: BalanceTransactionCreateOrConnectWithoutBalanceInput | BalanceTransactionCreateOrConnectWithoutBalanceInput[]
+    upsert?: BalanceTransactionUpsertWithWhereUniqueWithoutBalanceInput | BalanceTransactionUpsertWithWhereUniqueWithoutBalanceInput[]
+    createMany?: BalanceTransactionCreateManyBalanceInputEnvelope
+    set?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    disconnect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    delete?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    update?: BalanceTransactionUpdateWithWhereUniqueWithoutBalanceInput | BalanceTransactionUpdateWithWhereUniqueWithoutBalanceInput[]
+    updateMany?: BalanceTransactionUpdateManyWithWhereWithoutBalanceInput | BalanceTransactionUpdateManyWithWhereWithoutBalanceInput[]
+    deleteMany?: BalanceTransactionScalarWhereInput | BalanceTransactionScalarWhereInput[]
+  }
+
+  export type StudentBalanceCreateNestedOneWithoutTransactionsInput = {
+    create?: XOR<StudentBalanceCreateWithoutTransactionsInput, StudentBalanceUncheckedCreateWithoutTransactionsInput>
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutTransactionsInput
+    connect?: StudentBalanceWhereUniqueInput
+  }
+
+  export type TenantCreateNestedOneWithoutBalanceTransactionsInput = {
+    create?: XOR<TenantCreateWithoutBalanceTransactionsInput, TenantUncheckedCreateWithoutBalanceTransactionsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutBalanceTransactionsInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type EnumTransactionTypeFieldUpdateOperationsInput = {
+    set?: $Enums.TransactionType
+  }
+
+  export type EnumTransactionStatusFieldUpdateOperationsInput = {
+    set?: $Enums.TransactionStatus
+  }
+
+  export type StudentBalanceUpdateOneRequiredWithoutTransactionsNestedInput = {
+    create?: XOR<StudentBalanceCreateWithoutTransactionsInput, StudentBalanceUncheckedCreateWithoutTransactionsInput>
+    connectOrCreate?: StudentBalanceCreateOrConnectWithoutTransactionsInput
+    upsert?: StudentBalanceUpsertWithoutTransactionsInput
+    connect?: StudentBalanceWhereUniqueInput
+    update?: XOR<XOR<StudentBalanceUpdateToOneWithWhereWithoutTransactionsInput, StudentBalanceUpdateWithoutTransactionsInput>, StudentBalanceUncheckedUpdateWithoutTransactionsInput>
+  }
+
+  export type TenantUpdateOneRequiredWithoutBalanceTransactionsNestedInput = {
+    create?: XOR<TenantCreateWithoutBalanceTransactionsInput, TenantUncheckedCreateWithoutBalanceTransactionsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutBalanceTransactionsInput
+    upsert?: TenantUpsertWithoutBalanceTransactionsInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutBalanceTransactionsInput, TenantUpdateWithoutBalanceTransactionsInput>, TenantUncheckedUpdateWithoutBalanceTransactionsInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -31133,6 +36565,13 @@ export namespace Prisma {
     not?: NestedEnumPaymentMethodFilter<$PrismaModel> | $Enums.PaymentMethod
   }
 
+  export type NestedEnumPaymentGatewayFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentGateway | EnumPaymentGatewayFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentGateway[] | ListEnumPaymentGatewayFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentGateway[] | ListEnumPaymentGatewayFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentGatewayFilter<$PrismaModel> | $Enums.PaymentGateway
+  }
+
   export type NestedEnumPaymentStatusWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.PaymentStatus | EnumPaymentStatusFieldRefInput<$PrismaModel>
     in?: $Enums.PaymentStatus[] | ListEnumPaymentStatusFieldRefInput<$PrismaModel>
@@ -31178,6 +36617,16 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedEnumPaymentGatewayWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentGateway | EnumPaymentGatewayFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentGateway[] | ListEnumPaymentGatewayFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentGateway[] | ListEnumPaymentGatewayFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentGatewayWithAggregatesFilter<$PrismaModel> | $Enums.PaymentGateway
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPaymentGatewayFilter<$PrismaModel>
+    _max?: NestedEnumPaymentGatewayFilter<$PrismaModel>
   }
 
   export type NestedEnumNotificationTypeFilter<$PrismaModel = never> = {
@@ -31246,6 +36695,74 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumQuestionTypeFilter<$PrismaModel>
     _max?: NestedEnumQuestionTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumSubscriptionPlanFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionPlan | EnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionPlanFilter<$PrismaModel> | $Enums.SubscriptionPlan
+  }
+
+  export type NestedEnumBillingCycleFilter<$PrismaModel = never> = {
+    equals?: $Enums.BillingCycle | EnumBillingCycleFieldRefInput<$PrismaModel>
+    in?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel>
+    not?: NestedEnumBillingCycleFilter<$PrismaModel> | $Enums.BillingCycle
+  }
+
+  export type NestedEnumSubscriptionPlanWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionPlan | EnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionPlanWithAggregatesFilter<$PrismaModel> | $Enums.SubscriptionPlan
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSubscriptionPlanFilter<$PrismaModel>
+    _max?: NestedEnumSubscriptionPlanFilter<$PrismaModel>
+  }
+
+  export type NestedEnumBillingCycleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BillingCycle | EnumBillingCycleFieldRefInput<$PrismaModel>
+    in?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BillingCycle[] | ListEnumBillingCycleFieldRefInput<$PrismaModel>
+    not?: NestedEnumBillingCycleWithAggregatesFilter<$PrismaModel> | $Enums.BillingCycle
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBillingCycleFilter<$PrismaModel>
+    _max?: NestedEnumBillingCycleFilter<$PrismaModel>
+  }
+
+  export type NestedEnumTransactionTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransactionType | EnumTransactionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransactionTypeFilter<$PrismaModel> | $Enums.TransactionType
+  }
+
+  export type NestedEnumTransactionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransactionStatus | EnumTransactionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransactionStatusFilter<$PrismaModel> | $Enums.TransactionStatus
+  }
+
+  export type NestedEnumTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransactionType | EnumTransactionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransactionTypeWithAggregatesFilter<$PrismaModel> | $Enums.TransactionType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTransactionTypeFilter<$PrismaModel>
+    _max?: NestedEnumTransactionTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumTransactionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransactionStatus | EnumTransactionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransactionStatusWithAggregatesFilter<$PrismaModel> | $Enums.TransactionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTransactionStatusFilter<$PrismaModel>
+    _max?: NestedEnumTransactionStatusFilter<$PrismaModel>
   }
 
   export type AssignmentCreateWithoutTenantInput = {
@@ -31496,6 +37013,9 @@ export namespace Prisma {
     receiptUrl?: string | null
     paidAt?: Date | string | null
     notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     recordedBy?: UserCreateNestedOneWithoutRecordedPaymentsInput
@@ -31516,6 +37036,9 @@ export namespace Prisma {
     paidAt?: Date | string | null
     recordedById?: string | null
     notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31599,6 +37122,8 @@ export namespace Prisma {
     childStudents?: ParentStudentCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutTenantInput = {
@@ -31630,6 +37155,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutTenantInput = {
@@ -31639,6 +37166,103 @@ export namespace Prisma {
 
   export type UserCreateManyTenantInputEnvelope = {
     data: UserCreateManyTenantInput | UserCreateManyTenantInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TeacherSubscriptionCreateWithoutTenantInput = {
+    id?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    billingCycle?: $Enums.BillingCycle
+    amount: number
+    isActive?: boolean
+    nextBillingAt: Date | string
+    cancelledAt?: Date | string | null
+    kashierApiKey?: string | null
+    kashierMerId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TeacherSubscriptionUncheckedCreateWithoutTenantInput = {
+    id?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    billingCycle?: $Enums.BillingCycle
+    amount: number
+    isActive?: boolean
+    nextBillingAt: Date | string
+    cancelledAt?: Date | string | null
+    kashierApiKey?: string | null
+    kashierMerId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TeacherSubscriptionCreateOrConnectWithoutTenantInput = {
+    where: TeacherSubscriptionWhereUniqueInput
+    create: XOR<TeacherSubscriptionCreateWithoutTenantInput, TeacherSubscriptionUncheckedCreateWithoutTenantInput>
+  }
+
+  export type StudentBalanceCreateWithoutTenantInput = {
+    id?: string
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    student: UserCreateNestedOneWithoutStudentBalanceInput
+    parent?: UserCreateNestedOneWithoutParentBalanceInput
+    transactions?: BalanceTransactionCreateNestedManyWithoutBalanceInput
+  }
+
+  export type StudentBalanceUncheckedCreateWithoutTenantInput = {
+    id?: string
+    studentId: string
+    parentId?: string | null
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    transactions?: BalanceTransactionUncheckedCreateNestedManyWithoutBalanceInput
+  }
+
+  export type StudentBalanceCreateOrConnectWithoutTenantInput = {
+    where: StudentBalanceWhereUniqueInput
+    create: XOR<StudentBalanceCreateWithoutTenantInput, StudentBalanceUncheckedCreateWithoutTenantInput>
+  }
+
+  export type StudentBalanceCreateManyTenantInputEnvelope = {
+    data: StudentBalanceCreateManyTenantInput | StudentBalanceCreateManyTenantInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BalanceTransactionCreateWithoutTenantInput = {
+    id?: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    relatedPaymentId?: string | null
+    status?: $Enums.TransactionStatus
+    createdAt?: Date | string
+    balance: StudentBalanceCreateNestedOneWithoutTransactionsInput
+  }
+
+  export type BalanceTransactionUncheckedCreateWithoutTenantInput = {
+    id?: string
+    balanceId: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    relatedPaymentId?: string | null
+    status?: $Enums.TransactionStatus
+    createdAt?: Date | string
+  }
+
+  export type BalanceTransactionCreateOrConnectWithoutTenantInput = {
+    where: BalanceTransactionWhereUniqueInput
+    create: XOR<BalanceTransactionCreateWithoutTenantInput, BalanceTransactionUncheckedCreateWithoutTenantInput>
+  }
+
+  export type BalanceTransactionCreateManyTenantInputEnvelope = {
+    data: BalanceTransactionCreateManyTenantInput | BalanceTransactionCreateManyTenantInput[]
     skipDuplicates?: boolean
   }
 
@@ -31876,6 +37500,9 @@ export namespace Prisma {
     paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
     recordedById?: StringNullableFilter<"Payment"> | string | null
     notes?: StringNullableFilter<"Payment"> | string | null
+    paymentGateway?: EnumPaymentGatewayFilter<"Payment"> | $Enums.PaymentGateway
+    transactionId?: StringNullableFilter<"Payment"> | string | null
+    teacherApiUsed?: BoolFilter<"Payment"> | boolean
     createdAt?: DateTimeFilter<"Payment"> | Date | string
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
   }
@@ -31950,6 +37577,106 @@ export namespace Prisma {
     pinHash?: StringNullableFilter<"User"> | string | null
     email?: StringNullableFilter<"User"> | string | null
     settings?: JsonNullableFilter<"User">
+  }
+
+  export type TeacherSubscriptionUpsertWithoutTenantInput = {
+    update: XOR<TeacherSubscriptionUpdateWithoutTenantInput, TeacherSubscriptionUncheckedUpdateWithoutTenantInput>
+    create: XOR<TeacherSubscriptionCreateWithoutTenantInput, TeacherSubscriptionUncheckedCreateWithoutTenantInput>
+    where?: TeacherSubscriptionWhereInput
+  }
+
+  export type TeacherSubscriptionUpdateToOneWithWhereWithoutTenantInput = {
+    where?: TeacherSubscriptionWhereInput
+    data: XOR<TeacherSubscriptionUpdateWithoutTenantInput, TeacherSubscriptionUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type TeacherSubscriptionUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    billingCycle?: EnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle
+    amount?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    nextBillingAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    kashierApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    kashierMerId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeacherSubscriptionUncheckedUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    billingCycle?: EnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle
+    amount?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    nextBillingAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    kashierApiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    kashierMerId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StudentBalanceUpsertWithWhereUniqueWithoutTenantInput = {
+    where: StudentBalanceWhereUniqueInput
+    update: XOR<StudentBalanceUpdateWithoutTenantInput, StudentBalanceUncheckedUpdateWithoutTenantInput>
+    create: XOR<StudentBalanceCreateWithoutTenantInput, StudentBalanceUncheckedCreateWithoutTenantInput>
+  }
+
+  export type StudentBalanceUpdateWithWhereUniqueWithoutTenantInput = {
+    where: StudentBalanceWhereUniqueInput
+    data: XOR<StudentBalanceUpdateWithoutTenantInput, StudentBalanceUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type StudentBalanceUpdateManyWithWhereWithoutTenantInput = {
+    where: StudentBalanceScalarWhereInput
+    data: XOR<StudentBalanceUpdateManyMutationInput, StudentBalanceUncheckedUpdateManyWithoutTenantInput>
+  }
+
+  export type StudentBalanceScalarWhereInput = {
+    AND?: StudentBalanceScalarWhereInput | StudentBalanceScalarWhereInput[]
+    OR?: StudentBalanceScalarWhereInput[]
+    NOT?: StudentBalanceScalarWhereInput | StudentBalanceScalarWhereInput[]
+    id?: StringFilter<"StudentBalance"> | string
+    tenantId?: StringFilter<"StudentBalance"> | string
+    studentId?: StringFilter<"StudentBalance"> | string
+    parentId?: StringNullableFilter<"StudentBalance"> | string | null
+    balance?: IntFilter<"StudentBalance"> | number
+    lastRechargedAt?: DateTimeNullableFilter<"StudentBalance"> | Date | string | null
+    createdAt?: DateTimeFilter<"StudentBalance"> | Date | string
+    updatedAt?: DateTimeFilter<"StudentBalance"> | Date | string
+  }
+
+  export type BalanceTransactionUpsertWithWhereUniqueWithoutTenantInput = {
+    where: BalanceTransactionWhereUniqueInput
+    update: XOR<BalanceTransactionUpdateWithoutTenantInput, BalanceTransactionUncheckedUpdateWithoutTenantInput>
+    create: XOR<BalanceTransactionCreateWithoutTenantInput, BalanceTransactionUncheckedCreateWithoutTenantInput>
+  }
+
+  export type BalanceTransactionUpdateWithWhereUniqueWithoutTenantInput = {
+    where: BalanceTransactionWhereUniqueInput
+    data: XOR<BalanceTransactionUpdateWithoutTenantInput, BalanceTransactionUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type BalanceTransactionUpdateManyWithWhereWithoutTenantInput = {
+    where: BalanceTransactionScalarWhereInput
+    data: XOR<BalanceTransactionUpdateManyMutationInput, BalanceTransactionUncheckedUpdateManyWithoutTenantInput>
+  }
+
+  export type BalanceTransactionScalarWhereInput = {
+    AND?: BalanceTransactionScalarWhereInput | BalanceTransactionScalarWhereInput[]
+    OR?: BalanceTransactionScalarWhereInput[]
+    NOT?: BalanceTransactionScalarWhereInput | BalanceTransactionScalarWhereInput[]
+    id?: StringFilter<"BalanceTransaction"> | string
+    tenantId?: StringFilter<"BalanceTransaction"> | string
+    balanceId?: StringFilter<"BalanceTransaction"> | string
+    type?: EnumTransactionTypeFilter<"BalanceTransaction"> | $Enums.TransactionType
+    amount?: IntFilter<"BalanceTransaction"> | number
+    reason?: StringFilter<"BalanceTransaction"> | string
+    relatedPaymentId?: StringNullableFilter<"BalanceTransaction"> | string | null
+    status?: EnumTransactionStatusFilter<"BalanceTransaction"> | $Enums.TransactionStatus
+    createdAt?: DateTimeFilter<"BalanceTransaction"> | Date | string
   }
 
   export type AssignmentSubmissionCreateWithoutStudentInput = {
@@ -32306,6 +38033,9 @@ export namespace Prisma {
     receiptUrl?: string | null
     paidAt?: Date | string | null
     notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     student: UserCreateNestedOneWithoutPaymentsInput
@@ -32326,6 +38056,9 @@ export namespace Prisma {
     receiptUrl?: string | null
     paidAt?: Date | string | null
     notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32352,6 +38085,9 @@ export namespace Prisma {
     receiptUrl?: string | null
     paidAt?: Date | string | null
     notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     recordedBy?: UserCreateNestedOneWithoutRecordedPaymentsInput
@@ -32372,6 +38108,9 @@ export namespace Prisma {
     paidAt?: Date | string | null
     recordedById?: string | null
     notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -32410,6 +38149,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutTenantInput
     payments?: PaymentCreateNestedManyWithoutTenantInput
     sessions?: SessionCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutUsersInput = {
@@ -32436,11 +38178,78 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutTenantInput
     payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
     sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutUsersInput = {
     where: TenantWhereUniqueInput
     create: XOR<TenantCreateWithoutUsersInput, TenantUncheckedCreateWithoutUsersInput>
+  }
+
+  export type StudentBalanceCreateWithoutStudentInput = {
+    id?: string
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    parent?: UserCreateNestedOneWithoutParentBalanceInput
+    tenant: TenantCreateNestedOneWithoutStudentBalancesInput
+    transactions?: BalanceTransactionCreateNestedManyWithoutBalanceInput
+  }
+
+  export type StudentBalanceUncheckedCreateWithoutStudentInput = {
+    id?: string
+    tenantId: string
+    parentId?: string | null
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    transactions?: BalanceTransactionUncheckedCreateNestedManyWithoutBalanceInput
+  }
+
+  export type StudentBalanceCreateOrConnectWithoutStudentInput = {
+    where: StudentBalanceWhereUniqueInput
+    create: XOR<StudentBalanceCreateWithoutStudentInput, StudentBalanceUncheckedCreateWithoutStudentInput>
+  }
+
+  export type StudentBalanceCreateManyStudentInputEnvelope = {
+    data: StudentBalanceCreateManyStudentInput | StudentBalanceCreateManyStudentInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type StudentBalanceCreateWithoutParentInput = {
+    id?: string
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    student: UserCreateNestedOneWithoutStudentBalanceInput
+    tenant: TenantCreateNestedOneWithoutStudentBalancesInput
+    transactions?: BalanceTransactionCreateNestedManyWithoutBalanceInput
+  }
+
+  export type StudentBalanceUncheckedCreateWithoutParentInput = {
+    id?: string
+    tenantId: string
+    studentId: string
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    transactions?: BalanceTransactionUncheckedCreateNestedManyWithoutBalanceInput
+  }
+
+  export type StudentBalanceCreateOrConnectWithoutParentInput = {
+    where: StudentBalanceWhereUniqueInput
+    create: XOR<StudentBalanceCreateWithoutParentInput, StudentBalanceUncheckedCreateWithoutParentInput>
+  }
+
+  export type StudentBalanceCreateManyParentInputEnvelope = {
+    data: StudentBalanceCreateManyParentInput | StudentBalanceCreateManyParentInput[]
+    skipDuplicates?: boolean
   }
 
   export type AssignmentSubmissionUpsertWithWhereUniqueWithoutStudentInput = {
@@ -32757,6 +38566,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutTenantNestedInput
     payments?: PaymentUpdateManyWithoutTenantNestedInput
     sessions?: SessionUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutUsersInput = {
@@ -32783,6 +38595,41 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutTenantNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+  }
+
+  export type StudentBalanceUpsertWithWhereUniqueWithoutStudentInput = {
+    where: StudentBalanceWhereUniqueInput
+    update: XOR<StudentBalanceUpdateWithoutStudentInput, StudentBalanceUncheckedUpdateWithoutStudentInput>
+    create: XOR<StudentBalanceCreateWithoutStudentInput, StudentBalanceUncheckedCreateWithoutStudentInput>
+  }
+
+  export type StudentBalanceUpdateWithWhereUniqueWithoutStudentInput = {
+    where: StudentBalanceWhereUniqueInput
+    data: XOR<StudentBalanceUpdateWithoutStudentInput, StudentBalanceUncheckedUpdateWithoutStudentInput>
+  }
+
+  export type StudentBalanceUpdateManyWithWhereWithoutStudentInput = {
+    where: StudentBalanceScalarWhereInput
+    data: XOR<StudentBalanceUpdateManyMutationInput, StudentBalanceUncheckedUpdateManyWithoutStudentInput>
+  }
+
+  export type StudentBalanceUpsertWithWhereUniqueWithoutParentInput = {
+    where: StudentBalanceWhereUniqueInput
+    update: XOR<StudentBalanceUpdateWithoutParentInput, StudentBalanceUncheckedUpdateWithoutParentInput>
+    create: XOR<StudentBalanceCreateWithoutParentInput, StudentBalanceUncheckedCreateWithoutParentInput>
+  }
+
+  export type StudentBalanceUpdateWithWhereUniqueWithoutParentInput = {
+    where: StudentBalanceWhereUniqueInput
+    data: XOR<StudentBalanceUpdateWithoutParentInput, StudentBalanceUncheckedUpdateWithoutParentInput>
+  }
+
+  export type StudentBalanceUpdateManyWithWhereWithoutParentInput = {
+    where: StudentBalanceScalarWhereInput
+    data: XOR<StudentBalanceUpdateManyMutationInput, StudentBalanceUncheckedUpdateManyWithoutParentInput>
   }
 
   export type UserCreateWithoutParentStudentsInput = {
@@ -32814,6 +38661,8 @@ export namespace Prisma {
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutParentStudentsInput = {
@@ -32845,6 +38694,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutParentStudentsInput = {
@@ -32881,6 +38732,8 @@ export namespace Prisma {
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutChildStudentsInput = {
@@ -32912,6 +38765,8 @@ export namespace Prisma {
     parentStudents?: ParentStudentUncheckedCreateNestedManyWithoutParentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutChildStudentsInput = {
@@ -32959,6 +38814,8 @@ export namespace Prisma {
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutParentStudentsInput = {
@@ -32990,6 +38847,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type UserUpsertWithoutChildStudentsInput = {
@@ -33032,6 +38891,8 @@ export namespace Prisma {
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutChildStudentsInput = {
@@ -33063,6 +38924,8 @@ export namespace Prisma {
     parentStudents?: ParentStudentUncheckedUpdateManyWithoutParentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type AssignmentCreateWithoutGroupInput = {
@@ -33201,6 +39064,9 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutTenantInput
     sessions?: SessionCreateNestedManyWithoutTenantInput
     users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutGroupsInput = {
@@ -33227,6 +39093,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
     sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutGroupsInput = {
@@ -33383,6 +39252,9 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutTenantNestedInput
     sessions?: SessionUpdateManyWithoutTenantNestedInput
     users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutGroupsInput = {
@@ -33409,6 +39281,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type GroupStudentUpsertWithWhereUniqueWithoutGroupInput = {
@@ -33525,6 +39400,8 @@ export namespace Prisma {
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutGroupStudentsInput = {
@@ -33556,6 +39433,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutGroupStudentsInput = {
@@ -33662,6 +39541,8 @@ export namespace Prisma {
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutGroupStudentsInput = {
@@ -33693,6 +39574,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type AttendanceCreateWithoutSessionInput = {
@@ -33808,6 +39691,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutTenantInput
     payments?: PaymentCreateNestedManyWithoutTenantInput
     users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutSessionsInput = {
@@ -33834,6 +39720,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutTenantInput
     payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutSessionsInput = {
@@ -33951,6 +39840,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutTenantNestedInput
     payments?: PaymentUpdateManyWithoutTenantNestedInput
     users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutSessionsInput = {
@@ -33977,6 +39869,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutTenantNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type GroupCreateWithoutAttendancesInput = {
@@ -34061,6 +39956,8 @@ export namespace Prisma {
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutMarkedAttendancesInput = {
@@ -34092,6 +39989,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutMarkedAttendancesInput = {
@@ -34163,6 +40062,8 @@ export namespace Prisma {
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutAttendancesInput = {
@@ -34194,6 +40095,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutAttendancesInput = {
@@ -34225,6 +40128,9 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutTenantInput
     sessions?: SessionCreateNestedManyWithoutTenantInput
     users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutAttendancesInput = {
@@ -34251,6 +40157,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
     sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutAttendancesInput = {
@@ -34357,6 +40266,8 @@ export namespace Prisma {
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMarkedAttendancesInput = {
@@ -34388,6 +40299,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type SessionUpsertWithoutAttendancesInput = {
@@ -34471,6 +40384,8 @@ export namespace Prisma {
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAttendancesInput = {
@@ -34502,6 +40417,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type TenantUpsertWithoutAttendancesInput = {
@@ -34539,6 +40456,9 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutTenantNestedInput
     sessions?: SessionUpdateManyWithoutTenantNestedInput
     users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutAttendancesInput = {
@@ -34565,6 +40485,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserCreateWithoutRecordedPaymentsInput = {
@@ -34596,6 +40519,8 @@ export namespace Prisma {
     childStudents?: ParentStudentCreateNestedManyWithoutStudentInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutRecordedPaymentsInput = {
@@ -34627,6 +40552,8 @@ export namespace Prisma {
     parentStudents?: ParentStudentUncheckedCreateNestedManyWithoutParentInput
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutRecordedPaymentsInput = {
@@ -34663,6 +40590,8 @@ export namespace Prisma {
     childStudents?: ParentStudentCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutPaymentsInput = {
@@ -34694,6 +40623,8 @@ export namespace Prisma {
     parentStudents?: ParentStudentUncheckedCreateNestedManyWithoutParentInput
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutPaymentsInput = {
@@ -34725,6 +40656,9 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutTenantInput
     sessions?: SessionCreateNestedManyWithoutTenantInput
     users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutPaymentsInput = {
@@ -34751,6 +40685,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutTenantInput
     sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutPaymentsInput = {
@@ -34798,6 +40735,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUpdateManyWithoutStudentNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRecordedPaymentsInput = {
@@ -34829,6 +40768,8 @@ export namespace Prisma {
     parentStudents?: ParentStudentUncheckedUpdateManyWithoutParentNestedInput
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type UserUpsertWithoutPaymentsInput = {
@@ -34871,6 +40812,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentsInput = {
@@ -34902,6 +40845,8 @@ export namespace Prisma {
     parentStudents?: ParentStudentUncheckedUpdateManyWithoutParentNestedInput
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type TenantUpsertWithoutPaymentsInput = {
@@ -34939,6 +40884,9 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutTenantNestedInput
     sessions?: SessionUpdateManyWithoutTenantNestedInput
     users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutPaymentsInput = {
@@ -34965,6 +40913,9 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutTenantNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantCreateWithoutNotificationsInput = {
@@ -34991,6 +40942,9 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutTenantInput
     sessions?: SessionCreateNestedManyWithoutTenantInput
     users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutNotificationsInput = {
@@ -35017,6 +40971,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
     sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutNotificationsInput = {
@@ -35053,6 +41010,8 @@ export namespace Prisma {
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -35084,6 +41043,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -35126,6 +41087,9 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutTenantNestedInput
     sessions?: SessionUpdateManyWithoutTenantNestedInput
     users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutNotificationsInput = {
@@ -35152,6 +41116,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserUpsertWithoutNotificationsInput = {
@@ -35194,6 +41161,8 @@ export namespace Prisma {
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -35225,6 +41194,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type UserCreateWithoutAuthSessionsInput = {
@@ -35256,6 +41227,8 @@ export namespace Prisma {
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutAuthSessionsInput = {
@@ -35287,6 +41260,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutAuthSessionsInput = {
@@ -35334,6 +41309,8 @@ export namespace Prisma {
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuthSessionsInput = {
@@ -35365,6 +41342,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type GroupCreateWithoutAssignmentsInput = {
@@ -35444,6 +41423,9 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutTenantInput
     sessions?: SessionCreateNestedManyWithoutTenantInput
     users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutAssignmentsInput = {
@@ -35470,6 +41452,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
     sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutAssignmentsInput = {
@@ -35609,6 +41594,9 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutTenantNestedInput
     sessions?: SessionUpdateManyWithoutTenantNestedInput
     users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutAssignmentsInput = {
@@ -35635,6 +41623,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type AssignmentSubmissionUpsertWithWhereUniqueWithoutAssignmentInput = {
@@ -35715,6 +41706,8 @@ export namespace Prisma {
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutAssignmentSubmissionsInput = {
@@ -35746,6 +41739,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutAssignmentSubmissionsInput = {
@@ -35832,6 +41827,8 @@ export namespace Prisma {
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAssignmentSubmissionsInput = {
@@ -35863,6 +41860,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type UserCreateWithoutReceivedMessagesInput = {
@@ -35894,6 +41893,8 @@ export namespace Prisma {
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutReceivedMessagesInput = {
@@ -35925,6 +41926,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutReceivedMessagesInput = {
@@ -35961,6 +41964,8 @@ export namespace Prisma {
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutSentMessagesInput = {
@@ -35992,6 +41997,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutSentMessagesInput = {
@@ -36023,6 +42030,9 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutTenantInput
     sessions?: SessionCreateNestedManyWithoutTenantInput
     users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutMessagesInput = {
@@ -36049,6 +42059,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
     sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutMessagesInput = {
@@ -36096,6 +42109,8 @@ export namespace Prisma {
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReceivedMessagesInput = {
@@ -36127,6 +42142,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type UserUpsertWithoutSentMessagesInput = {
@@ -36169,6 +42186,8 @@ export namespace Prisma {
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSentMessagesInput = {
@@ -36200,6 +42219,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type TenantUpsertWithoutMessagesInput = {
@@ -36237,6 +42258,9 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutTenantNestedInput
     sessions?: SessionUpdateManyWithoutTenantNestedInput
     users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutMessagesInput = {
@@ -36263,6 +42287,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type GroupCreateWithoutExamsInput = {
@@ -36342,6 +42369,9 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutTenantInput
     sessions?: SessionCreateNestedManyWithoutTenantInput
     users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutExamsInput = {
@@ -36368,6 +42398,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
     sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutExamsInput = {
@@ -36535,6 +42568,9 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutTenantNestedInput
     sessions?: SessionUpdateManyWithoutTenantNestedInput
     users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutExamsInput = {
@@ -36561,6 +42597,9 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type ExamQuestionUpsertWithWhereUniqueWithoutExamInput = {
@@ -36743,6 +42782,8 @@ export namespace Prisma {
     recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
     payments?: PaymentCreateNestedManyWithoutStudentInput
     tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
   }
 
   export type UserUncheckedCreateWithoutExamSubmissionsInput = {
@@ -36774,6 +42815,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
     recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
     payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
   }
 
   export type UserCreateOrConnectWithoutExamSubmissionsInput = {
@@ -36860,6 +42903,8 @@ export namespace Prisma {
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
     tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutExamSubmissionsInput = {
@@ -36891,6 +42936,808 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
+  }
+
+  export type TenantCreateWithoutTeacherSubscriptionInput = {
+    id?: string
+    slug: string
+    name: string
+    plan?: $Enums.Plan
+    planExpiresAt?: Date | string | null
+    logoUrl?: string | null
+    themeColor?: string
+    phone?: string | null
+    region?: string | null
+    bio?: string | null
+    subjects?: TenantCreatesubjectsInput | string[]
+    isActive?: boolean
+    smsQuota?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: AssignmentCreateNestedManyWithoutTenantInput
+    attendances?: AttendanceCreateNestedManyWithoutTenantInput
+    exams?: ExamCreateNestedManyWithoutTenantInput
+    groups?: GroupCreateNestedManyWithoutTenantInput
+    messages?: MessageCreateNestedManyWithoutTenantInput
+    notifications?: NotificationCreateNestedManyWithoutTenantInput
+    payments?: PaymentCreateNestedManyWithoutTenantInput
+    sessions?: SessionCreateNestedManyWithoutTenantInput
+    users?: UserCreateNestedManyWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantUncheckedCreateWithoutTeacherSubscriptionInput = {
+    id?: string
+    slug: string
+    name: string
+    plan?: $Enums.Plan
+    planExpiresAt?: Date | string | null
+    logoUrl?: string | null
+    themeColor?: string
+    phone?: string | null
+    region?: string | null
+    bio?: string | null
+    subjects?: TenantCreatesubjectsInput | string[]
+    isActive?: boolean
+    smsQuota?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: AssignmentUncheckedCreateNestedManyWithoutTenantInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTenantInput
+    exams?: ExamUncheckedCreateNestedManyWithoutTenantInput
+    groups?: GroupUncheckedCreateNestedManyWithoutTenantInput
+    messages?: MessageUncheckedCreateNestedManyWithoutTenantInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutTenantInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
+    users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantCreateOrConnectWithoutTeacherSubscriptionInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutTeacherSubscriptionInput, TenantUncheckedCreateWithoutTeacherSubscriptionInput>
+  }
+
+  export type TenantUpsertWithoutTeacherSubscriptionInput = {
+    update: XOR<TenantUpdateWithoutTeacherSubscriptionInput, TenantUncheckedUpdateWithoutTeacherSubscriptionInput>
+    create: XOR<TenantCreateWithoutTeacherSubscriptionInput, TenantUncheckedCreateWithoutTeacherSubscriptionInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutTeacherSubscriptionInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutTeacherSubscriptionInput, TenantUncheckedUpdateWithoutTeacherSubscriptionInput>
+  }
+
+  export type TenantUpdateWithoutTeacherSubscriptionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    plan?: EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+    planExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    subjects?: TenantUpdatesubjectsInput | string[]
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    smsQuota?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: AssignmentUpdateManyWithoutTenantNestedInput
+    attendances?: AttendanceUpdateManyWithoutTenantNestedInput
+    exams?: ExamUpdateManyWithoutTenantNestedInput
+    groups?: GroupUpdateManyWithoutTenantNestedInput
+    messages?: MessageUpdateManyWithoutTenantNestedInput
+    notifications?: NotificationUpdateManyWithoutTenantNestedInput
+    payments?: PaymentUpdateManyWithoutTenantNestedInput
+    sessions?: SessionUpdateManyWithoutTenantNestedInput
+    users?: UserUpdateManyWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutTeacherSubscriptionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    plan?: EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+    planExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    subjects?: TenantUpdatesubjectsInput | string[]
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    smsQuota?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: AssignmentUncheckedUpdateManyWithoutTenantNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTenantNestedInput
+    exams?: ExamUncheckedUpdateManyWithoutTenantNestedInput
+    groups?: GroupUncheckedUpdateManyWithoutTenantNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutTenantNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutTenantNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
+    users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+  }
+
+  export type UserCreateWithoutStudentBalanceInput = {
+    id?: string
+    phone: string
+    name: string
+    role: $Enums.UserRole
+    avatarUrl?: string | null
+    gradeLevel?: string | null
+    parentName?: string | null
+    parentPhone?: string | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    pinHash?: string | null
+    email?: string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    assignmentSubmissions?: AssignmentSubmissionCreateNestedManyWithoutStudentInput
+    markedAttendances?: AttendanceCreateNestedManyWithoutMarkedByInput
+    attendances?: AttendanceCreateNestedManyWithoutStudentInput
+    authSessions?: AuthSessionCreateNestedManyWithoutUserInput
+    examSubmissions?: ExamSubmissionCreateNestedManyWithoutStudentInput
+    groupStudents?: GroupStudentCreateNestedManyWithoutStudentInput
+    receivedMessages?: MessageCreateNestedManyWithoutReceiverInput
+    sentMessages?: MessageCreateNestedManyWithoutSenderInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    parentStudents?: ParentStudentCreateNestedManyWithoutParentInput
+    childStudents?: ParentStudentCreateNestedManyWithoutStudentInput
+    recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
+    payments?: PaymentCreateNestedManyWithoutStudentInput
+    tenant: TenantCreateNestedOneWithoutUsersInput
+    parentBalance?: StudentBalanceCreateNestedManyWithoutParentInput
+  }
+
+  export type UserUncheckedCreateWithoutStudentBalanceInput = {
+    id?: string
+    tenantId: string
+    phone: string
+    name: string
+    role: $Enums.UserRole
+    avatarUrl?: string | null
+    gradeLevel?: string | null
+    parentName?: string | null
+    parentPhone?: string | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    pinHash?: string | null
+    email?: string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    assignmentSubmissions?: AssignmentSubmissionUncheckedCreateNestedManyWithoutStudentInput
+    markedAttendances?: AttendanceUncheckedCreateNestedManyWithoutMarkedByInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutStudentInput
+    authSessions?: AuthSessionUncheckedCreateNestedManyWithoutUserInput
+    examSubmissions?: ExamSubmissionUncheckedCreateNestedManyWithoutStudentInput
+    groupStudents?: GroupStudentUncheckedCreateNestedManyWithoutStudentInput
+    receivedMessages?: MessageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    parentStudents?: ParentStudentUncheckedCreateNestedManyWithoutParentInput
+    childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
+    recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    parentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutParentInput
+  }
+
+  export type UserCreateOrConnectWithoutStudentBalanceInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutStudentBalanceInput, UserUncheckedCreateWithoutStudentBalanceInput>
+  }
+
+  export type UserCreateWithoutParentBalanceInput = {
+    id?: string
+    phone: string
+    name: string
+    role: $Enums.UserRole
+    avatarUrl?: string | null
+    gradeLevel?: string | null
+    parentName?: string | null
+    parentPhone?: string | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    pinHash?: string | null
+    email?: string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    assignmentSubmissions?: AssignmentSubmissionCreateNestedManyWithoutStudentInput
+    markedAttendances?: AttendanceCreateNestedManyWithoutMarkedByInput
+    attendances?: AttendanceCreateNestedManyWithoutStudentInput
+    authSessions?: AuthSessionCreateNestedManyWithoutUserInput
+    examSubmissions?: ExamSubmissionCreateNestedManyWithoutStudentInput
+    groupStudents?: GroupStudentCreateNestedManyWithoutStudentInput
+    receivedMessages?: MessageCreateNestedManyWithoutReceiverInput
+    sentMessages?: MessageCreateNestedManyWithoutSenderInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    parentStudents?: ParentStudentCreateNestedManyWithoutParentInput
+    childStudents?: ParentStudentCreateNestedManyWithoutStudentInput
+    recordedPayments?: PaymentCreateNestedManyWithoutRecordedByInput
+    payments?: PaymentCreateNestedManyWithoutStudentInput
+    tenant: TenantCreateNestedOneWithoutUsersInput
+    studentBalance?: StudentBalanceCreateNestedManyWithoutStudentInput
+  }
+
+  export type UserUncheckedCreateWithoutParentBalanceInput = {
+    id?: string
+    tenantId: string
+    phone: string
+    name: string
+    role: $Enums.UserRole
+    avatarUrl?: string | null
+    gradeLevel?: string | null
+    parentName?: string | null
+    parentPhone?: string | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    pinHash?: string | null
+    email?: string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    assignmentSubmissions?: AssignmentSubmissionUncheckedCreateNestedManyWithoutStudentInput
+    markedAttendances?: AttendanceUncheckedCreateNestedManyWithoutMarkedByInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutStudentInput
+    authSessions?: AuthSessionUncheckedCreateNestedManyWithoutUserInput
+    examSubmissions?: ExamSubmissionUncheckedCreateNestedManyWithoutStudentInput
+    groupStudents?: GroupStudentUncheckedCreateNestedManyWithoutStudentInput
+    receivedMessages?: MessageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    parentStudents?: ParentStudentUncheckedCreateNestedManyWithoutParentInput
+    childStudents?: ParentStudentUncheckedCreateNestedManyWithoutStudentInput
+    recordedPayments?: PaymentUncheckedCreateNestedManyWithoutRecordedByInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutStudentInput
+    studentBalance?: StudentBalanceUncheckedCreateNestedManyWithoutStudentInput
+  }
+
+  export type UserCreateOrConnectWithoutParentBalanceInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutParentBalanceInput, UserUncheckedCreateWithoutParentBalanceInput>
+  }
+
+  export type TenantCreateWithoutStudentBalancesInput = {
+    id?: string
+    slug: string
+    name: string
+    plan?: $Enums.Plan
+    planExpiresAt?: Date | string | null
+    logoUrl?: string | null
+    themeColor?: string
+    phone?: string | null
+    region?: string | null
+    bio?: string | null
+    subjects?: TenantCreatesubjectsInput | string[]
+    isActive?: boolean
+    smsQuota?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: AssignmentCreateNestedManyWithoutTenantInput
+    attendances?: AttendanceCreateNestedManyWithoutTenantInput
+    exams?: ExamCreateNestedManyWithoutTenantInput
+    groups?: GroupCreateNestedManyWithoutTenantInput
+    messages?: MessageCreateNestedManyWithoutTenantInput
+    notifications?: NotificationCreateNestedManyWithoutTenantInput
+    payments?: PaymentCreateNestedManyWithoutTenantInput
+    sessions?: SessionCreateNestedManyWithoutTenantInput
+    users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantUncheckedCreateWithoutStudentBalancesInput = {
+    id?: string
+    slug: string
+    name: string
+    plan?: $Enums.Plan
+    planExpiresAt?: Date | string | null
+    logoUrl?: string | null
+    themeColor?: string
+    phone?: string | null
+    region?: string | null
+    bio?: string | null
+    subjects?: TenantCreatesubjectsInput | string[]
+    isActive?: boolean
+    smsQuota?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: AssignmentUncheckedCreateNestedManyWithoutTenantInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTenantInput
+    exams?: ExamUncheckedCreateNestedManyWithoutTenantInput
+    groups?: GroupUncheckedCreateNestedManyWithoutTenantInput
+    messages?: MessageUncheckedCreateNestedManyWithoutTenantInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutTenantInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
+    users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantCreateOrConnectWithoutStudentBalancesInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutStudentBalancesInput, TenantUncheckedCreateWithoutStudentBalancesInput>
+  }
+
+  export type BalanceTransactionCreateWithoutBalanceInput = {
+    id?: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    relatedPaymentId?: string | null
+    status?: $Enums.TransactionStatus
+    createdAt?: Date | string
+    tenant: TenantCreateNestedOneWithoutBalanceTransactionsInput
+  }
+
+  export type BalanceTransactionUncheckedCreateWithoutBalanceInput = {
+    id?: string
+    tenantId: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    relatedPaymentId?: string | null
+    status?: $Enums.TransactionStatus
+    createdAt?: Date | string
+  }
+
+  export type BalanceTransactionCreateOrConnectWithoutBalanceInput = {
+    where: BalanceTransactionWhereUniqueInput
+    create: XOR<BalanceTransactionCreateWithoutBalanceInput, BalanceTransactionUncheckedCreateWithoutBalanceInput>
+  }
+
+  export type BalanceTransactionCreateManyBalanceInputEnvelope = {
+    data: BalanceTransactionCreateManyBalanceInput | BalanceTransactionCreateManyBalanceInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutStudentBalanceInput = {
+    update: XOR<UserUpdateWithoutStudentBalanceInput, UserUncheckedUpdateWithoutStudentBalanceInput>
+    create: XOR<UserCreateWithoutStudentBalanceInput, UserUncheckedCreateWithoutStudentBalanceInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutStudentBalanceInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutStudentBalanceInput, UserUncheckedUpdateWithoutStudentBalanceInput>
+  }
+
+  export type UserUpdateWithoutStudentBalanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    gradeLevel?: NullableStringFieldUpdateOperationsInput | string | null
+    parentName?: NullableStringFieldUpdateOperationsInput | string | null
+    parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pinHash?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    assignmentSubmissions?: AssignmentSubmissionUpdateManyWithoutStudentNestedInput
+    markedAttendances?: AttendanceUpdateManyWithoutMarkedByNestedInput
+    attendances?: AttendanceUpdateManyWithoutStudentNestedInput
+    authSessions?: AuthSessionUpdateManyWithoutUserNestedInput
+    examSubmissions?: ExamSubmissionUpdateManyWithoutStudentNestedInput
+    groupStudents?: GroupStudentUpdateManyWithoutStudentNestedInput
+    receivedMessages?: MessageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: MessageUpdateManyWithoutSenderNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    parentStudents?: ParentStudentUpdateManyWithoutParentNestedInput
+    childStudents?: ParentStudentUpdateManyWithoutStudentNestedInput
+    recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
+    payments?: PaymentUpdateManyWithoutStudentNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutStudentBalanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    gradeLevel?: NullableStringFieldUpdateOperationsInput | string | null
+    parentName?: NullableStringFieldUpdateOperationsInput | string | null
+    parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pinHash?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    assignmentSubmissions?: AssignmentSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+    markedAttendances?: AttendanceUncheckedUpdateManyWithoutMarkedByNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+    authSessions?: AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+    examSubmissions?: ExamSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+    groupStudents?: GroupStudentUncheckedUpdateManyWithoutStudentNestedInput
+    receivedMessages?: MessageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    parentStudents?: ParentStudentUncheckedUpdateManyWithoutParentNestedInput
+    childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
+    recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
+  }
+
+  export type UserUpsertWithoutParentBalanceInput = {
+    update: XOR<UserUpdateWithoutParentBalanceInput, UserUncheckedUpdateWithoutParentBalanceInput>
+    create: XOR<UserCreateWithoutParentBalanceInput, UserUncheckedCreateWithoutParentBalanceInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutParentBalanceInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutParentBalanceInput, UserUncheckedUpdateWithoutParentBalanceInput>
+  }
+
+  export type UserUpdateWithoutParentBalanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    gradeLevel?: NullableStringFieldUpdateOperationsInput | string | null
+    parentName?: NullableStringFieldUpdateOperationsInput | string | null
+    parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pinHash?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    assignmentSubmissions?: AssignmentSubmissionUpdateManyWithoutStudentNestedInput
+    markedAttendances?: AttendanceUpdateManyWithoutMarkedByNestedInput
+    attendances?: AttendanceUpdateManyWithoutStudentNestedInput
+    authSessions?: AuthSessionUpdateManyWithoutUserNestedInput
+    examSubmissions?: ExamSubmissionUpdateManyWithoutStudentNestedInput
+    groupStudents?: GroupStudentUpdateManyWithoutStudentNestedInput
+    receivedMessages?: MessageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: MessageUpdateManyWithoutSenderNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    parentStudents?: ParentStudentUpdateManyWithoutParentNestedInput
+    childStudents?: ParentStudentUpdateManyWithoutStudentNestedInput
+    recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
+    payments?: PaymentUpdateManyWithoutStudentNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutUsersNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutParentBalanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    gradeLevel?: NullableStringFieldUpdateOperationsInput | string | null
+    parentName?: NullableStringFieldUpdateOperationsInput | string | null
+    parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pinHash?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    assignmentSubmissions?: AssignmentSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+    markedAttendances?: AttendanceUncheckedUpdateManyWithoutMarkedByNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+    authSessions?: AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+    examSubmissions?: ExamSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+    groupStudents?: GroupStudentUncheckedUpdateManyWithoutStudentNestedInput
+    receivedMessages?: MessageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: MessageUncheckedUpdateManyWithoutSenderNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    parentStudents?: ParentStudentUncheckedUpdateManyWithoutParentNestedInput
+    childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
+    recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+  }
+
+  export type TenantUpsertWithoutStudentBalancesInput = {
+    update: XOR<TenantUpdateWithoutStudentBalancesInput, TenantUncheckedUpdateWithoutStudentBalancesInput>
+    create: XOR<TenantCreateWithoutStudentBalancesInput, TenantUncheckedCreateWithoutStudentBalancesInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutStudentBalancesInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutStudentBalancesInput, TenantUncheckedUpdateWithoutStudentBalancesInput>
+  }
+
+  export type TenantUpdateWithoutStudentBalancesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    plan?: EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+    planExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    subjects?: TenantUpdatesubjectsInput | string[]
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    smsQuota?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: AssignmentUpdateManyWithoutTenantNestedInput
+    attendances?: AttendanceUpdateManyWithoutTenantNestedInput
+    exams?: ExamUpdateManyWithoutTenantNestedInput
+    groups?: GroupUpdateManyWithoutTenantNestedInput
+    messages?: MessageUpdateManyWithoutTenantNestedInput
+    notifications?: NotificationUpdateManyWithoutTenantNestedInput
+    payments?: PaymentUpdateManyWithoutTenantNestedInput
+    sessions?: SessionUpdateManyWithoutTenantNestedInput
+    users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutStudentBalancesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    plan?: EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+    planExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    subjects?: TenantUpdatesubjectsInput | string[]
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    smsQuota?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: AssignmentUncheckedUpdateManyWithoutTenantNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTenantNestedInput
+    exams?: ExamUncheckedUpdateManyWithoutTenantNestedInput
+    groups?: GroupUncheckedUpdateManyWithoutTenantNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutTenantNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutTenantNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
+    users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+  }
+
+  export type BalanceTransactionUpsertWithWhereUniqueWithoutBalanceInput = {
+    where: BalanceTransactionWhereUniqueInput
+    update: XOR<BalanceTransactionUpdateWithoutBalanceInput, BalanceTransactionUncheckedUpdateWithoutBalanceInput>
+    create: XOR<BalanceTransactionCreateWithoutBalanceInput, BalanceTransactionUncheckedCreateWithoutBalanceInput>
+  }
+
+  export type BalanceTransactionUpdateWithWhereUniqueWithoutBalanceInput = {
+    where: BalanceTransactionWhereUniqueInput
+    data: XOR<BalanceTransactionUpdateWithoutBalanceInput, BalanceTransactionUncheckedUpdateWithoutBalanceInput>
+  }
+
+  export type BalanceTransactionUpdateManyWithWhereWithoutBalanceInput = {
+    where: BalanceTransactionScalarWhereInput
+    data: XOR<BalanceTransactionUpdateManyMutationInput, BalanceTransactionUncheckedUpdateManyWithoutBalanceInput>
+  }
+
+  export type StudentBalanceCreateWithoutTransactionsInput = {
+    id?: string
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    student: UserCreateNestedOneWithoutStudentBalanceInput
+    parent?: UserCreateNestedOneWithoutParentBalanceInput
+    tenant: TenantCreateNestedOneWithoutStudentBalancesInput
+  }
+
+  export type StudentBalanceUncheckedCreateWithoutTransactionsInput = {
+    id?: string
+    tenantId: string
+    studentId: string
+    parentId?: string | null
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StudentBalanceCreateOrConnectWithoutTransactionsInput = {
+    where: StudentBalanceWhereUniqueInput
+    create: XOR<StudentBalanceCreateWithoutTransactionsInput, StudentBalanceUncheckedCreateWithoutTransactionsInput>
+  }
+
+  export type TenantCreateWithoutBalanceTransactionsInput = {
+    id?: string
+    slug: string
+    name: string
+    plan?: $Enums.Plan
+    planExpiresAt?: Date | string | null
+    logoUrl?: string | null
+    themeColor?: string
+    phone?: string | null
+    region?: string | null
+    bio?: string | null
+    subjects?: TenantCreatesubjectsInput | string[]
+    isActive?: boolean
+    smsQuota?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: AssignmentCreateNestedManyWithoutTenantInput
+    attendances?: AttendanceCreateNestedManyWithoutTenantInput
+    exams?: ExamCreateNestedManyWithoutTenantInput
+    groups?: GroupCreateNestedManyWithoutTenantInput
+    messages?: MessageCreateNestedManyWithoutTenantInput
+    notifications?: NotificationCreateNestedManyWithoutTenantInput
+    payments?: PaymentCreateNestedManyWithoutTenantInput
+    sessions?: SessionCreateNestedManyWithoutTenantInput
+    users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantUncheckedCreateWithoutBalanceTransactionsInput = {
+    id?: string
+    slug: string
+    name: string
+    plan?: $Enums.Plan
+    planExpiresAt?: Date | string | null
+    logoUrl?: string | null
+    themeColor?: string
+    phone?: string | null
+    region?: string | null
+    bio?: string | null
+    subjects?: TenantCreatesubjectsInput | string[]
+    isActive?: boolean
+    smsQuota?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: AssignmentUncheckedCreateNestedManyWithoutTenantInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTenantInput
+    exams?: ExamUncheckedCreateNestedManyWithoutTenantInput
+    groups?: GroupUncheckedCreateNestedManyWithoutTenantInput
+    messages?: MessageUncheckedCreateNestedManyWithoutTenantInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutTenantInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
+    users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantCreateOrConnectWithoutBalanceTransactionsInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutBalanceTransactionsInput, TenantUncheckedCreateWithoutBalanceTransactionsInput>
+  }
+
+  export type StudentBalanceUpsertWithoutTransactionsInput = {
+    update: XOR<StudentBalanceUpdateWithoutTransactionsInput, StudentBalanceUncheckedUpdateWithoutTransactionsInput>
+    create: XOR<StudentBalanceCreateWithoutTransactionsInput, StudentBalanceUncheckedCreateWithoutTransactionsInput>
+    where?: StudentBalanceWhereInput
+  }
+
+  export type StudentBalanceUpdateToOneWithWhereWithoutTransactionsInput = {
+    where?: StudentBalanceWhereInput
+    data: XOR<StudentBalanceUpdateWithoutTransactionsInput, StudentBalanceUncheckedUpdateWithoutTransactionsInput>
+  }
+
+  export type StudentBalanceUpdateWithoutTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    student?: UserUpdateOneRequiredWithoutStudentBalanceNestedInput
+    parent?: UserUpdateOneWithoutParentBalanceNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutStudentBalancesNestedInput
+  }
+
+  export type StudentBalanceUncheckedUpdateWithoutTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    studentId?: StringFieldUpdateOperationsInput | string
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TenantUpsertWithoutBalanceTransactionsInput = {
+    update: XOR<TenantUpdateWithoutBalanceTransactionsInput, TenantUncheckedUpdateWithoutBalanceTransactionsInput>
+    create: XOR<TenantCreateWithoutBalanceTransactionsInput, TenantUncheckedCreateWithoutBalanceTransactionsInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutBalanceTransactionsInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutBalanceTransactionsInput, TenantUncheckedUpdateWithoutBalanceTransactionsInput>
+  }
+
+  export type TenantUpdateWithoutBalanceTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    plan?: EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+    planExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    subjects?: TenantUpdatesubjectsInput | string[]
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    smsQuota?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: AssignmentUpdateManyWithoutTenantNestedInput
+    attendances?: AttendanceUpdateManyWithoutTenantNestedInput
+    exams?: ExamUpdateManyWithoutTenantNestedInput
+    groups?: GroupUpdateManyWithoutTenantNestedInput
+    messages?: MessageUpdateManyWithoutTenantNestedInput
+    notifications?: NotificationUpdateManyWithoutTenantNestedInput
+    payments?: PaymentUpdateManyWithoutTenantNestedInput
+    sessions?: SessionUpdateManyWithoutTenantNestedInput
+    users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutBalanceTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    plan?: EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+    planExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    subjects?: TenantUpdatesubjectsInput | string[]
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    smsQuota?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: AssignmentUncheckedUpdateManyWithoutTenantNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTenantNestedInput
+    exams?: ExamUncheckedUpdateManyWithoutTenantNestedInput
+    groups?: GroupUncheckedUpdateManyWithoutTenantNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutTenantNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutTenantNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
+    users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type AssignmentCreateManyTenantInput = {
@@ -36987,6 +43834,9 @@ export namespace Prisma {
     paidAt?: Date | string | null
     recordedById?: string | null
     notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -37021,6 +43871,27 @@ export namespace Prisma {
     pinHash?: string | null
     email?: string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type StudentBalanceCreateManyTenantInput = {
+    id?: string
+    studentId: string
+    parentId?: string | null
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BalanceTransactionCreateManyTenantInput = {
+    id?: string
+    balanceId: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    relatedPaymentId?: string | null
+    status?: $Enums.TransactionStatus
+    createdAt?: Date | string
   }
 
   export type AssignmentUpdateWithoutTenantInput = {
@@ -37291,6 +44162,9 @@ export namespace Prisma {
     receiptUrl?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recordedBy?: UserUpdateOneWithoutRecordedPaymentsNestedInput
@@ -37311,6 +44185,9 @@ export namespace Prisma {
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     recordedById?: NullableStringFieldUpdateOperationsInput | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -37329,6 +44206,9 @@ export namespace Prisma {
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     recordedById?: NullableStringFieldUpdateOperationsInput | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -37406,6 +44286,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTenantInput = {
@@ -37437,6 +44319,8 @@ export namespace Prisma {
     childStudents?: ParentStudentUncheckedUpdateManyWithoutStudentNestedInput
     recordedPayments?: PaymentUncheckedUpdateManyWithoutRecordedByNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutStudentNestedInput
+    studentBalance?: StudentBalanceUncheckedUpdateManyWithoutStudentNestedInput
+    parentBalance?: StudentBalanceUncheckedUpdateManyWithoutParentNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutTenantInput = {
@@ -37455,6 +44339,71 @@ export namespace Prisma {
     pinHash?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type StudentBalanceUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    student?: UserUpdateOneRequiredWithoutStudentBalanceNestedInput
+    parent?: UserUpdateOneWithoutParentBalanceNestedInput
+    transactions?: BalanceTransactionUpdateManyWithoutBalanceNestedInput
+  }
+
+  export type StudentBalanceUncheckedUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    studentId?: StringFieldUpdateOperationsInput | string
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: BalanceTransactionUncheckedUpdateManyWithoutBalanceNestedInput
+  }
+
+  export type StudentBalanceUncheckedUpdateManyWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    studentId?: StringFieldUpdateOperationsInput | string
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BalanceTransactionUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balance?: StudentBalanceUpdateOneRequiredWithoutTransactionsNestedInput
+  }
+
+  export type BalanceTransactionUncheckedUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    balanceId?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BalanceTransactionUncheckedUpdateManyWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    balanceId?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AssignmentSubmissionCreateManyStudentInput = {
@@ -37587,6 +44536,9 @@ export namespace Prisma {
     receiptUrl?: string | null
     paidAt?: Date | string | null
     notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -37605,6 +44557,29 @@ export namespace Prisma {
     paidAt?: Date | string | null
     recordedById?: string | null
     notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StudentBalanceCreateManyStudentInput = {
+    id?: string
+    tenantId: string
+    parentId?: string | null
+    balance?: number
+    lastRechargedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StudentBalanceCreateManyParentInput = {
+    id?: string
+    tenantId: string
+    studentId: string
+    balance?: number
+    lastRechargedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -37969,6 +44944,9 @@ export namespace Prisma {
     receiptUrl?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     student?: UserUpdateOneRequiredWithoutPaymentsNestedInput
@@ -37989,6 +44967,9 @@ export namespace Prisma {
     receiptUrl?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -38007,6 +44988,9 @@ export namespace Prisma {
     receiptUrl?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -38023,6 +45007,9 @@ export namespace Prisma {
     receiptUrl?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recordedBy?: UserUpdateOneWithoutRecordedPaymentsNestedInput
@@ -38043,6 +45030,9 @@ export namespace Prisma {
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     recordedById?: NullableStringFieldUpdateOperationsInput | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -38061,6 +45051,73 @@ export namespace Prisma {
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     recordedById?: NullableStringFieldUpdateOperationsInput | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StudentBalanceUpdateWithoutStudentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    parent?: UserUpdateOneWithoutParentBalanceNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutStudentBalancesNestedInput
+    transactions?: BalanceTransactionUpdateManyWithoutBalanceNestedInput
+  }
+
+  export type StudentBalanceUncheckedUpdateWithoutStudentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: BalanceTransactionUncheckedUpdateManyWithoutBalanceNestedInput
+  }
+
+  export type StudentBalanceUncheckedUpdateManyWithoutStudentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StudentBalanceUpdateWithoutParentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    student?: UserUpdateOneRequiredWithoutStudentBalanceNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutStudentBalancesNestedInput
+    transactions?: BalanceTransactionUpdateManyWithoutBalanceNestedInput
+  }
+
+  export type StudentBalanceUncheckedUpdateWithoutParentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    studentId?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: BalanceTransactionUncheckedUpdateManyWithoutBalanceNestedInput
+  }
+
+  export type StudentBalanceUncheckedUpdateManyWithoutParentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    studentId?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    lastRechargedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -38511,6 +45568,50 @@ export namespace Prisma {
     gradedByAi?: BoolFieldUpdateOperationsInput | boolean
     submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BalanceTransactionCreateManyBalanceInput = {
+    id?: string
+    tenantId: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    relatedPaymentId?: string | null
+    status?: $Enums.TransactionStatus
+    createdAt?: Date | string
+  }
+
+  export type BalanceTransactionUpdateWithoutBalanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneRequiredWithoutBalanceTransactionsNestedInput
+  }
+
+  export type BalanceTransactionUncheckedUpdateWithoutBalanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BalanceTransactionUncheckedUpdateManyWithoutBalanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

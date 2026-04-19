@@ -239,6 +239,9 @@ exports.Prisma.PaymentScalarFieldEnum = {
   paidAt: 'paidAt',
   recordedById: 'recordedById',
   notes: 'notes',
+  paymentGateway: 'paymentGateway',
+  transactionId: 'transactionId',
+  teacherApiUsed: 'teacherApiUsed',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -355,6 +358,44 @@ exports.Prisma.ExamSubmissionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.TeacherSubscriptionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  subscriptionPlan: 'subscriptionPlan',
+  billingCycle: 'billingCycle',
+  amount: 'amount',
+  isActive: 'isActive',
+  nextBillingAt: 'nextBillingAt',
+  cancelledAt: 'cancelledAt',
+  kashierApiKey: 'kashierApiKey',
+  kashierMerId: 'kashierMerId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.StudentBalanceScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  studentId: 'studentId',
+  parentId: 'parentId',
+  balance: 'balance',
+  lastRechargedAt: 'lastRechargedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BalanceTransactionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  balanceId: 'balanceId',
+  type: 'type',
+  amount: 'amount',
+  reason: 'reason',
+  relatedPaymentId: 'relatedPaymentId',
+  status: 'status',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -450,6 +491,11 @@ exports.PaymentMethod = exports.$Enums.PaymentMethod = {
   CARD: 'CARD'
 };
 
+exports.PaymentGateway = exports.$Enums.PaymentGateway = {
+  KASHIER: 'KASHIER',
+  INTERNAL_BALANCE: 'INTERNAL_BALANCE'
+};
+
 exports.NotificationType = exports.$Enums.NotificationType = {
   ATTENDANCE_PRESENT: 'ATTENDANCE_PRESENT',
   ATTENDANCE_ABSENT: 'ATTENDANCE_ABSENT',
@@ -481,6 +527,29 @@ exports.QuestionType = exports.$Enums.QuestionType = {
   TRUE_FALSE: 'TRUE_FALSE'
 };
 
+exports.SubscriptionPlan = exports.$Enums.SubscriptionPlan = {
+  STARTER: 'STARTER',
+  PROFESSIONAL: 'PROFESSIONAL',
+  ENTERPRISE: 'ENTERPRISE'
+};
+
+exports.BillingCycle = exports.$Enums.BillingCycle = {
+  MONTHLY: 'MONTHLY',
+  YEARLY: 'YEARLY'
+};
+
+exports.TransactionType = exports.$Enums.TransactionType = {
+  CREDIT: 'CREDIT',
+  DEBIT: 'DEBIT'
+};
+
+exports.TransactionStatus = exports.$Enums.TransactionStatus = {
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  REFUNDED: 'REFUNDED'
+};
+
 exports.Prisma.ModelName = {
   Tenant: 'Tenant',
   User: 'User',
@@ -498,7 +567,10 @@ exports.Prisma.ModelName = {
   Message: 'Message',
   Exam: 'Exam',
   ExamQuestion: 'ExamQuestion',
-  ExamSubmission: 'ExamSubmission'
+  ExamSubmission: 'ExamSubmission',
+  TeacherSubscription: 'TeacherSubscription',
+  StudentBalance: 'StudentBalance',
+  BalanceTransaction: 'BalanceTransaction'
 };
 
 /**
