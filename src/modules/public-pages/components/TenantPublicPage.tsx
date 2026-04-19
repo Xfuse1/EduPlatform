@@ -7,6 +7,7 @@ type TenantPublicPageProps = {
   teacher: {
     id: string;
     name: string;
+    slug: string;
     logoUrl: string | null;
     themeColor: string;
     region: string | null;

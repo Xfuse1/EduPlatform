@@ -73,6 +73,7 @@ const findTenantByHost = cache(async (host: string): Promise<ResolvedTenant> => 
   const subdomain = extractSubdomain(host)
     .replace(":3000", "")
     .replace(":3001", "");
+  console.log("🔍 host:", host, "→ subdomain:", subdomain);
 
   try {
     if (!subdomain || SPECIAL_SUBDOMAINS.has(subdomain) || subdomain.includes("vercel")) {
