@@ -14,6 +14,7 @@ import { formatCapacity, formatCurrency, formatTimeRange12Hour, toArabicDigits }
 type TeacherLandingProps = {
   teacher: {
     name: string;
+    slug: string;
     logoUrl: string | null;
     themeColor: string;
     region: string | null;
@@ -107,10 +108,22 @@ export function TeacherLanding({
                 )}
               </div>
               <p className="mt-6 text-center text-sm leading-7 text-white/85">استعرض المجموعات المفتوحة وحدد أفضل موعد للانضمام مباشرة.</p>
-              <Link className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-primary transition hover:bg-slate-100" href="/register">
-                سجّل ابنك الآن
-                <ArrowLeft className="h-4 w-4" />
-              </Link>
+              <div className="mt-6 flex flex-col gap-3">
+                <Link
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-primary transition hover:bg-slate-100"
+                  href="/register"
+                >
+                  أنا طالب — سجّل الآن
+                  <ArrowLeft className="h-4 w-4" />
+                </Link>
+                <Link
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/20 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/30"
+                  href="/parent-register"
+                >
+                  أنا ولي أمر — سجّل ابنك
+                  <ArrowLeft className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>

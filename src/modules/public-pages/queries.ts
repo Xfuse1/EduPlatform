@@ -3,7 +3,7 @@ import { cache } from "react";
 import { db } from "@/lib/db";
 import { parseStoredGroupSchedule } from "@/modules/groups/schedule";
 
-export const getTeacherPublicProfile = cache(async (tenantId: string) => {
+export const getTeacherPublicProfile = async (tenantId: string) => {
   try {
     const tenant = await db.tenant.findFirst({
       where: {
@@ -13,6 +13,7 @@ export const getTeacherPublicProfile = cache(async (tenantId: string) => {
       select: {
         id: true,
         name: true,
+        slug: true,
         logoUrl: true,
         themeColor: true,
         region: true,
@@ -29,7 +30,7 @@ export const getTeacherPublicProfile = cache(async (tenantId: string) => {
   }
 
   return null;
-});
+};
 
 export const getOpenGroups = cache(async (tenantId: string) => {
   try {
