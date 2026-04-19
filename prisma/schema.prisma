@@ -72,7 +72,7 @@ model User {
   recordedPayments      Payment[]              @relation("RecordedPayments")
   payments              Payment[]              @relation("StudentPayments")
   tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  studentBalance        StudentBalance?        @relation("StudentBalance")
+  studentBalance        StudentBalance[]       @relation("StudentBalance")
   parentBalance         StudentBalance[]       @relation("ParentBalance")
 
   @@unique([tenantId, phone])
