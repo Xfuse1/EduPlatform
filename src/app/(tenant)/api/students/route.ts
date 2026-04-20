@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server'
-import { PaymentStatus } from '@prisma/client'
+import { PaymentStatus } from '@/generated/client'
 import { ZodError } from 'zod'
 
 import { requireAuth, UnauthorizedError } from '@/lib/auth'

@@ -2,7 +2,7 @@
 import { db } from '@/lib/db'
 import { requireTenant } from '@/lib/tenant'
 import { requireAuth } from '@/lib/auth'
-import { SubscriptionPlan, BillingCycle } from '@prisma/client'
+import { SubscriptionPlan, BillingCycle } from '@/generated/client'
 
 // ── Subscription Plans Configuration ───────────────────────────────────────
 

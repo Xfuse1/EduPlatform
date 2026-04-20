@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Check, CheckCircle2, CircleAlert, Loader2, RefreshCw } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createTeacherSignup, checkSubdomainAvailability } from "@/modules/marketing/actions";
 
@@ -125,7 +125,26 @@ function mapSignupOtpError(error: unknown) {
   }
 }
 
-export default function TeacherSignupPage() {
+function SignupPageFallback() {
+  return (
+    <main
+      className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.22),_transparent_30%),linear-gradient(145deg,_#0f2740_0%,_#1A5276_45%,_#dbeafe_120%)] px-4 py-8 sm:px-6"
+      dir="rtl"
+    >
+      <Card className="w-full max-w-[500px] rounded-[28px] border-white/10 bg-slate-950/80 text-white shadow-[0_24px_80px_rgba(15,23,42,0.35)]">
+        <CardContent className="flex min-h-[360px] flex-col items-center justify-center gap-4 p-6 text-center sm:p-8">
+          <Loader2 className="h-10 w-10 animate-spin text-sky-300" />
+          <div className="space-y-2">
+            <h1 className="text-xl font-extrabold">جارٍ تجهيز صفحة التسجيل</h1>
+            <p className="text-sm leading-7 text-slate-300">لحظات وننقلك إلى خطوات إنشاء الحساب</p>
+          </div>
+        </CardContent>
+      </Card>
+    </main>
+  );
+}
+
+function TeacherSignupPageContent() {
   const searchParams = useSearchParams();
   const [isReady, setIsReady] = useState(false);
   const [currentStep, setCurrentStep] = useState<SignupStep>(1);
@@ -733,5 +752,13 @@ export default function TeacherSignupPage() {
       </Card>
       <div aria-hidden="true" id="recaptcha-container-signup" />
     </main>
+  );
+}
+
+export default function TeacherSignupPage() {
+  return (
+    <Suspense fallback={<SignupPageFallback />}>
+      <TeacherSignupPageContent />
+    </Suspense>
   );
 }

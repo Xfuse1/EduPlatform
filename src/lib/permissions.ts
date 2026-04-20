@@ -1,4 +1,4 @@
-import type { UserRole } from '@prisma/client'
+import type { UserRole } from '@/generated/client'
 
 export class PermissionError extends Error {
   constructor(message = 'ليس لديك صلاحية') {

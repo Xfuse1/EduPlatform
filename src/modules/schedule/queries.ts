@@ -1,8 +1,8 @@
-﻿import {
+import {
   AttendanceStatus,
   EnrollmentStatus,
   UserRole,
-} from '@prisma/client'
+} from '@/generated/client'
 
 import type { DayOfWeek } from '@/types'
 import { db } from '@/lib/db'
