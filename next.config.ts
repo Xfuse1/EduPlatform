@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "2mb",
     },
   },
+  turbopack: {
+    root: process.cwd(),
+  },
   outputFileTracingIncludes: {
     "/*": ["./src/app/(tenant)/**/*"],
   },
