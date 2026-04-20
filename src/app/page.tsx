@@ -13,6 +13,10 @@ const IGNORED_SUBDOMAINS = new Set(["www", "app", "api", "localhost", ""]);
 function extractSubdomain(host: string): string {
   const hostname = host.split(":")[0] ?? "";
 
+  if (hostname.endsWith(".vercel.app")) {
+    return "";
+  }
+
   if (hostname.endsWith(".localhost")) {
     return hostname.replace(".localhost", "");
   }
