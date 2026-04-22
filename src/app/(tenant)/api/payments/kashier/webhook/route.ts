@@ -6,7 +6,7 @@ import { db } from '@/lib/db'
 import { logFinancialEvent } from '@/lib/financial-audit'
 import { creditBalanceForTenant } from '@/modules/payments/providers/balance'
 import { verifyKashierWebhookSignature } from '@/modules/payments/providers/kashier'
-import { createTeacherSubscriptionForTenant } from '@/modules/payments/providers/subscription'
+import { activateOrRenewSubscriptionForTenant } from '@/modules/payments/providers/subscription'
 import { enqueueTeacherTransferForPayment } from '@/modules/payments/providers/transfer'
 import { kashierWebhookSchema } from '@/modules/payments/validations'
 
@@ -70,18 +70,21 @@ export async function POST(req: NextRequest) {
         updatedPayment.id,
       )
     } else if (orderId.startsWith('SUBK-') || notes.startsWith('SUBSCRIPTION:')) {
-      const parts = notes.split(':')
-      const plan = parts[1] as 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE' | undefined
-      const cycle = parts[2] as 'MONTHLY' | 'YEARLY' | undefined
+      // notes may include appended transaction info on new lines.
+      // Keep only first line to parse SUBSCRIPTION:<PLAN>:<CYCLE>.
+      const subscriptionMeta = notes.split('\n')[0]?.trim() ?? ''
+      const parts = subscriptionMeta.split(':')
+      const planRaw = (parts[1] ?? '').trim()
+      const cycleRaw = (parts[2] ?? '').trim()
+      const validPlans = new Set(['STARTER', 'PROFESSIONAL', 'ENTERPRISE'])
+      const validCycles = new Set(['MONTHLY', 'YEARLY'])
 
-      if (plan && cycle) {
-        const existingSubscription = await db.teacherSubscription.findUnique({
-          where: { tenantId: updatedPayment.tenantId },
-        })
-
-        if (!existingSubscription) {
-          await createTeacherSubscriptionForTenant(updatedPayment.tenantId, plan, cycle)
-        }
+      if (validPlans.has(planRaw) && validCycles.has(cycleRaw)) {
+        await activateOrRenewSubscriptionForTenant(
+          updatedPayment.tenantId,
+          planRaw as 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE',
+          cycleRaw as 'MONTHLY' | 'YEARLY',
+        )
       }
     } else {
       const teacherApi = await db.teacherSubscription.findUnique({

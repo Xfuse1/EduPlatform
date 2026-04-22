@@ -58,13 +58,32 @@ export const SUBSCRIPTION_PLANS: Record<
 
 export type SubscriptionLimits = (typeof SUBSCRIPTION_PLANS)[SubscriptionPlanType]['limits']
 
+function calculateNextBillingAt(baseDate: Date, cycle: BillingCycleType) {
+  const next = new Date(baseDate)
+  if (cycle === 'MONTHLY') next.setMonth(next.getMonth() + 1)
+  else next.setFullYear(next.getFullYear() + 1)
+  return next
+}
+
 export async function getTeacherSubscription() {
   const tenant = await requireTenant()
   await requireAuth()
 
-  return db.teacherSubscription.findUnique({
+  const subscription = await db.teacherSubscription.findUnique({
     where: { tenantId: tenant.id },
   })
+
+  if (!subscription) return null
+
+  // Auto-expire when billing date has passed.
+  if (subscription.isActive && new Date() > subscription.nextBillingAt) {
+    return db.teacherSubscription.update({
+      where: { id: subscription.id },
+      data: { isActive: false },
+    })
+  }
+
+  return subscription
 }
 
 export async function createTeacherSubscription(
@@ -93,9 +112,7 @@ export async function createTeacherSubscriptionForTenant(
   const config = SUBSCRIPTION_PLANS[plan]
   const amount = cycle === 'MONTHLY' ? config.monthlyPrice : config.yearlyPrice
 
-  const nextBillingAt = new Date()
-  if (cycle === 'MONTHLY') nextBillingAt.setMonth(nextBillingAt.getMonth() + 1)
-  else nextBillingAt.setFullYear(nextBillingAt.getFullYear() + 1)
+  const nextBillingAt = calculateNextBillingAt(new Date(), cycle)
 
   const subscription = await db.teacherSubscription.create({
     data: {
@@ -116,6 +133,61 @@ export async function createTeacherSubscriptionForTenant(
     entityId: subscription.id,
     message: `Subscription created: ${plan}/${cycle}`,
     metadata: { amount },
+  })
+
+  return subscription
+}
+
+export async function activateOrRenewSubscriptionForTenant(
+  tenantId: string,
+  plan: SubscriptionPlanType,
+  cycle: BillingCycleType,
+  actorId?: string,
+) {
+  const existing = await db.teacherSubscription.findUnique({
+    where: { tenantId },
+  })
+
+  const config = SUBSCRIPTION_PLANS[plan]
+  const amount = cycle === 'MONTHLY' ? config.monthlyPrice : config.yearlyPrice
+  const now = new Date()
+
+  // If renewal happens before expiry, extend from current nextBillingAt.
+  const baseDate =
+    existing?.nextBillingAt && existing.nextBillingAt > now ? existing.nextBillingAt : now
+  const nextBillingAt = calculateNextBillingAt(baseDate, cycle)
+
+  const subscription = existing
+    ? await db.teacherSubscription.update({
+        where: { id: existing.id },
+        data: {
+          subscriptionPlan: plan,
+          billingCycle: cycle,
+          amount,
+          isActive: true,
+          cancelledAt: null,
+          nextBillingAt,
+        },
+      })
+    : await db.teacherSubscription.create({
+        data: {
+          tenantId,
+          subscriptionPlan: plan,
+          billingCycle: cycle,
+          amount,
+          isActive: true,
+          nextBillingAt,
+        },
+      })
+
+  await logFinancialEvent({
+    tenantId,
+    actorId: actorId ?? null,
+    eventType: 'SUBSCRIPTION_UPDATED',
+    entityType: 'SUBSCRIPTION',
+    entityId: subscription.id,
+    message: existing ? `Subscription renewed: ${plan}/${cycle}` : `Subscription created: ${plan}/${cycle}`,
+    metadata: { amount, nextBillingAt: nextBillingAt.toISOString() },
   })
 
   return subscription
