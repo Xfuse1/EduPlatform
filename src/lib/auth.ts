@@ -207,3 +207,9 @@ export async function getCurrentSession() {
     return null;
   }
 }
+
+export async function validateRequest() {
+  const user = await getCurrentUser();
+  const session = await getCurrentSession();
+  return { user, session };
+}

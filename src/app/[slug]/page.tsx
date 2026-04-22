@@ -1,10 +1,10 @@
 export const dynamic = "force-dynamic";
 
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { getTenantBySlug } from "@/lib/tenant";
 import TenantPublicPage from "@/modules/public-pages/components/TenantPublicPage";
-import { getOpenGroups, getTeacherPublicProfile } from "@/modules/public-pages/queries";
+import { getPublicGroups, getPublicTenantProfile } from "@/modules/public-pages/queries";
 
 export default async function TenantSlugPage({
   params,
@@ -27,8 +27,8 @@ export default async function TenantSlugPage({
   }
 
   const [teacher, groups] = await Promise.all([
-    getTeacherPublicProfile(tenant.id),
-    getOpenGroups(tenant.id),
+    getPublicTenantProfile(tenant.id),
+    getPublicGroups(tenant.id),
   ]);
 
   if (!teacher) {

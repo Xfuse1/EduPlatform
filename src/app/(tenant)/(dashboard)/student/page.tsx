@@ -7,7 +7,7 @@ import { requireTenant } from "@/lib/tenant";
 import { getGradeLevelKey } from "@/lib/grade-levels";
 import { StudentDashboard } from "@/modules/dashboard/components/StudentDashboard";
 import { getStudentDashboardData } from "@/modules/dashboard/queries";
-import { getOpenGroups } from "@/modules/public-pages/queries";
+import { getPublicGroups } from "@/modules/public-pages/queries";
 
 export default async function StudentDashboardPage() {
   const tenant = await requireTenant();
@@ -19,7 +19,7 @@ export default async function StudentDashboardPage() {
 
   const [data, allGroups] = await Promise.all([
     getStudentDashboardData(tenant.id, user.id),
-    getOpenGroups(tenant.id),
+    getPublicGroups(tenant.id),
   ]);
 
   const studentGradeLevelKey = getGradeLevelKey(data.profile?.student?.gradeLevel ?? "");

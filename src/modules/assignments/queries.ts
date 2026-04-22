@@ -32,8 +32,6 @@ export const getAssignmentsByGroup = async (tenantId: string, groupId?: string) 
   }
 };
 
-export const getAssignments = getAssignmentsByGroup;
-
 export const getSubmissionsByAssignment = cache(async (assignmentId: string) => {
   try {
     return await db.assignment.findUnique({
@@ -52,8 +50,6 @@ export const getSubmissionsByAssignment = cache(async (assignmentId: string) => 
     return null;
   }
 });
-
-export const getAssignmentWithSubmissions = getSubmissionsByAssignment;
 
 export const getAssignmentsByStudent = cache(async (studentId: string) => {
   try {
@@ -96,8 +92,6 @@ export const getAssignmentsByStudent = cache(async (studentId: string) => {
     return [];
   }
 });
-
-export const getStudentAssignments = getAssignmentsByStudent;
 
 export const getAssignmentsByParent = cache(async (tenantId: string, parentId: string) => {
   try {

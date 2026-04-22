@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-console.log("Loading /api/ai-grade module...");
 // const pdfParse = require("pdf-parse/lib/pdf-parse.js");
 // const mammoth = require("mammoth");
 

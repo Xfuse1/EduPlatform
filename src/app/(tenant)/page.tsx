@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getTenantBySlug } from "@/lib/tenant";
 import { TeacherLanding } from "@/modules/public-pages/components/TeacherLanding";
-import { getOpenGroups, getTeacherPublicProfile } from "@/modules/public-pages/queries";
+import { getPublicGroups, getPublicTenantProfile } from "@/modules/public-pages/queries";
 
 export default async function TenantPublicPage() {
   const headerStore = await headers();
@@ -18,8 +18,8 @@ export default async function TenantPublicPage() {
   }
 
   const [teacher, groups, user] = await Promise.all([
-    getTeacherPublicProfile(tenant.id),
-    getOpenGroups(tenant.id),
+    getPublicTenantProfile(tenant.id),
+    getPublicGroups(tenant.id),
     getCurrentUser(),
   ]);
 

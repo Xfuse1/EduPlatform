@@ -32,11 +32,14 @@ export function AppShell({
       { href: "/teacher/students", label: "الطلاب" },
       { href: "/attendance", label: "الحضور" },
       { href: "/payments", label: "المصاريف" },
+      { href: "/payments/subscription", label: "الاشتراك" },
+      { href: "/payments/transfers", label: "التحويلات" },
       { href: "/messages", label: "الرسائل" },
     ],
     student: [
       { href: "/student", label: "الرئيسية" },
       { href: "/student/schedule", label: "جدولي" },
+      { href: "/payments/wallet", label: "المحفظة" },
       { href: "/messages", label: "الرسائل" },
     ],
     parent: [
@@ -44,6 +47,7 @@ export function AppShell({
       { href: "/parent/children", label: "أبنائي" },
       { href: "/parent/assignments", label: "الواجبات" },
       { href: "/parent/exams", label: "الامتحانات" },
+      { href: "/payments/wallet", label: "المحفظة" },
     ],
   } as const;
 
@@ -80,3 +84,4 @@ export function AppShell({
     </div>
   );
 }
+

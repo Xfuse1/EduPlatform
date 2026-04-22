@@ -1,4 +1,4 @@
-import { cache } from "react";
+﻿import { cache } from "react";
 
 import { db } from "@/lib/db";
 
@@ -302,3 +302,48 @@ export const getPaymentStudentOptions = cache(async (tenantId: string) => {
     },
   });
 });
+
+export const getStudentWallet = cache(async (tenantId: string, studentId: string) => {
+  const parentLink = await db.parentStudent.findFirst({
+    where: { studentId },
+    select: { parentId: true },
+  })
+
+  const walletOwnerId = parentLink?.parentId ?? studentId
+
+  const wallet = await db.studentBalance.findUnique({
+    where: {
+      tenantId_studentId: {
+        tenantId,
+        studentId: walletOwnerId,
+      },
+    },
+  })
+
+  return {
+    ownerType: parentLink ? 'PARENT' : 'STUDENT',
+    ownerId: walletOwnerId,
+    balance: wallet?.balance ?? 0,
+    updatedAt: wallet?.updatedAt ?? null,
+  }
+})
+
+export const getTeacherTransfers = cache(async (tenantId: string, limit: number = 50) => {
+  return db.teacherTransfer.findMany({
+    where: { tenantId },
+    include: {
+      payment: {
+        select: {
+          id: true,
+          amount: true,
+          studentId: true,
+          month: true,
+          status: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+  })
+})
+

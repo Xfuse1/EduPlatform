@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
 import { StudentAssignments } from "@/modules/dashboard/components/StudentAssignments";
-import { getStudentAssignments } from "@/modules/assignments/queries";
+import { getAssignmentsByStudent } from "@/modules/assignments/queries";
 
 export default async function StudentAssignmentsPage() {
   const tenant = await requireTenant();
@@ -14,7 +14,7 @@ export default async function StudentAssignmentsPage() {
     redirect(user.role === "PARENT" ? "/parent" : "/teacher");
   }
 
-  const assignments = await getStudentAssignments(user.id);
+  const assignments = await getAssignmentsByStudent(user.id);
 
   return (
     <div className="space-y-6">

@@ -1,171 +1,177 @@
-'use server'
-import { db } from '@/lib/db'
-import { requireTenant } from '@/lib/tenant'
+﻿import { db } from '@/lib/db'
+import { logFinancialEvent } from '@/lib/financial-audit'
+import { decryptKashierKey, encryptKashierKey } from '@/lib/encryption'
 import { requireAuth } from '@/lib/auth'
-import { SubscriptionPlan, BillingCycle } from '@/generated/client'
+import { requireTenant } from '@/lib/tenant'
 
-// ── Subscription Plans Configuration ───────────────────────────────────────
+export type SubscriptionPlanType = 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE'
+export type BillingCycleType = 'MONTHLY' | 'YEARLY'
 
-export const SUBSCRIPTION_PLANS = {
+export const SUBSCRIPTION_PLANS: Record<
+  SubscriptionPlanType,
+  {
+    name: string
+    monthlyPrice: number
+    yearlyPrice: number
+    limits: {
+      students: number
+      groups: number
+      sessions: number
+      storage: number
+    }
+  }
+> = {
   STARTER: {
-    name: 'خطة البداية',
-    monthlyPrice: 20000, // 200 جنيه
-    yearlyPrice: 200000, // 2000 جنيه
+    name: '??? ???????',
+    monthlyPrice: 200,
+    yearlyPrice: 2000,
     limits: {
       students: 20,
       groups: 2,
       sessions: 100,
-      storage: 100, // MB
+      storage: 100,
     },
   },
   PROFESSIONAL: {
-    name: 'خطة احترافية',
-    monthlyPrice: 50000, // 500 جنيه
-    yearlyPrice: 500000, // 5000 جنيه
+    name: '????? ??????????',
+    monthlyPrice: 500,
+    yearlyPrice: 5000,
     limits: {
       students: 100,
       groups: 10,
       sessions: 1000,
-      storage: 1000, // MB
+      storage: 1000,
     },
   },
   ENTERPRISE: {
-    name: 'خطة المؤسسات',
-    monthlyPrice: 0, // حسب الطلب
+    name: '??? ????????',
+    monthlyPrice: 0,
     yearlyPrice: 0,
     limits: {
-      students: Infinity,
-      groups: Infinity,
-      sessions: Infinity,
-      storage: Infinity,
+      students: Number.MAX_SAFE_INTEGER,
+      groups: Number.MAX_SAFE_INTEGER,
+      sessions: Number.MAX_SAFE_INTEGER,
+      storage: Number.MAX_SAFE_INTEGER,
     },
   },
-} as const
+}
 
-export type SubscriptionLimits = typeof SUBSCRIPTION_PLANS.STARTER.limits
+export type SubscriptionLimits = (typeof SUBSCRIPTION_PLANS)[SubscriptionPlanType]['limits']
 
-/**
- * الحصول على معلومات اشتراك المعلم الحالية
- */
 export async function getTeacherSubscription() {
   const tenant = await requireTenant()
   await requireAuth()
 
-  const subscription = await db.teacherSubscription.findUnique({
+  return db.teacherSubscription.findUnique({
     where: { tenantId: tenant.id },
   })
-
-  if (!subscription) {
-    throw new Error('المعلم لم ينشئ اشتراك بعد')
-  }
-
-  return subscription
 }
 
-/**
- * إنشاء اشتراك جديد للمعلم
- * يُستدعى بعد الدفع الناجح عبر Kashier
- */
 export async function createTeacherSubscription(
-  plan: SubscriptionPlan,
-  cycle: BillingCycle,
+  plan: SubscriptionPlanType,
+  cycle: BillingCycleType,
 ) {
   const tenant = await requireTenant()
-  await requireAuth()
+  const actor = await requireAuth()
+  return createTeacherSubscriptionForTenant(tenant.id, plan, cycle, actor.id)
+}
 
-  // تحقق من عدم وجود اشتراك موجود
+export async function createTeacherSubscriptionForTenant(
+  tenantId: string,
+  plan: SubscriptionPlanType,
+  cycle: BillingCycleType,
+  actorId?: string,
+) {
   const existing = await db.teacherSubscription.findUnique({
-    where: { tenantId: tenant.id },
+    where: { tenantId },
   })
 
   if (existing) {
-    throw new Error('المعلم لديه اشتراك موجود بالفعل')
+    throw new Error('?????? ?????? ????? ??????')
   }
 
-  const planConfig = SUBSCRIPTION_PLANS[plan]
-  const amount = cycle === 'MONTHLY' ? planConfig.monthlyPrice : planConfig.yearlyPrice
+  const config = SUBSCRIPTION_PLANS[plan]
+  const amount = cycle === 'MONTHLY' ? config.monthlyPrice : config.yearlyPrice
 
-  // حساب تاريخ الدفع التالي
   const nextBillingAt = new Date()
-  if (cycle === 'MONTHLY') {
-    nextBillingAt.setMonth(nextBillingAt.getMonth() + 1)
-  } else {
-    nextBillingAt.setFullYear(nextBillingAt.getFullYear() + 1)
-  }
+  if (cycle === 'MONTHLY') nextBillingAt.setMonth(nextBillingAt.getMonth() + 1)
+  else nextBillingAt.setFullYear(nextBillingAt.getFullYear() + 1)
 
   const subscription = await db.teacherSubscription.create({
     data: {
-      tenantId: tenant.id,
+      tenantId,
       subscriptionPlan: plan,
       billingCycle: cycle,
       amount,
-      nextBillingAt,
       isActive: true,
+      nextBillingAt,
     },
+  })
+
+  await logFinancialEvent({
+    tenantId,
+    actorId: actorId ?? null,
+    eventType: 'SUBSCRIPTION_UPDATED',
+    entityType: 'SUBSCRIPTION',
+    entityId: subscription.id,
+    message: `Subscription created: ${plan}/${cycle}`,
+    metadata: { amount },
   })
 
   return subscription
 }
 
-/**
- * تحديث خطة الاشتراك
- */
 export async function updateSubscriptionPlan(
-  newPlan: SubscriptionPlan,
-  newCycle: BillingCycle,
+  newPlan: SubscriptionPlanType,
+  newCycle: BillingCycleType,
 ) {
   const tenant = await requireTenant()
-  await requireAuth()
+  const actor = await requireAuth()
 
   const subscription = await db.teacherSubscription.findUnique({
     where: { tenantId: tenant.id },
   })
 
   if (!subscription) {
-    throw new Error('المعلم لا يملك اشتراك')
+    throw new Error('?? ???? ?????? ???????')
   }
 
-  const planConfig = SUBSCRIPTION_PLANS[newPlan]
-  const newAmount = newCycle === 'MONTHLY' ? planConfig.monthlyPrice : planConfig.yearlyPrice
+  const config = SUBSCRIPTION_PLANS[newPlan]
+  const amount = newCycle === 'MONTHLY' ? config.monthlyPrice : config.yearlyPrice
 
-  // حساب التاريخ التالي
   const nextBillingAt = new Date()
-  if (newCycle === 'MONTHLY') {
-    nextBillingAt.setMonth(nextBillingAt.getMonth() + 1)
-  } else {
-    nextBillingAt.setFullYear(nextBillingAt.getFullYear() + 1)
-  }
+  if (newCycle === 'MONTHLY') nextBillingAt.setMonth(nextBillingAt.getMonth() + 1)
+  else nextBillingAt.setFullYear(nextBillingAt.getFullYear() + 1)
 
   const updated = await db.teacherSubscription.update({
     where: { id: subscription.id },
     data: {
       subscriptionPlan: newPlan,
       billingCycle: newCycle,
-      amount: newAmount,
+      amount,
       nextBillingAt,
+      isActive: true,
     },
+  })
+
+  await logFinancialEvent({
+    tenantId: tenant.id,
+    actorId: actor.id,
+    eventType: 'SUBSCRIPTION_UPDATED',
+    entityType: 'SUBSCRIPTION',
+    entityId: updated.id,
+    message: `Subscription updated: ${newPlan}/${newCycle}`,
+    metadata: { amount },
   })
 
   return updated
 }
 
-/**
- * التحقق من أن المعلم له اشتراك نشط وصالح
- */
 export async function verifyActiveSubscription() {
-  const tenant = await requireTenant()
+  const subscription = await getTeacherSubscription()
+  if (!subscription || !subscription.isActive) return false
 
-  const subscription = await db.teacherSubscription.findUnique({
-    where: { tenantId: tenant.id },
-  })
-
-  if (!subscription || !subscription.isActive) {
-    return false
-  }
-
-  // التحقق من عدم انتهاء الاشتراك
   if (new Date() > subscription.nextBillingAt) {
-    // الاشتراك انتهى — أوقفه
     await db.teacherSubscription.update({
       where: { id: subscription.id },
       data: { isActive: false },
@@ -176,42 +182,38 @@ export async function verifyActiveSubscription() {
   return true
 }
 
-/**
- * الحصول على حدود الاستخدام حسب الخطة
- */
 export async function getSubscriptionLimits(): Promise<SubscriptionLimits> {
   const subscription = await getTeacherSubscription()
-  return SUBSCRIPTION_PLANS[subscription.subscriptionPlan].limits
+  if (!subscription || !subscription.isActive) {
+    return SUBSCRIPTION_PLANS.STARTER.limits
+  }
+
+  return SUBSCRIPTION_PLANS[subscription.subscriptionPlan as SubscriptionPlanType].limits
 }
 
-/**
- * التحقق من عدم تجاوز الحد الأقصى للطلاب
- */
 export async function checkStudentLimit(currentCount: number): Promise<boolean> {
   const limits = await getSubscriptionLimits()
   return currentCount < limits.students
 }
 
-/**
- * التحقق من عدم تجاوز الحد الأقصى للمجموعات
- */
 export async function checkGroupLimit(currentCount: number): Promise<boolean> {
   const limits = await getSubscriptionLimits()
   return currentCount < limits.groups
 }
 
-/**
- * إضافة Kashier API الخاص بالمعلم (مشفر)
- */
-export async function addKashierApiCredentials(
-  kashierApiKey: string,
-  kashierMerId: string,
-) {
-  const subscription = await getTeacherSubscription()
+export async function addKashierApiCredentials(kashierApiKey: string, kashierMerId: string) {
+  const tenant = await requireTenant()
+  const actor = await requireAuth()
 
-  // TODO: تشفير المفتاح قبل الحفظ
-  // استخدم bcrypt أو libsodium
-  const encrypted = kashierApiKey // placeholder
+  const subscription = await db.teacherSubscription.findUnique({
+    where: { tenantId: tenant.id },
+  })
+
+  if (!subscription) {
+    throw new Error('?? ???? ?????? ??? ??????')
+  }
+
+  const encrypted = encryptKashierKey(kashierApiKey)
 
   const updated = await db.teacherSubscription.update({
     where: { id: subscription.id },
@@ -221,46 +223,58 @@ export async function addKashierApiCredentials(
     },
   })
 
-  return { success: true, message: 'تم حفظ بيانات Kashier بنجاح' }
-}
-
-/**
- * الحصول على Kashier API (مفكك التشفير)
- * يُستخدم فقط للتحويل التلقائي
- */
-export async function getKashierApiCredentials() {
-  const subscription = await getTeacherSubscription()
-
-  if (!subscription.kashierApiKey || !subscription.kashierMerId) {
-    throw new Error('لم تضف بيانات Kashier API بعد')
-  }
-
-  // TODO: فك تشفير المفتاح
-  const decrypted = subscription.kashierApiKey // placeholder
+  await logFinancialEvent({
+    tenantId: tenant.id,
+    actorId: actor.id,
+    eventType: 'SUBSCRIPTION_UPDATED',
+    entityType: 'SUBSCRIPTION',
+    entityId: updated.id,
+    message: 'Teacher Kashier credentials updated',
+    metadata: { hasApi: true },
+  })
 
   return {
-    apiKey: decrypted,
+    success: true,
+    hasApi: true,
+  }
+}
+
+export async function getKashierApiCredentialsByTenantId(tenantId: string) {
+  const subscription = await db.teacherSubscription.findUnique({
+    where: { tenantId },
+  })
+
+  if (!subscription?.kashierApiKey || !subscription.kashierMerId) {
+    throw new Error('?????? Kashier API ??? ??????')
+  }
+
+  return {
+    apiKey: decryptKashierKey(subscription.kashierApiKey),
     merId: subscription.kashierMerId,
   }
 }
 
-/**
- * التحقق من إضافة Kashier API
- */
-export async function hasKashierApi(): Promise<boolean> {
-  try {
-    const subscription = await getTeacherSubscription()
-    return !!(subscription.kashierApiKey && subscription.kashierMerId)
-  } catch {
-    return false
-  }
+export async function getKashierApiCredentials() {
+  const tenant = await requireTenant()
+  return getKashierApiCredentialsByTenantId(tenant.id)
 }
 
-/**
- * إلغاء اشتراك المعلم
- */
-export async function cancelSubscription() {
+export async function hasKashierApi(): Promise<boolean> {
   const subscription = await getTeacherSubscription()
+  return !!(subscription?.kashierApiKey && subscription?.kashierMerId)
+}
+
+export async function cancelSubscription() {
+  const tenant = await requireTenant()
+  const actor = await requireAuth()
+
+  const subscription = await db.teacherSubscription.findUnique({
+    where: { tenantId: tenant.id },
+  })
+
+  if (!subscription) {
+    throw new Error('?? ???? ?????? ???????')
+  }
 
   const updated = await db.teacherSubscription.update({
     where: { id: subscription.id },
@@ -270,5 +284,15 @@ export async function cancelSubscription() {
     },
   })
 
-  return { success: true, message: 'تم إلغاء الاشتراك' }
+  await logFinancialEvent({
+    tenantId: tenant.id,
+    actorId: actor.id,
+    eventType: 'SUBSCRIPTION_UPDATED',
+    entityType: 'SUBSCRIPTION',
+    entityId: updated.id,
+    message: 'Subscription cancelled',
+  })
+
+  return { success: true, message: '?? ????? ????????' }
 }
+

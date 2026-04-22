@@ -1,4 +1,4 @@
-type RequiredEnvKey =
+﻿type RequiredEnvKey =
   | 'DATABASE_URL'
 
 type OptionalEnvKey =
@@ -12,6 +12,10 @@ type OptionalEnvKey =
   | 'KASHIER_MERCHANT_ID'
   | 'KASHIER_API_KEY'
   | 'KASHIER_WEBHOOK_SECRET'
+  | 'KASHIER_ALLOWED_METHODS'
+  | 'ENCRYPTION_KEY'
+  | 'INTERNAL_JOBS_SECRET'
+  | 'TEACHER_TRANSFER_FEE_PERCENT'
 
 type EnvConfig = {
   DATABASE_URL: string
@@ -27,6 +31,10 @@ type EnvConfig = {
   KASHIER_MERCHANT_ID?: string
   KASHIER_API_KEY?: string
   KASHIER_WEBHOOK_SECRET?: string
+  KASHIER_ALLOWED_METHODS?: string
+  ENCRYPTION_KEY?: string
+  INTERNAL_JOBS_SECRET?: string
+  TEACHER_TRANSFER_FEE_PERCENT: number
 }
 
 function readEnv(key: string) {
@@ -84,6 +92,12 @@ function createEnv(): EnvConfig {
   const redisUrl = optionalEnv('REDIS_URL')
   const smsProviderUrl = optionalEnv('SMS_PROVIDER_URL')
   const whatsappApiUrl = optionalEnv('WHATSAPP_API_URL')
+  const transferFeeRaw = optionalEnv('TEACHER_TRANSFER_FEE_PERCENT')
+  const transferFee = transferFeeRaw ? Number(transferFeeRaw) : 0
+
+  if (!Number.isFinite(transferFee) || transferFee < 0 || transferFee > 100) {
+    throw new Error('TEACHER_TRANSFER_FEE_PERCENT must be a number between 0 and 100')
+  }
 
   return {
     DATABASE_URL: requireEnv('DATABASE_URL'),
@@ -105,7 +119,12 @@ function createEnv(): EnvConfig {
     KASHIER_MERCHANT_ID: optionalEnv('KASHIER_MERCHANT_ID'),
     KASHIER_API_KEY: optionalEnv('KASHIER_API_KEY'),
     KASHIER_WEBHOOK_SECRET: optionalEnv('KASHIER_WEBHOOK_SECRET'),
+    KASHIER_ALLOWED_METHODS: optionalEnv('KASHIER_ALLOWED_METHODS'),
+    ENCRYPTION_KEY: optionalEnv('ENCRYPTION_KEY'),
+    INTERNAL_JOBS_SECRET: optionalEnv('INTERNAL_JOBS_SECRET'),
+    TEACHER_TRANSFER_FEE_PERCENT: transferFee,
   }
 }
 
 export const env = createEnv()
+

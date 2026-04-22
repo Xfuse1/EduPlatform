@@ -113,6 +113,16 @@ export type StudentBalance = $Result.DefaultSelection<Prisma.$StudentBalancePayl
  * 
  */
 export type BalanceTransaction = $Result.DefaultSelection<Prisma.$BalanceTransactionPayload>
+/**
+ * Model TeacherTransfer
+ * 
+ */
+export type TeacherTransfer = $Result.DefaultSelection<Prisma.$TeacherTransferPayload>
+/**
+ * Model FinancialAuditLog
+ * 
+ */
+export type FinancialAuditLog = $Result.DefaultSelection<Prisma.$FinancialAuditLogPayload>
 
 /**
  * Enums
@@ -296,6 +306,42 @@ export const PaymentGateway: {
 
 export type PaymentGateway = (typeof PaymentGateway)[keyof typeof PaymentGateway]
 
+
+export const TransferStatus: {
+  PENDING: 'PENDING',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED',
+  RETRY: 'RETRY'
+};
+
+export type TransferStatus = (typeof TransferStatus)[keyof typeof TransferStatus]
+
+
+export const FinancialEventType: {
+  PAYMENT_CREATED: 'PAYMENT_CREATED',
+  PAYMENT_CONFIRMED: 'PAYMENT_CONFIRMED',
+  PAYMENT_FAILED: 'PAYMENT_FAILED',
+  BALANCE_CREDIT: 'BALANCE_CREDIT',
+  BALANCE_DEBIT: 'BALANCE_DEBIT',
+  TRANSFER_ENQUEUED: 'TRANSFER_ENQUEUED',
+  TRANSFER_SUCCESS: 'TRANSFER_SUCCESS',
+  TRANSFER_FAILED: 'TRANSFER_FAILED',
+  SUBSCRIPTION_UPDATED: 'SUBSCRIPTION_UPDATED'
+};
+
+export type FinancialEventType = (typeof FinancialEventType)[keyof typeof FinancialEventType]
+
+
+export const FinancialEntityType: {
+  PAYMENT: 'PAYMENT',
+  BALANCE: 'BALANCE',
+  BALANCE_TRANSACTION: 'BALANCE_TRANSACTION',
+  TRANSFER: 'TRANSFER',
+  SUBSCRIPTION: 'SUBSCRIPTION'
+};
+
+export type FinancialEntityType = (typeof FinancialEntityType)[keyof typeof FinancialEntityType]
+
 }
 
 export type Plan = $Enums.Plan
@@ -369,6 +415,18 @@ export const TransactionStatus: typeof $Enums.TransactionStatus
 export type PaymentGateway = $Enums.PaymentGateway
 
 export const PaymentGateway: typeof $Enums.PaymentGateway
+
+export type TransferStatus = $Enums.TransferStatus
+
+export const TransferStatus: typeof $Enums.TransferStatus
+
+export type FinancialEventType = $Enums.FinancialEventType
+
+export const FinancialEventType: typeof $Enums.FinancialEventType
+
+export type FinancialEntityType = $Enums.FinancialEntityType
+
+export const FinancialEntityType: typeof $Enums.FinancialEntityType
 
 /**
  * ##  Prisma Client ʲˢ
@@ -687,6 +745,26 @@ export class PrismaClient<
     * ```
     */
   get balanceTransaction(): Prisma.BalanceTransactionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.teacherTransfer`: Exposes CRUD operations for the **TeacherTransfer** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TeacherTransfers
+    * const teacherTransfers = await prisma.teacherTransfer.findMany()
+    * ```
+    */
+  get teacherTransfer(): Prisma.TeacherTransferDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.financialAuditLog`: Exposes CRUD operations for the **FinancialAuditLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FinancialAuditLogs
+    * const financialAuditLogs = await prisma.financialAuditLog.findMany()
+    * ```
+    */
+  get financialAuditLog(): Prisma.FinancialAuditLogDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1147,7 +1225,9 @@ export namespace Prisma {
     ExamSubmission: 'ExamSubmission',
     TeacherSubscription: 'TeacherSubscription',
     StudentBalance: 'StudentBalance',
-    BalanceTransaction: 'BalanceTransaction'
+    BalanceTransaction: 'BalanceTransaction',
+    TeacherTransfer: 'TeacherTransfer',
+    FinancialAuditLog: 'FinancialAuditLog'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1166,7 +1246,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "tenant" | "user" | "parentStudent" | "group" | "groupStudent" | "session" | "attendance" | "payment" | "notification" | "oTP" | "authSession" | "assignment" | "assignmentSubmission" | "message" | "exam" | "examQuestion" | "examSubmission" | "teacherSubscription" | "studentBalance" | "balanceTransaction"
+      modelProps: "tenant" | "user" | "parentStudent" | "group" | "groupStudent" | "session" | "attendance" | "payment" | "notification" | "oTP" | "authSession" | "assignment" | "assignmentSubmission" | "message" | "exam" | "examQuestion" | "examSubmission" | "teacherSubscription" | "studentBalance" | "balanceTransaction" | "teacherTransfer" | "financialAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2650,6 +2730,154 @@ export namespace Prisma {
           }
         }
       }
+      TeacherTransfer: {
+        payload: Prisma.$TeacherTransferPayload<ExtArgs>
+        fields: Prisma.TeacherTransferFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TeacherTransferFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherTransferPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TeacherTransferFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherTransferPayload>
+          }
+          findFirst: {
+            args: Prisma.TeacherTransferFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherTransferPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TeacherTransferFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherTransferPayload>
+          }
+          findMany: {
+            args: Prisma.TeacherTransferFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherTransferPayload>[]
+          }
+          create: {
+            args: Prisma.TeacherTransferCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherTransferPayload>
+          }
+          createMany: {
+            args: Prisma.TeacherTransferCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TeacherTransferCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherTransferPayload>[]
+          }
+          delete: {
+            args: Prisma.TeacherTransferDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherTransferPayload>
+          }
+          update: {
+            args: Prisma.TeacherTransferUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherTransferPayload>
+          }
+          deleteMany: {
+            args: Prisma.TeacherTransferDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TeacherTransferUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TeacherTransferUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherTransferPayload>[]
+          }
+          upsert: {
+            args: Prisma.TeacherTransferUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TeacherTransferPayload>
+          }
+          aggregate: {
+            args: Prisma.TeacherTransferAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTeacherTransfer>
+          }
+          groupBy: {
+            args: Prisma.TeacherTransferGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TeacherTransferGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TeacherTransferCountArgs<ExtArgs>
+            result: $Utils.Optional<TeacherTransferCountAggregateOutputType> | number
+          }
+        }
+      }
+      FinancialAuditLog: {
+        payload: Prisma.$FinancialAuditLogPayload<ExtArgs>
+        fields: Prisma.FinancialAuditLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FinancialAuditLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialAuditLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FinancialAuditLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialAuditLogPayload>
+          }
+          findFirst: {
+            args: Prisma.FinancialAuditLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialAuditLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FinancialAuditLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialAuditLogPayload>
+          }
+          findMany: {
+            args: Prisma.FinancialAuditLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialAuditLogPayload>[]
+          }
+          create: {
+            args: Prisma.FinancialAuditLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialAuditLogPayload>
+          }
+          createMany: {
+            args: Prisma.FinancialAuditLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FinancialAuditLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialAuditLogPayload>[]
+          }
+          delete: {
+            args: Prisma.FinancialAuditLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialAuditLogPayload>
+          }
+          update: {
+            args: Prisma.FinancialAuditLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialAuditLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.FinancialAuditLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FinancialAuditLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FinancialAuditLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialAuditLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.FinancialAuditLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialAuditLogPayload>
+          }
+          aggregate: {
+            args: Prisma.FinancialAuditLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFinancialAuditLog>
+          }
+          groupBy: {
+            args: Prisma.FinancialAuditLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FinancialAuditLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FinancialAuditLogCountArgs<ExtArgs>
+            result: $Utils.Optional<FinancialAuditLogCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2766,6 +2994,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionOmit
     studentBalance?: StudentBalanceOmit
     balanceTransaction?: BalanceTransactionOmit
+    teacherTransfer?: TeacherTransferOmit
+    financialAuditLog?: FinancialAuditLogOmit
   }
 
   /* Types for Logging */
@@ -2857,6 +3087,8 @@ export namespace Prisma {
     users: number
     studentBalances: number
     balanceTransactions: number
+    teacherTransfers: number
+    financialAuditLogs: number
   }
 
   export type TenantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2871,6 +3103,8 @@ export namespace Prisma {
     users?: boolean | TenantCountOutputTypeCountUsersArgs
     studentBalances?: boolean | TenantCountOutputTypeCountStudentBalancesArgs
     balanceTransactions?: boolean | TenantCountOutputTypeCountBalanceTransactionsArgs
+    teacherTransfers?: boolean | TenantCountOutputTypeCountTeacherTransfersArgs
+    financialAuditLogs?: boolean | TenantCountOutputTypeCountFinancialAuditLogsArgs
   }
 
   // Custom InputTypes
@@ -2959,6 +3193,20 @@ export namespace Prisma {
    */
   export type TenantCountOutputTypeCountBalanceTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: BalanceTransactionWhereInput
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountTeacherTransfersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TeacherTransferWhereInput
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountFinancialAuditLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FinancialAuditLogWhereInput
   }
 
 
@@ -3214,6 +3462,46 @@ export namespace Prisma {
    */
   export type SessionCountOutputTypeCountAttendancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AttendanceWhereInput
+  }
+
+
+  /**
+   * Count Type PaymentCountOutputType
+   */
+
+  export type PaymentCountOutputType = {
+    balanceTransactions: number
+    teacherTransfers: number
+  }
+
+  export type PaymentCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    balanceTransactions?: boolean | PaymentCountOutputTypeCountBalanceTransactionsArgs
+    teacherTransfers?: boolean | PaymentCountOutputTypeCountTeacherTransfersArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * PaymentCountOutputType without action
+   */
+  export type PaymentCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentCountOutputType
+     */
+    select?: PaymentCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * PaymentCountOutputType without action
+   */
+  export type PaymentCountOutputTypeCountBalanceTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BalanceTransactionWhereInput
+  }
+
+  /**
+   * PaymentCountOutputType without action
+   */
+  export type PaymentCountOutputTypeCountTeacherTransfersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TeacherTransferWhereInput
   }
 
 
@@ -3609,6 +3897,8 @@ export namespace Prisma {
     teacherSubscription?: boolean | Tenant$teacherSubscriptionArgs<ExtArgs>
     studentBalances?: boolean | Tenant$studentBalancesArgs<ExtArgs>
     balanceTransactions?: boolean | Tenant$balanceTransactionsArgs<ExtArgs>
+    teacherTransfers?: boolean | Tenant$teacherTransfersArgs<ExtArgs>
+    financialAuditLogs?: boolean | Tenant$financialAuditLogsArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
@@ -3680,6 +3970,8 @@ export namespace Prisma {
     teacherSubscription?: boolean | Tenant$teacherSubscriptionArgs<ExtArgs>
     studentBalances?: boolean | Tenant$studentBalancesArgs<ExtArgs>
     balanceTransactions?: boolean | Tenant$balanceTransactionsArgs<ExtArgs>
+    teacherTransfers?: boolean | Tenant$teacherTransfersArgs<ExtArgs>
+    financialAuditLogs?: boolean | Tenant$financialAuditLogsArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TenantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -3700,6 +3992,8 @@ export namespace Prisma {
       teacherSubscription: Prisma.$TeacherSubscriptionPayload<ExtArgs> | null
       studentBalances: Prisma.$StudentBalancePayload<ExtArgs>[]
       balanceTransactions: Prisma.$BalanceTransactionPayload<ExtArgs>[]
+      teacherTransfers: Prisma.$TeacherTransferPayload<ExtArgs>[]
+      financialAuditLogs: Prisma.$FinancialAuditLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4123,6 +4417,8 @@ export namespace Prisma {
     teacherSubscription<T extends Tenant$teacherSubscriptionArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$teacherSubscriptionArgs<ExtArgs>>): Prisma__TeacherSubscriptionClient<$Result.GetResult<Prisma.$TeacherSubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     studentBalances<T extends Tenant$studentBalancesArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$studentBalancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     balanceTransactions<T extends Tenant$balanceTransactionsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$balanceTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    teacherTransfers<T extends Tenant$teacherTransfersArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$teacherTransfersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    financialAuditLogs<T extends Tenant$financialAuditLogsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$financialAuditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinancialAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4835,6 +5131,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: BalanceTransactionScalarFieldEnum | BalanceTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * Tenant.teacherTransfers
+   */
+  export type Tenant$teacherTransfersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferInclude<ExtArgs> | null
+    where?: TeacherTransferWhereInput
+    orderBy?: TeacherTransferOrderByWithRelationInput | TeacherTransferOrderByWithRelationInput[]
+    cursor?: TeacherTransferWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TeacherTransferScalarFieldEnum | TeacherTransferScalarFieldEnum[]
+  }
+
+  /**
+   * Tenant.financialAuditLogs
+   */
+  export type Tenant$financialAuditLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogInclude<ExtArgs> | null
+    where?: FinancialAuditLogWhereInput
+    orderBy?: FinancialAuditLogOrderByWithRelationInput | FinancialAuditLogOrderByWithRelationInput[]
+    cursor?: FinancialAuditLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FinancialAuditLogScalarFieldEnum | FinancialAuditLogScalarFieldEnum[]
   }
 
   /**
@@ -12701,6 +13045,9 @@ export namespace Prisma {
     recordedBy?: boolean | Payment$recordedByArgs<ExtArgs>
     student?: boolean | UserDefaultArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    balanceTransactions?: boolean | Payment$balanceTransactionsArgs<ExtArgs>
+    teacherTransfers?: boolean | Payment$teacherTransfersArgs<ExtArgs>
+    _count?: boolean | PaymentCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["payment"]>
 
   export type PaymentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -12780,6 +13127,9 @@ export namespace Prisma {
     recordedBy?: boolean | Payment$recordedByArgs<ExtArgs>
     student?: boolean | UserDefaultArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    balanceTransactions?: boolean | Payment$balanceTransactionsArgs<ExtArgs>
+    teacherTransfers?: boolean | Payment$teacherTransfersArgs<ExtArgs>
+    _count?: boolean | PaymentCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type PaymentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     recordedBy?: boolean | Payment$recordedByArgs<ExtArgs>
@@ -12798,6 +13148,8 @@ export namespace Prisma {
       recordedBy: Prisma.$UserPayload<ExtArgs> | null
       student: Prisma.$UserPayload<ExtArgs>
       tenant: Prisma.$TenantPayload<ExtArgs>
+      balanceTransactions: Prisma.$BalanceTransactionPayload<ExtArgs>[]
+      teacherTransfers: Prisma.$TeacherTransferPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -13216,6 +13568,8 @@ export namespace Prisma {
     recordedBy<T extends Payment$recordedByArgs<ExtArgs> = {}>(args?: Subset<T, Payment$recordedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     student<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    balanceTransactions<T extends Payment$balanceTransactionsArgs<ExtArgs> = {}>(args?: Subset<T, Payment$balanceTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BalanceTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    teacherTransfers<T extends Payment$teacherTransfersArgs<ExtArgs> = {}>(args?: Subset<T, Payment$teacherTransfersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13676,6 +14030,54 @@ export namespace Prisma {
      */
     include?: UserInclude<ExtArgs> | null
     where?: UserWhereInput
+  }
+
+  /**
+   * Payment.balanceTransactions
+   */
+  export type Payment$balanceTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BalanceTransaction
+     */
+    select?: BalanceTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BalanceTransaction
+     */
+    omit?: BalanceTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BalanceTransactionInclude<ExtArgs> | null
+    where?: BalanceTransactionWhereInput
+    orderBy?: BalanceTransactionOrderByWithRelationInput | BalanceTransactionOrderByWithRelationInput[]
+    cursor?: BalanceTransactionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BalanceTransactionScalarFieldEnum | BalanceTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * Payment.teacherTransfers
+   */
+  export type Payment$teacherTransfersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferInclude<ExtArgs> | null
+    where?: TeacherTransferWhereInput
+    orderBy?: TeacherTransferOrderByWithRelationInput | TeacherTransferOrderByWithRelationInput[]
+    cursor?: TeacherTransferWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TeacherTransferScalarFieldEnum | TeacherTransferScalarFieldEnum[]
   }
 
   /**
@@ -26676,6 +27078,7 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     balance?: boolean | StudentBalanceDefaultArgs<ExtArgs>
+    payment?: boolean | BalanceTransaction$paymentArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["balanceTransaction"]>
 
@@ -26690,6 +27093,7 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     balance?: boolean | StudentBalanceDefaultArgs<ExtArgs>
+    payment?: boolean | BalanceTransaction$paymentArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["balanceTransaction"]>
 
@@ -26704,6 +27108,7 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     balance?: boolean | StudentBalanceDefaultArgs<ExtArgs>
+    payment?: boolean | BalanceTransaction$paymentArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["balanceTransaction"]>
 
@@ -26722,14 +27127,17 @@ export namespace Prisma {
   export type BalanceTransactionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "balanceId" | "type" | "amount" | "reason" | "relatedPaymentId" | "status" | "createdAt", ExtArgs["result"]["balanceTransaction"]>
   export type BalanceTransactionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     balance?: boolean | StudentBalanceDefaultArgs<ExtArgs>
+    payment?: boolean | BalanceTransaction$paymentArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }
   export type BalanceTransactionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     balance?: boolean | StudentBalanceDefaultArgs<ExtArgs>
+    payment?: boolean | BalanceTransaction$paymentArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }
   export type BalanceTransactionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     balance?: boolean | StudentBalanceDefaultArgs<ExtArgs>
+    payment?: boolean | BalanceTransaction$paymentArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }
 
@@ -26737,6 +27145,7 @@ export namespace Prisma {
     name: "BalanceTransaction"
     objects: {
       balance: Prisma.$StudentBalancePayload<ExtArgs>
+      payment: Prisma.$PaymentPayload<ExtArgs> | null
       tenant: Prisma.$TenantPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -27144,6 +27553,7 @@ export namespace Prisma {
   export interface Prisma__BalanceTransactionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     balance<T extends StudentBalanceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, StudentBalanceDefaultArgs<ExtArgs>>): Prisma__StudentBalanceClient<$Result.GetResult<Prisma.$StudentBalancePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    payment<T extends BalanceTransaction$paymentArgs<ExtArgs> = {}>(args?: Subset<T, BalanceTransaction$paymentArgs<ExtArgs>>): Prisma__PaymentClient<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -27579,6 +27989,25 @@ export namespace Prisma {
   }
 
   /**
+   * BalanceTransaction.payment
+   */
+  export type BalanceTransaction$paymentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Payment
+     */
+    select?: PaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Payment
+     */
+    omit?: PaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentInclude<ExtArgs> | null
+    where?: PaymentWhereInput
+  }
+
+  /**
    * BalanceTransaction without action
    */
   export type BalanceTransactionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -27594,6 +28023,2298 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: BalanceTransactionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TeacherTransfer
+   */
+
+  export type AggregateTeacherTransfer = {
+    _count: TeacherTransferCountAggregateOutputType | null
+    _avg: TeacherTransferAvgAggregateOutputType | null
+    _sum: TeacherTransferSumAggregateOutputType | null
+    _min: TeacherTransferMinAggregateOutputType | null
+    _max: TeacherTransferMaxAggregateOutputType | null
+  }
+
+  export type TeacherTransferAvgAggregateOutputType = {
+    amount: number | null
+    fee: number | null
+    attemptCount: number | null
+  }
+
+  export type TeacherTransferSumAggregateOutputType = {
+    amount: number | null
+    fee: number | null
+    attemptCount: number | null
+  }
+
+  export type TeacherTransferMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    paymentId: string | null
+    amount: number | null
+    fee: number | null
+    status: $Enums.TransferStatus | null
+    attemptCount: number | null
+    lastAttemptAt: Date | null
+    failureReason: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TeacherTransferMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    paymentId: string | null
+    amount: number | null
+    fee: number | null
+    status: $Enums.TransferStatus | null
+    attemptCount: number | null
+    lastAttemptAt: Date | null
+    failureReason: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TeacherTransferCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    paymentId: number
+    amount: number
+    fee: number
+    status: number
+    attemptCount: number
+    lastAttemptAt: number
+    failureReason: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TeacherTransferAvgAggregateInputType = {
+    amount?: true
+    fee?: true
+    attemptCount?: true
+  }
+
+  export type TeacherTransferSumAggregateInputType = {
+    amount?: true
+    fee?: true
+    attemptCount?: true
+  }
+
+  export type TeacherTransferMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    paymentId?: true
+    amount?: true
+    fee?: true
+    status?: true
+    attemptCount?: true
+    lastAttemptAt?: true
+    failureReason?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TeacherTransferMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    paymentId?: true
+    amount?: true
+    fee?: true
+    status?: true
+    attemptCount?: true
+    lastAttemptAt?: true
+    failureReason?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TeacherTransferCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    paymentId?: true
+    amount?: true
+    fee?: true
+    status?: true
+    attemptCount?: true
+    lastAttemptAt?: true
+    failureReason?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TeacherTransferAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TeacherTransfer to aggregate.
+     */
+    where?: TeacherTransferWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeacherTransfers to fetch.
+     */
+    orderBy?: TeacherTransferOrderByWithRelationInput | TeacherTransferOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TeacherTransferWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeacherTransfers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeacherTransfers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TeacherTransfers
+    **/
+    _count?: true | TeacherTransferCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TeacherTransferAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TeacherTransferSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TeacherTransferMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TeacherTransferMaxAggregateInputType
+  }
+
+  export type GetTeacherTransferAggregateType<T extends TeacherTransferAggregateArgs> = {
+        [P in keyof T & keyof AggregateTeacherTransfer]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTeacherTransfer[P]>
+      : GetScalarType<T[P], AggregateTeacherTransfer[P]>
+  }
+
+
+
+
+  export type TeacherTransferGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TeacherTransferWhereInput
+    orderBy?: TeacherTransferOrderByWithAggregationInput | TeacherTransferOrderByWithAggregationInput[]
+    by: TeacherTransferScalarFieldEnum[] | TeacherTransferScalarFieldEnum
+    having?: TeacherTransferScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TeacherTransferCountAggregateInputType | true
+    _avg?: TeacherTransferAvgAggregateInputType
+    _sum?: TeacherTransferSumAggregateInputType
+    _min?: TeacherTransferMinAggregateInputType
+    _max?: TeacherTransferMaxAggregateInputType
+  }
+
+  export type TeacherTransferGroupByOutputType = {
+    id: string
+    tenantId: string
+    paymentId: string
+    amount: number
+    fee: number
+    status: $Enums.TransferStatus
+    attemptCount: number
+    lastAttemptAt: Date | null
+    failureReason: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: TeacherTransferCountAggregateOutputType | null
+    _avg: TeacherTransferAvgAggregateOutputType | null
+    _sum: TeacherTransferSumAggregateOutputType | null
+    _min: TeacherTransferMinAggregateOutputType | null
+    _max: TeacherTransferMaxAggregateOutputType | null
+  }
+
+  type GetTeacherTransferGroupByPayload<T extends TeacherTransferGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TeacherTransferGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TeacherTransferGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TeacherTransferGroupByOutputType[P]>
+            : GetScalarType<T[P], TeacherTransferGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TeacherTransferSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    paymentId?: boolean
+    amount?: boolean
+    fee?: boolean
+    status?: boolean
+    attemptCount?: boolean
+    lastAttemptAt?: boolean
+    failureReason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    payment?: boolean | PaymentDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["teacherTransfer"]>
+
+  export type TeacherTransferSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    paymentId?: boolean
+    amount?: boolean
+    fee?: boolean
+    status?: boolean
+    attemptCount?: boolean
+    lastAttemptAt?: boolean
+    failureReason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    payment?: boolean | PaymentDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["teacherTransfer"]>
+
+  export type TeacherTransferSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    paymentId?: boolean
+    amount?: boolean
+    fee?: boolean
+    status?: boolean
+    attemptCount?: boolean
+    lastAttemptAt?: boolean
+    failureReason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    payment?: boolean | PaymentDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["teacherTransfer"]>
+
+  export type TeacherTransferSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    paymentId?: boolean
+    amount?: boolean
+    fee?: boolean
+    status?: boolean
+    attemptCount?: boolean
+    lastAttemptAt?: boolean
+    failureReason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TeacherTransferOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "paymentId" | "amount" | "fee" | "status" | "attemptCount" | "lastAttemptAt" | "failureReason" | "createdAt" | "updatedAt", ExtArgs["result"]["teacherTransfer"]>
+  export type TeacherTransferInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    payment?: boolean | PaymentDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type TeacherTransferIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    payment?: boolean | PaymentDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type TeacherTransferIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    payment?: boolean | PaymentDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+
+  export type $TeacherTransferPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TeacherTransfer"
+    objects: {
+      payment: Prisma.$PaymentPayload<ExtArgs>
+      tenant: Prisma.$TenantPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      paymentId: string
+      amount: number
+      fee: number
+      status: $Enums.TransferStatus
+      attemptCount: number
+      lastAttemptAt: Date | null
+      failureReason: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["teacherTransfer"]>
+    composites: {}
+  }
+
+  type TeacherTransferGetPayload<S extends boolean | null | undefined | TeacherTransferDefaultArgs> = $Result.GetResult<Prisma.$TeacherTransferPayload, S>
+
+  type TeacherTransferCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TeacherTransferFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TeacherTransferCountAggregateInputType | true
+    }
+
+  export interface TeacherTransferDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TeacherTransfer'], meta: { name: 'TeacherTransfer' } }
+    /**
+     * Find zero or one TeacherTransfer that matches the filter.
+     * @param {TeacherTransferFindUniqueArgs} args - Arguments to find a TeacherTransfer
+     * @example
+     * // Get one TeacherTransfer
+     * const teacherTransfer = await prisma.teacherTransfer.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TeacherTransferFindUniqueArgs>(args: SelectSubset<T, TeacherTransferFindUniqueArgs<ExtArgs>>): Prisma__TeacherTransferClient<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TeacherTransfer that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TeacherTransferFindUniqueOrThrowArgs} args - Arguments to find a TeacherTransfer
+     * @example
+     * // Get one TeacherTransfer
+     * const teacherTransfer = await prisma.teacherTransfer.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TeacherTransferFindUniqueOrThrowArgs>(args: SelectSubset<T, TeacherTransferFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TeacherTransferClient<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TeacherTransfer that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherTransferFindFirstArgs} args - Arguments to find a TeacherTransfer
+     * @example
+     * // Get one TeacherTransfer
+     * const teacherTransfer = await prisma.teacherTransfer.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TeacherTransferFindFirstArgs>(args?: SelectSubset<T, TeacherTransferFindFirstArgs<ExtArgs>>): Prisma__TeacherTransferClient<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TeacherTransfer that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherTransferFindFirstOrThrowArgs} args - Arguments to find a TeacherTransfer
+     * @example
+     * // Get one TeacherTransfer
+     * const teacherTransfer = await prisma.teacherTransfer.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TeacherTransferFindFirstOrThrowArgs>(args?: SelectSubset<T, TeacherTransferFindFirstOrThrowArgs<ExtArgs>>): Prisma__TeacherTransferClient<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TeacherTransfers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherTransferFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TeacherTransfers
+     * const teacherTransfers = await prisma.teacherTransfer.findMany()
+     * 
+     * // Get first 10 TeacherTransfers
+     * const teacherTransfers = await prisma.teacherTransfer.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const teacherTransferWithIdOnly = await prisma.teacherTransfer.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TeacherTransferFindManyArgs>(args?: SelectSubset<T, TeacherTransferFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TeacherTransfer.
+     * @param {TeacherTransferCreateArgs} args - Arguments to create a TeacherTransfer.
+     * @example
+     * // Create one TeacherTransfer
+     * const TeacherTransfer = await prisma.teacherTransfer.create({
+     *   data: {
+     *     // ... data to create a TeacherTransfer
+     *   }
+     * })
+     * 
+     */
+    create<T extends TeacherTransferCreateArgs>(args: SelectSubset<T, TeacherTransferCreateArgs<ExtArgs>>): Prisma__TeacherTransferClient<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TeacherTransfers.
+     * @param {TeacherTransferCreateManyArgs} args - Arguments to create many TeacherTransfers.
+     * @example
+     * // Create many TeacherTransfers
+     * const teacherTransfer = await prisma.teacherTransfer.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TeacherTransferCreateManyArgs>(args?: SelectSubset<T, TeacherTransferCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TeacherTransfers and returns the data saved in the database.
+     * @param {TeacherTransferCreateManyAndReturnArgs} args - Arguments to create many TeacherTransfers.
+     * @example
+     * // Create many TeacherTransfers
+     * const teacherTransfer = await prisma.teacherTransfer.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TeacherTransfers and only return the `id`
+     * const teacherTransferWithIdOnly = await prisma.teacherTransfer.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TeacherTransferCreateManyAndReturnArgs>(args?: SelectSubset<T, TeacherTransferCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TeacherTransfer.
+     * @param {TeacherTransferDeleteArgs} args - Arguments to delete one TeacherTransfer.
+     * @example
+     * // Delete one TeacherTransfer
+     * const TeacherTransfer = await prisma.teacherTransfer.delete({
+     *   where: {
+     *     // ... filter to delete one TeacherTransfer
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TeacherTransferDeleteArgs>(args: SelectSubset<T, TeacherTransferDeleteArgs<ExtArgs>>): Prisma__TeacherTransferClient<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TeacherTransfer.
+     * @param {TeacherTransferUpdateArgs} args - Arguments to update one TeacherTransfer.
+     * @example
+     * // Update one TeacherTransfer
+     * const teacherTransfer = await prisma.teacherTransfer.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TeacherTransferUpdateArgs>(args: SelectSubset<T, TeacherTransferUpdateArgs<ExtArgs>>): Prisma__TeacherTransferClient<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TeacherTransfers.
+     * @param {TeacherTransferDeleteManyArgs} args - Arguments to filter TeacherTransfers to delete.
+     * @example
+     * // Delete a few TeacherTransfers
+     * const { count } = await prisma.teacherTransfer.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TeacherTransferDeleteManyArgs>(args?: SelectSubset<T, TeacherTransferDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TeacherTransfers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherTransferUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TeacherTransfers
+     * const teacherTransfer = await prisma.teacherTransfer.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TeacherTransferUpdateManyArgs>(args: SelectSubset<T, TeacherTransferUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TeacherTransfers and returns the data updated in the database.
+     * @param {TeacherTransferUpdateManyAndReturnArgs} args - Arguments to update many TeacherTransfers.
+     * @example
+     * // Update many TeacherTransfers
+     * const teacherTransfer = await prisma.teacherTransfer.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TeacherTransfers and only return the `id`
+     * const teacherTransferWithIdOnly = await prisma.teacherTransfer.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TeacherTransferUpdateManyAndReturnArgs>(args: SelectSubset<T, TeacherTransferUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TeacherTransfer.
+     * @param {TeacherTransferUpsertArgs} args - Arguments to update or create a TeacherTransfer.
+     * @example
+     * // Update or create a TeacherTransfer
+     * const teacherTransfer = await prisma.teacherTransfer.upsert({
+     *   create: {
+     *     // ... data to create a TeacherTransfer
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TeacherTransfer we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TeacherTransferUpsertArgs>(args: SelectSubset<T, TeacherTransferUpsertArgs<ExtArgs>>): Prisma__TeacherTransferClient<$Result.GetResult<Prisma.$TeacherTransferPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TeacherTransfers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherTransferCountArgs} args - Arguments to filter TeacherTransfers to count.
+     * @example
+     * // Count the number of TeacherTransfers
+     * const count = await prisma.teacherTransfer.count({
+     *   where: {
+     *     // ... the filter for the TeacherTransfers we want to count
+     *   }
+     * })
+    **/
+    count<T extends TeacherTransferCountArgs>(
+      args?: Subset<T, TeacherTransferCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TeacherTransferCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TeacherTransfer.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherTransferAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TeacherTransferAggregateArgs>(args: Subset<T, TeacherTransferAggregateArgs>): Prisma.PrismaPromise<GetTeacherTransferAggregateType<T>>
+
+    /**
+     * Group by TeacherTransfer.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TeacherTransferGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TeacherTransferGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TeacherTransferGroupByArgs['orderBy'] }
+        : { orderBy?: TeacherTransferGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TeacherTransferGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTeacherTransferGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TeacherTransfer model
+   */
+  readonly fields: TeacherTransferFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TeacherTransfer.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TeacherTransferClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    payment<T extends PaymentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PaymentDefaultArgs<ExtArgs>>): Prisma__PaymentClient<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TeacherTransfer model
+   */
+  interface TeacherTransferFieldRefs {
+    readonly id: FieldRef<"TeacherTransfer", 'String'>
+    readonly tenantId: FieldRef<"TeacherTransfer", 'String'>
+    readonly paymentId: FieldRef<"TeacherTransfer", 'String'>
+    readonly amount: FieldRef<"TeacherTransfer", 'Int'>
+    readonly fee: FieldRef<"TeacherTransfer", 'Int'>
+    readonly status: FieldRef<"TeacherTransfer", 'TransferStatus'>
+    readonly attemptCount: FieldRef<"TeacherTransfer", 'Int'>
+    readonly lastAttemptAt: FieldRef<"TeacherTransfer", 'DateTime'>
+    readonly failureReason: FieldRef<"TeacherTransfer", 'String'>
+    readonly createdAt: FieldRef<"TeacherTransfer", 'DateTime'>
+    readonly updatedAt: FieldRef<"TeacherTransfer", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TeacherTransfer findUnique
+   */
+  export type TeacherTransferFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferInclude<ExtArgs> | null
+    /**
+     * Filter, which TeacherTransfer to fetch.
+     */
+    where: TeacherTransferWhereUniqueInput
+  }
+
+  /**
+   * TeacherTransfer findUniqueOrThrow
+   */
+  export type TeacherTransferFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferInclude<ExtArgs> | null
+    /**
+     * Filter, which TeacherTransfer to fetch.
+     */
+    where: TeacherTransferWhereUniqueInput
+  }
+
+  /**
+   * TeacherTransfer findFirst
+   */
+  export type TeacherTransferFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferInclude<ExtArgs> | null
+    /**
+     * Filter, which TeacherTransfer to fetch.
+     */
+    where?: TeacherTransferWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeacherTransfers to fetch.
+     */
+    orderBy?: TeacherTransferOrderByWithRelationInput | TeacherTransferOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TeacherTransfers.
+     */
+    cursor?: TeacherTransferWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeacherTransfers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeacherTransfers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TeacherTransfers.
+     */
+    distinct?: TeacherTransferScalarFieldEnum | TeacherTransferScalarFieldEnum[]
+  }
+
+  /**
+   * TeacherTransfer findFirstOrThrow
+   */
+  export type TeacherTransferFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferInclude<ExtArgs> | null
+    /**
+     * Filter, which TeacherTransfer to fetch.
+     */
+    where?: TeacherTransferWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeacherTransfers to fetch.
+     */
+    orderBy?: TeacherTransferOrderByWithRelationInput | TeacherTransferOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TeacherTransfers.
+     */
+    cursor?: TeacherTransferWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeacherTransfers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeacherTransfers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TeacherTransfers.
+     */
+    distinct?: TeacherTransferScalarFieldEnum | TeacherTransferScalarFieldEnum[]
+  }
+
+  /**
+   * TeacherTransfer findMany
+   */
+  export type TeacherTransferFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferInclude<ExtArgs> | null
+    /**
+     * Filter, which TeacherTransfers to fetch.
+     */
+    where?: TeacherTransferWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TeacherTransfers to fetch.
+     */
+    orderBy?: TeacherTransferOrderByWithRelationInput | TeacherTransferOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TeacherTransfers.
+     */
+    cursor?: TeacherTransferWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TeacherTransfers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TeacherTransfers.
+     */
+    skip?: number
+    distinct?: TeacherTransferScalarFieldEnum | TeacherTransferScalarFieldEnum[]
+  }
+
+  /**
+   * TeacherTransfer create
+   */
+  export type TeacherTransferCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TeacherTransfer.
+     */
+    data: XOR<TeacherTransferCreateInput, TeacherTransferUncheckedCreateInput>
+  }
+
+  /**
+   * TeacherTransfer createMany
+   */
+  export type TeacherTransferCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TeacherTransfers.
+     */
+    data: TeacherTransferCreateManyInput | TeacherTransferCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TeacherTransfer createManyAndReturn
+   */
+  export type TeacherTransferCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * The data used to create many TeacherTransfers.
+     */
+    data: TeacherTransferCreateManyInput | TeacherTransferCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TeacherTransfer update
+   */
+  export type TeacherTransferUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TeacherTransfer.
+     */
+    data: XOR<TeacherTransferUpdateInput, TeacherTransferUncheckedUpdateInput>
+    /**
+     * Choose, which TeacherTransfer to update.
+     */
+    where: TeacherTransferWhereUniqueInput
+  }
+
+  /**
+   * TeacherTransfer updateMany
+   */
+  export type TeacherTransferUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TeacherTransfers.
+     */
+    data: XOR<TeacherTransferUpdateManyMutationInput, TeacherTransferUncheckedUpdateManyInput>
+    /**
+     * Filter which TeacherTransfers to update
+     */
+    where?: TeacherTransferWhereInput
+    /**
+     * Limit how many TeacherTransfers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TeacherTransfer updateManyAndReturn
+   */
+  export type TeacherTransferUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * The data used to update TeacherTransfers.
+     */
+    data: XOR<TeacherTransferUpdateManyMutationInput, TeacherTransferUncheckedUpdateManyInput>
+    /**
+     * Filter which TeacherTransfers to update
+     */
+    where?: TeacherTransferWhereInput
+    /**
+     * Limit how many TeacherTransfers to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TeacherTransfer upsert
+   */
+  export type TeacherTransferUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TeacherTransfer to update in case it exists.
+     */
+    where: TeacherTransferWhereUniqueInput
+    /**
+     * In case the TeacherTransfer found by the `where` argument doesn't exist, create a new TeacherTransfer with this data.
+     */
+    create: XOR<TeacherTransferCreateInput, TeacherTransferUncheckedCreateInput>
+    /**
+     * In case the TeacherTransfer was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TeacherTransferUpdateInput, TeacherTransferUncheckedUpdateInput>
+  }
+
+  /**
+   * TeacherTransfer delete
+   */
+  export type TeacherTransferDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferInclude<ExtArgs> | null
+    /**
+     * Filter which TeacherTransfer to delete.
+     */
+    where: TeacherTransferWhereUniqueInput
+  }
+
+  /**
+   * TeacherTransfer deleteMany
+   */
+  export type TeacherTransferDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TeacherTransfers to delete
+     */
+    where?: TeacherTransferWhereInput
+    /**
+     * Limit how many TeacherTransfers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TeacherTransfer without action
+   */
+  export type TeacherTransferDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TeacherTransfer
+     */
+    select?: TeacherTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TeacherTransfer
+     */
+    omit?: TeacherTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeacherTransferInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FinancialAuditLog
+   */
+
+  export type AggregateFinancialAuditLog = {
+    _count: FinancialAuditLogCountAggregateOutputType | null
+    _min: FinancialAuditLogMinAggregateOutputType | null
+    _max: FinancialAuditLogMaxAggregateOutputType | null
+  }
+
+  export type FinancialAuditLogMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    actorId: string | null
+    eventType: $Enums.FinancialEventType | null
+    entityType: $Enums.FinancialEntityType | null
+    entityId: string | null
+    message: string | null
+    createdAt: Date | null
+  }
+
+  export type FinancialAuditLogMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    actorId: string | null
+    eventType: $Enums.FinancialEventType | null
+    entityType: $Enums.FinancialEntityType | null
+    entityId: string | null
+    message: string | null
+    createdAt: Date | null
+  }
+
+  export type FinancialAuditLogCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    actorId: number
+    eventType: number
+    entityType: number
+    entityId: number
+    message: number
+    metadata: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type FinancialAuditLogMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    actorId?: true
+    eventType?: true
+    entityType?: true
+    entityId?: true
+    message?: true
+    createdAt?: true
+  }
+
+  export type FinancialAuditLogMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    actorId?: true
+    eventType?: true
+    entityType?: true
+    entityId?: true
+    message?: true
+    createdAt?: true
+  }
+
+  export type FinancialAuditLogCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    actorId?: true
+    eventType?: true
+    entityType?: true
+    entityId?: true
+    message?: true
+    metadata?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type FinancialAuditLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FinancialAuditLog to aggregate.
+     */
+    where?: FinancialAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FinancialAuditLogs to fetch.
+     */
+    orderBy?: FinancialAuditLogOrderByWithRelationInput | FinancialAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FinancialAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FinancialAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FinancialAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FinancialAuditLogs
+    **/
+    _count?: true | FinancialAuditLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FinancialAuditLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FinancialAuditLogMaxAggregateInputType
+  }
+
+  export type GetFinancialAuditLogAggregateType<T extends FinancialAuditLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateFinancialAuditLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFinancialAuditLog[P]>
+      : GetScalarType<T[P], AggregateFinancialAuditLog[P]>
+  }
+
+
+
+
+  export type FinancialAuditLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FinancialAuditLogWhereInput
+    orderBy?: FinancialAuditLogOrderByWithAggregationInput | FinancialAuditLogOrderByWithAggregationInput[]
+    by: FinancialAuditLogScalarFieldEnum[] | FinancialAuditLogScalarFieldEnum
+    having?: FinancialAuditLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FinancialAuditLogCountAggregateInputType | true
+    _min?: FinancialAuditLogMinAggregateInputType
+    _max?: FinancialAuditLogMaxAggregateInputType
+  }
+
+  export type FinancialAuditLogGroupByOutputType = {
+    id: string
+    tenantId: string
+    actorId: string | null
+    eventType: $Enums.FinancialEventType
+    entityType: $Enums.FinancialEntityType
+    entityId: string | null
+    message: string
+    metadata: JsonValue | null
+    createdAt: Date
+    _count: FinancialAuditLogCountAggregateOutputType | null
+    _min: FinancialAuditLogMinAggregateOutputType | null
+    _max: FinancialAuditLogMaxAggregateOutputType | null
+  }
+
+  type GetFinancialAuditLogGroupByPayload<T extends FinancialAuditLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FinancialAuditLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FinancialAuditLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FinancialAuditLogGroupByOutputType[P]>
+            : GetScalarType<T[P], FinancialAuditLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FinancialAuditLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    actorId?: boolean
+    eventType?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    message?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["financialAuditLog"]>
+
+  export type FinancialAuditLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    actorId?: boolean
+    eventType?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    message?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["financialAuditLog"]>
+
+  export type FinancialAuditLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    actorId?: boolean
+    eventType?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    message?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["financialAuditLog"]>
+
+  export type FinancialAuditLogSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    actorId?: boolean
+    eventType?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    message?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+  }
+
+  export type FinancialAuditLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "actorId" | "eventType" | "entityType" | "entityId" | "message" | "metadata" | "createdAt", ExtArgs["result"]["financialAuditLog"]>
+  export type FinancialAuditLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type FinancialAuditLogIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type FinancialAuditLogIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+
+  export type $FinancialAuditLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FinancialAuditLog"
+    objects: {
+      tenant: Prisma.$TenantPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      actorId: string | null
+      eventType: $Enums.FinancialEventType
+      entityType: $Enums.FinancialEntityType
+      entityId: string | null
+      message: string
+      metadata: Prisma.JsonValue | null
+      createdAt: Date
+    }, ExtArgs["result"]["financialAuditLog"]>
+    composites: {}
+  }
+
+  type FinancialAuditLogGetPayload<S extends boolean | null | undefined | FinancialAuditLogDefaultArgs> = $Result.GetResult<Prisma.$FinancialAuditLogPayload, S>
+
+  type FinancialAuditLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FinancialAuditLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FinancialAuditLogCountAggregateInputType | true
+    }
+
+  export interface FinancialAuditLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FinancialAuditLog'], meta: { name: 'FinancialAuditLog' } }
+    /**
+     * Find zero or one FinancialAuditLog that matches the filter.
+     * @param {FinancialAuditLogFindUniqueArgs} args - Arguments to find a FinancialAuditLog
+     * @example
+     * // Get one FinancialAuditLog
+     * const financialAuditLog = await prisma.financialAuditLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FinancialAuditLogFindUniqueArgs>(args: SelectSubset<T, FinancialAuditLogFindUniqueArgs<ExtArgs>>): Prisma__FinancialAuditLogClient<$Result.GetResult<Prisma.$FinancialAuditLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FinancialAuditLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FinancialAuditLogFindUniqueOrThrowArgs} args - Arguments to find a FinancialAuditLog
+     * @example
+     * // Get one FinancialAuditLog
+     * const financialAuditLog = await prisma.financialAuditLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FinancialAuditLogFindUniqueOrThrowArgs>(args: SelectSubset<T, FinancialAuditLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FinancialAuditLogClient<$Result.GetResult<Prisma.$FinancialAuditLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FinancialAuditLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialAuditLogFindFirstArgs} args - Arguments to find a FinancialAuditLog
+     * @example
+     * // Get one FinancialAuditLog
+     * const financialAuditLog = await prisma.financialAuditLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FinancialAuditLogFindFirstArgs>(args?: SelectSubset<T, FinancialAuditLogFindFirstArgs<ExtArgs>>): Prisma__FinancialAuditLogClient<$Result.GetResult<Prisma.$FinancialAuditLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FinancialAuditLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialAuditLogFindFirstOrThrowArgs} args - Arguments to find a FinancialAuditLog
+     * @example
+     * // Get one FinancialAuditLog
+     * const financialAuditLog = await prisma.financialAuditLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FinancialAuditLogFindFirstOrThrowArgs>(args?: SelectSubset<T, FinancialAuditLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__FinancialAuditLogClient<$Result.GetResult<Prisma.$FinancialAuditLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FinancialAuditLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialAuditLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FinancialAuditLogs
+     * const financialAuditLogs = await prisma.financialAuditLog.findMany()
+     * 
+     * // Get first 10 FinancialAuditLogs
+     * const financialAuditLogs = await prisma.financialAuditLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const financialAuditLogWithIdOnly = await prisma.financialAuditLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FinancialAuditLogFindManyArgs>(args?: SelectSubset<T, FinancialAuditLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinancialAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FinancialAuditLog.
+     * @param {FinancialAuditLogCreateArgs} args - Arguments to create a FinancialAuditLog.
+     * @example
+     * // Create one FinancialAuditLog
+     * const FinancialAuditLog = await prisma.financialAuditLog.create({
+     *   data: {
+     *     // ... data to create a FinancialAuditLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends FinancialAuditLogCreateArgs>(args: SelectSubset<T, FinancialAuditLogCreateArgs<ExtArgs>>): Prisma__FinancialAuditLogClient<$Result.GetResult<Prisma.$FinancialAuditLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FinancialAuditLogs.
+     * @param {FinancialAuditLogCreateManyArgs} args - Arguments to create many FinancialAuditLogs.
+     * @example
+     * // Create many FinancialAuditLogs
+     * const financialAuditLog = await prisma.financialAuditLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FinancialAuditLogCreateManyArgs>(args?: SelectSubset<T, FinancialAuditLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FinancialAuditLogs and returns the data saved in the database.
+     * @param {FinancialAuditLogCreateManyAndReturnArgs} args - Arguments to create many FinancialAuditLogs.
+     * @example
+     * // Create many FinancialAuditLogs
+     * const financialAuditLog = await prisma.financialAuditLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FinancialAuditLogs and only return the `id`
+     * const financialAuditLogWithIdOnly = await prisma.financialAuditLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FinancialAuditLogCreateManyAndReturnArgs>(args?: SelectSubset<T, FinancialAuditLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinancialAuditLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FinancialAuditLog.
+     * @param {FinancialAuditLogDeleteArgs} args - Arguments to delete one FinancialAuditLog.
+     * @example
+     * // Delete one FinancialAuditLog
+     * const FinancialAuditLog = await prisma.financialAuditLog.delete({
+     *   where: {
+     *     // ... filter to delete one FinancialAuditLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FinancialAuditLogDeleteArgs>(args: SelectSubset<T, FinancialAuditLogDeleteArgs<ExtArgs>>): Prisma__FinancialAuditLogClient<$Result.GetResult<Prisma.$FinancialAuditLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FinancialAuditLog.
+     * @param {FinancialAuditLogUpdateArgs} args - Arguments to update one FinancialAuditLog.
+     * @example
+     * // Update one FinancialAuditLog
+     * const financialAuditLog = await prisma.financialAuditLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FinancialAuditLogUpdateArgs>(args: SelectSubset<T, FinancialAuditLogUpdateArgs<ExtArgs>>): Prisma__FinancialAuditLogClient<$Result.GetResult<Prisma.$FinancialAuditLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FinancialAuditLogs.
+     * @param {FinancialAuditLogDeleteManyArgs} args - Arguments to filter FinancialAuditLogs to delete.
+     * @example
+     * // Delete a few FinancialAuditLogs
+     * const { count } = await prisma.financialAuditLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FinancialAuditLogDeleteManyArgs>(args?: SelectSubset<T, FinancialAuditLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FinancialAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialAuditLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FinancialAuditLogs
+     * const financialAuditLog = await prisma.financialAuditLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FinancialAuditLogUpdateManyArgs>(args: SelectSubset<T, FinancialAuditLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FinancialAuditLogs and returns the data updated in the database.
+     * @param {FinancialAuditLogUpdateManyAndReturnArgs} args - Arguments to update many FinancialAuditLogs.
+     * @example
+     * // Update many FinancialAuditLogs
+     * const financialAuditLog = await prisma.financialAuditLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FinancialAuditLogs and only return the `id`
+     * const financialAuditLogWithIdOnly = await prisma.financialAuditLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FinancialAuditLogUpdateManyAndReturnArgs>(args: SelectSubset<T, FinancialAuditLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinancialAuditLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FinancialAuditLog.
+     * @param {FinancialAuditLogUpsertArgs} args - Arguments to update or create a FinancialAuditLog.
+     * @example
+     * // Update or create a FinancialAuditLog
+     * const financialAuditLog = await prisma.financialAuditLog.upsert({
+     *   create: {
+     *     // ... data to create a FinancialAuditLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FinancialAuditLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FinancialAuditLogUpsertArgs>(args: SelectSubset<T, FinancialAuditLogUpsertArgs<ExtArgs>>): Prisma__FinancialAuditLogClient<$Result.GetResult<Prisma.$FinancialAuditLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FinancialAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialAuditLogCountArgs} args - Arguments to filter FinancialAuditLogs to count.
+     * @example
+     * // Count the number of FinancialAuditLogs
+     * const count = await prisma.financialAuditLog.count({
+     *   where: {
+     *     // ... the filter for the FinancialAuditLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends FinancialAuditLogCountArgs>(
+      args?: Subset<T, FinancialAuditLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FinancialAuditLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FinancialAuditLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialAuditLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FinancialAuditLogAggregateArgs>(args: Subset<T, FinancialAuditLogAggregateArgs>): Prisma.PrismaPromise<GetFinancialAuditLogAggregateType<T>>
+
+    /**
+     * Group by FinancialAuditLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialAuditLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FinancialAuditLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FinancialAuditLogGroupByArgs['orderBy'] }
+        : { orderBy?: FinancialAuditLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FinancialAuditLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFinancialAuditLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FinancialAuditLog model
+   */
+  readonly fields: FinancialAuditLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FinancialAuditLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FinancialAuditLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FinancialAuditLog model
+   */
+  interface FinancialAuditLogFieldRefs {
+    readonly id: FieldRef<"FinancialAuditLog", 'String'>
+    readonly tenantId: FieldRef<"FinancialAuditLog", 'String'>
+    readonly actorId: FieldRef<"FinancialAuditLog", 'String'>
+    readonly eventType: FieldRef<"FinancialAuditLog", 'FinancialEventType'>
+    readonly entityType: FieldRef<"FinancialAuditLog", 'FinancialEntityType'>
+    readonly entityId: FieldRef<"FinancialAuditLog", 'String'>
+    readonly message: FieldRef<"FinancialAuditLog", 'String'>
+    readonly metadata: FieldRef<"FinancialAuditLog", 'Json'>
+    readonly createdAt: FieldRef<"FinancialAuditLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FinancialAuditLog findUnique
+   */
+  export type FinancialAuditLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which FinancialAuditLog to fetch.
+     */
+    where: FinancialAuditLogWhereUniqueInput
+  }
+
+  /**
+   * FinancialAuditLog findUniqueOrThrow
+   */
+  export type FinancialAuditLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which FinancialAuditLog to fetch.
+     */
+    where: FinancialAuditLogWhereUniqueInput
+  }
+
+  /**
+   * FinancialAuditLog findFirst
+   */
+  export type FinancialAuditLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which FinancialAuditLog to fetch.
+     */
+    where?: FinancialAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FinancialAuditLogs to fetch.
+     */
+    orderBy?: FinancialAuditLogOrderByWithRelationInput | FinancialAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FinancialAuditLogs.
+     */
+    cursor?: FinancialAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FinancialAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FinancialAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FinancialAuditLogs.
+     */
+    distinct?: FinancialAuditLogScalarFieldEnum | FinancialAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * FinancialAuditLog findFirstOrThrow
+   */
+  export type FinancialAuditLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which FinancialAuditLog to fetch.
+     */
+    where?: FinancialAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FinancialAuditLogs to fetch.
+     */
+    orderBy?: FinancialAuditLogOrderByWithRelationInput | FinancialAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FinancialAuditLogs.
+     */
+    cursor?: FinancialAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FinancialAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FinancialAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FinancialAuditLogs.
+     */
+    distinct?: FinancialAuditLogScalarFieldEnum | FinancialAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * FinancialAuditLog findMany
+   */
+  export type FinancialAuditLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which FinancialAuditLogs to fetch.
+     */
+    where?: FinancialAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FinancialAuditLogs to fetch.
+     */
+    orderBy?: FinancialAuditLogOrderByWithRelationInput | FinancialAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FinancialAuditLogs.
+     */
+    cursor?: FinancialAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FinancialAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FinancialAuditLogs.
+     */
+    skip?: number
+    distinct?: FinancialAuditLogScalarFieldEnum | FinancialAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * FinancialAuditLog create
+   */
+  export type FinancialAuditLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FinancialAuditLog.
+     */
+    data: XOR<FinancialAuditLogCreateInput, FinancialAuditLogUncheckedCreateInput>
+  }
+
+  /**
+   * FinancialAuditLog createMany
+   */
+  export type FinancialAuditLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FinancialAuditLogs.
+     */
+    data: FinancialAuditLogCreateManyInput | FinancialAuditLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FinancialAuditLog createManyAndReturn
+   */
+  export type FinancialAuditLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many FinancialAuditLogs.
+     */
+    data: FinancialAuditLogCreateManyInput | FinancialAuditLogCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FinancialAuditLog update
+   */
+  export type FinancialAuditLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FinancialAuditLog.
+     */
+    data: XOR<FinancialAuditLogUpdateInput, FinancialAuditLogUncheckedUpdateInput>
+    /**
+     * Choose, which FinancialAuditLog to update.
+     */
+    where: FinancialAuditLogWhereUniqueInput
+  }
+
+  /**
+   * FinancialAuditLog updateMany
+   */
+  export type FinancialAuditLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FinancialAuditLogs.
+     */
+    data: XOR<FinancialAuditLogUpdateManyMutationInput, FinancialAuditLogUncheckedUpdateManyInput>
+    /**
+     * Filter which FinancialAuditLogs to update
+     */
+    where?: FinancialAuditLogWhereInput
+    /**
+     * Limit how many FinancialAuditLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FinancialAuditLog updateManyAndReturn
+   */
+  export type FinancialAuditLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * The data used to update FinancialAuditLogs.
+     */
+    data: XOR<FinancialAuditLogUpdateManyMutationInput, FinancialAuditLogUncheckedUpdateManyInput>
+    /**
+     * Filter which FinancialAuditLogs to update
+     */
+    where?: FinancialAuditLogWhereInput
+    /**
+     * Limit how many FinancialAuditLogs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FinancialAuditLog upsert
+   */
+  export type FinancialAuditLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FinancialAuditLog to update in case it exists.
+     */
+    where: FinancialAuditLogWhereUniqueInput
+    /**
+     * In case the FinancialAuditLog found by the `where` argument doesn't exist, create a new FinancialAuditLog with this data.
+     */
+    create: XOR<FinancialAuditLogCreateInput, FinancialAuditLogUncheckedCreateInput>
+    /**
+     * In case the FinancialAuditLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FinancialAuditLogUpdateInput, FinancialAuditLogUncheckedUpdateInput>
+  }
+
+  /**
+   * FinancialAuditLog delete
+   */
+  export type FinancialAuditLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogInclude<ExtArgs> | null
+    /**
+     * Filter which FinancialAuditLog to delete.
+     */
+    where: FinancialAuditLogWhereUniqueInput
+  }
+
+  /**
+   * FinancialAuditLog deleteMany
+   */
+  export type FinancialAuditLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FinancialAuditLogs to delete
+     */
+    where?: FinancialAuditLogWhereInput
+    /**
+     * Limit how many FinancialAuditLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FinancialAuditLog without action
+   */
+  export type FinancialAuditLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialAuditLog
+     */
+    select?: FinancialAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialAuditLog
+     */
+    omit?: FinancialAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialAuditLogInclude<ExtArgs> | null
   }
 
 
@@ -27944,6 +30665,38 @@ export namespace Prisma {
   };
 
   export type BalanceTransactionScalarFieldEnum = (typeof BalanceTransactionScalarFieldEnum)[keyof typeof BalanceTransactionScalarFieldEnum]
+
+
+  export const TeacherTransferScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    paymentId: 'paymentId',
+    amount: 'amount',
+    fee: 'fee',
+    status: 'status',
+    attemptCount: 'attemptCount',
+    lastAttemptAt: 'lastAttemptAt',
+    failureReason: 'failureReason',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TeacherTransferScalarFieldEnum = (typeof TeacherTransferScalarFieldEnum)[keyof typeof TeacherTransferScalarFieldEnum]
+
+
+  export const FinancialAuditLogScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    actorId: 'actorId',
+    eventType: 'eventType',
+    entityType: 'entityType',
+    entityId: 'entityId',
+    message: 'message',
+    metadata: 'metadata',
+    createdAt: 'createdAt'
+  };
+
+  export type FinancialAuditLogScalarFieldEnum = (typeof FinancialAuditLogScalarFieldEnum)[keyof typeof FinancialAuditLogScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -28315,6 +31068,48 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'TransferStatus'
+   */
+  export type EnumTransferStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TransferStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'TransferStatus[]'
+   */
+  export type ListEnumTransferStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TransferStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'FinancialEventType'
+   */
+  export type EnumFinancialEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FinancialEventType'>
+    
+
+
+  /**
+   * Reference to a field of type 'FinancialEventType[]'
+   */
+  export type ListEnumFinancialEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FinancialEventType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'FinancialEntityType'
+   */
+  export type EnumFinancialEntityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FinancialEntityType'>
+    
+
+
+  /**
+   * Reference to a field of type 'FinancialEntityType[]'
+   */
+  export type ListEnumFinancialEntityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FinancialEntityType[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -28362,6 +31157,8 @@ export namespace Prisma {
     teacherSubscription?: XOR<TeacherSubscriptionNullableScalarRelationFilter, TeacherSubscriptionWhereInput> | null
     studentBalances?: StudentBalanceListRelationFilter
     balanceTransactions?: BalanceTransactionListRelationFilter
+    teacherTransfers?: TeacherTransferListRelationFilter
+    financialAuditLogs?: FinancialAuditLogListRelationFilter
   }
 
   export type TenantOrderByWithRelationInput = {
@@ -28392,6 +31189,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionOrderByWithRelationInput
     studentBalances?: StudentBalanceOrderByRelationAggregateInput
     balanceTransactions?: BalanceTransactionOrderByRelationAggregateInput
+    teacherTransfers?: TeacherTransferOrderByRelationAggregateInput
+    financialAuditLogs?: FinancialAuditLogOrderByRelationAggregateInput
   }
 
   export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -28425,6 +31224,8 @@ export namespace Prisma {
     teacherSubscription?: XOR<TeacherSubscriptionNullableScalarRelationFilter, TeacherSubscriptionWhereInput> | null
     studentBalances?: StudentBalanceListRelationFilter
     balanceTransactions?: BalanceTransactionListRelationFilter
+    teacherTransfers?: TeacherTransferListRelationFilter
+    financialAuditLogs?: FinancialAuditLogListRelationFilter
   }, "id" | "slug">
 
   export type TenantOrderByWithAggregationInput = {
@@ -29103,6 +31904,8 @@ export namespace Prisma {
     recordedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     student?: XOR<UserScalarRelationFilter, UserWhereInput>
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    balanceTransactions?: BalanceTransactionListRelationFilter
+    teacherTransfers?: TeacherTransferListRelationFilter
   }
 
   export type PaymentOrderByWithRelationInput = {
@@ -29128,6 +31931,8 @@ export namespace Prisma {
     recordedBy?: UserOrderByWithRelationInput
     student?: UserOrderByWithRelationInput
     tenant?: TenantOrderByWithRelationInput
+    balanceTransactions?: BalanceTransactionOrderByRelationAggregateInput
+    teacherTransfers?: TeacherTransferOrderByRelationAggregateInput
   }
 
   export type PaymentWhereUniqueInput = Prisma.AtLeast<{
@@ -29156,6 +31961,8 @@ export namespace Prisma {
     recordedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     student?: XOR<UserScalarRelationFilter, UserWhereInput>
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    balanceTransactions?: BalanceTransactionListRelationFilter
+    teacherTransfers?: TeacherTransferListRelationFilter
   }, "id" | "receiptNumber">
 
   export type PaymentOrderByWithAggregationInput = {
@@ -30135,6 +32942,7 @@ export namespace Prisma {
     status?: EnumTransactionStatusFilter<"BalanceTransaction"> | $Enums.TransactionStatus
     createdAt?: DateTimeFilter<"BalanceTransaction"> | Date | string
     balance?: XOR<StudentBalanceScalarRelationFilter, StudentBalanceWhereInput>
+    payment?: XOR<PaymentNullableScalarRelationFilter, PaymentWhereInput> | null
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
   }
 
@@ -30149,6 +32957,7 @@ export namespace Prisma {
     status?: SortOrder
     createdAt?: SortOrder
     balance?: StudentBalanceOrderByWithRelationInput
+    payment?: PaymentOrderByWithRelationInput
     tenant?: TenantOrderByWithRelationInput
   }
 
@@ -30166,6 +32975,7 @@ export namespace Prisma {
     status?: EnumTransactionStatusFilter<"BalanceTransaction"> | $Enums.TransactionStatus
     createdAt?: DateTimeFilter<"BalanceTransaction"> | Date | string
     balance?: XOR<StudentBalanceScalarRelationFilter, StudentBalanceWhereInput>
+    payment?: XOR<PaymentNullableScalarRelationFilter, PaymentWhereInput> | null
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
   }, "id">
 
@@ -30201,6 +33011,171 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"BalanceTransaction"> | Date | string
   }
 
+  export type TeacherTransferWhereInput = {
+    AND?: TeacherTransferWhereInput | TeacherTransferWhereInput[]
+    OR?: TeacherTransferWhereInput[]
+    NOT?: TeacherTransferWhereInput | TeacherTransferWhereInput[]
+    id?: StringFilter<"TeacherTransfer"> | string
+    tenantId?: StringFilter<"TeacherTransfer"> | string
+    paymentId?: StringFilter<"TeacherTransfer"> | string
+    amount?: IntFilter<"TeacherTransfer"> | number
+    fee?: IntFilter<"TeacherTransfer"> | number
+    status?: EnumTransferStatusFilter<"TeacherTransfer"> | $Enums.TransferStatus
+    attemptCount?: IntFilter<"TeacherTransfer"> | number
+    lastAttemptAt?: DateTimeNullableFilter<"TeacherTransfer"> | Date | string | null
+    failureReason?: StringNullableFilter<"TeacherTransfer"> | string | null
+    createdAt?: DateTimeFilter<"TeacherTransfer"> | Date | string
+    updatedAt?: DateTimeFilter<"TeacherTransfer"> | Date | string
+    payment?: XOR<PaymentScalarRelationFilter, PaymentWhereInput>
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }
+
+  export type TeacherTransferOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    paymentId?: SortOrder
+    amount?: SortOrder
+    fee?: SortOrder
+    status?: SortOrder
+    attemptCount?: SortOrder
+    lastAttemptAt?: SortOrderInput | SortOrder
+    failureReason?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    payment?: PaymentOrderByWithRelationInput
+    tenant?: TenantOrderByWithRelationInput
+  }
+
+  export type TeacherTransferWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    paymentId?: string
+    AND?: TeacherTransferWhereInput | TeacherTransferWhereInput[]
+    OR?: TeacherTransferWhereInput[]
+    NOT?: TeacherTransferWhereInput | TeacherTransferWhereInput[]
+    tenantId?: StringFilter<"TeacherTransfer"> | string
+    amount?: IntFilter<"TeacherTransfer"> | number
+    fee?: IntFilter<"TeacherTransfer"> | number
+    status?: EnumTransferStatusFilter<"TeacherTransfer"> | $Enums.TransferStatus
+    attemptCount?: IntFilter<"TeacherTransfer"> | number
+    lastAttemptAt?: DateTimeNullableFilter<"TeacherTransfer"> | Date | string | null
+    failureReason?: StringNullableFilter<"TeacherTransfer"> | string | null
+    createdAt?: DateTimeFilter<"TeacherTransfer"> | Date | string
+    updatedAt?: DateTimeFilter<"TeacherTransfer"> | Date | string
+    payment?: XOR<PaymentScalarRelationFilter, PaymentWhereInput>
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }, "id" | "paymentId">
+
+  export type TeacherTransferOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    paymentId?: SortOrder
+    amount?: SortOrder
+    fee?: SortOrder
+    status?: SortOrder
+    attemptCount?: SortOrder
+    lastAttemptAt?: SortOrderInput | SortOrder
+    failureReason?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TeacherTransferCountOrderByAggregateInput
+    _avg?: TeacherTransferAvgOrderByAggregateInput
+    _max?: TeacherTransferMaxOrderByAggregateInput
+    _min?: TeacherTransferMinOrderByAggregateInput
+    _sum?: TeacherTransferSumOrderByAggregateInput
+  }
+
+  export type TeacherTransferScalarWhereWithAggregatesInput = {
+    AND?: TeacherTransferScalarWhereWithAggregatesInput | TeacherTransferScalarWhereWithAggregatesInput[]
+    OR?: TeacherTransferScalarWhereWithAggregatesInput[]
+    NOT?: TeacherTransferScalarWhereWithAggregatesInput | TeacherTransferScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TeacherTransfer"> | string
+    tenantId?: StringWithAggregatesFilter<"TeacherTransfer"> | string
+    paymentId?: StringWithAggregatesFilter<"TeacherTransfer"> | string
+    amount?: IntWithAggregatesFilter<"TeacherTransfer"> | number
+    fee?: IntWithAggregatesFilter<"TeacherTransfer"> | number
+    status?: EnumTransferStatusWithAggregatesFilter<"TeacherTransfer"> | $Enums.TransferStatus
+    attemptCount?: IntWithAggregatesFilter<"TeacherTransfer"> | number
+    lastAttemptAt?: DateTimeNullableWithAggregatesFilter<"TeacherTransfer"> | Date | string | null
+    failureReason?: StringNullableWithAggregatesFilter<"TeacherTransfer"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"TeacherTransfer"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"TeacherTransfer"> | Date | string
+  }
+
+  export type FinancialAuditLogWhereInput = {
+    AND?: FinancialAuditLogWhereInput | FinancialAuditLogWhereInput[]
+    OR?: FinancialAuditLogWhereInput[]
+    NOT?: FinancialAuditLogWhereInput | FinancialAuditLogWhereInput[]
+    id?: StringFilter<"FinancialAuditLog"> | string
+    tenantId?: StringFilter<"FinancialAuditLog"> | string
+    actorId?: StringNullableFilter<"FinancialAuditLog"> | string | null
+    eventType?: EnumFinancialEventTypeFilter<"FinancialAuditLog"> | $Enums.FinancialEventType
+    entityType?: EnumFinancialEntityTypeFilter<"FinancialAuditLog"> | $Enums.FinancialEntityType
+    entityId?: StringNullableFilter<"FinancialAuditLog"> | string | null
+    message?: StringFilter<"FinancialAuditLog"> | string
+    metadata?: JsonNullableFilter<"FinancialAuditLog">
+    createdAt?: DateTimeFilter<"FinancialAuditLog"> | Date | string
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }
+
+  export type FinancialAuditLogOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    actorId?: SortOrderInput | SortOrder
+    eventType?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrderInput | SortOrder
+    message?: SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    tenant?: TenantOrderByWithRelationInput
+  }
+
+  export type FinancialAuditLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: FinancialAuditLogWhereInput | FinancialAuditLogWhereInput[]
+    OR?: FinancialAuditLogWhereInput[]
+    NOT?: FinancialAuditLogWhereInput | FinancialAuditLogWhereInput[]
+    tenantId?: StringFilter<"FinancialAuditLog"> | string
+    actorId?: StringNullableFilter<"FinancialAuditLog"> | string | null
+    eventType?: EnumFinancialEventTypeFilter<"FinancialAuditLog"> | $Enums.FinancialEventType
+    entityType?: EnumFinancialEntityTypeFilter<"FinancialAuditLog"> | $Enums.FinancialEntityType
+    entityId?: StringNullableFilter<"FinancialAuditLog"> | string | null
+    message?: StringFilter<"FinancialAuditLog"> | string
+    metadata?: JsonNullableFilter<"FinancialAuditLog">
+    createdAt?: DateTimeFilter<"FinancialAuditLog"> | Date | string
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }, "id">
+
+  export type FinancialAuditLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    actorId?: SortOrderInput | SortOrder
+    eventType?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrderInput | SortOrder
+    message?: SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: FinancialAuditLogCountOrderByAggregateInput
+    _max?: FinancialAuditLogMaxOrderByAggregateInput
+    _min?: FinancialAuditLogMinOrderByAggregateInput
+  }
+
+  export type FinancialAuditLogScalarWhereWithAggregatesInput = {
+    AND?: FinancialAuditLogScalarWhereWithAggregatesInput | FinancialAuditLogScalarWhereWithAggregatesInput[]
+    OR?: FinancialAuditLogScalarWhereWithAggregatesInput[]
+    NOT?: FinancialAuditLogScalarWhereWithAggregatesInput | FinancialAuditLogScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FinancialAuditLog"> | string
+    tenantId?: StringWithAggregatesFilter<"FinancialAuditLog"> | string
+    actorId?: StringNullableWithAggregatesFilter<"FinancialAuditLog"> | string | null
+    eventType?: EnumFinancialEventTypeWithAggregatesFilter<"FinancialAuditLog"> | $Enums.FinancialEventType
+    entityType?: EnumFinancialEntityTypeWithAggregatesFilter<"FinancialAuditLog"> | $Enums.FinancialEntityType
+    entityId?: StringNullableWithAggregatesFilter<"FinancialAuditLog"> | string | null
+    message?: StringWithAggregatesFilter<"FinancialAuditLog"> | string
+    metadata?: JsonNullableWithAggregatesFilter<"FinancialAuditLog">
+    createdAt?: DateTimeWithAggregatesFilter<"FinancialAuditLog"> | Date | string
+  }
+
   export type TenantCreateInput = {
     id?: string
     slug: string
@@ -30229,6 +33204,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateInput = {
@@ -30259,6 +33236,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUpdateInput = {
@@ -30289,6 +33268,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateInput = {
@@ -30319,6 +33300,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantCreateManyInput = {
@@ -31061,6 +34044,8 @@ export namespace Prisma {
     recordedBy?: UserCreateNestedOneWithoutRecordedPaymentsInput
     student: UserCreateNestedOneWithoutPaymentsInput
     tenant: TenantCreateNestedOneWithoutPaymentsInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutPaymentInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutPaymentInput
   }
 
   export type PaymentUncheckedCreateInput = {
@@ -31083,6 +34068,8 @@ export namespace Prisma {
     teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutPaymentInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutPaymentInput
   }
 
   export type PaymentUpdateInput = {
@@ -31105,6 +34092,8 @@ export namespace Prisma {
     recordedBy?: UserUpdateOneWithoutRecordedPaymentsNestedInput
     student?: UserUpdateOneRequiredWithoutPaymentsNestedInput
     tenant?: TenantUpdateOneRequiredWithoutPaymentsNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutPaymentNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutPaymentNestedInput
   }
 
   export type PaymentUncheckedUpdateInput = {
@@ -31127,6 +34116,8 @@ export namespace Prisma {
     teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutPaymentNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutPaymentNestedInput
   }
 
   export type PaymentCreateManyInput = {
@@ -32160,10 +35151,10 @@ export namespace Prisma {
     type: $Enums.TransactionType
     amount: number
     reason: string
-    relatedPaymentId?: string | null
     status?: $Enums.TransactionStatus
     createdAt?: Date | string
     balance: StudentBalanceCreateNestedOneWithoutTransactionsInput
+    payment?: PaymentCreateNestedOneWithoutBalanceTransactionsInput
     tenant: TenantCreateNestedOneWithoutBalanceTransactionsInput
   }
 
@@ -32184,10 +35175,10 @@ export namespace Prisma {
     type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
     amount?: IntFieldUpdateOperationsInput | number
     reason?: StringFieldUpdateOperationsInput | string
-    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     balance?: StudentBalanceUpdateOneRequiredWithoutTransactionsNestedInput
+    payment?: PaymentUpdateOneWithoutBalanceTransactionsNestedInput
     tenant?: TenantUpdateOneRequiredWithoutBalanceTransactionsNestedInput
   }
 
@@ -32220,7 +35211,6 @@ export namespace Prisma {
     type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
     amount?: IntFieldUpdateOperationsInput | number
     reason?: StringFieldUpdateOperationsInput | string
-    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -32234,6 +35224,185 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeacherTransferCreateInput = {
+    id?: string
+    amount: number
+    fee: number
+    status?: $Enums.TransferStatus
+    attemptCount?: number
+    lastAttemptAt?: Date | string | null
+    failureReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    payment: PaymentCreateNestedOneWithoutTeacherTransfersInput
+    tenant: TenantCreateNestedOneWithoutTeacherTransfersInput
+  }
+
+  export type TeacherTransferUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    paymentId: string
+    amount: number
+    fee: number
+    status?: $Enums.TransferStatus
+    attemptCount?: number
+    lastAttemptAt?: Date | string | null
+    failureReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TeacherTransferUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    fee?: IntFieldUpdateOperationsInput | number
+    status?: EnumTransferStatusFieldUpdateOperationsInput | $Enums.TransferStatus
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failureReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    payment?: PaymentUpdateOneRequiredWithoutTeacherTransfersNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutTeacherTransfersNestedInput
+  }
+
+  export type TeacherTransferUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    paymentId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    fee?: IntFieldUpdateOperationsInput | number
+    status?: EnumTransferStatusFieldUpdateOperationsInput | $Enums.TransferStatus
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failureReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeacherTransferCreateManyInput = {
+    id?: string
+    tenantId: string
+    paymentId: string
+    amount: number
+    fee: number
+    status?: $Enums.TransferStatus
+    attemptCount?: number
+    lastAttemptAt?: Date | string | null
+    failureReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TeacherTransferUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    fee?: IntFieldUpdateOperationsInput | number
+    status?: EnumTransferStatusFieldUpdateOperationsInput | $Enums.TransferStatus
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failureReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeacherTransferUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    paymentId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    fee?: IntFieldUpdateOperationsInput | number
+    status?: EnumTransferStatusFieldUpdateOperationsInput | $Enums.TransferStatus
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failureReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinancialAuditLogCreateInput = {
+    id?: string
+    actorId?: string | null
+    eventType: $Enums.FinancialEventType
+    entityType: $Enums.FinancialEntityType
+    entityId?: string | null
+    message: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    tenant: TenantCreateNestedOneWithoutFinancialAuditLogsInput
+  }
+
+  export type FinancialAuditLogUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    actorId?: string | null
+    eventType: $Enums.FinancialEventType
+    entityType: $Enums.FinancialEntityType
+    entityId?: string | null
+    message: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type FinancialAuditLogUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    actorId?: NullableStringFieldUpdateOperationsInput | string | null
+    eventType?: EnumFinancialEventTypeFieldUpdateOperationsInput | $Enums.FinancialEventType
+    entityType?: EnumFinancialEntityTypeFieldUpdateOperationsInput | $Enums.FinancialEntityType
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneRequiredWithoutFinancialAuditLogsNestedInput
+  }
+
+  export type FinancialAuditLogUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    actorId?: NullableStringFieldUpdateOperationsInput | string | null
+    eventType?: EnumFinancialEventTypeFieldUpdateOperationsInput | $Enums.FinancialEventType
+    entityType?: EnumFinancialEntityTypeFieldUpdateOperationsInput | $Enums.FinancialEntityType
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinancialAuditLogCreateManyInput = {
+    id?: string
+    tenantId: string
+    actorId?: string | null
+    eventType: $Enums.FinancialEventType
+    entityType: $Enums.FinancialEntityType
+    entityId?: string | null
+    message: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type FinancialAuditLogUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    actorId?: NullableStringFieldUpdateOperationsInput | string | null
+    eventType?: EnumFinancialEventTypeFieldUpdateOperationsInput | $Enums.FinancialEventType
+    entityType?: EnumFinancialEntityTypeFieldUpdateOperationsInput | $Enums.FinancialEntityType
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinancialAuditLogUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    actorId?: NullableStringFieldUpdateOperationsInput | string | null
+    eventType?: EnumFinancialEventTypeFieldUpdateOperationsInput | $Enums.FinancialEventType
+    entityType?: EnumFinancialEntityTypeFieldUpdateOperationsInput | $Enums.FinancialEntityType
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -32391,6 +35560,18 @@ export namespace Prisma {
     none?: BalanceTransactionWhereInput
   }
 
+  export type TeacherTransferListRelationFilter = {
+    every?: TeacherTransferWhereInput
+    some?: TeacherTransferWhereInput
+    none?: TeacherTransferWhereInput
+  }
+
+  export type FinancialAuditLogListRelationFilter = {
+    every?: FinancialAuditLogWhereInput
+    some?: FinancialAuditLogWhereInput
+    none?: FinancialAuditLogWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -32437,6 +35618,14 @@ export namespace Prisma {
   }
 
   export type BalanceTransactionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TeacherTransferOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type FinancialAuditLogOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -33954,6 +37143,11 @@ export namespace Prisma {
     isNot?: StudentBalanceWhereInput
   }
 
+  export type PaymentNullableScalarRelationFilter = {
+    is?: PaymentWhereInput | null
+    isNot?: PaymentWhereInput | null
+  }
+
   export type BalanceTransactionCountOrderByAggregateInput = {
     id?: SortOrder
     tenantId?: SortOrder
@@ -34016,6 +37210,150 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumTransactionStatusFilter<$PrismaModel>
     _max?: NestedEnumTransactionStatusFilter<$PrismaModel>
+  }
+
+  export type EnumTransferStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransferStatus | EnumTransferStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TransferStatus[] | ListEnumTransferStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransferStatus[] | ListEnumTransferStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransferStatusFilter<$PrismaModel> | $Enums.TransferStatus
+  }
+
+  export type PaymentScalarRelationFilter = {
+    is?: PaymentWhereInput
+    isNot?: PaymentWhereInput
+  }
+
+  export type TeacherTransferCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    paymentId?: SortOrder
+    amount?: SortOrder
+    fee?: SortOrder
+    status?: SortOrder
+    attemptCount?: SortOrder
+    lastAttemptAt?: SortOrder
+    failureReason?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TeacherTransferAvgOrderByAggregateInput = {
+    amount?: SortOrder
+    fee?: SortOrder
+    attemptCount?: SortOrder
+  }
+
+  export type TeacherTransferMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    paymentId?: SortOrder
+    amount?: SortOrder
+    fee?: SortOrder
+    status?: SortOrder
+    attemptCount?: SortOrder
+    lastAttemptAt?: SortOrder
+    failureReason?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TeacherTransferMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    paymentId?: SortOrder
+    amount?: SortOrder
+    fee?: SortOrder
+    status?: SortOrder
+    attemptCount?: SortOrder
+    lastAttemptAt?: SortOrder
+    failureReason?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TeacherTransferSumOrderByAggregateInput = {
+    amount?: SortOrder
+    fee?: SortOrder
+    attemptCount?: SortOrder
+  }
+
+  export type EnumTransferStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransferStatus | EnumTransferStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TransferStatus[] | ListEnumTransferStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransferStatus[] | ListEnumTransferStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransferStatusWithAggregatesFilter<$PrismaModel> | $Enums.TransferStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTransferStatusFilter<$PrismaModel>
+    _max?: NestedEnumTransferStatusFilter<$PrismaModel>
+  }
+
+  export type EnumFinancialEventTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.FinancialEventType | EnumFinancialEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.FinancialEventType[] | ListEnumFinancialEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FinancialEventType[] | ListEnumFinancialEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumFinancialEventTypeFilter<$PrismaModel> | $Enums.FinancialEventType
+  }
+
+  export type EnumFinancialEntityTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.FinancialEntityType | EnumFinancialEntityTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.FinancialEntityType[] | ListEnumFinancialEntityTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FinancialEntityType[] | ListEnumFinancialEntityTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumFinancialEntityTypeFilter<$PrismaModel> | $Enums.FinancialEntityType
+  }
+
+  export type FinancialAuditLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    actorId?: SortOrder
+    eventType?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    message?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type FinancialAuditLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    actorId?: SortOrder
+    eventType?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    message?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type FinancialAuditLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    actorId?: SortOrder
+    eventType?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    message?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type EnumFinancialEventTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FinancialEventType | EnumFinancialEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.FinancialEventType[] | ListEnumFinancialEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FinancialEventType[] | ListEnumFinancialEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumFinancialEventTypeWithAggregatesFilter<$PrismaModel> | $Enums.FinancialEventType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumFinancialEventTypeFilter<$PrismaModel>
+    _max?: NestedEnumFinancialEventTypeFilter<$PrismaModel>
+  }
+
+  export type EnumFinancialEntityTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FinancialEntityType | EnumFinancialEntityTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.FinancialEntityType[] | ListEnumFinancialEntityTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FinancialEntityType[] | ListEnumFinancialEntityTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumFinancialEntityTypeWithAggregatesFilter<$PrismaModel> | $Enums.FinancialEntityType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumFinancialEntityTypeFilter<$PrismaModel>
+    _max?: NestedEnumFinancialEntityTypeFilter<$PrismaModel>
   }
 
   export type TenantCreatesubjectsInput = {
@@ -34105,6 +37443,20 @@ export namespace Prisma {
     connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
   }
 
+  export type TeacherTransferCreateNestedManyWithoutTenantInput = {
+    create?: XOR<TeacherTransferCreateWithoutTenantInput, TeacherTransferUncheckedCreateWithoutTenantInput> | TeacherTransferCreateWithoutTenantInput[] | TeacherTransferUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: TeacherTransferCreateOrConnectWithoutTenantInput | TeacherTransferCreateOrConnectWithoutTenantInput[]
+    createMany?: TeacherTransferCreateManyTenantInputEnvelope
+    connect?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+  }
+
+  export type FinancialAuditLogCreateNestedManyWithoutTenantInput = {
+    create?: XOR<FinancialAuditLogCreateWithoutTenantInput, FinancialAuditLogUncheckedCreateWithoutTenantInput> | FinancialAuditLogCreateWithoutTenantInput[] | FinancialAuditLogUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: FinancialAuditLogCreateOrConnectWithoutTenantInput | FinancialAuditLogCreateOrConnectWithoutTenantInput[]
+    createMany?: FinancialAuditLogCreateManyTenantInputEnvelope
+    connect?: FinancialAuditLogWhereUniqueInput | FinancialAuditLogWhereUniqueInput[]
+  }
+
   export type AssignmentUncheckedCreateNestedManyWithoutTenantInput = {
     create?: XOR<AssignmentCreateWithoutTenantInput, AssignmentUncheckedCreateWithoutTenantInput> | AssignmentCreateWithoutTenantInput[] | AssignmentUncheckedCreateWithoutTenantInput[]
     connectOrCreate?: AssignmentCreateOrConnectWithoutTenantInput | AssignmentCreateOrConnectWithoutTenantInput[]
@@ -34186,6 +37538,20 @@ export namespace Prisma {
     connectOrCreate?: BalanceTransactionCreateOrConnectWithoutTenantInput | BalanceTransactionCreateOrConnectWithoutTenantInput[]
     createMany?: BalanceTransactionCreateManyTenantInputEnvelope
     connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+  }
+
+  export type TeacherTransferUncheckedCreateNestedManyWithoutTenantInput = {
+    create?: XOR<TeacherTransferCreateWithoutTenantInput, TeacherTransferUncheckedCreateWithoutTenantInput> | TeacherTransferCreateWithoutTenantInput[] | TeacherTransferUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: TeacherTransferCreateOrConnectWithoutTenantInput | TeacherTransferCreateOrConnectWithoutTenantInput[]
+    createMany?: TeacherTransferCreateManyTenantInputEnvelope
+    connect?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+  }
+
+  export type FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput = {
+    create?: XOR<FinancialAuditLogCreateWithoutTenantInput, FinancialAuditLogUncheckedCreateWithoutTenantInput> | FinancialAuditLogCreateWithoutTenantInput[] | FinancialAuditLogUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: FinancialAuditLogCreateOrConnectWithoutTenantInput | FinancialAuditLogCreateOrConnectWithoutTenantInput[]
+    createMany?: FinancialAuditLogCreateManyTenantInputEnvelope
+    connect?: FinancialAuditLogWhereUniqueInput | FinancialAuditLogWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -34389,6 +37755,34 @@ export namespace Prisma {
     deleteMany?: BalanceTransactionScalarWhereInput | BalanceTransactionScalarWhereInput[]
   }
 
+  export type TeacherTransferUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<TeacherTransferCreateWithoutTenantInput, TeacherTransferUncheckedCreateWithoutTenantInput> | TeacherTransferCreateWithoutTenantInput[] | TeacherTransferUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: TeacherTransferCreateOrConnectWithoutTenantInput | TeacherTransferCreateOrConnectWithoutTenantInput[]
+    upsert?: TeacherTransferUpsertWithWhereUniqueWithoutTenantInput | TeacherTransferUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: TeacherTransferCreateManyTenantInputEnvelope
+    set?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    disconnect?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    delete?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    connect?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    update?: TeacherTransferUpdateWithWhereUniqueWithoutTenantInput | TeacherTransferUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: TeacherTransferUpdateManyWithWhereWithoutTenantInput | TeacherTransferUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: TeacherTransferScalarWhereInput | TeacherTransferScalarWhereInput[]
+  }
+
+  export type FinancialAuditLogUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<FinancialAuditLogCreateWithoutTenantInput, FinancialAuditLogUncheckedCreateWithoutTenantInput> | FinancialAuditLogCreateWithoutTenantInput[] | FinancialAuditLogUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: FinancialAuditLogCreateOrConnectWithoutTenantInput | FinancialAuditLogCreateOrConnectWithoutTenantInput[]
+    upsert?: FinancialAuditLogUpsertWithWhereUniqueWithoutTenantInput | FinancialAuditLogUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: FinancialAuditLogCreateManyTenantInputEnvelope
+    set?: FinancialAuditLogWhereUniqueInput | FinancialAuditLogWhereUniqueInput[]
+    disconnect?: FinancialAuditLogWhereUniqueInput | FinancialAuditLogWhereUniqueInput[]
+    delete?: FinancialAuditLogWhereUniqueInput | FinancialAuditLogWhereUniqueInput[]
+    connect?: FinancialAuditLogWhereUniqueInput | FinancialAuditLogWhereUniqueInput[]
+    update?: FinancialAuditLogUpdateWithWhereUniqueWithoutTenantInput | FinancialAuditLogUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: FinancialAuditLogUpdateManyWithWhereWithoutTenantInput | FinancialAuditLogUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: FinancialAuditLogScalarWhereInput | FinancialAuditLogScalarWhereInput[]
+  }
+
   export type AssignmentUncheckedUpdateManyWithoutTenantNestedInput = {
     create?: XOR<AssignmentCreateWithoutTenantInput, AssignmentUncheckedCreateWithoutTenantInput> | AssignmentCreateWithoutTenantInput[] | AssignmentUncheckedCreateWithoutTenantInput[]
     connectOrCreate?: AssignmentCreateOrConnectWithoutTenantInput | AssignmentCreateOrConnectWithoutTenantInput[]
@@ -34551,6 +37945,34 @@ export namespace Prisma {
     update?: BalanceTransactionUpdateWithWhereUniqueWithoutTenantInput | BalanceTransactionUpdateWithWhereUniqueWithoutTenantInput[]
     updateMany?: BalanceTransactionUpdateManyWithWhereWithoutTenantInput | BalanceTransactionUpdateManyWithWhereWithoutTenantInput[]
     deleteMany?: BalanceTransactionScalarWhereInput | BalanceTransactionScalarWhereInput[]
+  }
+
+  export type TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<TeacherTransferCreateWithoutTenantInput, TeacherTransferUncheckedCreateWithoutTenantInput> | TeacherTransferCreateWithoutTenantInput[] | TeacherTransferUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: TeacherTransferCreateOrConnectWithoutTenantInput | TeacherTransferCreateOrConnectWithoutTenantInput[]
+    upsert?: TeacherTransferUpsertWithWhereUniqueWithoutTenantInput | TeacherTransferUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: TeacherTransferCreateManyTenantInputEnvelope
+    set?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    disconnect?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    delete?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    connect?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    update?: TeacherTransferUpdateWithWhereUniqueWithoutTenantInput | TeacherTransferUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: TeacherTransferUpdateManyWithWhereWithoutTenantInput | TeacherTransferUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: TeacherTransferScalarWhereInput | TeacherTransferScalarWhereInput[]
+  }
+
+  export type FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<FinancialAuditLogCreateWithoutTenantInput, FinancialAuditLogUncheckedCreateWithoutTenantInput> | FinancialAuditLogCreateWithoutTenantInput[] | FinancialAuditLogUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: FinancialAuditLogCreateOrConnectWithoutTenantInput | FinancialAuditLogCreateOrConnectWithoutTenantInput[]
+    upsert?: FinancialAuditLogUpsertWithWhereUniqueWithoutTenantInput | FinancialAuditLogUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: FinancialAuditLogCreateManyTenantInputEnvelope
+    set?: FinancialAuditLogWhereUniqueInput | FinancialAuditLogWhereUniqueInput[]
+    disconnect?: FinancialAuditLogWhereUniqueInput | FinancialAuditLogWhereUniqueInput[]
+    delete?: FinancialAuditLogWhereUniqueInput | FinancialAuditLogWhereUniqueInput[]
+    connect?: FinancialAuditLogWhereUniqueInput | FinancialAuditLogWhereUniqueInput[]
+    update?: FinancialAuditLogUpdateWithWhereUniqueWithoutTenantInput | FinancialAuditLogUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: FinancialAuditLogUpdateManyWithWhereWithoutTenantInput | FinancialAuditLogUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: FinancialAuditLogScalarWhereInput | FinancialAuditLogScalarWhereInput[]
   }
 
   export type AssignmentSubmissionCreateNestedManyWithoutStudentInput = {
@@ -35670,6 +39092,34 @@ export namespace Prisma {
     connect?: TenantWhereUniqueInput
   }
 
+  export type BalanceTransactionCreateNestedManyWithoutPaymentInput = {
+    create?: XOR<BalanceTransactionCreateWithoutPaymentInput, BalanceTransactionUncheckedCreateWithoutPaymentInput> | BalanceTransactionCreateWithoutPaymentInput[] | BalanceTransactionUncheckedCreateWithoutPaymentInput[]
+    connectOrCreate?: BalanceTransactionCreateOrConnectWithoutPaymentInput | BalanceTransactionCreateOrConnectWithoutPaymentInput[]
+    createMany?: BalanceTransactionCreateManyPaymentInputEnvelope
+    connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+  }
+
+  export type TeacherTransferCreateNestedManyWithoutPaymentInput = {
+    create?: XOR<TeacherTransferCreateWithoutPaymentInput, TeacherTransferUncheckedCreateWithoutPaymentInput> | TeacherTransferCreateWithoutPaymentInput[] | TeacherTransferUncheckedCreateWithoutPaymentInput[]
+    connectOrCreate?: TeacherTransferCreateOrConnectWithoutPaymentInput | TeacherTransferCreateOrConnectWithoutPaymentInput[]
+    createMany?: TeacherTransferCreateManyPaymentInputEnvelope
+    connect?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+  }
+
+  export type BalanceTransactionUncheckedCreateNestedManyWithoutPaymentInput = {
+    create?: XOR<BalanceTransactionCreateWithoutPaymentInput, BalanceTransactionUncheckedCreateWithoutPaymentInput> | BalanceTransactionCreateWithoutPaymentInput[] | BalanceTransactionUncheckedCreateWithoutPaymentInput[]
+    connectOrCreate?: BalanceTransactionCreateOrConnectWithoutPaymentInput | BalanceTransactionCreateOrConnectWithoutPaymentInput[]
+    createMany?: BalanceTransactionCreateManyPaymentInputEnvelope
+    connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+  }
+
+  export type TeacherTransferUncheckedCreateNestedManyWithoutPaymentInput = {
+    create?: XOR<TeacherTransferCreateWithoutPaymentInput, TeacherTransferUncheckedCreateWithoutPaymentInput> | TeacherTransferCreateWithoutPaymentInput[] | TeacherTransferUncheckedCreateWithoutPaymentInput[]
+    connectOrCreate?: TeacherTransferCreateOrConnectWithoutPaymentInput | TeacherTransferCreateOrConnectWithoutPaymentInput[]
+    createMany?: TeacherTransferCreateManyPaymentInputEnvelope
+    connect?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+  }
+
   export type EnumPaymentStatusFieldUpdateOperationsInput = {
     set?: $Enums.PaymentStatus
   }
@@ -35714,6 +39164,62 @@ export namespace Prisma {
     upsert?: TenantUpsertWithoutPaymentsInput
     connect?: TenantWhereUniqueInput
     update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutPaymentsInput, TenantUpdateWithoutPaymentsInput>, TenantUncheckedUpdateWithoutPaymentsInput>
+  }
+
+  export type BalanceTransactionUpdateManyWithoutPaymentNestedInput = {
+    create?: XOR<BalanceTransactionCreateWithoutPaymentInput, BalanceTransactionUncheckedCreateWithoutPaymentInput> | BalanceTransactionCreateWithoutPaymentInput[] | BalanceTransactionUncheckedCreateWithoutPaymentInput[]
+    connectOrCreate?: BalanceTransactionCreateOrConnectWithoutPaymentInput | BalanceTransactionCreateOrConnectWithoutPaymentInput[]
+    upsert?: BalanceTransactionUpsertWithWhereUniqueWithoutPaymentInput | BalanceTransactionUpsertWithWhereUniqueWithoutPaymentInput[]
+    createMany?: BalanceTransactionCreateManyPaymentInputEnvelope
+    set?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    disconnect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    delete?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    update?: BalanceTransactionUpdateWithWhereUniqueWithoutPaymentInput | BalanceTransactionUpdateWithWhereUniqueWithoutPaymentInput[]
+    updateMany?: BalanceTransactionUpdateManyWithWhereWithoutPaymentInput | BalanceTransactionUpdateManyWithWhereWithoutPaymentInput[]
+    deleteMany?: BalanceTransactionScalarWhereInput | BalanceTransactionScalarWhereInput[]
+  }
+
+  export type TeacherTransferUpdateManyWithoutPaymentNestedInput = {
+    create?: XOR<TeacherTransferCreateWithoutPaymentInput, TeacherTransferUncheckedCreateWithoutPaymentInput> | TeacherTransferCreateWithoutPaymentInput[] | TeacherTransferUncheckedCreateWithoutPaymentInput[]
+    connectOrCreate?: TeacherTransferCreateOrConnectWithoutPaymentInput | TeacherTransferCreateOrConnectWithoutPaymentInput[]
+    upsert?: TeacherTransferUpsertWithWhereUniqueWithoutPaymentInput | TeacherTransferUpsertWithWhereUniqueWithoutPaymentInput[]
+    createMany?: TeacherTransferCreateManyPaymentInputEnvelope
+    set?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    disconnect?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    delete?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    connect?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    update?: TeacherTransferUpdateWithWhereUniqueWithoutPaymentInput | TeacherTransferUpdateWithWhereUniqueWithoutPaymentInput[]
+    updateMany?: TeacherTransferUpdateManyWithWhereWithoutPaymentInput | TeacherTransferUpdateManyWithWhereWithoutPaymentInput[]
+    deleteMany?: TeacherTransferScalarWhereInput | TeacherTransferScalarWhereInput[]
+  }
+
+  export type BalanceTransactionUncheckedUpdateManyWithoutPaymentNestedInput = {
+    create?: XOR<BalanceTransactionCreateWithoutPaymentInput, BalanceTransactionUncheckedCreateWithoutPaymentInput> | BalanceTransactionCreateWithoutPaymentInput[] | BalanceTransactionUncheckedCreateWithoutPaymentInput[]
+    connectOrCreate?: BalanceTransactionCreateOrConnectWithoutPaymentInput | BalanceTransactionCreateOrConnectWithoutPaymentInput[]
+    upsert?: BalanceTransactionUpsertWithWhereUniqueWithoutPaymentInput | BalanceTransactionUpsertWithWhereUniqueWithoutPaymentInput[]
+    createMany?: BalanceTransactionCreateManyPaymentInputEnvelope
+    set?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    disconnect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    delete?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    connect?: BalanceTransactionWhereUniqueInput | BalanceTransactionWhereUniqueInput[]
+    update?: BalanceTransactionUpdateWithWhereUniqueWithoutPaymentInput | BalanceTransactionUpdateWithWhereUniqueWithoutPaymentInput[]
+    updateMany?: BalanceTransactionUpdateManyWithWhereWithoutPaymentInput | BalanceTransactionUpdateManyWithWhereWithoutPaymentInput[]
+    deleteMany?: BalanceTransactionScalarWhereInput | BalanceTransactionScalarWhereInput[]
+  }
+
+  export type TeacherTransferUncheckedUpdateManyWithoutPaymentNestedInput = {
+    create?: XOR<TeacherTransferCreateWithoutPaymentInput, TeacherTransferUncheckedCreateWithoutPaymentInput> | TeacherTransferCreateWithoutPaymentInput[] | TeacherTransferUncheckedCreateWithoutPaymentInput[]
+    connectOrCreate?: TeacherTransferCreateOrConnectWithoutPaymentInput | TeacherTransferCreateOrConnectWithoutPaymentInput[]
+    upsert?: TeacherTransferUpsertWithWhereUniqueWithoutPaymentInput | TeacherTransferUpsertWithWhereUniqueWithoutPaymentInput[]
+    createMany?: TeacherTransferCreateManyPaymentInputEnvelope
+    set?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    disconnect?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    delete?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    connect?: TeacherTransferWhereUniqueInput | TeacherTransferWhereUniqueInput[]
+    update?: TeacherTransferUpdateWithWhereUniqueWithoutPaymentInput | TeacherTransferUpdateWithWhereUniqueWithoutPaymentInput[]
+    updateMany?: TeacherTransferUpdateManyWithWhereWithoutPaymentInput | TeacherTransferUpdateManyWithWhereWithoutPaymentInput[]
+    deleteMany?: TeacherTransferScalarWhereInput | TeacherTransferScalarWhereInput[]
   }
 
   export type TenantCreateNestedOneWithoutNotificationsInput = {
@@ -36182,6 +39688,12 @@ export namespace Prisma {
     connect?: StudentBalanceWhereUniqueInput
   }
 
+  export type PaymentCreateNestedOneWithoutBalanceTransactionsInput = {
+    create?: XOR<PaymentCreateWithoutBalanceTransactionsInput, PaymentUncheckedCreateWithoutBalanceTransactionsInput>
+    connectOrCreate?: PaymentCreateOrConnectWithoutBalanceTransactionsInput
+    connect?: PaymentWhereUniqueInput
+  }
+
   export type TenantCreateNestedOneWithoutBalanceTransactionsInput = {
     create?: XOR<TenantCreateWithoutBalanceTransactionsInput, TenantUncheckedCreateWithoutBalanceTransactionsInput>
     connectOrCreate?: TenantCreateOrConnectWithoutBalanceTransactionsInput
@@ -36204,12 +39716,76 @@ export namespace Prisma {
     update?: XOR<XOR<StudentBalanceUpdateToOneWithWhereWithoutTransactionsInput, StudentBalanceUpdateWithoutTransactionsInput>, StudentBalanceUncheckedUpdateWithoutTransactionsInput>
   }
 
+  export type PaymentUpdateOneWithoutBalanceTransactionsNestedInput = {
+    create?: XOR<PaymentCreateWithoutBalanceTransactionsInput, PaymentUncheckedCreateWithoutBalanceTransactionsInput>
+    connectOrCreate?: PaymentCreateOrConnectWithoutBalanceTransactionsInput
+    upsert?: PaymentUpsertWithoutBalanceTransactionsInput
+    disconnect?: PaymentWhereInput | boolean
+    delete?: PaymentWhereInput | boolean
+    connect?: PaymentWhereUniqueInput
+    update?: XOR<XOR<PaymentUpdateToOneWithWhereWithoutBalanceTransactionsInput, PaymentUpdateWithoutBalanceTransactionsInput>, PaymentUncheckedUpdateWithoutBalanceTransactionsInput>
+  }
+
   export type TenantUpdateOneRequiredWithoutBalanceTransactionsNestedInput = {
     create?: XOR<TenantCreateWithoutBalanceTransactionsInput, TenantUncheckedCreateWithoutBalanceTransactionsInput>
     connectOrCreate?: TenantCreateOrConnectWithoutBalanceTransactionsInput
     upsert?: TenantUpsertWithoutBalanceTransactionsInput
     connect?: TenantWhereUniqueInput
     update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutBalanceTransactionsInput, TenantUpdateWithoutBalanceTransactionsInput>, TenantUncheckedUpdateWithoutBalanceTransactionsInput>
+  }
+
+  export type PaymentCreateNestedOneWithoutTeacherTransfersInput = {
+    create?: XOR<PaymentCreateWithoutTeacherTransfersInput, PaymentUncheckedCreateWithoutTeacherTransfersInput>
+    connectOrCreate?: PaymentCreateOrConnectWithoutTeacherTransfersInput
+    connect?: PaymentWhereUniqueInput
+  }
+
+  export type TenantCreateNestedOneWithoutTeacherTransfersInput = {
+    create?: XOR<TenantCreateWithoutTeacherTransfersInput, TenantUncheckedCreateWithoutTeacherTransfersInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutTeacherTransfersInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type EnumTransferStatusFieldUpdateOperationsInput = {
+    set?: $Enums.TransferStatus
+  }
+
+  export type PaymentUpdateOneRequiredWithoutTeacherTransfersNestedInput = {
+    create?: XOR<PaymentCreateWithoutTeacherTransfersInput, PaymentUncheckedCreateWithoutTeacherTransfersInput>
+    connectOrCreate?: PaymentCreateOrConnectWithoutTeacherTransfersInput
+    upsert?: PaymentUpsertWithoutTeacherTransfersInput
+    connect?: PaymentWhereUniqueInput
+    update?: XOR<XOR<PaymentUpdateToOneWithWhereWithoutTeacherTransfersInput, PaymentUpdateWithoutTeacherTransfersInput>, PaymentUncheckedUpdateWithoutTeacherTransfersInput>
+  }
+
+  export type TenantUpdateOneRequiredWithoutTeacherTransfersNestedInput = {
+    create?: XOR<TenantCreateWithoutTeacherTransfersInput, TenantUncheckedCreateWithoutTeacherTransfersInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutTeacherTransfersInput
+    upsert?: TenantUpsertWithoutTeacherTransfersInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutTeacherTransfersInput, TenantUpdateWithoutTeacherTransfersInput>, TenantUncheckedUpdateWithoutTeacherTransfersInput>
+  }
+
+  export type TenantCreateNestedOneWithoutFinancialAuditLogsInput = {
+    create?: XOR<TenantCreateWithoutFinancialAuditLogsInput, TenantUncheckedCreateWithoutFinancialAuditLogsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutFinancialAuditLogsInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type EnumFinancialEventTypeFieldUpdateOperationsInput = {
+    set?: $Enums.FinancialEventType
+  }
+
+  export type EnumFinancialEntityTypeFieldUpdateOperationsInput = {
+    set?: $Enums.FinancialEntityType
+  }
+
+  export type TenantUpdateOneRequiredWithoutFinancialAuditLogsNestedInput = {
+    create?: XOR<TenantCreateWithoutFinancialAuditLogsInput, TenantUncheckedCreateWithoutFinancialAuditLogsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutFinancialAuditLogsInput
+    upsert?: TenantUpsertWithoutFinancialAuditLogsInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutFinancialAuditLogsInput, TenantUpdateWithoutFinancialAuditLogsInput>, TenantUncheckedUpdateWithoutFinancialAuditLogsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -36765,6 +40341,57 @@ export namespace Prisma {
     _max?: NestedEnumTransactionStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumTransferStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransferStatus | EnumTransferStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TransferStatus[] | ListEnumTransferStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransferStatus[] | ListEnumTransferStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransferStatusFilter<$PrismaModel> | $Enums.TransferStatus
+  }
+
+  export type NestedEnumTransferStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransferStatus | EnumTransferStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TransferStatus[] | ListEnumTransferStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransferStatus[] | ListEnumTransferStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransferStatusWithAggregatesFilter<$PrismaModel> | $Enums.TransferStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTransferStatusFilter<$PrismaModel>
+    _max?: NestedEnumTransferStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumFinancialEventTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.FinancialEventType | EnumFinancialEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.FinancialEventType[] | ListEnumFinancialEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FinancialEventType[] | ListEnumFinancialEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumFinancialEventTypeFilter<$PrismaModel> | $Enums.FinancialEventType
+  }
+
+  export type NestedEnumFinancialEntityTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.FinancialEntityType | EnumFinancialEntityTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.FinancialEntityType[] | ListEnumFinancialEntityTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FinancialEntityType[] | ListEnumFinancialEntityTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumFinancialEntityTypeFilter<$PrismaModel> | $Enums.FinancialEntityType
+  }
+
+  export type NestedEnumFinancialEventTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FinancialEventType | EnumFinancialEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.FinancialEventType[] | ListEnumFinancialEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FinancialEventType[] | ListEnumFinancialEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumFinancialEventTypeWithAggregatesFilter<$PrismaModel> | $Enums.FinancialEventType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumFinancialEventTypeFilter<$PrismaModel>
+    _max?: NestedEnumFinancialEventTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumFinancialEntityTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FinancialEntityType | EnumFinancialEntityTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.FinancialEntityType[] | ListEnumFinancialEntityTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FinancialEntityType[] | ListEnumFinancialEntityTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumFinancialEntityTypeWithAggregatesFilter<$PrismaModel> | $Enums.FinancialEntityType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumFinancialEntityTypeFilter<$PrismaModel>
+    _max?: NestedEnumFinancialEntityTypeFilter<$PrismaModel>
+  }
+
   export type AssignmentCreateWithoutTenantInput = {
     id?: string
     title: string
@@ -37020,6 +40647,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     recordedBy?: UserCreateNestedOneWithoutRecordedPaymentsInput
     student: UserCreateNestedOneWithoutPaymentsInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutPaymentInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutPaymentInput
   }
 
   export type PaymentUncheckedCreateWithoutTenantInput = {
@@ -37041,6 +40670,8 @@ export namespace Prisma {
     teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutPaymentInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutPaymentInput
   }
 
   export type PaymentCreateOrConnectWithoutTenantInput = {
@@ -37239,10 +40870,10 @@ export namespace Prisma {
     type: $Enums.TransactionType
     amount: number
     reason: string
-    relatedPaymentId?: string | null
     status?: $Enums.TransactionStatus
     createdAt?: Date | string
     balance: StudentBalanceCreateNestedOneWithoutTransactionsInput
+    payment?: PaymentCreateNestedOneWithoutBalanceTransactionsInput
   }
 
   export type BalanceTransactionUncheckedCreateWithoutTenantInput = {
@@ -37263,6 +40894,74 @@ export namespace Prisma {
 
   export type BalanceTransactionCreateManyTenantInputEnvelope = {
     data: BalanceTransactionCreateManyTenantInput | BalanceTransactionCreateManyTenantInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TeacherTransferCreateWithoutTenantInput = {
+    id?: string
+    amount: number
+    fee: number
+    status?: $Enums.TransferStatus
+    attemptCount?: number
+    lastAttemptAt?: Date | string | null
+    failureReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    payment: PaymentCreateNestedOneWithoutTeacherTransfersInput
+  }
+
+  export type TeacherTransferUncheckedCreateWithoutTenantInput = {
+    id?: string
+    paymentId: string
+    amount: number
+    fee: number
+    status?: $Enums.TransferStatus
+    attemptCount?: number
+    lastAttemptAt?: Date | string | null
+    failureReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TeacherTransferCreateOrConnectWithoutTenantInput = {
+    where: TeacherTransferWhereUniqueInput
+    create: XOR<TeacherTransferCreateWithoutTenantInput, TeacherTransferUncheckedCreateWithoutTenantInput>
+  }
+
+  export type TeacherTransferCreateManyTenantInputEnvelope = {
+    data: TeacherTransferCreateManyTenantInput | TeacherTransferCreateManyTenantInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FinancialAuditLogCreateWithoutTenantInput = {
+    id?: string
+    actorId?: string | null
+    eventType: $Enums.FinancialEventType
+    entityType: $Enums.FinancialEntityType
+    entityId?: string | null
+    message: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type FinancialAuditLogUncheckedCreateWithoutTenantInput = {
+    id?: string
+    actorId?: string | null
+    eventType: $Enums.FinancialEventType
+    entityType: $Enums.FinancialEntityType
+    entityId?: string | null
+    message: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type FinancialAuditLogCreateOrConnectWithoutTenantInput = {
+    where: FinancialAuditLogWhereUniqueInput
+    create: XOR<FinancialAuditLogCreateWithoutTenantInput, FinancialAuditLogUncheckedCreateWithoutTenantInput>
+  }
+
+  export type FinancialAuditLogCreateManyTenantInputEnvelope = {
+    data: FinancialAuditLogCreateManyTenantInput | FinancialAuditLogCreateManyTenantInput[]
     skipDuplicates?: boolean
   }
 
@@ -37679,6 +41378,70 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"BalanceTransaction"> | Date | string
   }
 
+  export type TeacherTransferUpsertWithWhereUniqueWithoutTenantInput = {
+    where: TeacherTransferWhereUniqueInput
+    update: XOR<TeacherTransferUpdateWithoutTenantInput, TeacherTransferUncheckedUpdateWithoutTenantInput>
+    create: XOR<TeacherTransferCreateWithoutTenantInput, TeacherTransferUncheckedCreateWithoutTenantInput>
+  }
+
+  export type TeacherTransferUpdateWithWhereUniqueWithoutTenantInput = {
+    where: TeacherTransferWhereUniqueInput
+    data: XOR<TeacherTransferUpdateWithoutTenantInput, TeacherTransferUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type TeacherTransferUpdateManyWithWhereWithoutTenantInput = {
+    where: TeacherTransferScalarWhereInput
+    data: XOR<TeacherTransferUpdateManyMutationInput, TeacherTransferUncheckedUpdateManyWithoutTenantInput>
+  }
+
+  export type TeacherTransferScalarWhereInput = {
+    AND?: TeacherTransferScalarWhereInput | TeacherTransferScalarWhereInput[]
+    OR?: TeacherTransferScalarWhereInput[]
+    NOT?: TeacherTransferScalarWhereInput | TeacherTransferScalarWhereInput[]
+    id?: StringFilter<"TeacherTransfer"> | string
+    tenantId?: StringFilter<"TeacherTransfer"> | string
+    paymentId?: StringFilter<"TeacherTransfer"> | string
+    amount?: IntFilter<"TeacherTransfer"> | number
+    fee?: IntFilter<"TeacherTransfer"> | number
+    status?: EnumTransferStatusFilter<"TeacherTransfer"> | $Enums.TransferStatus
+    attemptCount?: IntFilter<"TeacherTransfer"> | number
+    lastAttemptAt?: DateTimeNullableFilter<"TeacherTransfer"> | Date | string | null
+    failureReason?: StringNullableFilter<"TeacherTransfer"> | string | null
+    createdAt?: DateTimeFilter<"TeacherTransfer"> | Date | string
+    updatedAt?: DateTimeFilter<"TeacherTransfer"> | Date | string
+  }
+
+  export type FinancialAuditLogUpsertWithWhereUniqueWithoutTenantInput = {
+    where: FinancialAuditLogWhereUniqueInput
+    update: XOR<FinancialAuditLogUpdateWithoutTenantInput, FinancialAuditLogUncheckedUpdateWithoutTenantInput>
+    create: XOR<FinancialAuditLogCreateWithoutTenantInput, FinancialAuditLogUncheckedCreateWithoutTenantInput>
+  }
+
+  export type FinancialAuditLogUpdateWithWhereUniqueWithoutTenantInput = {
+    where: FinancialAuditLogWhereUniqueInput
+    data: XOR<FinancialAuditLogUpdateWithoutTenantInput, FinancialAuditLogUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type FinancialAuditLogUpdateManyWithWhereWithoutTenantInput = {
+    where: FinancialAuditLogScalarWhereInput
+    data: XOR<FinancialAuditLogUpdateManyMutationInput, FinancialAuditLogUncheckedUpdateManyWithoutTenantInput>
+  }
+
+  export type FinancialAuditLogScalarWhereInput = {
+    AND?: FinancialAuditLogScalarWhereInput | FinancialAuditLogScalarWhereInput[]
+    OR?: FinancialAuditLogScalarWhereInput[]
+    NOT?: FinancialAuditLogScalarWhereInput | FinancialAuditLogScalarWhereInput[]
+    id?: StringFilter<"FinancialAuditLog"> | string
+    tenantId?: StringFilter<"FinancialAuditLog"> | string
+    actorId?: StringNullableFilter<"FinancialAuditLog"> | string | null
+    eventType?: EnumFinancialEventTypeFilter<"FinancialAuditLog"> | $Enums.FinancialEventType
+    entityType?: EnumFinancialEntityTypeFilter<"FinancialAuditLog"> | $Enums.FinancialEntityType
+    entityId?: StringNullableFilter<"FinancialAuditLog"> | string | null
+    message?: StringFilter<"FinancialAuditLog"> | string
+    metadata?: JsonNullableFilter<"FinancialAuditLog">
+    createdAt?: DateTimeFilter<"FinancialAuditLog"> | Date | string
+  }
+
   export type AssignmentSubmissionCreateWithoutStudentInput = {
     id?: string
     fileUrl?: string | null
@@ -38040,6 +41803,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     student: UserCreateNestedOneWithoutPaymentsInput
     tenant: TenantCreateNestedOneWithoutPaymentsInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutPaymentInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutPaymentInput
   }
 
   export type PaymentUncheckedCreateWithoutRecordedByInput = {
@@ -38061,6 +41826,8 @@ export namespace Prisma {
     teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutPaymentInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutPaymentInput
   }
 
   export type PaymentCreateOrConnectWithoutRecordedByInput = {
@@ -38092,6 +41859,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     recordedBy?: UserCreateNestedOneWithoutRecordedPaymentsInput
     tenant: TenantCreateNestedOneWithoutPaymentsInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutPaymentInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutPaymentInput
   }
 
   export type PaymentUncheckedCreateWithoutStudentInput = {
@@ -38113,6 +41882,8 @@ export namespace Prisma {
     teacherApiUsed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutPaymentInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutPaymentInput
   }
 
   export type PaymentCreateOrConnectWithoutStudentInput = {
@@ -38152,6 +41923,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutUsersInput = {
@@ -38181,6 +41954,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutUsersInput = {
@@ -38569,6 +42344,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutUsersInput = {
@@ -38598,6 +42375,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type StudentBalanceUpsertWithWhereUniqueWithoutStudentInput = {
@@ -39067,6 +42846,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutGroupsInput = {
@@ -39096,6 +42877,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutGroupsInput = {
@@ -39255,6 +43038,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutGroupsInput = {
@@ -39284,6 +43069,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type GroupStudentUpsertWithWhereUniqueWithoutGroupInput = {
@@ -39694,6 +43481,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutSessionsInput = {
@@ -39723,6 +43512,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutSessionsInput = {
@@ -39843,6 +43634,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutSessionsInput = {
@@ -39872,6 +43665,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type GroupCreateWithoutAttendancesInput = {
@@ -40131,6 +43926,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutAttendancesInput = {
@@ -40160,6 +43957,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutAttendancesInput = {
@@ -40459,6 +44258,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutAttendancesInput = {
@@ -40488,6 +44289,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserCreateWithoutRecordedPaymentsInput = {
@@ -40659,6 +44462,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutPaymentsInput = {
@@ -40688,11 +44493,81 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutPaymentsInput = {
     where: TenantWhereUniqueInput
     create: XOR<TenantCreateWithoutPaymentsInput, TenantUncheckedCreateWithoutPaymentsInput>
+  }
+
+  export type BalanceTransactionCreateWithoutPaymentInput = {
+    id?: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    status?: $Enums.TransactionStatus
+    createdAt?: Date | string
+    balance: StudentBalanceCreateNestedOneWithoutTransactionsInput
+    tenant: TenantCreateNestedOneWithoutBalanceTransactionsInput
+  }
+
+  export type BalanceTransactionUncheckedCreateWithoutPaymentInput = {
+    id?: string
+    tenantId: string
+    balanceId: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    status?: $Enums.TransactionStatus
+    createdAt?: Date | string
+  }
+
+  export type BalanceTransactionCreateOrConnectWithoutPaymentInput = {
+    where: BalanceTransactionWhereUniqueInput
+    create: XOR<BalanceTransactionCreateWithoutPaymentInput, BalanceTransactionUncheckedCreateWithoutPaymentInput>
+  }
+
+  export type BalanceTransactionCreateManyPaymentInputEnvelope = {
+    data: BalanceTransactionCreateManyPaymentInput | BalanceTransactionCreateManyPaymentInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TeacherTransferCreateWithoutPaymentInput = {
+    id?: string
+    amount: number
+    fee: number
+    status?: $Enums.TransferStatus
+    attemptCount?: number
+    lastAttemptAt?: Date | string | null
+    failureReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant: TenantCreateNestedOneWithoutTeacherTransfersInput
+  }
+
+  export type TeacherTransferUncheckedCreateWithoutPaymentInput = {
+    id?: string
+    tenantId: string
+    amount: number
+    fee: number
+    status?: $Enums.TransferStatus
+    attemptCount?: number
+    lastAttemptAt?: Date | string | null
+    failureReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TeacherTransferCreateOrConnectWithoutPaymentInput = {
+    where: TeacherTransferWhereUniqueInput
+    create: XOR<TeacherTransferCreateWithoutPaymentInput, TeacherTransferUncheckedCreateWithoutPaymentInput>
+  }
+
+  export type TeacherTransferCreateManyPaymentInputEnvelope = {
+    data: TeacherTransferCreateManyPaymentInput | TeacherTransferCreateManyPaymentInput[]
+    skipDuplicates?: boolean
   }
 
   export type UserUpsertWithoutRecordedPaymentsInput = {
@@ -40887,6 +44762,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutPaymentsInput = {
@@ -40916,6 +44793,40 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  }
+
+  export type BalanceTransactionUpsertWithWhereUniqueWithoutPaymentInput = {
+    where: BalanceTransactionWhereUniqueInput
+    update: XOR<BalanceTransactionUpdateWithoutPaymentInput, BalanceTransactionUncheckedUpdateWithoutPaymentInput>
+    create: XOR<BalanceTransactionCreateWithoutPaymentInput, BalanceTransactionUncheckedCreateWithoutPaymentInput>
+  }
+
+  export type BalanceTransactionUpdateWithWhereUniqueWithoutPaymentInput = {
+    where: BalanceTransactionWhereUniqueInput
+    data: XOR<BalanceTransactionUpdateWithoutPaymentInput, BalanceTransactionUncheckedUpdateWithoutPaymentInput>
+  }
+
+  export type BalanceTransactionUpdateManyWithWhereWithoutPaymentInput = {
+    where: BalanceTransactionScalarWhereInput
+    data: XOR<BalanceTransactionUpdateManyMutationInput, BalanceTransactionUncheckedUpdateManyWithoutPaymentInput>
+  }
+
+  export type TeacherTransferUpsertWithWhereUniqueWithoutPaymentInput = {
+    where: TeacherTransferWhereUniqueInput
+    update: XOR<TeacherTransferUpdateWithoutPaymentInput, TeacherTransferUncheckedUpdateWithoutPaymentInput>
+    create: XOR<TeacherTransferCreateWithoutPaymentInput, TeacherTransferUncheckedCreateWithoutPaymentInput>
+  }
+
+  export type TeacherTransferUpdateWithWhereUniqueWithoutPaymentInput = {
+    where: TeacherTransferWhereUniqueInput
+    data: XOR<TeacherTransferUpdateWithoutPaymentInput, TeacherTransferUncheckedUpdateWithoutPaymentInput>
+  }
+
+  export type TeacherTransferUpdateManyWithWhereWithoutPaymentInput = {
+    where: TeacherTransferScalarWhereInput
+    data: XOR<TeacherTransferUpdateManyMutationInput, TeacherTransferUncheckedUpdateManyWithoutPaymentInput>
   }
 
   export type TenantCreateWithoutNotificationsInput = {
@@ -40945,6 +44856,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutNotificationsInput = {
@@ -40974,6 +44887,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutNotificationsInput = {
@@ -41090,6 +45005,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutNotificationsInput = {
@@ -41119,6 +45036,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserUpsertWithoutNotificationsInput = {
@@ -41426,6 +45345,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutAssignmentsInput = {
@@ -41455,6 +45376,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutAssignmentsInput = {
@@ -41597,6 +45520,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutAssignmentsInput = {
@@ -41626,6 +45551,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type AssignmentSubmissionUpsertWithWhereUniqueWithoutAssignmentInput = {
@@ -42033,6 +45960,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutMessagesInput = {
@@ -42062,6 +45991,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutMessagesInput = {
@@ -42261,6 +46192,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutMessagesInput = {
@@ -42290,6 +46223,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type GroupCreateWithoutExamsInput = {
@@ -42372,6 +46307,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutExamsInput = {
@@ -42401,6 +46338,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutExamsInput = {
@@ -42571,6 +46510,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutExamsInput = {
@@ -42600,6 +46541,8 @@ export namespace Prisma {
     teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type ExamQuestionUpsertWithWhereUniqueWithoutExamInput = {
@@ -42967,6 +46910,8 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutTenantInput
     studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutTeacherSubscriptionInput = {
@@ -42996,6 +46941,8 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
     studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
     balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutTeacherSubscriptionInput = {
@@ -43041,6 +46988,8 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutTenantNestedInput
     studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutTeacherSubscriptionInput = {
@@ -43070,6 +47019,8 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
     studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserCreateWithoutStudentBalanceInput = {
@@ -43241,6 +47192,8 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutTenantInput
     teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
     balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutStudentBalancesInput = {
@@ -43270,6 +47223,8 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
     teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
     balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutStudentBalancesInput = {
@@ -43282,9 +47237,9 @@ export namespace Prisma {
     type: $Enums.TransactionType
     amount: number
     reason: string
-    relatedPaymentId?: string | null
     status?: $Enums.TransactionStatus
     createdAt?: Date | string
+    payment?: PaymentCreateNestedOneWithoutBalanceTransactionsInput
     tenant: TenantCreateNestedOneWithoutBalanceTransactionsInput
   }
 
@@ -43501,6 +47456,8 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutTenantNestedInput
     teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutStudentBalancesInput = {
@@ -43530,6 +47487,8 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
     teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
     balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type BalanceTransactionUpsertWithWhereUniqueWithoutBalanceInput = {
@@ -43575,6 +47534,57 @@ export namespace Prisma {
     create: XOR<StudentBalanceCreateWithoutTransactionsInput, StudentBalanceUncheckedCreateWithoutTransactionsInput>
   }
 
+  export type PaymentCreateWithoutBalanceTransactionsInput = {
+    id?: string
+    amount: number
+    month: string
+    status?: $Enums.PaymentStatus
+    method?: $Enums.PaymentMethod
+    installmentNumber?: number | null
+    installmentTotal?: number | null
+    receiptNumber?: string | null
+    receiptUrl?: string | null
+    paidAt?: Date | string | null
+    notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    recordedBy?: UserCreateNestedOneWithoutRecordedPaymentsInput
+    student: UserCreateNestedOneWithoutPaymentsInput
+    tenant: TenantCreateNestedOneWithoutPaymentsInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutPaymentInput
+  }
+
+  export type PaymentUncheckedCreateWithoutBalanceTransactionsInput = {
+    id?: string
+    tenantId: string
+    studentId: string
+    amount: number
+    month: string
+    status?: $Enums.PaymentStatus
+    method?: $Enums.PaymentMethod
+    installmentNumber?: number | null
+    installmentTotal?: number | null
+    receiptNumber?: string | null
+    receiptUrl?: string | null
+    paidAt?: Date | string | null
+    recordedById?: string | null
+    notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutPaymentInput
+  }
+
+  export type PaymentCreateOrConnectWithoutBalanceTransactionsInput = {
+    where: PaymentWhereUniqueInput
+    create: XOR<PaymentCreateWithoutBalanceTransactionsInput, PaymentUncheckedCreateWithoutBalanceTransactionsInput>
+  }
+
   export type TenantCreateWithoutBalanceTransactionsInput = {
     id?: string
     slug: string
@@ -43602,6 +47612,8 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutTenantInput
     teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutBalanceTransactionsInput = {
@@ -43631,6 +47643,8 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
     teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
     studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutBalanceTransactionsInput = {
@@ -43671,6 +47685,63 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PaymentUpsertWithoutBalanceTransactionsInput = {
+    update: XOR<PaymentUpdateWithoutBalanceTransactionsInput, PaymentUncheckedUpdateWithoutBalanceTransactionsInput>
+    create: XOR<PaymentCreateWithoutBalanceTransactionsInput, PaymentUncheckedCreateWithoutBalanceTransactionsInput>
+    where?: PaymentWhereInput
+  }
+
+  export type PaymentUpdateToOneWithWhereWithoutBalanceTransactionsInput = {
+    where?: PaymentWhereInput
+    data: XOR<PaymentUpdateWithoutBalanceTransactionsInput, PaymentUncheckedUpdateWithoutBalanceTransactionsInput>
+  }
+
+  export type PaymentUpdateWithoutBalanceTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    month?: StringFieldUpdateOperationsInput | string
+    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    method?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    installmentNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    installmentTotal?: NullableIntFieldUpdateOperationsInput | number | null
+    receiptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recordedBy?: UserUpdateOneWithoutRecordedPaymentsNestedInput
+    student?: UserUpdateOneRequiredWithoutPaymentsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutPaymentsNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutPaymentNestedInput
+  }
+
+  export type PaymentUncheckedUpdateWithoutBalanceTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    studentId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    month?: StringFieldUpdateOperationsInput | string
+    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    method?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    installmentNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    installmentTotal?: NullableIntFieldUpdateOperationsInput | number | null
+    receiptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    recordedById?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutPaymentNestedInput
+  }
+
   export type TenantUpsertWithoutBalanceTransactionsInput = {
     update: XOR<TenantUpdateWithoutBalanceTransactionsInput, TenantUncheckedUpdateWithoutBalanceTransactionsInput>
     create: XOR<TenantCreateWithoutBalanceTransactionsInput, TenantUncheckedCreateWithoutBalanceTransactionsInput>
@@ -43709,6 +47780,8 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutTenantNestedInput
     teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutBalanceTransactionsInput = {
@@ -43738,6 +47811,396 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
     teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
     studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  }
+
+  export type PaymentCreateWithoutTeacherTransfersInput = {
+    id?: string
+    amount: number
+    month: string
+    status?: $Enums.PaymentStatus
+    method?: $Enums.PaymentMethod
+    installmentNumber?: number | null
+    installmentTotal?: number | null
+    receiptNumber?: string | null
+    receiptUrl?: string | null
+    paidAt?: Date | string | null
+    notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    recordedBy?: UserCreateNestedOneWithoutRecordedPaymentsInput
+    student: UserCreateNestedOneWithoutPaymentsInput
+    tenant: TenantCreateNestedOneWithoutPaymentsInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutPaymentInput
+  }
+
+  export type PaymentUncheckedCreateWithoutTeacherTransfersInput = {
+    id?: string
+    tenantId: string
+    studentId: string
+    amount: number
+    month: string
+    status?: $Enums.PaymentStatus
+    method?: $Enums.PaymentMethod
+    installmentNumber?: number | null
+    installmentTotal?: number | null
+    receiptNumber?: string | null
+    receiptUrl?: string | null
+    paidAt?: Date | string | null
+    recordedById?: string | null
+    notes?: string | null
+    paymentGateway?: $Enums.PaymentGateway
+    transactionId?: string | null
+    teacherApiUsed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutPaymentInput
+  }
+
+  export type PaymentCreateOrConnectWithoutTeacherTransfersInput = {
+    where: PaymentWhereUniqueInput
+    create: XOR<PaymentCreateWithoutTeacherTransfersInput, PaymentUncheckedCreateWithoutTeacherTransfersInput>
+  }
+
+  export type TenantCreateWithoutTeacherTransfersInput = {
+    id?: string
+    slug: string
+    name: string
+    plan?: $Enums.Plan
+    planExpiresAt?: Date | string | null
+    logoUrl?: string | null
+    themeColor?: string
+    phone?: string | null
+    region?: string | null
+    bio?: string | null
+    subjects?: TenantCreatesubjectsInput | string[]
+    isActive?: boolean
+    smsQuota?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: AssignmentCreateNestedManyWithoutTenantInput
+    attendances?: AttendanceCreateNestedManyWithoutTenantInput
+    exams?: ExamCreateNestedManyWithoutTenantInput
+    groups?: GroupCreateNestedManyWithoutTenantInput
+    messages?: MessageCreateNestedManyWithoutTenantInput
+    notifications?: NotificationCreateNestedManyWithoutTenantInput
+    payments?: PaymentCreateNestedManyWithoutTenantInput
+    sessions?: SessionCreateNestedManyWithoutTenantInput
+    users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantUncheckedCreateWithoutTeacherTransfersInput = {
+    id?: string
+    slug: string
+    name: string
+    plan?: $Enums.Plan
+    planExpiresAt?: Date | string | null
+    logoUrl?: string | null
+    themeColor?: string
+    phone?: string | null
+    region?: string | null
+    bio?: string | null
+    subjects?: TenantCreatesubjectsInput | string[]
+    isActive?: boolean
+    smsQuota?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: AssignmentUncheckedCreateNestedManyWithoutTenantInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTenantInput
+    exams?: ExamUncheckedCreateNestedManyWithoutTenantInput
+    groups?: GroupUncheckedCreateNestedManyWithoutTenantInput
+    messages?: MessageUncheckedCreateNestedManyWithoutTenantInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutTenantInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
+    users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    financialAuditLogs?: FinancialAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantCreateOrConnectWithoutTeacherTransfersInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutTeacherTransfersInput, TenantUncheckedCreateWithoutTeacherTransfersInput>
+  }
+
+  export type PaymentUpsertWithoutTeacherTransfersInput = {
+    update: XOR<PaymentUpdateWithoutTeacherTransfersInput, PaymentUncheckedUpdateWithoutTeacherTransfersInput>
+    create: XOR<PaymentCreateWithoutTeacherTransfersInput, PaymentUncheckedCreateWithoutTeacherTransfersInput>
+    where?: PaymentWhereInput
+  }
+
+  export type PaymentUpdateToOneWithWhereWithoutTeacherTransfersInput = {
+    where?: PaymentWhereInput
+    data: XOR<PaymentUpdateWithoutTeacherTransfersInput, PaymentUncheckedUpdateWithoutTeacherTransfersInput>
+  }
+
+  export type PaymentUpdateWithoutTeacherTransfersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    month?: StringFieldUpdateOperationsInput | string
+    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    method?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    installmentNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    installmentTotal?: NullableIntFieldUpdateOperationsInput | number | null
+    receiptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recordedBy?: UserUpdateOneWithoutRecordedPaymentsNestedInput
+    student?: UserUpdateOneRequiredWithoutPaymentsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutPaymentsNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutPaymentNestedInput
+  }
+
+  export type PaymentUncheckedUpdateWithoutTeacherTransfersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    studentId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    month?: StringFieldUpdateOperationsInput | string
+    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    method?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    installmentNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    installmentTotal?: NullableIntFieldUpdateOperationsInput | number | null
+    receiptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    recordedById?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentGateway?: EnumPaymentGatewayFieldUpdateOperationsInput | $Enums.PaymentGateway
+    transactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutPaymentNestedInput
+  }
+
+  export type TenantUpsertWithoutTeacherTransfersInput = {
+    update: XOR<TenantUpdateWithoutTeacherTransfersInput, TenantUncheckedUpdateWithoutTeacherTransfersInput>
+    create: XOR<TenantCreateWithoutTeacherTransfersInput, TenantUncheckedCreateWithoutTeacherTransfersInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutTeacherTransfersInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutTeacherTransfersInput, TenantUncheckedUpdateWithoutTeacherTransfersInput>
+  }
+
+  export type TenantUpdateWithoutTeacherTransfersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    plan?: EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+    planExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    subjects?: TenantUpdatesubjectsInput | string[]
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    smsQuota?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: AssignmentUpdateManyWithoutTenantNestedInput
+    attendances?: AttendanceUpdateManyWithoutTenantNestedInput
+    exams?: ExamUpdateManyWithoutTenantNestedInput
+    groups?: GroupUpdateManyWithoutTenantNestedInput
+    messages?: MessageUpdateManyWithoutTenantNestedInput
+    notifications?: NotificationUpdateManyWithoutTenantNestedInput
+    payments?: PaymentUpdateManyWithoutTenantNestedInput
+    sessions?: SessionUpdateManyWithoutTenantNestedInput
+    users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutTeacherTransfersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    plan?: EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+    planExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    subjects?: TenantUpdatesubjectsInput | string[]
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    smsQuota?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: AssignmentUncheckedUpdateManyWithoutTenantNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTenantNestedInput
+    exams?: ExamUncheckedUpdateManyWithoutTenantNestedInput
+    groups?: GroupUncheckedUpdateManyWithoutTenantNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutTenantNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutTenantNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
+    users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    financialAuditLogs?: FinancialAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantCreateWithoutFinancialAuditLogsInput = {
+    id?: string
+    slug: string
+    name: string
+    plan?: $Enums.Plan
+    planExpiresAt?: Date | string | null
+    logoUrl?: string | null
+    themeColor?: string
+    phone?: string | null
+    region?: string | null
+    bio?: string | null
+    subjects?: TenantCreatesubjectsInput | string[]
+    isActive?: boolean
+    smsQuota?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: AssignmentCreateNestedManyWithoutTenantInput
+    attendances?: AttendanceCreateNestedManyWithoutTenantInput
+    exams?: ExamCreateNestedManyWithoutTenantInput
+    groups?: GroupCreateNestedManyWithoutTenantInput
+    messages?: MessageCreateNestedManyWithoutTenantInput
+    notifications?: NotificationCreateNestedManyWithoutTenantInput
+    payments?: PaymentCreateNestedManyWithoutTenantInput
+    sessions?: SessionCreateNestedManyWithoutTenantInput
+    users?: UserCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantUncheckedCreateWithoutFinancialAuditLogsInput = {
+    id?: string
+    slug: string
+    name: string
+    plan?: $Enums.Plan
+    planExpiresAt?: Date | string | null
+    logoUrl?: string | null
+    themeColor?: string
+    phone?: string | null
+    region?: string | null
+    bio?: string | null
+    subjects?: TenantCreatesubjectsInput | string[]
+    isActive?: boolean
+    smsQuota?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: AssignmentUncheckedCreateNestedManyWithoutTenantInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTenantInput
+    exams?: ExamUncheckedCreateNestedManyWithoutTenantInput
+    groups?: GroupUncheckedCreateNestedManyWithoutTenantInput
+    messages?: MessageUncheckedCreateNestedManyWithoutTenantInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutTenantInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutTenantInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutTenantInput
+    users?: UserUncheckedCreateNestedManyWithoutTenantInput
+    teacherSubscription?: TeacherSubscriptionUncheckedCreateNestedOneWithoutTenantInput
+    studentBalances?: StudentBalanceUncheckedCreateNestedManyWithoutTenantInput
+    balanceTransactions?: BalanceTransactionUncheckedCreateNestedManyWithoutTenantInput
+    teacherTransfers?: TeacherTransferUncheckedCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantCreateOrConnectWithoutFinancialAuditLogsInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutFinancialAuditLogsInput, TenantUncheckedCreateWithoutFinancialAuditLogsInput>
+  }
+
+  export type TenantUpsertWithoutFinancialAuditLogsInput = {
+    update: XOR<TenantUpdateWithoutFinancialAuditLogsInput, TenantUncheckedUpdateWithoutFinancialAuditLogsInput>
+    create: XOR<TenantCreateWithoutFinancialAuditLogsInput, TenantUncheckedCreateWithoutFinancialAuditLogsInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutFinancialAuditLogsInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutFinancialAuditLogsInput, TenantUncheckedUpdateWithoutFinancialAuditLogsInput>
+  }
+
+  export type TenantUpdateWithoutFinancialAuditLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    plan?: EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+    planExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    subjects?: TenantUpdatesubjectsInput | string[]
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    smsQuota?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: AssignmentUpdateManyWithoutTenantNestedInput
+    attendances?: AttendanceUpdateManyWithoutTenantNestedInput
+    exams?: ExamUpdateManyWithoutTenantNestedInput
+    groups?: GroupUpdateManyWithoutTenantNestedInput
+    messages?: MessageUpdateManyWithoutTenantNestedInput
+    notifications?: NotificationUpdateManyWithoutTenantNestedInput
+    payments?: PaymentUpdateManyWithoutTenantNestedInput
+    sessions?: SessionUpdateManyWithoutTenantNestedInput
+    users?: UserUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutFinancialAuditLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    plan?: EnumPlanFieldUpdateOperationsInput | $Enums.Plan
+    planExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    subjects?: TenantUpdatesubjectsInput | string[]
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    smsQuota?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: AssignmentUncheckedUpdateManyWithoutTenantNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTenantNestedInput
+    exams?: ExamUncheckedUpdateManyWithoutTenantNestedInput
+    groups?: GroupUncheckedUpdateManyWithoutTenantNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutTenantNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutTenantNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutTenantNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutTenantNestedInput
+    users?: UserUncheckedUpdateManyWithoutTenantNestedInput
+    teacherSubscription?: TeacherSubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+    studentBalances?: StudentBalanceUncheckedUpdateManyWithoutTenantNestedInput
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutTenantNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type AssignmentCreateManyTenantInput = {
@@ -43891,6 +48354,30 @@ export namespace Prisma {
     reason: string
     relatedPaymentId?: string | null
     status?: $Enums.TransactionStatus
+    createdAt?: Date | string
+  }
+
+  export type TeacherTransferCreateManyTenantInput = {
+    id?: string
+    paymentId: string
+    amount: number
+    fee: number
+    status?: $Enums.TransferStatus
+    attemptCount?: number
+    lastAttemptAt?: Date | string | null
+    failureReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FinancialAuditLogCreateManyTenantInput = {
+    id?: string
+    actorId?: string | null
+    eventType: $Enums.FinancialEventType
+    entityType: $Enums.FinancialEntityType
+    entityId?: string | null
+    message: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
@@ -44169,6 +48656,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recordedBy?: UserUpdateOneWithoutRecordedPaymentsNestedInput
     student?: UserUpdateOneRequiredWithoutPaymentsNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutPaymentNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutPaymentNestedInput
   }
 
   export type PaymentUncheckedUpdateWithoutTenantInput = {
@@ -44190,6 +48679,8 @@ export namespace Prisma {
     teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutPaymentNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutPaymentNestedInput
   }
 
   export type PaymentUncheckedUpdateManyWithoutTenantInput = {
@@ -44378,10 +48869,10 @@ export namespace Prisma {
     type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
     amount?: IntFieldUpdateOperationsInput | number
     reason?: StringFieldUpdateOperationsInput | string
-    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     balance?: StudentBalanceUpdateOneRequiredWithoutTransactionsNestedInput
+    payment?: PaymentUpdateOneWithoutBalanceTransactionsNestedInput
   }
 
   export type BalanceTransactionUncheckedUpdateWithoutTenantInput = {
@@ -44403,6 +48894,78 @@ export namespace Prisma {
     reason?: StringFieldUpdateOperationsInput | string
     relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeacherTransferUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    fee?: IntFieldUpdateOperationsInput | number
+    status?: EnumTransferStatusFieldUpdateOperationsInput | $Enums.TransferStatus
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failureReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    payment?: PaymentUpdateOneRequiredWithoutTeacherTransfersNestedInput
+  }
+
+  export type TeacherTransferUncheckedUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    paymentId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    fee?: IntFieldUpdateOperationsInput | number
+    status?: EnumTransferStatusFieldUpdateOperationsInput | $Enums.TransferStatus
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failureReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeacherTransferUncheckedUpdateManyWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    paymentId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    fee?: IntFieldUpdateOperationsInput | number
+    status?: EnumTransferStatusFieldUpdateOperationsInput | $Enums.TransferStatus
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failureReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinancialAuditLogUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    actorId?: NullableStringFieldUpdateOperationsInput | string | null
+    eventType?: EnumFinancialEventTypeFieldUpdateOperationsInput | $Enums.FinancialEventType
+    entityType?: EnumFinancialEntityTypeFieldUpdateOperationsInput | $Enums.FinancialEntityType
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinancialAuditLogUncheckedUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    actorId?: NullableStringFieldUpdateOperationsInput | string | null
+    eventType?: EnumFinancialEventTypeFieldUpdateOperationsInput | $Enums.FinancialEventType
+    entityType?: EnumFinancialEntityTypeFieldUpdateOperationsInput | $Enums.FinancialEntityType
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinancialAuditLogUncheckedUpdateManyWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    actorId?: NullableStringFieldUpdateOperationsInput | string | null
+    eventType?: EnumFinancialEventTypeFieldUpdateOperationsInput | $Enums.FinancialEventType
+    entityType?: EnumFinancialEntityTypeFieldUpdateOperationsInput | $Enums.FinancialEntityType
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -44951,6 +49514,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     student?: UserUpdateOneRequiredWithoutPaymentsNestedInput
     tenant?: TenantUpdateOneRequiredWithoutPaymentsNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutPaymentNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutPaymentNestedInput
   }
 
   export type PaymentUncheckedUpdateWithoutRecordedByInput = {
@@ -44972,6 +49537,8 @@ export namespace Prisma {
     teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutPaymentNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutPaymentNestedInput
   }
 
   export type PaymentUncheckedUpdateManyWithoutRecordedByInput = {
@@ -45014,6 +49581,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recordedBy?: UserUpdateOneWithoutRecordedPaymentsNestedInput
     tenant?: TenantUpdateOneRequiredWithoutPaymentsNestedInput
+    balanceTransactions?: BalanceTransactionUpdateManyWithoutPaymentNestedInput
+    teacherTransfers?: TeacherTransferUpdateManyWithoutPaymentNestedInput
   }
 
   export type PaymentUncheckedUpdateWithoutStudentInput = {
@@ -45035,6 +49604,8 @@ export namespace Prisma {
     teacherApiUsed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balanceTransactions?: BalanceTransactionUncheckedUpdateManyWithoutPaymentNestedInput
+    teacherTransfers?: TeacherTransferUncheckedUpdateManyWithoutPaymentNestedInput
   }
 
   export type PaymentUncheckedUpdateManyWithoutStudentInput = {
@@ -45422,6 +49993,102 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BalanceTransactionCreateManyPaymentInput = {
+    id?: string
+    tenantId: string
+    balanceId: string
+    type: $Enums.TransactionType
+    amount: number
+    reason: string
+    status?: $Enums.TransactionStatus
+    createdAt?: Date | string
+  }
+
+  export type TeacherTransferCreateManyPaymentInput = {
+    id?: string
+    tenantId: string
+    amount: number
+    fee: number
+    status?: $Enums.TransferStatus
+    attemptCount?: number
+    lastAttemptAt?: Date | string | null
+    failureReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BalanceTransactionUpdateWithoutPaymentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balance?: StudentBalanceUpdateOneRequiredWithoutTransactionsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutBalanceTransactionsNestedInput
+  }
+
+  export type BalanceTransactionUncheckedUpdateWithoutPaymentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    balanceId?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BalanceTransactionUncheckedUpdateManyWithoutPaymentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    balanceId?: StringFieldUpdateOperationsInput | string
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    amount?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeacherTransferUpdateWithoutPaymentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    fee?: IntFieldUpdateOperationsInput | number
+    status?: EnumTransferStatusFieldUpdateOperationsInput | $Enums.TransferStatus
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failureReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneRequiredWithoutTeacherTransfersNestedInput
+  }
+
+  export type TeacherTransferUncheckedUpdateWithoutPaymentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    fee?: IntFieldUpdateOperationsInput | number
+    status?: EnumTransferStatusFieldUpdateOperationsInput | $Enums.TransferStatus
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failureReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TeacherTransferUncheckedUpdateManyWithoutPaymentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    fee?: IntFieldUpdateOperationsInput | number
+    status?: EnumTransferStatusFieldUpdateOperationsInput | $Enums.TransferStatus
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failureReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AssignmentSubmissionCreateManyAssignmentInput = {
     id?: string
     studentId: string
@@ -45586,9 +50253,9 @@ export namespace Prisma {
     type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
     amount?: IntFieldUpdateOperationsInput | number
     reason?: StringFieldUpdateOperationsInput | string
-    relatedPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    payment?: PaymentUpdateOneWithoutBalanceTransactionsNestedInput
     tenant?: TenantUpdateOneRequiredWithoutBalanceTransactionsNestedInput
   }
 

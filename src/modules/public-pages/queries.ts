@@ -3,7 +3,7 @@ import { cache } from "react";
 import { db } from "@/lib/db";
 import { parseStoredGroupSchedule } from "@/modules/groups/schedule";
 
-export const getTeacherPublicProfile = async (tenantId: string) => {
+export const getPublicTenantProfile = async (tenantId: string) => {
   try {
     const tenant = await db.tenant.findFirst({
       where: {
@@ -26,13 +26,13 @@ export const getTeacherPublicProfile = async (tenantId: string) => {
       return tenant;
     }
   } catch (error) {
-    console.error("DB getTeacherPublicProfile failed, using mock:", error);
+    console.error("DB getPublicTenantProfile failed, using mock:", error);
   }
 
   return null;
 };
 
-export const getOpenGroups = cache(async (tenantId: string) => {
+export const getPublicGroups = cache(async (tenantId: string) => {
   try {
     const groups = await db.group.findMany({
       where: {
@@ -80,11 +80,9 @@ export const getOpenGroups = cache(async (tenantId: string) => {
       };
     });
   } catch (error) {
-    console.error("DB getOpenGroups failed, using mock:", error);
+    console.error("DB getPublicGroups failed, using mock:", error);
   }
 
   return [];
 });
 
-export const getPublicGroups = getOpenGroups;
-export const getPublicTenantProfile = getTeacherPublicProfile;
