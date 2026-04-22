@@ -6,6 +6,7 @@ import { env } from '@/config/env'
 // Hash: HMAC-SHA256("?mid={mid}&amount={amount}&currency={currency}&orderId={orderId}", apiKey)
 
 const KASHIER_CHECKOUT_URL = 'https://checkout.kashier.io/'
+const VALID_METHODS = new Set(['card', 'wallet', 'bank_installments', 'valU', 'fawry', 'meeza'])
 
 export interface KashierOrderParams {
   orderId: string       // مثال: KSH-academy-20260317-0001
@@ -39,10 +40,13 @@ export function createKashierCheckoutUrl(params: KashierOrderParams): string {
   const hash = createHmac('sha256', apiKey).update(message).digest('hex')
 
   const url = new URL(KASHIER_CHECKOUT_URL)
-  const isLiveMode = process.env.NODE_ENV === 'production'
-  const allowedMethods =
-    env.KASHIER_ALLOWED_METHODS ??
-    (isLiveMode ? 'card,wallet,bank_installments' : 'card,bank_installments')
+  const mode = env.KASHIER_MODE ?? 'test'
+  const isLiveMode = mode === 'live'
+  const allowedMethods = (env.KASHIER_ALLOWED_METHODS ?? 'card,wallet,bank_installments')
+    .split(',')
+    .map((method) => method.trim())
+    .filter((method) => VALID_METHODS.has(method))
+    .join(',')
 
   url.searchParams.set('merchantId', merchantId)
   url.searchParams.set('orderId', params.orderId)
@@ -55,10 +59,10 @@ export function createKashierCheckoutUrl(params: KashierOrderParams): string {
   url.searchParams.set('redirectUrl', params.callbackUrl)
   url.searchParams.set('webhookUrl', params.webhookUrl)
   // في التطوير الافتراضي بدون wallet لتجنب أخطاء SMS المحلية
-  url.searchParams.set('allowedMethods', allowedMethods)
+  url.searchParams.set('allowedMethods', allowedMethods || 'card')
   // display ليست اسم العميل؛ هي إعداد عرض/لغة
   url.searchParams.set('display', 'en')
-  url.searchParams.set('mode', isLiveMode ? 'live' : 'test')
+  url.searchParams.set('mode', mode)
 
   return url.toString()
 }
@@ -72,7 +76,7 @@ export function verifyKashierWebhookSignature(
   rawBody: string,
   receivedSignature: string,
 ): boolean {
-  const secret = env.KASHIER_WEBHOOK_SECRET
+  const secret = env.KASHIER_WEBHOOK_SECRET ?? env.KASHIER_SECRET_KEY
   if (!secret || !receivedSignature) return false
 
   const expectedSignature = createHmac('sha256', secret)

@@ -12,6 +12,8 @@ type OptionalEnvKey =
   | 'KASHIER_MERCHANT_ID'
   | 'KASHIER_API_KEY'
   | 'KASHIER_WEBHOOK_SECRET'
+  | 'KASHIER_SECRET_KEY'
+  | 'KASHIER_MODE'
   | 'KASHIER_ALLOWED_METHODS'
   | 'ENCRYPTION_KEY'
   | 'INTERNAL_JOBS_SECRET'
@@ -31,6 +33,8 @@ type EnvConfig = {
   KASHIER_MERCHANT_ID?: string
   KASHIER_API_KEY?: string
   KASHIER_WEBHOOK_SECRET?: string
+  KASHIER_SECRET_KEY?: string
+  KASHIER_MODE?: 'test' | 'live'
   KASHIER_ALLOWED_METHODS?: string
   ENCRYPTION_KEY?: string
   INTERNAL_JOBS_SECRET?: string
@@ -94,9 +98,17 @@ function createEnv(): EnvConfig {
   const whatsappApiUrl = optionalEnv('WHATSAPP_API_URL')
   const transferFeeRaw = optionalEnv('TEACHER_TRANSFER_FEE_PERCENT')
   const transferFee = transferFeeRaw ? Number(transferFeeRaw) : 0
+  const kashierModeRaw = optionalEnv('KASHIER_MODE')
+  const kashierMode = kashierModeRaw
+    ? kashierModeRaw.toLowerCase()
+    : undefined
 
   if (!Number.isFinite(transferFee) || transferFee < 0 || transferFee > 100) {
     throw new Error('TEACHER_TRANSFER_FEE_PERCENT must be a number between 0 and 100')
+  }
+
+  if (kashierMode && kashierMode !== 'test' && kashierMode !== 'live') {
+    throw new Error('KASHIER_MODE must be either "test" or "live"')
   }
 
   return {
@@ -119,6 +131,8 @@ function createEnv(): EnvConfig {
     KASHIER_MERCHANT_ID: optionalEnv('KASHIER_MERCHANT_ID'),
     KASHIER_API_KEY: optionalEnv('KASHIER_API_KEY'),
     KASHIER_WEBHOOK_SECRET: optionalEnv('KASHIER_WEBHOOK_SECRET'),
+    KASHIER_SECRET_KEY: optionalEnv('KASHIER_SECRET_KEY'),
+    KASHIER_MODE: kashierMode as 'test' | 'live' | undefined,
     KASHIER_ALLOWED_METHODS: optionalEnv('KASHIER_ALLOWED_METHODS'),
     ENCRYPTION_KEY: optionalEnv('ENCRYPTION_KEY'),
     INTERNAL_JOBS_SECRET: optionalEnv('INTERNAL_JOBS_SECRET'),
