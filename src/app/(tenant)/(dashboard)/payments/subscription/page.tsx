@@ -4,15 +4,15 @@ import { redirect } from 'next/navigation'
 
 import { requireAuth } from '@/lib/auth'
 import { requireTenant } from '@/lib/tenant'
-import { db } from '@/lib/db'
 import { SubscriptionPlans } from '@/modules/payments/components/SubscriptionPlans'
+import { getTeacherSubscription } from '@/modules/payments/providers/subscription'
 
 export default async function PaymentsSubscriptionPage({
   searchParams,
 }: {
   searchParams: Promise<{ kashier?: string }>
 }) {
-  const tenant = await requireTenant()
+  await requireTenant()
   const user = await requireAuth()
   const params = await searchParams
 
@@ -20,15 +20,7 @@ export default async function PaymentsSubscriptionPage({
     redirect(user.role === 'STUDENT' ? '/student' : '/parent')
   }
 
-  const subscription = await db.teacherSubscription.findUnique({
-    where: { tenantId: tenant.id },
-    select: {
-      subscriptionPlan: true,
-      billingCycle: true,
-      nextBillingAt: true,
-      isActive: true,
-    },
-  })
+  const subscription = await getTeacherSubscription()
 
   return (
     <SubscriptionPlans

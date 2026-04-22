@@ -79,8 +79,14 @@ export function SubscriptionPlans({
           body: JSON.stringify({ subscriptionPlan, billingCycle }),
         })
 
-        const payload = await res.json()
-        if (!res.ok) throw new Error(payload?.message ?? 'تعذر إنشاء رابط الدفع')
+        const payload = await res.json().catch(() => null)
+        if (!res.ok) {
+          throw new Error(
+            payload?.error?.message ??
+              payload?.message ??
+              'تعذر إنشاء رابط الدفع',
+          )
+        }
 
         const checkoutUrl = payload?.data?.checkoutUrl
         if (!checkoutUrl) throw new Error('رابط الدفع غير متوفر')
