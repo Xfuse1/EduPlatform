@@ -37,6 +37,8 @@ const navigation: Record<DashboardRole, NavigationItem[]> = {
     { href: "/teacher/assignments", label: "الواجبات", icon: ClipboardList },
     { href: "/teacher/exams", label: "الامتحانات", icon: PenTool },
     { href: "/payments", label: "المصاريف", icon: Wallet },
+    { href: "/payments/subscription", label: "الاشتراك", icon: Wallet },
+    { href: "/payments/transfers", label: "التحويلات", icon: Wallet },
     { href: "/teacher/schedule", label: "الجدول", icon: Calendar },
     { href: "/messages", label: "الرسائل", icon: MessageSquare },
     { href: "/teacher/settings", label: "الإعدادات", icon: Settings },
@@ -46,6 +48,7 @@ const navigation: Record<DashboardRole, NavigationItem[]> = {
     { href: "/student/schedule", label: "جدولي", icon: Calendar },
     { href: "/student/assignments", label: "الواجبات", icon: ClipboardList },
     { href: "/student/exams", label: "الامتحانات", icon: PenTool },
+    { href: "/payments/wallet", label: "المحفظة", icon: Wallet },
     { href: "/student/settings", label: "الإعدادات", icon: Settings },
   ],
   parent: [
@@ -53,6 +56,7 @@ const navigation: Record<DashboardRole, NavigationItem[]> = {
     { href: "/parent/children", label: "أبنائي", icon: Heart },
     { href: "/parent/assignments", label: "الواجبات", icon: ClipboardList },
     { href: "/parent/exams", label: "الامتحانات", icon: PenTool },
+    { href: "/payments/wallet", label: "المحفظة", icon: Wallet },
     { href: "/messages", label: "الرسائل", icon: MessageSquare },
     { href: "/parent/settings", label: "الإعدادات", icon: Settings },
   ],
@@ -173,3 +177,4 @@ export function Sidebar({
     </aside>
   );
 }
+

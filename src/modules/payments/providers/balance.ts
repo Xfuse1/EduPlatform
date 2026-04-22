@@ -1,47 +1,56 @@
-'use server'
+﻿'use server'
+
 import { db } from '@/lib/db'
+import { logFinancialEvent } from '@/lib/financial-audit'
 import { requireTenant } from '@/lib/tenant'
-import { requireAuth } from '@/lib/auth'
 
-// ── Balance Management Helper Functions ────────────────────────────────────
+type WalletOwnerType = 'STUDENT' | 'PARENT'
 
-/**
- * الحصول على رصيد الطالب أو ولي الأمر
- * إذا كان الطالب مرتبطاً بولي أمر، يرجع رصيد ولي الأمر
- * وإلا يرجع رصيد الطالب مباشرة
- */
-export async function getStudentBalance(studentId: string, tenantId: string) {
-  // تحقق من وجود الطالب
-  const student = await db.user.findFirst({
+async function resolveWalletOwner(studentId: string, tenantId: string, tx: any = db) {
+  const student = await tx.user.findFirst({
     where: { id: studentId, tenantId, role: 'STUDENT' },
-    include: { parentStudents: { include: { parent: true } } },
+    select: {
+      id: true,
+      parentStudents: {
+        select: { parentId: true },
+        take: 1,
+      },
+    },
   })
 
-  if (!student) throw new Error('الطالب غير موجود')
+  if (!student) throw new Error('Student not found')
 
-  // إذا كان الطالب مرتبطاً بولي أمر
-  if (student.parentStudents && student.parentStudents.length > 0) {
-    const parentId = student.parentStudents[0].parentId
-    const parentBalance = await db.studentBalance.findFirst({
-      where: { studentId: parentId, tenantId },
-    })
-    return { balance: parentBalance, owner: 'PARENT', ownerId: parentId }
+  const parentId = student.parentStudents[0]?.parentId
+
+  if (parentId) {
+    return {
+      ownerType: 'PARENT' as WalletOwnerType,
+      ownerId: parentId,
+      studentId,
+    }
   }
 
-  // وإلا جيب رصيد الطالب نفسه
-  const studentBalance = await db.studentBalance.findFirst({
-    where: { studentId, tenantId },
-  })
-
-  return { balance: studentBalance, owner: 'STUDENT', ownerId: studentId }
+  return {
+    ownerType: 'STUDENT' as WalletOwnerType,
+    ownerId: student.id,
+    studentId,
+  }
 }
 
-/**
- * خصم من رصيد الطالب/ولي الأمر
- * - يتحقق من وجود رصيد كافي
- * - ينشئ transaction للخصم
- * - يحدّث الرصيد
- */
+export async function getStudentBalance(studentId: string, tenantId: string) {
+  const { ownerType, ownerId } = await resolveWalletOwner(studentId, tenantId)
+  const balance = await db.studentBalance.findUnique({
+    where: {
+      tenantId_studentId: {
+        tenantId,
+        studentId: ownerId,
+      },
+    },
+  })
+
+  return { balance, owner: ownerType, ownerId }
+}
+
 export async function debitBalance(
   studentId: string,
   amount: number,
@@ -49,33 +58,79 @@ export async function debitBalance(
   relatedPaymentId?: string,
 ) {
   const tenant = await requireTenant()
+  return debitBalanceForTenant(tenant.id, studentId, amount, reason, relatedPaymentId)
+}
 
-  // جيب معلومات الرصيد
-  const { balance, ownerId } = await getStudentBalance(studentId, tenant.id)
-
-  if (!balance) {
-    throw new Error('لا يوجد رصيد للطالب - تفضل أضف رصيد أولاً')
+export async function debitBalanceForTenant(
+  tenantId: string,
+  studentId: string,
+  amount: number,
+  reason: string,
+  relatedPaymentId?: string,
+) {
+  if (amount <= 0) {
+    throw new Error('Amount must be greater than zero')
   }
 
-  if (balance.balance < amount) {
-    throw new Error(
-      `رصيد غير كافي! الرصيد المتاح: ${balance.balance} جنيه، المبلغ المطلوب: ${amount} جنيه`,
-    )
-  }
-
-  // استخدم transaction للتأكد من عدم حدوث race condition
   const result = await db.$transaction(async (tx) => {
-    // تحديث الرصيد
-    const updatedBalance = await tx.studentBalance.update({
-      where: { id: balance.id },
-      data: { balance: balance.balance - amount },
+    const { ownerId } = await resolveWalletOwner(studentId, tenantId, tx)
+
+    const wallet = await tx.studentBalance.upsert({
+      where: {
+        tenantId_studentId: {
+          tenantId,
+          studentId: ownerId,
+        },
+      },
+      update: {},
+      create: {
+        tenantId,
+        studentId: ownerId,
+        balance: 0,
+      },
     })
 
-    // إنشاء transaction record
+    if (wallet.balance < amount) {
+      throw new Error(`Insufficient balance. Available: ${wallet.balance} EGP`)
+    }
+
+    if (relatedPaymentId) {
+      const existingTx = await tx.balanceTransaction.findFirst({
+        where: {
+          tenantId,
+          relatedPaymentId,
+          type: 'DEBIT',
+          status: 'COMPLETED',
+        },
+      })
+
+      if (existingTx) {
+        return { balance: wallet, transaction: existingTx }
+      }
+    }
+
+    const updateRes = await tx.studentBalance.updateMany({
+      where: {
+        id: wallet.id,
+        balance: { gte: amount },
+      },
+      data: {
+        balance: { decrement: amount },
+      },
+    })
+
+    if (updateRes.count === 0) {
+      throw new Error('Concurrent balance update detected')
+    }
+
+    const updatedBalance = await tx.studentBalance.findUniqueOrThrow({
+      where: { id: wallet.id },
+    })
+
     const transaction = await tx.balanceTransaction.create({
       data: {
-        tenantId: tenant.id,
-        balanceId: balance.id,
+        tenantId,
+        balanceId: wallet.id,
         type: 'DEBIT',
         amount,
         reason,
@@ -87,14 +142,18 @@ export async function debitBalance(
     return { balance: updatedBalance, transaction }
   })
 
+  await logFinancialEvent({
+    tenantId,
+    eventType: 'BALANCE_DEBIT',
+    entityType: 'BALANCE_TRANSACTION',
+    entityId: result.transaction.id,
+    message: `Balance debited by ${amount} EGP`,
+    metadata: { studentId, relatedPaymentId },
+  })
+
   return result
 }
 
-/**
- * إضافة رصيد للطالب/ولي الأمر
- * - ينشئ transaction للإضافة
- * - يحدّث الرصيد
- */
 export async function creditBalance(
   userId: string,
   amount: number,
@@ -102,35 +161,63 @@ export async function creditBalance(
   relatedPaymentId?: string,
 ) {
   const tenant = await requireTenant()
+  return creditBalanceForTenant(tenant.id, userId, amount, reason, relatedPaymentId)
+}
 
-  // جيب الرصيد أو أنشئه إذا لم يكن موجوداً
-  let balance = await db.studentBalance.findFirst({
-    where: { studentId: userId, tenantId: tenant.id },
-  })
+export async function creditBalanceForTenant(
+  tenantId: string,
+  userId: string,
+  amount: number,
+  reason: string,
+  relatedPaymentId?: string,
+) {
+  if (amount <= 0) {
+    throw new Error('Amount must be greater than zero')
+  }
 
-  if (!balance) {
-    balance = await db.studentBalance.create({
-      data: {
-        tenantId: tenant.id,
+  const result = await db.$transaction(async (tx) => {
+    const wallet = await tx.studentBalance.upsert({
+      where: {
+        tenantId_studentId: {
+          tenantId,
+          studentId: userId,
+        },
+      },
+      update: {},
+      create: {
+        tenantId,
         studentId: userId,
         balance: 0,
       },
     })
-  }
 
-  // استخدم transaction
-  const result = await db.$transaction(async (tx) => {
-    // تحديث الرصيد
+    if (relatedPaymentId) {
+      const existingTx = await tx.balanceTransaction.findFirst({
+        where: {
+          tenantId,
+          relatedPaymentId,
+          type: 'CREDIT',
+          status: 'COMPLETED',
+        },
+      })
+
+      if (existingTx) {
+        return { balance: wallet, transaction: existingTx }
+      }
+    }
+
     const updatedBalance = await tx.studentBalance.update({
-      where: { id: balance!.id },
-      data: { balance: balance!.balance + amount, lastRechargedAt: new Date() },
+      where: { id: wallet.id },
+      data: {
+        balance: { increment: amount },
+        lastRechargedAt: new Date(),
+      },
     })
 
-    // إنشاء transaction record
     const transaction = await tx.balanceTransaction.create({
       data: {
-        tenantId: tenant.id,
-        balanceId: balance!.id,
+        tenantId,
+        balanceId: wallet.id,
         type: 'CREDIT',
         amount,
         reason,
@@ -142,41 +229,43 @@ export async function creditBalance(
     return { balance: updatedBalance, transaction }
   })
 
+  await logFinancialEvent({
+    tenantId,
+    eventType: 'BALANCE_CREDIT',
+    entityType: 'BALANCE_TRANSACTION',
+    entityId: result.transaction.id,
+    message: `Balance credited by ${amount} EGP`,
+    metadata: { userId, relatedPaymentId },
+  })
+
   return result
 }
 
-/**
- * جلب سجل المعاملات للرصيد
- */
-export async function getBalanceTransactions(
-  studentId: string,
-  limit: number = 50,
-) {
+export async function getBalanceTransactions(studentId: string, limit: number = 50) {
   const tenant = await requireTenant()
+  const { ownerId } = await resolveWalletOwner(studentId, tenant.id)
 
-  // جيب الرصيد أولاً
-  const balance = await db.studentBalance.findFirst({
-    where: { studentId, tenantId: tenant.id },
+  const balance = await db.studentBalance.findUnique({
+    where: {
+      tenantId_studentId: {
+        tenantId: tenant.id,
+        studentId: ownerId,
+      },
+    },
   })
 
   if (!balance) return []
 
-  const transactions = await db.balanceTransaction.findMany({
+  return db.balanceTransaction.findMany({
     where: {
-      balanceId: balance.id,
       tenantId: tenant.id,
+      balanceId: balance.id,
     },
     orderBy: { createdAt: 'desc' },
     take: limit,
   })
-
-  return transactions
 }
 
-/**
- * حساب إجمالي الدخل من الطلاب في شهر معين
- * (للمعلم لعرض الأرباح)
- */
 export async function getTeacherMonthlyIncome(month: string) {
   const tenant = await requireTenant()
 
@@ -193,3 +282,5 @@ export async function getTeacherMonthlyIncome(month: string) {
 
   return income._sum.amount ?? 0
 }
+
+

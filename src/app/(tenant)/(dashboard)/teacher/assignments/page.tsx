@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
 import { AssignmentsPageClient } from "@/modules/assignments/components/AssignmentsPageClient";
-import { getAssignments, getTeacherGroups } from "@/modules/assignments/queries";
+import { getAssignmentsByGroup, getTeacherGroups } from "@/modules/assignments/queries";
 
 export default async function TeacherAssignmentsPage() {
   const tenant = await requireTenant();
@@ -17,7 +17,7 @@ export default async function TeacherAssignmentsPage() {
   }
 
   const [assignments, groups] = await Promise.all([
-    getAssignments(tenant.id),
+    getAssignmentsByGroup(tenant.id),
     getTeacherGroups(tenant.id),
   ]);
 

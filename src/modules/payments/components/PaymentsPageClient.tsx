@@ -1,7 +1,8 @@
 'use client';
 
-import { FileText, Pencil, Plus, Search, X } from "lucide-react";
+import { ArrowUpLeft, FileText, Pencil, Plus, Repeat, Search, Wallet, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -167,6 +168,50 @@ export function PaymentsPageClient({
           <Plus className="h-4 w-4" />
           تسجيل دفعة جديدة
         </Button>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-3">
+        <Link
+          className="group rounded-[18px] border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          href="/payments/wallet"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-sky-400/20 dark:text-sky-300">
+              <Wallet className="h-5 w-5" />
+            </span>
+            <ArrowUpLeft className="h-4 w-4 text-slate-400 transition group-hover:text-primary" />
+          </div>
+          <p className="mt-3 text-start text-base font-bold text-slate-900 dark:text-white">المحفظة</p>
+          <p className="mt-1 text-start text-sm text-slate-500 dark:text-slate-400">عرض الرصيد والشحن عبر كاشير.</p>
+        </Link>
+
+        <Link
+          className="group rounded-[18px] border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          href="/payments/subscription"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-sky-400/20 dark:text-sky-300">
+              <FileText className="h-5 w-5" />
+            </span>
+            <ArrowUpLeft className="h-4 w-4 text-slate-400 transition group-hover:text-primary" />
+          </div>
+          <p className="mt-3 text-start text-base font-bold text-slate-900 dark:text-white">الاشتراك</p>
+          <p className="mt-1 text-start text-sm text-slate-500 dark:text-slate-400">إدارة خطة الاشتراك والفوترة.</p>
+        </Link>
+
+        <Link
+          className="group rounded-[18px] border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          href="/payments/transfers"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-sky-400/20 dark:text-sky-300">
+              <Repeat className="h-5 w-5" />
+            </span>
+            <ArrowUpLeft className="h-4 w-4 text-slate-400 transition group-hover:text-primary" />
+          </div>
+          <p className="mt-3 text-start text-base font-bold text-slate-900 dark:text-white">التحويلات</p>
+          <p className="mt-1 text-start text-sm text-slate-500 dark:text-slate-400">متابعة تحويلات المعلم وحالات المحاولات.</p>
+        </Link>
       </div>
 
       {initialStudentQuery ? (

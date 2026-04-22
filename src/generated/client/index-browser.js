@@ -396,6 +396,32 @@ exports.Prisma.BalanceTransactionScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.TeacherTransferScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  paymentId: 'paymentId',
+  amount: 'amount',
+  fee: 'fee',
+  status: 'status',
+  attemptCount: 'attemptCount',
+  lastAttemptAt: 'lastAttemptAt',
+  failureReason: 'failureReason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FinancialAuditLogScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  actorId: 'actorId',
+  eventType: 'eventType',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  message: 'message',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -550,6 +576,33 @@ exports.TransactionStatus = exports.$Enums.TransactionStatus = {
   REFUNDED: 'REFUNDED'
 };
 
+exports.TransferStatus = exports.$Enums.TransferStatus = {
+  PENDING: 'PENDING',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED',
+  RETRY: 'RETRY'
+};
+
+exports.FinancialEventType = exports.$Enums.FinancialEventType = {
+  PAYMENT_CREATED: 'PAYMENT_CREATED',
+  PAYMENT_CONFIRMED: 'PAYMENT_CONFIRMED',
+  PAYMENT_FAILED: 'PAYMENT_FAILED',
+  BALANCE_CREDIT: 'BALANCE_CREDIT',
+  BALANCE_DEBIT: 'BALANCE_DEBIT',
+  TRANSFER_ENQUEUED: 'TRANSFER_ENQUEUED',
+  TRANSFER_SUCCESS: 'TRANSFER_SUCCESS',
+  TRANSFER_FAILED: 'TRANSFER_FAILED',
+  SUBSCRIPTION_UPDATED: 'SUBSCRIPTION_UPDATED'
+};
+
+exports.FinancialEntityType = exports.$Enums.FinancialEntityType = {
+  PAYMENT: 'PAYMENT',
+  BALANCE: 'BALANCE',
+  BALANCE_TRANSACTION: 'BALANCE_TRANSACTION',
+  TRANSFER: 'TRANSFER',
+  SUBSCRIPTION: 'SUBSCRIPTION'
+};
+
 exports.Prisma.ModelName = {
   Tenant: 'Tenant',
   User: 'User',
@@ -570,7 +623,9 @@ exports.Prisma.ModelName = {
   ExamSubmission: 'ExamSubmission',
   TeacherSubscription: 'TeacherSubscription',
   StudentBalance: 'StudentBalance',
-  BalanceTransaction: 'BalanceTransaction'
+  BalanceTransaction: 'BalanceTransaction',
+  TeacherTransfer: 'TeacherTransfer',
+  FinancialAuditLog: 'FinancialAuditLog'
 };
 
 /**

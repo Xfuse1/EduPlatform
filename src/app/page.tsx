@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { getTenantBySlug } from "@/lib/tenant";
 import MarketingPage from "@/modules/marketing/components/MarketingPage";
 import TenantPublicPage from "@/modules/public-pages/components/TenantPublicPage";
-import { getOpenGroups, getTeacherPublicProfile } from "@/modules/public-pages/queries";
+import { getPublicGroups, getPublicTenantProfile } from "@/modules/public-pages/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -42,8 +42,8 @@ export default async function HomePage() {
   }
 
   const [teacher, groups] = await Promise.all([
-    getTeacherPublicProfile(tenant.id),
-    getOpenGroups(tenant.id),
+    getPublicTenantProfile(tenant.id),
+    getPublicGroups(tenant.id),
   ]);
 
   if (!teacher) {

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
 import { GroupsPageClient } from "@/modules/groups/components/GroupsPageClient";
-import { getOpenGroups } from "@/modules/public-pages/queries";
+import { getPublicGroups } from "@/modules/public-pages/queries";
 
 export default async function TeacherGroupsPage() {
   const tenant = await requireTenant();
@@ -15,7 +15,7 @@ export default async function TeacherGroupsPage() {
     redirect(user.role === "STUDENT" ? "/student" : "/parent");
   }
 
-  const groups = await getOpenGroups(tenant.id);
+  const groups = await getPublicGroups(tenant.id);
 
   return <GroupsPageClient initialGroups={groups} />;
 }

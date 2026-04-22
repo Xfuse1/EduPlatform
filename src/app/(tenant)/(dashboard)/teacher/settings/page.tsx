@@ -15,10 +15,24 @@ export default async function TeacherSettingsPage() {
     redirect(user.role === "STUDENT" ? "/student" : "/parent");
   }
 
-  const userData = await db.user.findUnique({
-    where: { id: user.id },
-    select: { avatarUrl: true },
-  });
+  const [userData, subscription] = await Promise.all([
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { avatarUrl: true },
+    }),
+    db.teacherSubscription.findUnique({
+      where: { tenantId: tenant.id },
+      select: { kashierApiKey: true, kashierMerId: true },
+    }),
+  ]);
 
-  return <SettingsForm tenant={tenant} avatarUrl={userData?.avatarUrl} />;
+  const hasKashierApi = !!(subscription?.kashierApiKey && subscription?.kashierMerId);
+
+  return (
+    <SettingsForm
+      tenant={tenant}
+      avatarUrl={userData?.avatarUrl}
+      hasKashierApi={hasKashierApi}
+    />
+  );
 }

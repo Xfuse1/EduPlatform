@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { addTeacherKashierApi } from "@/modules/payments/actions";
 import { updateTenantSettings } from "@/modules/settings/actions";
 
 type TenantSettings = {
@@ -36,12 +37,14 @@ const planLabels: Record<TenantSettings["plan"], string> = {
   BUSINESS: "أعمال",
 };
 
-export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl }: { 
+export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierApi = false }: { 
   tenant: TenantSettings;
   avatarUrl?: string | null;
+  hasKashierApi?: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isApiPending, startApiTransition] = useTransition();
   const [name, setName] = useState(tenant.name);
   const [phone, setPhone] = useState(tenant.phone ?? "");
   const [region, setRegion] = useState(tenant.region ?? "");
@@ -51,6 +54,9 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl }: {
   const [toast, setToast] = useState<ToastState>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl ?? null);
   const [isUploading, setIsUploading] = useState(false);
+  const [kashierApiKey, setKashierApiKey] = useState("");
+  const [kashierMerId, setKashierMerId] = useState("");
+  const [isKashierConnected, setIsKashierConnected] = useState(hasKashierApi);
 
   const bioLength = useMemo(() => bio.length, [bio]);
 
@@ -133,6 +139,34 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl }: {
       }
 
       showToast("success", "✅ تم حفظ الإعدادات بنجاح");
+      router.refresh();
+    });
+  };
+
+  const handleSaveKashierApi = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!kashierApiKey.trim() || !kashierMerId.trim()) {
+      showToast("error", "من فضلك أدخل API Key و Merchant ID");
+      return;
+    }
+
+    startApiTransition(async () => {
+      const result = await addTeacherKashierApi({
+        kashierApiKey: kashierApiKey.trim(),
+        kashierMerId: kashierMerId.trim(),
+      });
+
+      if (!result?.success) {
+        const errorMessage = "message" in result ? result.message : "فشل حفظ بيانات Kashier";
+        showToast("error", errorMessage);
+        return;
+      }
+
+      setIsKashierConnected(true);
+      setKashierApiKey("");
+      setKashierMerId("");
+      showToast("success", "تم حفظ بيانات Kashier بنجاح");
       router.refresh();
     });
   };
@@ -374,6 +408,53 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl }: {
           )}
         </Button>
       </form>
+
+      <Card>
+        <CardContent className="space-y-5">
+          <div>
+            <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">Kashier API</h2>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              أضف بيانات Kashier الخاصة بك لتفعيل التحويل التلقائي للمدفوعات.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900">
+            <span className="font-semibold text-slate-700 dark:text-slate-200">الحالة:</span>{" "}
+            <span className={isKashierConnected ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}>
+              {isKashierConnected ? "مفعل" : "غير مفعل"}
+            </span>
+          </div>
+
+          <form className="grid gap-4 sm:grid-cols-2" onSubmit={handleSaveKashierApi}>
+            <div className="sm:col-span-2">
+              <Label htmlFor="kashierApiKey">Kashier API Key</Label>
+              <Input
+                id="kashierApiKey"
+                type="password"
+                placeholder="sk_live_..."
+                value={kashierApiKey}
+                onChange={(event) => setKashierApiKey(event.target.value)}
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <Label htmlFor="kashierMerId">Merchant ID</Label>
+              <Input
+                id="kashierMerId"
+                placeholder="merchant-id"
+                value={kashierMerId}
+                onChange={(event) => setKashierMerId(event.target.value)}
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <Button type="submit" disabled={isApiPending}>
+                {isApiPending ? "جاري الحفظ..." : "حفظ بيانات Kashier"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

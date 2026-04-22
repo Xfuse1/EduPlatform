@@ -37,6 +37,8 @@ model Tenant {
   teacherSubscription TeacherSubscription?
   studentBalances     StudentBalance[]
   balanceTransactions BalanceTransaction[]
+  teacherTransfers    TeacherTransfer[]
+  financialAuditLogs  FinancialAuditLog[]
 
   @@index([slug])
 }
@@ -183,28 +185,30 @@ model Attendance {
 }
 
 model Payment {
-  id                String         @id @default(cuid())
-  tenantId          String
-  studentId         String
-  amount            Int
-  month             String
-  status            PaymentStatus  @default(PENDING)
-  method            PaymentMethod  @default(CASH)
-  installmentNumber Int?
-  installmentTotal  Int?
-  receiptNumber     String?        @unique
-  receiptUrl        String?
-  paidAt            DateTime?
-  recordedById      String?
-  notes             String?
-  paymentGateway    PaymentGateway @default(KASHIER)
-  transactionId     String?
-  teacherApiUsed    Boolean        @default(false)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  recordedBy        User?          @relation("RecordedPayments", fields: [recordedById], references: [id])
-  student           User           @relation("StudentPayments", fields: [studentId], references: [id], onDelete: Cascade)
-  tenant            Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                  String               @id @default(cuid())
+  tenantId            String
+  studentId           String
+  amount              Int
+  month               String
+  status              PaymentStatus        @default(PENDING)
+  method              PaymentMethod        @default(CASH)
+  installmentNumber   Int?
+  installmentTotal    Int?
+  receiptNumber       String?              @unique
+  receiptUrl          String?
+  paidAt              DateTime?
+  recordedById        String?
+  notes               String?
+  paymentGateway      PaymentGateway       @default(KASHIER)
+  transactionId       String?
+  teacherApiUsed      Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  recordedBy          User?                @relation("RecordedPayments", fields: [recordedById], references: [id])
+  student             User                 @relation("StudentPayments", fields: [studentId], references: [id], onDelete: Cascade)
+  tenant              Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  balanceTransactions BalanceTransaction[]
+  teacherTransfers    TeacherTransfer[]
 
   @@index([tenantId, studentId])
   @@index([tenantId, month])
@@ -513,11 +517,50 @@ model BalanceTransaction {
   status           TransactionStatus @default(COMPLETED)
   createdAt        DateTime          @default(now())
   balance          StudentBalance    @relation(fields: [balanceId], references: [id], onDelete: Cascade)
+  payment          Payment?          @relation(fields: [relatedPaymentId], references: [id], onDelete: SetNull)
   tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, balanceId])
   @@index([balanceId, createdAt])
   @@index([status, createdAt])
+}
+
+model TeacherTransfer {
+  id            String         @id @default(cuid())
+  tenantId      String
+  paymentId     String
+  amount        Int // المبلغ المحول
+  fee           Int // رسوم المنصة
+  status        TransferStatus @default(PENDING)
+  attemptCount  Int            @default(0)
+  lastAttemptAt DateTime?
+  failureReason String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  payment       Payment        @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([paymentId])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@index([paymentId])
+  @@index([status, attemptCount])
+}
+
+model FinancialAuditLog {
+  id         String              @id @default(cuid())
+  tenantId   String
+  actorId    String?
+  eventType  FinancialEventType
+  entityType FinancialEntityType
+  entityId   String?
+  message    String
+  metadata   Json?
+  createdAt  DateTime            @default(now())
+  tenant     Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, eventType])
 }
 
 // ── Enums ─────────────────────────────────────────────────────────────────
@@ -548,4 +591,31 @@ enum TransactionStatus {
 enum PaymentGateway {
   KASHIER
   INTERNAL_BALANCE
+}
+
+enum TransferStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  RETRY
+}
+
+enum FinancialEventType {
+  PAYMENT_CREATED
+  PAYMENT_CONFIRMED
+  PAYMENT_FAILED
+  BALANCE_CREDIT
+  BALANCE_DEBIT
+  TRANSFER_ENQUEUED
+  TRANSFER_SUCCESS
+  TRANSFER_FAILED
+  SUBSCRIPTION_UPDATED
+}
+
+enum FinancialEntityType {
+  PAYMENT
+  BALANCE
+  BALANCE_TRANSACTION
+  TRANSFER
+  SUBSCRIPTION
 }

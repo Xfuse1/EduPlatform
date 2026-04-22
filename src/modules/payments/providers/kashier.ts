@@ -10,7 +10,7 @@ const KASHIER_CHECKOUT_URL = 'https://checkout.kashier.io/'
 export interface KashierOrderParams {
   orderId: string       // مثال: KSH-academy-20260317-0001
   amount: number        // بالجنيه المصري (رقم صحيح)
-  studentName: string
+  studentName?: string
   callbackUrl: string   // URL بعد الدفع (redirect للمستخدم)
   webhookUrl: string    // URL لاستقبال إشعار الخادم
 }
@@ -33,24 +33,32 @@ export function createKashierCheckoutUrl(params: KashierOrderParams): string {
   const amountStr = params.amount.toFixed(2)
   const currency = 'EGP'
 
-  // Hash message حسب توثيق Kashier
-  const message = `?mid=${merchantId}&amount=${amountStr}&currency=${currency}&orderId=${params.orderId}`
+  // Hash message حسب الـ demo الرسمي من Kashier:
+  // /?payment={mid}.{orderId}.{amount}.{currency}
+  const message = `/?payment=${merchantId}.${params.orderId}.${amountStr}.${currency}`
   const hash = createHmac('sha256', apiKey).update(message).digest('hex')
 
   const url = new URL(KASHIER_CHECKOUT_URL)
+  const isLiveMode = process.env.NODE_ENV === 'production'
+  const allowedMethods =
+    env.KASHIER_ALLOWED_METHODS ??
+    (isLiveMode ? 'card,wallet,bank_installments' : 'card,bank_installments')
+
   url.searchParams.set('merchantId', merchantId)
   url.searchParams.set('orderId', params.orderId)
   url.searchParams.set('amount', amountStr)
   url.searchParams.set('currency', currency)
   url.searchParams.set('hash', hash)
+  // merchantRedirect هو الاسم المستخدم في أمثلة Kashier Hosted Checkout
+  url.searchParams.set('merchantRedirect', params.callbackUrl)
+  // نبقي redirectUrl للتوافق مع أي صيغة قديمة
   url.searchParams.set('redirectUrl', params.callbackUrl)
   url.searchParams.set('webhookUrl', params.webhookUrl)
-  url.searchParams.set('allowedMethods', 'card,bank_installments,mobile_wallet,service_bill')
-  url.searchParams.set('display', params.studentName)
-  url.searchParams.set(
-    'mode',
-    process.env.NODE_ENV === 'production' ? 'live' : 'test',
-  )
+  // في التطوير الافتراضي بدون wallet لتجنب أخطاء SMS المحلية
+  url.searchParams.set('allowedMethods', allowedMethods)
+  // display ليست اسم العميل؛ هي إعداد عرض/لغة
+  url.searchParams.set('display', 'en')
+  url.searchParams.set('mode', isLiveMode ? 'live' : 'test')
 
   return url.toString()
 }

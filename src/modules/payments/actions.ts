@@ -1,18 +1,48 @@
-'use server'
-import { requireTenant } from '@/lib/tenant'
+﻿'use server'
+
+import { revalidatePath } from 'next/cache'
+
+import { env } from '@/config/env'
 import { requireAuth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { revalidatePath } from 'next/cache'
-import { paymentRecordSchema, initiatePaymentSchema } from './validations'
+import { logFinancialEvent } from '@/lib/financial-audit'
+import { requireTenant } from '@/lib/tenant'
+
+import {
+  addKashierApiSchema,
+  debitBalanceSchema,
+  initiatePaymentSchema,
+  paymentRecordSchema,
+  rechargeBalanceSchema,
+  updateSubscriptionSchema,
+} from './validations'
+import { creditBalance, debitBalance } from './providers/balance'
 import { createKashierCheckoutUrl } from './providers/kashier'
-import { env } from '@/config/env'
+import { SUBSCRIPTION_PLANS, createTeacherSubscription } from './providers/subscription'
 
-// ── B-03: Payments Actions (mutations — 'use server') ───────────────────────
+function makeOrderId(prefix: string, tenantSlug: string, count: number) {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  return `${prefix}-${tenantSlug}-${date}-${String(count + 1).padStart(4, '0')}`
+}
 
-/**
- * تسجيل دفعة جديدة مع توليد رقم إيصال فريد
- * يحسب الحالة تلقائياً: PAID / PARTIAL / PENDING بناءً على الـ monthlyFee
- */
+function mapPaymentToClientItem(payment: {
+  id: string
+  studentId: string
+  month: string
+  status: 'PAID' | 'PARTIAL' | 'PENDING' | 'OVERDUE'
+  amount: number
+  student: { name: string }
+}) {
+  return {
+    id: payment.id,
+    studentId: payment.studentId,
+    studentName: payment.student.name,
+    month: payment.month,
+    status: payment.status,
+    amount: payment.amount,
+  }
+}
+
 export async function recordPayment(formData: FormData) {
   const tenant = await requireTenant()
   const user = await requireAuth()
@@ -25,38 +55,37 @@ export async function recordPayment(formData: FormData) {
     notes: formData.get('notes') || undefined,
   })
 
-  // توليد رقم إيصال فريد: RCP-{slug}-{YYYYMMDD}-{count+1 (4 digits)}
   const count = await db.payment.count({ where: { tenantId: tenant.id } })
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-  const receiptNumber = `RCP-${tenant.slug}-${date}-${String(count + 1).padStart(4, '0')}`
+  const receiptNumber = makeOrderId('RCP', tenant.slug, count)
 
-  // جيب بيانات الطالب مع التسجيلات النشطة لمعرفة الـ monthlyFee
   const student = await db.user.findFirst({
     where: { id: data.studentId, tenantId: tenant.id },
-    include: {
-      enrollments: {
+    select: {
+      id: true,
+      groupStudents: {
         where: { status: 'ACTIVE' },
-        include: { group: true },
+        include: { group: { select: { monthlyFee: true } } },
         take: 1,
       },
     },
   })
-  if (!student) throw new Error('الطالب غير موجود أو لا ينتمي لهذا الحساب')
 
-  const monthlyFee = student.enrollments[0]?.group?.monthlyFee ?? 0
+  if (!student) throw new Error('?????? ??? ????? ?? ?? ????? ???? ??????')
 
-  // احسب إجمالي ما تم دفعه في هذا الشهر
+  const monthlyFee = student.groupStudents[0]?.group.monthlyFee ?? 0
+
   const existingPayments = await db.payment.findMany({
     where: {
       tenantId: tenant.id,
       studentId: data.studentId,
       month: data.month,
+      status: { in: ['PAID', 'PARTIAL'] },
     },
+    select: { amount: true },
   })
-  const totalPaid =
-    existingPayments.reduce((sum: number, p: { amount: number }) => sum + p.amount, 0) + data.amount
 
-  // حدد الحالة بناءً على المبلغ المدفوع
+  const totalPaid = existingPayments.reduce((sum, p) => sum + p.amount, 0) + data.amount
+
   let status: 'PAID' | 'PARTIAL' | 'PENDING' = 'PENDING'
   if (monthlyFee > 0 && totalPaid >= monthlyFee) status = 'PAID'
   else if (totalPaid > 0) status = 'PARTIAL'
@@ -72,19 +101,25 @@ export async function recordPayment(formData: FormData) {
       receiptNumber,
       recordedById: user.id,
       notes: data.notes ?? null,
-      paidAt: new Date(),
+      paidAt: status === 'PAID' ? new Date() : null,
+      paymentGateway: 'KASHIER',
     },
+  })
+
+  await logFinancialEvent({
+    tenantId: tenant.id,
+    actorId: user.id,
+    eventType: 'PAYMENT_CREATED',
+    entityType: 'PAYMENT',
+    entityId: payment.id,
+    message: `Manual payment recorded (${status})`,
+    metadata: { amount: data.amount, month: data.month },
   })
 
   revalidatePath('/payments')
   return { success: true, data: { payment, receiptNumber } }
 }
 
-/**
- * إرسال تذكيرات دفع لقائمة من الطلاب
- * يستخدم Promise.allSettled — فشل واحد لا يوقف الباقيين
- * سيُربط بنظام الإشعارات الكامل في B-06
- */
 export async function sendPaymentReminder(studentIds: string[]) {
   const tenant = await requireTenant()
   await requireAuth()
@@ -96,13 +131,12 @@ export async function sendPaymentReminder(studentIds: string[]) {
       })
       if (!student?.parentPhone) return
 
-      // تسجيل الإشعار في DB (سيُرسل عبر SMS provider في B-06)
       await db.notification.create({
         data: {
           tenantId: tenant.id,
           userId: studentId,
           type: 'PAYMENT_REMINDER',
-          message: `💰 تذكير بسداد المصاريف المستحقة — ${tenant.name}`,
+          message: `????? ????? ???????? ???????? — ${tenant.name}`,
           channel: 'SMS',
           status: 'QUEUED',
           recipientPhone: student.parentPhone,
@@ -116,10 +150,6 @@ export async function sendPaymentReminder(studentIds: string[]) {
   return { success: true, sent }
 }
 
-/**
- * جلب بيانات الإيصال لطباعتها أو عرضها
- * ⚠️ يتحقق من tenantId قبل الإعادة
- */
 export async function generateReceipt(paymentId: string) {
   const tenant = await requireTenant()
   await requireAuth()
@@ -132,7 +162,7 @@ export async function generateReceipt(paymentId: string) {
     },
   })
 
-  if (!payment) throw new Error('الإيصال غير موجود أو لا ينتمي لهذا الحساب')
+  if (!payment) throw new Error('??????? ??? ????? ?? ?? ????? ???? ??????')
 
   return {
     success: true,
@@ -140,14 +170,6 @@ export async function generateReceipt(paymentId: string) {
   }
 }
 
-/**
- * بدء دفع أونلاين عبر Kashier
- * 1. ينشئ سجل Payment بحالة PENDING في DB
- * 2. يولّد رابط Kashier Checkout
- * 3. يرجع الرابط للـ client للـ redirect
- *
- * ⚠️ الإيصال يُكتمل بعد تأكيد الـ webhook — مش هنا
- */
 export async function initiateOnlinePayment(formData: FormData) {
   const tenant = await requireTenant()
   const user = await requireAuth()
@@ -159,33 +181,26 @@ export async function initiateOnlinePayment(formData: FormData) {
     notes: formData.get('notes') || undefined,
   })
 
-  // جيب بيانات الطالب — تحقق من tenantId
   const student = await db.user.findFirst({
     where: { id: data.studentId, tenantId: tenant.id },
     select: { id: true, name: true },
   })
-  if (!student) throw new Error('الطالب غير موجود أو لا ينتمي لهذا الحساب')
+  if (!student) throw new Error('?????? ??? ????? ?? ?? ????? ???? ??????')
 
-  // تأكد إن مفيش دفعة Kashier معلقة لنفس الطالب ونفس الشهر
   const existing = await db.payment.findFirst({
     where: {
       tenantId: tenant.id,
       studentId: data.studentId,
       month: data.month,
       status: 'PENDING',
-      receiptNumber: {
-        startsWith: 'KSH-',
-      },
+      receiptNumber: { startsWith: 'KSH-' },
     },
   })
-  if (existing) throw new Error('يوجد طلب دفع أونلاين معلق لهذا الشهر — انتظر تأكيد العملية أو تواصل مع الدعم')
+  if (existing) throw new Error('???? ??? ??? ??????? ???? ???? ?????')
 
-  // توليد orderId فريد: KSH-{slug}-{YYYYMMDD}-{count+1}
   const count = await db.payment.count({ where: { tenantId: tenant.id } })
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-  const kashierOrderId = `KSH-${tenant.slug}-${date}-${String(count + 1).padStart(4, '0')}`
+  const orderId = makeOrderId('KSH', tenant.slug, count)
 
-  // إنشاء سجل Payment معلق — سيُحدَّث عبر webhook
   await db.payment.create({
     data: {
       tenantId: tenant.id,
@@ -194,22 +209,21 @@ export async function initiateOnlinePayment(formData: FormData) {
       month: data.month,
       status: 'PENDING',
       method: 'CARD',
-      receiptNumber: kashierOrderId,
+      receiptNumber: orderId,
       recordedById: user.id,
-      notes: data.notes ? `Kashier: ${data.notes}` : 'Kashier checkout initiated',
+      notes: data.notes ? `TUITION:${data.notes}` : 'TUITION',
+      paymentGateway: 'KASHIER',
     },
   })
 
-  // بناء الـ URLs
   const appUrl = env.NEXT_PUBLIC_APP_URL
-  // ⚠️ callbackUrl = API route الذي يقرأ حالة DB ويعمل redirect للمستخدم
-  const callbackUrl = `${appUrl}/api/payments/kashier/callback?orderId=${kashierOrderId}`
+  const callbackUrl = `${appUrl}/api/payments/kashier/callback?orderId=${orderId}`
   const webhookUrl = `${appUrl}/api/payments/kashier/webhook`
 
   const checkoutUrl = createKashierCheckoutUrl({
-    orderId: kashierOrderId,
+    orderId,
     amount: data.amount,
-    studentName: student.name ?? 'طالب',
+    studentName: student.name ?? '????',
     callbackUrl,
     webhookUrl,
   })
@@ -217,24 +231,58 @@ export async function initiateOnlinePayment(formData: FormData) {
   return { success: true, checkoutUrl }
 }
 
-function mapPaymentToClientItem(payment: {
-  id: string
+export async function initiateBalanceRecharge(input: {
   studentId: string
-  month: string
-  status: 'PAID' | 'PARTIAL' | 'PENDING' | 'OVERDUE'
   amount: number
-  student: {
-    name: string
-  }
+  description?: string
 }) {
-  return {
-    id: payment.id,
-    studentId: payment.studentId,
-    studentName: payment.student.name,
-    month: payment.month,
-    status: payment.status,
-    amount: payment.amount,
-  }
+  const tenant = await requireTenant()
+  const user = await requireAuth()
+
+  const data = rechargeBalanceSchema.parse({
+    amount: input.amount,
+    description: input.description,
+  })
+
+  const student = await db.user.findFirst({
+    where: { id: input.studentId, tenantId: tenant.id },
+    select: { id: true, name: true },
+  })
+
+  if (!student) throw new Error('???????? ???????? ????? ??? ?????')
+
+  const count = await db.payment.count({ where: { tenantId: tenant.id } })
+  const orderId = makeOrderId('RCH', tenant.slug, count)
+  const month = new Date().toISOString().slice(0, 7)
+
+  await db.payment.create({
+    data: {
+      tenantId: tenant.id,
+      studentId: student.id,
+      amount: data.amount,
+      month,
+      status: 'PENDING',
+      method: 'CARD',
+      receiptNumber: orderId,
+      recordedById: user.id,
+      notes: `RECHARGE:${data.description ?? ''}`,
+      paymentGateway: 'KASHIER',
+    },
+  })
+
+  const appUrl = env.NEXT_PUBLIC_APP_URL
+  const callbackUrl = `${appUrl}/api/payments/kashier/callback?orderId=${orderId}`
+  const webhookUrl = `${appUrl}/api/payments/kashier/webhook`
+
+  const checkoutUrl = createKashierCheckoutUrl({
+    orderId,
+    amount: data.amount,
+    studentName: student.name ?? '????',
+    callbackUrl,
+    webhookUrl,
+  })
+
+  return { success: true, checkoutUrl, orderId }
 }
 
 export async function savePayment(input: {
@@ -253,36 +301,27 @@ export async function savePayment(input: {
         id: input.studentId,
         tenantId: tenant.id,
       },
-      select: {
-        id: true,
-      },
+      select: { id: true },
     })
 
     if (!student) {
-      throw new Error('الطالب غير موجود')
+      throw new Error('?????? ??? ?????')
     }
 
     let paymentId = input.id
 
     if (paymentId) {
       const existingPayment = await db.payment.findFirst({
-        where: {
-          id: paymentId,
-          tenantId: tenant.id,
-        },
-        select: {
-          id: true,
-        },
+        where: { id: paymentId, tenantId: tenant.id },
+        select: { id: true },
       })
 
       if (!existingPayment) {
-        throw new Error('الدفعة غير موجودة')
+        throw new Error('?????? ??? ??????')
       }
 
       await db.payment.update({
-        where: {
-          id: existingPayment.id,
-        },
+        where: { id: existingPayment.id },
         data: {
           studentId: input.studentId,
           month: input.month,
@@ -295,8 +334,7 @@ export async function savePayment(input: {
       })
     } else {
       const count = await db.payment.count({ where: { tenantId: tenant.id } })
-      const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-      const receiptNumber = `RCP-${tenant.slug}-${date}-${String(count + 1).padStart(4, '0')}`
+      const receiptNumber = makeOrderId('RCP', tenant.slug, count)
 
       const createdPayment = await db.payment.create({
         data: {
@@ -310,34 +348,26 @@ export async function savePayment(input: {
           paidAt: input.status === 'PAID' ? new Date() : null,
           recordedById: user.id,
         },
-        select: {
-          id: true,
-        },
+        select: { id: true },
       })
 
       paymentId = createdPayment.id
     }
 
     const payment = await db.payment.findUnique({
-      where: {
-        id: paymentId,
-      },
+      where: { id: paymentId },
       select: {
         id: true,
         studentId: true,
         month: true,
         status: true,
         amount: true,
-        student: {
-          select: {
-            name: true,
-          },
-        },
+        student: { select: { name: true } },
       },
     })
 
     if (!payment) {
-      throw new Error('تعذر تحميل بيانات الدفعة بعد الحفظ')
+      throw new Error('???? ????? ?????? ?????? ??? ?????')
     }
 
     revalidatePath('/payments')
@@ -349,17 +379,11 @@ export async function savePayment(input: {
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'تعذر حفظ الدفعة',
+      message: error instanceof Error ? error.message : '???? ??? ??????',
     }
   }
 }
 
-// ── Balance & Subscription Actions (جديد) ──────────────────────────────────
-
-/**
- * خصم من رصيد الطالب/ولي الأمر وتسجيل الدفع
- * يُستخدم عند الدفع من الرصيد الداخلي
- */
 export async function debitStudentBalance(input: {
   studentId: string
   amount: number
@@ -370,55 +394,68 @@ export async function debitStudentBalance(input: {
     const tenant = await requireTenant()
     const user = await requireAuth()
 
-    // استيراد الدوال من balance.ts
-    const { debitBalance } = await import('./providers/balance')
+    const validated = debitBalanceSchema.parse({
+      studentId: input.studentId,
+      amount: input.amount,
+      reason: input.reason,
+    })
 
-    // خصم من الرصيد
-    const { transaction } = await debitBalance(
-      input.studentId,
-      input.amount,
-      input.reason,
-    )
-
-    // تسجيل الدفع
     const count = await db.payment.count({ where: { tenantId: tenant.id } })
-    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-    const receiptNumber = `RCP-${tenant.slug}-${date}-${String(count + 1).padStart(4, '0')}`
+    const receiptNumber = makeOrderId('BAL', tenant.slug, count)
 
     const payment = await db.payment.create({
       data: {
         tenantId: tenant.id,
-        studentId: input.studentId,
-        amount: input.amount,
+        studentId: validated.studentId,
+        amount: validated.amount,
         month: input.month,
-        status: 'PAID',
-        method: 'CARD', // استخدمنا الرصيد الداخلي
+        status: 'PENDING',
+        method: 'CARD',
         receiptNumber,
         recordedById: user.id,
         paymentGateway: 'INTERNAL_BALANCE',
-        paidAt: new Date(),
+        notes: `BALANCE:${validated.reason}`,
       },
       include: { student: { select: { name: true } } },
+    })
+
+    await debitBalance(validated.studentId, validated.amount, validated.reason, payment.id)
+
+    await db.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: 'PAID',
+        paidAt: new Date(),
+      },
+    })
+
+    await logFinancialEvent({
+      tenantId: tenant.id,
+      actorId: user.id,
+      eventType: 'PAYMENT_CONFIRMED',
+      entityType: 'PAYMENT',
+      entityId: payment.id,
+      message: 'Internal balance payment confirmed',
     })
 
     revalidatePath('/payments')
 
     return {
       success: true,
-      message: 'تم الدفع بنجاح من الرصيد',
-      payment: mapPaymentToClientItem(payment),
+      message: '?? ????? ????? ?? ??????',
+      payment: mapPaymentToClientItem({
+        ...payment,
+        status: 'PAID',
+      }),
     }
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'فشل خصم الرصيد',
+      message: error instanceof Error ? error.message : '??? ??? ??????',
     }
   }
 }
 
-/**
- * إضافة رصيد للطالب بعد دفع ناجح عبر Kashier
- */
 export async function creditBalanceAfterPayment(input: {
   studentId: string
   amount: number
@@ -426,15 +463,12 @@ export async function creditBalanceAfterPayment(input: {
   reason?: string
 }) {
   try {
-    const tenant = await requireTenant()
     await requireAuth()
-
-    const { creditBalance } = await import('./providers/balance')
 
     const result = await creditBalance(
       input.studentId,
       input.amount,
-      input.reason ?? 'إضافة رصيد عبر Kashier',
+      input.reason ?? '????? ???? ??? Kashier',
       input.relatedPaymentId,
     )
 
@@ -442,34 +476,23 @@ export async function creditBalanceAfterPayment(input: {
 
     return {
       success: true,
-      message: 'تم إضافة الرصيد بنجاح',
+      message: '?? ????? ?????? ?????',
       balance: result.balance,
     }
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'فشل إضافة الرصيد',
+      message: error instanceof Error ? error.message : '??? ????? ??????',
     }
   }
 }
 
-/**
- * إضافة Kashier API للمعلم
- */
-export async function addTeacherKashierApi(input: {
-  kashierApiKey: string
-  kashierMerId: string
-}) {
+export async function addTeacherKashierApi(input: { kashierApiKey: string; kashierMerId: string }) {
   try {
-    const tenant = await requireTenant()
-    await requireAuth()
-
+    const validated = addKashierApiSchema.parse(input)
     const { addKashierApiCredentials } = await import('./providers/subscription')
 
-    const result = await addKashierApiCredentials(
-      input.kashierApiKey,
-      input.kashierMerId,
-    )
+    const result = await addKashierApiCredentials(validated.kashierApiKey, validated.kashierMerId)
 
     revalidatePath('/settings')
 
@@ -477,14 +500,11 @@ export async function addTeacherKashierApi(input: {
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'فشل حفظ بيانات Kashier',
+      message: error instanceof Error ? error.message : '??? ??? ?????? Kashier',
     }
   }
 }
 
-/**
- * إنشاء اشتراك جديد للمعلم بعد دفع ناجح
- */
 export async function createTeacherSubscriptionPayment(input: {
   subscriptionPlan: 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE'
   billingCycle: 'MONTHLY' | 'YEARLY'
@@ -495,41 +515,29 @@ export async function createTeacherSubscriptionPayment(input: {
     const tenant = await requireTenant()
     const user = await requireAuth()
 
-    const { createTeacherSubscription, SUBSCRIPTION_PLANS } = await import(
-      './providers/subscription'
-    )
-
-    // التحقق من صحة المبلغ
     const planConfig = SUBSCRIPTION_PLANS[input.subscriptionPlan]
     const expectedAmount =
-      input.billingCycle === 'MONTHLY'
-        ? planConfig.monthlyPrice
-        : planConfig.yearlyPrice
+      input.billingCycle === 'MONTHLY' ? planConfig.monthlyPrice : planConfig.yearlyPrice
 
-    if (input.amount !== expectedAmount && input.subscriptionPlan !== 'ENTERPRISE') {
-      throw new Error('المبلغ المدفوع لا يتطابق مع سعر الخطة')
+    if (input.subscriptionPlan !== 'ENTERPRISE' && input.amount !== expectedAmount) {
+      throw new Error('?????? ??????? ?? ?????? ?? ??? ?????')
     }
 
-    // إنشاء الاشتراك
-    const subscription = await createTeacherSubscription(
-      input.subscriptionPlan,
-      input.billingCycle,
-    )
+    const subscription = await createTeacherSubscription(input.subscriptionPlan, input.billingCycle)
 
-    // تسجيل دفعة الاشتراك في DB
-    const payment = await db.payment.create({
+    await db.payment.create({
       data: {
         tenantId: tenant.id,
-        studentId: user.id, // نستخدم studentId لتخزين معرف المدرس
+        studentId: user.id,
         amount: input.amount,
-        month: new Date().toISOString().slice(0, 7), // YYYY-MM
+        month: new Date().toISOString().slice(0, 7),
         status: 'PAID',
         method: 'CARD',
         receiptNumber: `SUB-${tenant.slug}-${input.subscriptionPlan}-${Date.now()}`,
         recordedById: user.id,
         transactionId: input.transactionId,
         paidAt: new Date(),
-        notes: `Subscription: ${input.subscriptionPlan} (${input.billingCycle})`,
+        notes: `SUBSCRIPTION:${input.subscriptionPlan}:${input.billingCycle}`,
       },
     })
 
@@ -537,13 +545,64 @@ export async function createTeacherSubscriptionPayment(input: {
 
     return {
       success: true,
-      message: 'تم تفعيل الاشتراك بنجاح',
+      message: '?? ????? ???????? ?????',
       subscription,
     }
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'فشل إنشاء الاشتراك',
+      message: error instanceof Error ? error.message : '??? ????? ????????',
     }
   }
 }
+
+export async function initiateTeacherSubscriptionCheckout(input: {
+  subscriptionPlan: 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE'
+  billingCycle: 'MONTHLY' | 'YEARLY'
+}) {
+  const tenant = await requireTenant()
+  const user = await requireAuth()
+
+  const validated = updateSubscriptionSchema.parse(input)
+
+  const planConfig = SUBSCRIPTION_PLANS[validated.subscriptionPlan]
+  const amount =
+    validated.subscriptionPlan === 'ENTERPRISE'
+      ? 0
+      : validated.billingCycle === 'MONTHLY'
+        ? planConfig.monthlyPrice
+        : planConfig.yearlyPrice
+
+  const count = await db.payment.count({ where: { tenantId: tenant.id } })
+  const orderId = makeOrderId('SUBK', tenant.slug, count)
+
+  await db.payment.create({
+    data: {
+      tenantId: tenant.id,
+      studentId: user.id,
+      amount,
+      month: new Date().toISOString().slice(0, 7),
+      status: 'PENDING',
+      method: 'CARD',
+      receiptNumber: orderId,
+      recordedById: user.id,
+      notes: `SUBSCRIPTION:${validated.subscriptionPlan}:${validated.billingCycle}`,
+      paymentGateway: 'KASHIER',
+    },
+  })
+
+  const appUrl = env.NEXT_PUBLIC_APP_URL
+  const callbackUrl = `${appUrl}/api/payments/kashier/callback?orderId=${orderId}`
+  const webhookUrl = `${appUrl}/api/payments/kashier/webhook`
+
+  const checkoutUrl = createKashierCheckoutUrl({
+    orderId,
+    amount,
+    studentName: user.name ?? 'Teacher',
+    callbackUrl,
+    webhookUrl,
+  })
+
+  return { success: true, checkoutUrl, orderId }
+}
+

@@ -1,4 +1,4 @@
-generator client {
+﻿generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/client"
 }
@@ -37,6 +37,8 @@ model Tenant {
   teacherSubscription   TeacherSubscription?
   studentBalances       StudentBalance[]
   balanceTransactions   BalanceTransaction[]
+  teacherTransfers      TeacherTransfer[]
+  financialAuditLogs    FinancialAuditLog[]
 
   @@index([slug])
 }
@@ -205,6 +207,8 @@ model Payment {
   recordedBy           User?          @relation("RecordedPayments", fields: [recordedById], references: [id])
   student              User           @relation("StudentPayments", fields: [studentId], references: [id], onDelete: Cascade)
   tenant               Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  balanceTransactions  BalanceTransaction[]
+  teacherTransfers     TeacherTransfer[]
 
   @@index([tenantId, studentId])
   @@index([tenantId, month])
@@ -460,7 +464,7 @@ enum QuestionType {
   TRUE_FALSE
 }
 
-// ── Teacher Subscription Models ────────────────────────────────────────────
+// â”€â”€ Teacher Subscription Models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 model TeacherSubscription {
   id             String            @id @default(cuid())
@@ -481,7 +485,7 @@ model TeacherSubscription {
   @@index([nextBillingAt])
 }
 
-// ── Student Balance / Wallet Models ────────────────────────────────────────
+// â”€â”€ Student Balance / Wallet Models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 model StudentBalance {
   id               String                 @id @default(cuid())
@@ -513,6 +517,7 @@ model BalanceTransaction {
   status           TransactionStatus  @default(COMPLETED)
   createdAt        DateTime           @default(now())
   balance          StudentBalance     @relation(fields: [balanceId], references: [id], onDelete: Cascade)
+  payment          Payment?           @relation(fields: [relatedPaymentId], references: [id], onDelete: SetNull)
   tenant           Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, balanceId])
@@ -520,7 +525,45 @@ model BalanceTransaction {
   @@index([status, createdAt])
 }
 
-// ── Enums ─────────────────────────────────────────────────────────────────
+model TeacherTransfer {
+  id              String        @id @default(cuid())
+  tenantId        String
+  paymentId       String
+  amount          Int           // Ø§Ù„Ù…Ø¨Ù„Øº Ø§Ù„Ù…Ø­ÙˆÙ„
+  fee             Int           // Ø±Ø³ÙˆÙ… Ø§Ù„Ù…Ù†ØµØ©
+  status          TransferStatus @default(PENDING)
+  attemptCount    Int           @default(0)
+  lastAttemptAt   DateTime?
+  failureReason   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  payment         Payment       @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@index([paymentId])
+  @@index([status, attemptCount])
+  @@unique([paymentId])
+}
+
+model FinancialAuditLog {
+  id          String             @id @default(cuid())
+  tenantId    String
+  actorId     String?
+  eventType   FinancialEventType
+  entityType  FinancialEntityType
+  entityId    String?
+  message     String
+  metadata    Json?
+  createdAt   DateTime           @default(now())
+  tenant      Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, eventType])
+}
+
+// â”€â”€ Enums â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 enum SubscriptionPlan {
   STARTER
@@ -549,3 +592,31 @@ enum PaymentGateway {
   KASHIER
   INTERNAL_BALANCE
 }
+
+enum TransferStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  RETRY
+}
+
+enum FinancialEventType {
+  PAYMENT_CREATED
+  PAYMENT_CONFIRMED
+  PAYMENT_FAILED
+  BALANCE_CREDIT
+  BALANCE_DEBIT
+  TRANSFER_ENQUEUED
+  TRANSFER_SUCCESS
+  TRANSFER_FAILED
+  SUBSCRIPTION_UPDATED
+}
+
+enum FinancialEntityType {
+  PAYMENT
+  BALANCE
+  BALANCE_TRANSACTION
+  TRANSFER
+  SUBSCRIPTION
+}
+
