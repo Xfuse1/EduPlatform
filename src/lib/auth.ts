@@ -13,7 +13,7 @@ export type SessionUser = {
   tenantId: string;
   name: string;
   phone: string;
-  role: UserRole | "CENTER_ADMIN";
+  role: UserRole;
   avatarUrl?: string | null;
 };
 
@@ -78,7 +78,7 @@ function toSessionUser(user: {
   tenantId: string;
   name: string;
   phone: string;
-  role: UserRole | "CENTER_ADMIN";
+  role: UserRole;
   avatarUrl?: string | null;
 }): SessionUser {
   return {

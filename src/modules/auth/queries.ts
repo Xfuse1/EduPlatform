@@ -27,7 +27,11 @@ export async function getLatestActiveOtp(phone: string) {
 
 export function getDashboardRouteForRole(role: UserRole) {
   switch (role) {
+    case 'SUPER_ADMIN':
+      return ROUTES.admin.dashboard
     case 'CENTER_ADMIN':
+    case 'ADMIN':
+    case 'MANAGER':
       return ROUTES.center.dashboard
     case 'TEACHER':
     case 'ASSISTANT':
@@ -36,5 +40,7 @@ export function getDashboardRouteForRole(role: UserRole) {
       return ROUTES.student.dashboard
     case 'PARENT':
       return ROUTES.parent.dashboard
+    default:
+      return ROUTES.teacher.dashboard
   }
 }

@@ -15,6 +15,13 @@ type OptionalEnvKey =
   | 'KASHIER_SECRET_KEY'
   | 'KASHIER_MODE'
   | 'KASHIER_ALLOWED_METHODS'
+  | 'KASHIER_SUBSCRIPTION_CHECKOUT_MODE'
+  | 'KASHIER_SUBSCRIPTION_LINK_STARTER_MONTHLY'
+  | 'KASHIER_SUBSCRIPTION_LINK_STARTER_YEARLY'
+  | 'KASHIER_SUBSCRIPTION_LINK_PROFESSIONAL_MONTHLY'
+  | 'KASHIER_SUBSCRIPTION_LINK_PROFESSIONAL_YEARLY'
+  | 'KASHIER_SUBSCRIPTION_LINK_ENTERPRISE_MONTHLY'
+  | 'KASHIER_SUBSCRIPTION_LINK_ENTERPRISE_YEARLY'
   | 'ENCRYPTION_KEY'
   | 'INTERNAL_JOBS_SECRET'
   | 'TEACHER_TRANSFER_FEE_PERCENT'
@@ -36,6 +43,13 @@ type EnvConfig = {
   KASHIER_SECRET_KEY?: string
   KASHIER_MODE?: 'test' | 'live'
   KASHIER_ALLOWED_METHODS?: string
+  KASHIER_SUBSCRIPTION_CHECKOUT_MODE?: 'hosted' | 'payment_link'
+  KASHIER_SUBSCRIPTION_LINK_STARTER_MONTHLY?: string
+  KASHIER_SUBSCRIPTION_LINK_STARTER_YEARLY?: string
+  KASHIER_SUBSCRIPTION_LINK_PROFESSIONAL_MONTHLY?: string
+  KASHIER_SUBSCRIPTION_LINK_PROFESSIONAL_YEARLY?: string
+  KASHIER_SUBSCRIPTION_LINK_ENTERPRISE_MONTHLY?: string
+  KASHIER_SUBSCRIPTION_LINK_ENTERPRISE_YEARLY?: string
   ENCRYPTION_KEY?: string
   INTERNAL_JOBS_SECRET?: string
   TEACHER_TRANSFER_FEE_PERCENT: number
@@ -98,6 +112,10 @@ function createEnv(): EnvConfig {
   const whatsappApiUrl = optionalEnv('WHATSAPP_API_URL')
   const transferFeeRaw = optionalEnv('TEACHER_TRANSFER_FEE_PERCENT')
   const transferFee = transferFeeRaw ? Number(transferFeeRaw) : 0
+  const subscriptionCheckoutModeRaw = optionalEnv('KASHIER_SUBSCRIPTION_CHECKOUT_MODE')
+  const subscriptionCheckoutMode = subscriptionCheckoutModeRaw
+    ? subscriptionCheckoutModeRaw.toLowerCase()
+    : undefined
   const kashierModeRaw = optionalEnv('KASHIER_MODE')
   const kashierMode = kashierModeRaw
     ? kashierModeRaw.toLowerCase()
@@ -109,6 +127,14 @@ function createEnv(): EnvConfig {
 
   if (kashierMode && kashierMode !== 'test' && kashierMode !== 'live') {
     throw new Error('KASHIER_MODE must be either "test" or "live"')
+  }
+
+  if (
+    subscriptionCheckoutMode &&
+    subscriptionCheckoutMode !== 'hosted' &&
+    subscriptionCheckoutMode !== 'payment_link'
+  ) {
+    throw new Error('KASHIER_SUBSCRIPTION_CHECKOUT_MODE must be either "hosted" or "payment_link"')
   }
 
   return {
@@ -134,6 +160,24 @@ function createEnv(): EnvConfig {
     KASHIER_SECRET_KEY: optionalEnv('KASHIER_SECRET_KEY'),
     KASHIER_MODE: kashierMode as 'test' | 'live' | undefined,
     KASHIER_ALLOWED_METHODS: optionalEnv('KASHIER_ALLOWED_METHODS'),
+    KASHIER_SUBSCRIPTION_CHECKOUT_MODE: subscriptionCheckoutMode as
+      | 'hosted'
+      | 'payment_link'
+      | undefined,
+    KASHIER_SUBSCRIPTION_LINK_STARTER_MONTHLY: optionalEnv('KASHIER_SUBSCRIPTION_LINK_STARTER_MONTHLY'),
+    KASHIER_SUBSCRIPTION_LINK_STARTER_YEARLY: optionalEnv('KASHIER_SUBSCRIPTION_LINK_STARTER_YEARLY'),
+    KASHIER_SUBSCRIPTION_LINK_PROFESSIONAL_MONTHLY: optionalEnv(
+      'KASHIER_SUBSCRIPTION_LINK_PROFESSIONAL_MONTHLY',
+    ),
+    KASHIER_SUBSCRIPTION_LINK_PROFESSIONAL_YEARLY: optionalEnv(
+      'KASHIER_SUBSCRIPTION_LINK_PROFESSIONAL_YEARLY',
+    ),
+    KASHIER_SUBSCRIPTION_LINK_ENTERPRISE_MONTHLY: optionalEnv(
+      'KASHIER_SUBSCRIPTION_LINK_ENTERPRISE_MONTHLY',
+    ),
+    KASHIER_SUBSCRIPTION_LINK_ENTERPRISE_YEARLY: optionalEnv(
+      'KASHIER_SUBSCRIPTION_LINK_ENTERPRISE_YEARLY',
+    ),
     ENCRYPTION_KEY: optionalEnv('ENCRYPTION_KEY'),
     INTERNAL_JOBS_SECRET: optionalEnv('INTERNAL_JOBS_SECRET'),
     TEACHER_TRANSFER_FEE_PERCENT: transferFee,

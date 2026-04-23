@@ -18,11 +18,64 @@ import {
 } from './validations'
 import { creditBalance, debitBalance } from './providers/balance'
 import { createKashierCheckoutUrl } from './providers/kashier'
-import { SUBSCRIPTION_PLANS, createTeacherSubscription } from './providers/subscription'
+import { createTeacherSubscription } from './providers/subscription'
+import { getSubscriptionPlanConfig } from './providers/plan-config'
+
+const SUBSCRIPTION_PAYMENT_LINKS: Record<string, string | undefined> = {
+  STARTER_MONTHLY: env.KASHIER_SUBSCRIPTION_LINK_STARTER_MONTHLY,
+  STARTER_YEARLY: env.KASHIER_SUBSCRIPTION_LINK_STARTER_YEARLY,
+  PROFESSIONAL_MONTHLY: env.KASHIER_SUBSCRIPTION_LINK_PROFESSIONAL_MONTHLY,
+  PROFESSIONAL_YEARLY: env.KASHIER_SUBSCRIPTION_LINK_PROFESSIONAL_YEARLY,
+  ENTERPRISE_MONTHLY: env.KASHIER_SUBSCRIPTION_LINK_ENTERPRISE_MONTHLY,
+  ENTERPRISE_YEARLY: env.KASHIER_SUBSCRIPTION_LINK_ENTERPRISE_YEARLY,
+}
 
 function makeOrderId(prefix: string, tenantSlug: string, count: number) {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
   return `${prefix}-${tenantSlug}-${date}-${String(count + 1).padStart(4, '0')}`
+}
+
+function normalizePaymentLinkIdentifier(raw: string) {
+  const value = raw.trim()
+
+  if (!value) return null
+
+  if (value.includes('checkouts.kashier.io')) {
+    try {
+      const url = new URL(value)
+      const pplink = url.searchParams.get('pplink')
+      if (pplink) return pplink
+    } catch {
+      return null
+    }
+  }
+
+  return value
+}
+
+function buildSubscriptionPaymentLinkUrl(
+  plan: 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE',
+  cycle: 'MONTHLY' | 'YEARLY',
+  orderId: string,
+) {
+  const key = `${plan}_${cycle}`
+  const rawLink = SUBSCRIPTION_PAYMENT_LINKS[key]
+
+  if (!rawLink) {
+    throw new Error(`Payment Link غير مضبوط للخطة ${plan} (${cycle})`)
+  }
+
+  const pplink = normalizePaymentLinkIdentifier(rawLink)
+  if (!pplink) {
+    throw new Error(`Payment Link غير صالح للخطة ${plan} (${cycle})`)
+  }
+
+  const checkoutUrl = new URL('https://checkouts.kashier.io/en/paymentlinkPage')
+  checkoutUrl.searchParams.set('pplink', pplink)
+  // نحافظ على مرجع داخلي لتتبع الطلب في logs/الدعم حتى لو Kashier لم يمرره للويبهوك.
+  checkoutUrl.searchParams.set('merchantOrderId', orderId)
+
+  return checkoutUrl.toString()
 }
 
 function mapPaymentToClientItem(payment: {
@@ -527,11 +580,10 @@ export async function createTeacherSubscriptionPayment(input: {
     const tenant = await requireTenant()
     const user = await requireAuth()
 
-    const planConfig = SUBSCRIPTION_PLANS[input.subscriptionPlan]
-    const expectedAmount =
-      input.billingCycle === 'MONTHLY' ? planConfig.monthlyPrice : planConfig.yearlyPrice
+    const planConfig = await getSubscriptionPlanConfig(input.subscriptionPlan)
+    const expectedAmount = input.billingCycle === 'MONTHLY' ? planConfig.monthlyPrice : planConfig.yearlyPrice
 
-    if (input.subscriptionPlan !== 'ENTERPRISE' && input.amount !== expectedAmount) {
+    if (input.amount !== expectedAmount) {
       throw new Error('?????? ??????? ?? ?????? ?? ??? ?????')
     }
 
@@ -577,13 +629,11 @@ export async function initiateTeacherSubscriptionCheckout(input: {
 
   const validated = updateSubscriptionSchema.parse(input)
 
-  const planConfig = SUBSCRIPTION_PLANS[validated.subscriptionPlan]
-  const amount =
-    validated.subscriptionPlan === 'ENTERPRISE'
-      ? 0
-      : validated.billingCycle === 'MONTHLY'
-        ? planConfig.monthlyPrice
-        : planConfig.yearlyPrice
+  const planConfig = await getSubscriptionPlanConfig(validated.subscriptionPlan)
+  if (!planConfig.isActive) {
+    throw new Error('هذه الباقة غير متاحة حالياً')
+  }
+  const amount = validated.billingCycle === 'MONTHLY' ? planConfig.monthlyPrice : planConfig.yearlyPrice
 
   const count = await db.payment.count({ where: { tenantId: tenant.id } })
   const orderId = makeOrderId('SUBK', tenant.slug, count)
@@ -607,21 +657,25 @@ export async function initiateTeacherSubscriptionCheckout(input: {
   const callbackUrl = `${appUrl}/api/payments/kashier/callback?orderId=${orderId}`
   const webhookUrl = `${appUrl}/api/payments/kashier/webhook`
 
-  const checkoutUrl = createKashierCheckoutUrl({
-    orderId,
-    amount,
-    studentName: user.name ?? 'Teacher',
-    customerPhone: user.phone,
-    metadata: {
-      paymentType: 'teacher_subscription',
-      tenantId: tenant.id,
-      teacherId: user.id,
-      plan: validated.subscriptionPlan,
-      cycle: validated.billingCycle,
-    },
-    callbackUrl,
-    webhookUrl,
-  })
+  const checkoutMode = env.KASHIER_SUBSCRIPTION_CHECKOUT_MODE ?? 'hosted'
+  const checkoutUrl =
+    checkoutMode === 'payment_link'
+      ? buildSubscriptionPaymentLinkUrl(validated.subscriptionPlan, validated.billingCycle, orderId)
+      : createKashierCheckoutUrl({
+          orderId,
+          amount,
+          studentName: user.name ?? 'Teacher',
+          customerPhone: user.phone,
+          metadata: {
+            paymentType: 'teacher_subscription',
+            tenantId: tenant.id,
+            teacherId: user.id,
+            plan: validated.subscriptionPlan,
+            cycle: validated.billingCycle,
+          },
+          callbackUrl,
+          webhookUrl,
+        })
 
   return { success: true, checkoutUrl, orderId }
 }
