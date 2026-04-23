@@ -66,13 +66,13 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierAp
     const { hostname, port, protocol } = window.location;
     const portSuffix = port ? `:${port}` : "";
 
-    // Keep Vercel deployment host and prepend tenant slug automatically.
+    // Vercel default domains do not support arbitrary wildcard subdomains.
+    // Use path-based tenant URL on *.vercel.app deployments.
     if (hostname.endsWith(".vercel.app")) {
-      const labels = hostname.split(".");
-      const vercelBaseHost = labels.slice(-3).join(".");
-      const nextHost = `${tenant.slug}.${vercelBaseHost}${portSuffix}`;
-      setPublicPageHost(nextHost);
-      setPublicPageUrl(`${protocol}//${nextHost}`);
+      const deploymentHost = `${hostname}${portSuffix}`;
+      const nextUrl = `${protocol}//${deploymentHost}/${tenant.slug}`;
+      setPublicPageHost(`${deploymentHost}/${tenant.slug}`);
+      setPublicPageUrl(nextUrl);
       return;
     }
 
