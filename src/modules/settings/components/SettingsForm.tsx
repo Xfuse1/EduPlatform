@@ -2,7 +2,7 @@
 
 import { Camera, Loader2, User, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -57,8 +57,33 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierAp
   const [kashierApiKey, setKashierApiKey] = useState("");
   const [kashierMerId, setKashierMerId] = useState("");
   const [isKashierConnected, setIsKashierConnected] = useState(hasKashierApi);
+  const [publicPageUrl, setPublicPageUrl] = useState(`https://${tenant.slug}.eduplatform.com`);
+  const [publicPageHost, setPublicPageHost] = useState(`${tenant.slug}.eduplatform.com`);
 
   const bioLength = useMemo(() => bio.length, [bio]);
+
+  useEffect(() => {
+    const { hostname, port, protocol } = window.location;
+    const portSuffix = port ? `:${port}` : "";
+
+    // Keep Vercel deployment host and prepend tenant slug automatically.
+    if (hostname.endsWith(".vercel.app")) {
+      const labels = hostname.split(".");
+      const vercelBaseHost = labels.slice(-3).join(".");
+      const nextHost = `${tenant.slug}.${vercelBaseHost}${portSuffix}`;
+      setPublicPageHost(nextHost);
+      setPublicPageUrl(`${protocol}//${nextHost}`);
+      return;
+    }
+
+    const tenantPrefix = `${tenant.slug}.`;
+    const normalizedHost = hostname.startsWith(tenantPrefix)
+      ? hostname.slice(tenantPrefix.length)
+      : hostname;
+    const nextHost = `${tenant.slug}.${normalizedHost}${portSuffix}`;
+    setPublicPageHost(nextHost);
+    setPublicPageUrl(`${protocol}//${nextHost}`);
+  }, [tenant.slug]);
 
   const showToast = (kind: "success" | "error", message: string) => {
     setToast({ kind, message });
@@ -266,12 +291,12 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierAp
                 <Label>رابط صفحتك الشخصية</Label>
                 <div className="mt-1 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
                   <span className="flex-1 text-sm font-mono text-slate-700 dark:text-slate-300" dir="ltr">
-                    {tenant.slug}.eduplatform.com
+                    {publicPageHost}
                   </span>
                   <button
                     type="button"
                     onClick={() => {
-                      navigator.clipboard.writeText(`https://${tenant.slug}.eduplatform.com`);
+                      navigator.clipboard.writeText(publicPageUrl);
                       showToast("success", "✅ تم نسخ الرابط");
                     }}
                     className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white transition hover:opacity-90"
