@@ -183,7 +183,7 @@ export async function initiateOnlinePayment(formData: FormData) {
 
   const student = await db.user.findFirst({
     where: { id: data.studentId, tenantId: tenant.id },
-    select: { id: true, name: true },
+    select: { id: true, name: true, phone: true },
   })
   if (!student) throw new Error('?????? ??? ????? ?? ?? ????? ???? ??????')
 
@@ -224,6 +224,12 @@ export async function initiateOnlinePayment(formData: FormData) {
     orderId,
     amount: data.amount,
     studentName: student.name ?? '????',
+    customerPhone: student.phone,
+    metadata: {
+      paymentType: 'tuition',
+      tenantId: tenant.id,
+      studentId: student.id,
+    },
     callbackUrl,
     webhookUrl,
   })
@@ -246,7 +252,7 @@ export async function initiateBalanceRecharge(input: {
 
   const student = await db.user.findFirst({
     where: { id: input.studentId, tenantId: tenant.id },
-    select: { id: true, name: true },
+    select: { id: true, name: true, phone: true },
   })
 
   if (!student) throw new Error('???????? ???????? ????? ??? ?????')
@@ -278,6 +284,12 @@ export async function initiateBalanceRecharge(input: {
     orderId,
     amount: data.amount,
     studentName: student.name ?? '????',
+    customerPhone: student.phone,
+    metadata: {
+      paymentType: 'wallet_recharge',
+      tenantId: tenant.id,
+      studentId: student.id,
+    },
     callbackUrl,
     webhookUrl,
   })
@@ -599,6 +611,14 @@ export async function initiateTeacherSubscriptionCheckout(input: {
     orderId,
     amount,
     studentName: user.name ?? 'Teacher',
+    customerPhone: user.phone,
+    metadata: {
+      paymentType: 'teacher_subscription',
+      tenantId: tenant.id,
+      teacherId: user.id,
+      plan: validated.subscriptionPlan,
+      cycle: validated.billingCycle,
+    },
     callbackUrl,
     webhookUrl,
   })

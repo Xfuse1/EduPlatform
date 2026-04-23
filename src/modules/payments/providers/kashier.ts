@@ -12,8 +12,23 @@ export interface KashierOrderParams {
   orderId: string       // مثال: KSH-academy-20260317-0001
   amount: number        // بالجنيه المصري (رقم صحيح)
   studentName?: string
+  customerPhone?: string
+  customerEmail?: string
+  metadata?: Record<string, string | number | boolean | null | undefined>
   callbackUrl: string   // URL بعد الدفع (redirect للمستخدم)
   webhookUrl: string    // URL لاستقبال إشعار الخادم
+}
+
+function normalizeEgyptPhone(phone?: string): string | undefined {
+  if (!phone) return undefined
+
+  const normalized = phone.replace(/\s+/g, '')
+
+  if (/^\+20\d{10}$/.test(normalized)) return normalized
+  if (/^20\d{10}$/.test(normalized)) return `+${normalized}`
+  if (/^01\d{9}$/.test(normalized)) return `+2${normalized}`
+
+  return undefined
 }
 
 /**
@@ -41,12 +56,22 @@ export function createKashierCheckoutUrl(params: KashierOrderParams): string {
 
   const url = new URL(KASHIER_CHECKOUT_URL)
   const mode = env.KASHIER_MODE ?? 'test'
-  const isLiveMode = mode === 'live'
   const allowedMethods = (env.KASHIER_ALLOWED_METHODS ?? 'card,wallet,bank_installments')
     .split(',')
     .map((method) => method.trim())
     .filter((method) => VALID_METHODS.has(method))
     .join(',')
+  const normalizedPhone = normalizeEgyptPhone(params.customerPhone)
+  const mergedMetadata = {
+    source: 'eduplatform',
+    studentName: params.studentName,
+    customerPhone: normalizedPhone,
+    customerEmail: params.customerEmail,
+    ...params.metadata,
+  }
+  const cleanMetadata = Object.fromEntries(
+    Object.entries(mergedMetadata).filter(([, value]) => value !== null && value !== undefined && value !== ''),
+  )
 
   url.searchParams.set('merchantId', merchantId)
   url.searchParams.set('orderId', params.orderId)
@@ -58,8 +83,13 @@ export function createKashierCheckoutUrl(params: KashierOrderParams): string {
   // نبقي redirectUrl للتوافق مع أي صيغة قديمة
   url.searchParams.set('redirectUrl', params.callbackUrl)
   url.searchParams.set('webhookUrl', params.webhookUrl)
+  if (Object.keys(cleanMetadata).length > 0) {
+    url.searchParams.set('metaData', JSON.stringify(cleanMetadata))
+  }
   // في التطوير الافتراضي بدون wallet لتجنب أخطاء SMS المحلية
   url.searchParams.set('allowedMethods', allowedMethods || 'card')
+  url.searchParams.set('failureRedirect', 'true')
+  url.searchParams.set('redirectMethod', 'get')
   // display ليست اسم العميل؛ هي إعداد عرض/لغة
   url.searchParams.set('display', 'en')
   url.searchParams.set('mode', mode)
