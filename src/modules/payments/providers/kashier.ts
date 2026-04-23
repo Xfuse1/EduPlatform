@@ -3,10 +3,18 @@ import { env } from '@/config/env'
 
 // ── Kashier Payment Gateway Provider ────────────────────────────────────────
 // https://kashier.io — Egyptian Payment Gateway
-// Hash: HMAC-SHA256("?mid={mid}&amount={amount}&currency={currency}&orderId={orderId}", apiKey)
+// Hash: HMAC-SHA256("/?payment={mid}.{orderId}.{amount}.{currency}", apiKey)
 
 const KASHIER_CHECKOUT_URL = 'https://checkout.kashier.io/'
-const VALID_METHODS = new Set(['card', 'wallet', 'bank_installments', 'valU', 'fawry', 'meeza'])
+const ALLOWED_METHODS = new Set(['card', 'wallet'])
+const DEFAULT_METHODS = 'card,wallet'
+
+// حسب env var أو الافتراضي — يُحسب مرة واحدة عند تحميل الموديول
+const CONFIGURED_METHODS = (process.env.KASHIER_ALLOWED_METHODS ?? DEFAULT_METHODS)
+  .split(',')
+  .map((m) => m.trim())
+  .filter((m) => ALLOWED_METHODS.has(m))
+  .join(',') || DEFAULT_METHODS
 
 export interface KashierOrderParams {
   orderId: string       // مثال: KSH-academy-20260317-0001
@@ -56,11 +64,6 @@ export function createKashierCheckoutUrl(params: KashierOrderParams): string {
 
   const url = new URL(KASHIER_CHECKOUT_URL)
   const mode = env.KASHIER_MODE ?? 'test'
-  const allowedMethods = (env.KASHIER_ALLOWED_METHODS ?? 'card,wallet,bank_installments')
-    .split(',')
-    .map((method) => method.trim())
-    .filter((method) => VALID_METHODS.has(method))
-    .join(',')
   const normalizedPhone = normalizeEgyptPhone(params.customerPhone)
   const mergedMetadata = {
     source: 'eduplatform',
@@ -86,8 +89,7 @@ export function createKashierCheckoutUrl(params: KashierOrderParams): string {
   if (Object.keys(cleanMetadata).length > 0) {
     url.searchParams.set('metaData', JSON.stringify(cleanMetadata))
   }
-  // في التطوير الافتراضي بدون wallet لتجنب أخطاء SMS المحلية
-  url.searchParams.set('allowedMethods', allowedMethods || 'card')
+  url.searchParams.set('allowedMethods', CONFIGURED_METHODS)
   url.searchParams.set('failureRedirect', 'true')
   url.searchParams.set('redirectMethod', 'get')
   // display ليست اسم العميل؛ هي إعداد عرض/لغة
@@ -97,25 +99,22 @@ export function createKashierCheckoutUrl(params: KashierOrderParams): string {
   return url.toString()
 }
 
-/**
- * التحقق من توقيع webhook — أمان حرج
- * يستخدم timingSafeEqual لمنع Timing Attacks
- * ⚠️ لو الـ secret مش موجود = webhook مرفوض
- */
+// timingSafeEqual يمنع Timing Attacks عند مقارنة الـ hash
 export function verifyKashierWebhookSignature(
-  rawBody: string,
-  receivedSignature: string,
+  orderId: string,
+  amount: string,
+  currency: string,
+  receivedHash: string,
 ): boolean {
-  const secret = env.KASHIER_WEBHOOK_SECRET ?? env.KASHIER_SECRET_KEY
-  if (!secret || !receivedSignature) return false
+  const apiKey = env.KASHIER_API_KEY
+  const merchantId = env.KASHIER_MERCHANT_ID
+  if (!apiKey || !merchantId || !receivedHash) return false
 
-  const expectedSignature = createHmac('sha256', secret)
-    .update(rawBody)
-    .digest('hex')
+  const message = `/?payment=${merchantId}.${orderId}.${amount}.${currency}`
+  const expectedHash = createHmac('sha256', apiKey).update(message).digest('hex')
 
-  // تحويل لـ Buffer لاستخدام timingSafeEqual
-  const expectedBuf = Buffer.from(expectedSignature, 'hex')
-  const receivedBuf = Buffer.from(receivedSignature, 'hex')
+  const expectedBuf = Buffer.from(expectedHash, 'hex')
+  const receivedBuf = Buffer.from(receivedHash, 'hex')
 
   if (expectedBuf.length !== receivedBuf.length) return false
   return timingSafeEqual(expectedBuf, receivedBuf)
