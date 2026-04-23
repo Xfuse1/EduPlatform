@@ -3,7 +3,10 @@ import { Prisma, UserRole } from "@/generated/client";
 import { db } from "@/lib/db";
 
 const roleLabelMap: Record<UserRole, string> = {
+  SUPER_ADMIN: "سوبر أدمن",
   CENTER_ADMIN: "مدير سنتر",
+  ADMIN: "مدير تشغيل",
+  MANAGER: "مشرف",
   TEACHER: "مدرس",
   STUDENT: "طالب",
   PARENT: "ولي أمر",

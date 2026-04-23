@@ -7,6 +7,9 @@ export const ROUTES = {
     login: '/login',
     verify: '/verify',
   },
+  admin: {
+    dashboard: '/admin',
+  },
   public: {
     landing: '/',
     register: '/register',
@@ -53,6 +56,10 @@ export const ROUTES = {
     settings: '/parent/settings',
   },
   api: {
+    admin: {
+      tenants: '/api/admin/tenants',
+      users: '/api/admin/users',
+    },
     auth: {
       sendOtp: '/api/auth/send-otp',
       verifyOtp: '/api/auth/verify-otp',

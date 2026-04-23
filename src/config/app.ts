@@ -14,7 +14,10 @@ export const APP_CONFIG = {
 } as const
 
 export const ROLE_LABELS = {
+  SUPER_ADMIN: 'سوبر أدمن',
   CENTER_ADMIN: 'مدير السنتر',
+  ADMIN: 'مدير تشغيل',
+  MANAGER: 'مشرف',
   TEACHER: 'المدرس',
   STUDENT: 'الطالب',
   PARENT: 'ولي الأمر',

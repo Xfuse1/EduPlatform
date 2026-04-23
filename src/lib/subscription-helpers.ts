@@ -1,10 +1,6 @@
-import { db } from '@/lib/db'
+﻿import { db } from '@/lib/db'
+import { getSubscriptionPlanConfigs } from '@/modules/payments/providers/plan-config'
 
-// ── Subscription & Limits Helpers ──────────────────────────────────────────
-
-/**
- * التحقق من أن المعلم يستطيع إضافة طالب جديد
- */
 export async function canAddStudent(tenantId: string): Promise<{
   allowed: boolean
   currentCount: number
@@ -12,21 +8,17 @@ export async function canAddStudent(tenantId: string): Promise<{
   message?: string
 }> {
   try {
-    // جيب الاشتراك
-    const subscription = await db.teacherSubscription.findUnique({
-      where: { tenantId },
-    })
+    const subscription = await db.teacherSubscription.findUnique({ where: { tenantId } })
 
     if (!subscription || !subscription.isActive) {
       return {
         allowed: false,
         currentCount: 0,
         limit: 0,
-        message: 'لا يوجد اشتراك نشط — يرجى تجديد الاشتراك أولاً',
+        message: 'لا يوجد اشتراك نشط — يرجى التجديد أولاً',
       }
     }
 
-    // التحقق من انتهاء الاشتراك
     if (new Date() > subscription.nextBillingAt) {
       return {
         allowed: false,
@@ -36,31 +28,18 @@ export async function canAddStudent(tenantId: string): Promise<{
       }
     }
 
-    // حسب عدد الطلاب الحاليين
     const studentCount = await db.groupStudent.count({
-      where: {
-        group: { tenantId },
-        status: 'ACTIVE',
-      },
+      where: { group: { tenantId }, status: 'ACTIVE' },
     })
 
-    // حسب الحد الأقصى حسب الخطة
-    const limits: Record<string, number> = {
-      STARTER: 20,
-      PROFESSIONAL: 100,
-      ENTERPRISE: Infinity,
-    }
-
-    const limit = limits[subscription.subscriptionPlan]
+    const plans = await getSubscriptionPlanConfigs()
+    const limit = plans[subscription.subscriptionPlan].limits.students
 
     return {
       allowed: studentCount < limit,
       currentCount: studentCount,
       limit,
-      message:
-        studentCount >= limit
-          ? `وصلت لحد الطلاب الأقصى (${limit})`
-          : undefined,
+      message: studentCount >= limit ? `وصلت لحد الطلاب الأقصى (${limit})` : undefined,
     }
   } catch (error) {
     console.error('Error checking student limit:', error)
@@ -68,14 +47,11 @@ export async function canAddStudent(tenantId: string): Promise<{
       allowed: false,
       currentCount: 0,
       limit: 0,
-      message: 'خطأ في التحقق من الحد الأقصى',
+      message: 'خطأ في التحقق من حد الطلاب',
     }
   }
 }
 
-/**
- * التحقق من أن المعلم يستطيع إضافة مجموعة جديدة
- */
 export async function canAddGroup(tenantId: string): Promise<{
   allowed: boolean
   currentCount: number
@@ -83,10 +59,7 @@ export async function canAddGroup(tenantId: string): Promise<{
   message?: string
 }> {
   try {
-    // جيب الاشتراك
-    const subscription = await db.teacherSubscription.findUnique({
-      where: { tenantId },
-    })
+    const subscription = await db.teacherSubscription.findUnique({ where: { tenantId } })
 
     if (!subscription || !subscription.isActive) {
       return {
@@ -97,28 +70,16 @@ export async function canAddGroup(tenantId: string): Promise<{
       }
     }
 
-    // حسب عدد المجموعات الحالية
-    const groupCount = await db.group.count({
-      where: { tenantId, isActive: true },
-    })
+    const groupCount = await db.group.count({ where: { tenantId, isActive: true } })
 
-    // حسب الحد الأقصى
-    const limits: Record<string, number> = {
-      STARTER: 2,
-      PROFESSIONAL: 10,
-      ENTERPRISE: Infinity,
-    }
-
-    const limit = limits[subscription.subscriptionPlan]
+    const plans = await getSubscriptionPlanConfigs()
+    const limit = plans[subscription.subscriptionPlan].limits.groups
 
     return {
       allowed: groupCount < limit,
       currentCount: groupCount,
       limit,
-      message:
-        groupCount >= limit
-          ? `وصلت لحد المجموعات الأقصى (${limit})`
-          : undefined,
+      message: groupCount >= limit ? `وصلت لحد المجموعات الأقصى (${limit})` : undefined,
     }
   } catch (error) {
     console.error('Error checking group limit:', error)
@@ -126,39 +87,25 @@ export async function canAddGroup(tenantId: string): Promise<{
       allowed: false,
       currentCount: 0,
       limit: 0,
-      message: 'خطأ في التحقق من الحد الأقصى',
+      message: 'خطأ في التحقق من حد المجموعات',
     }
   }
 }
 
-/**
- * الحصول على نسبة استخدام الاشتراك
- */
 export async function getSubscriptionUsage(tenantId: string) {
   try {
-    const subscription = await db.teacherSubscription.findUnique({
-      where: { tenantId },
-    })
+    const subscription = await db.teacherSubscription.findUnique({ where: { tenantId } })
 
     if (!subscription) {
       return { status: 'no_subscription', data: null }
     }
 
-    const studentCount = await db.groupStudent.count({
-      where: { group: { tenantId } },
-    })
+    const studentCount = await db.groupStudent.count({ where: { group: { tenantId } } })
+    const groupCount = await db.group.count({ where: { tenantId } })
 
-    const groupCount = await db.group.count({
-      where: { tenantId },
-    })
+    const plans = await getSubscriptionPlanConfigs()
+    const limit = plans[subscription.subscriptionPlan].limits
 
-    const limits: Record<string, any> = {
-      STARTER: { students: 20, groups: 2 },
-      PROFESSIONAL: { students: 100, groups: 10 },
-      ENTERPRISE: { students: Infinity, groups: Infinity },
-    }
-
-    const limit = limits[subscription.subscriptionPlan]
     const daysUntilExpiry = Math.ceil(
       (subscription.nextBillingAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
     )
@@ -176,17 +123,12 @@ export async function getSubscriptionUsage(tenantId: string) {
             current: studentCount,
             limit: limit.students,
             percentage:
-              limit.students === Infinity
-                ? 0
-                : (studentCount / limit.students) * 100,
+              limit.students === Number.MAX_SAFE_INTEGER ? 0 : (studentCount / limit.students) * 100,
           },
           groups: {
             current: groupCount,
             limit: limit.groups,
-            percentage:
-              limit.groups === Infinity
-                ? 0
-                : (groupCount / limit.groups) * 100,
+            percentage: limit.groups === Number.MAX_SAFE_INTEGER ? 0 : (groupCount / limit.groups) * 100,
           },
         },
       },
@@ -197,14 +139,9 @@ export async function getSubscriptionUsage(tenantId: string) {
   }
 }
 
-/**
- * التحقق من أن الاشتراك سينتهي قريباً (خلال 7 أيام)
- */
 export async function isSubscriptionExpiringSoon(tenantId: string): Promise<boolean> {
   try {
-    const subscription = await db.teacherSubscription.findUnique({
-      where: { tenantId },
-    })
+    const subscription = await db.teacherSubscription.findUnique({ where: { tenantId } })
 
     if (!subscription) return false
 
@@ -213,7 +150,7 @@ export async function isSubscriptionExpiringSoon(tenantId: string): Promise<bool
     )
 
     return daysUntilExpiry <= 7 && daysUntilExpiry > 0
-  } catch (error) {
+  } catch {
     return false
   }
 }

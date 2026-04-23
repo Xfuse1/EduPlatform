@@ -373,6 +373,21 @@ exports.Prisma.TeacherSubscriptionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.SubscriptionPlanConfigScalarFieldEnum = {
+  id: 'id',
+  plan: 'plan',
+  name: 'name',
+  monthlyPrice: 'monthlyPrice',
+  yearlyPrice: 'yearlyPrice',
+  studentsLimit: 'studentsLimit',
+  groupsLimit: 'groupsLimit',
+  sessionsLimit: 'sessionsLimit',
+  storageLimit: 'storageLimit',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.StudentBalanceScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -459,6 +474,10 @@ exports.Plan = exports.$Enums.Plan = {
 };
 
 exports.UserRole = exports.$Enums.UserRole = {
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  CENTER_ADMIN: 'CENTER_ADMIN',
+  ADMIN: 'ADMIN',
+  MANAGER: 'MANAGER',
   TEACHER: 'TEACHER',
   STUDENT: 'STUDENT',
   PARENT: 'PARENT',
@@ -622,6 +641,7 @@ exports.Prisma.ModelName = {
   ExamQuestion: 'ExamQuestion',
   ExamSubmission: 'ExamSubmission',
   TeacherSubscription: 'TeacherSubscription',
+  SubscriptionPlanConfig: 'SubscriptionPlanConfig',
   StudentBalance: 'StudentBalance',
   BalanceTransaction: 'BalanceTransaction',
   TeacherTransfer: 'TeacherTransfer',

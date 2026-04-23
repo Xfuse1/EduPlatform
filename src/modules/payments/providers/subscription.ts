@@ -4,59 +4,23 @@ import { decryptKashierKey, encryptKashierKey } from '@/lib/encryption'
 import { requireAuth } from '@/lib/auth'
 import { requireTenant } from '@/lib/tenant'
 
-export type SubscriptionPlanType = 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE'
+import {
+  DEFAULT_SUBSCRIPTION_PLANS,
+  type SubscriptionPlanType,
+  getSubscriptionPlanConfig,
+  getSubscriptionPlanConfigs,
+} from './plan-config'
+
 export type BillingCycleType = 'MONTHLY' | 'YEARLY'
 
-export const SUBSCRIPTION_PLANS: Record<
-  SubscriptionPlanType,
-  {
-    name: string
-    monthlyPrice: number
-    yearlyPrice: number
-    limits: {
-      students: number
-      groups: number
-      sessions: number
-      storage: number
-    }
-  }
-> = {
-  STARTER: {
-    name: '??? ???????',
-    monthlyPrice: 200,
-    yearlyPrice: 2000,
-    limits: {
-      students: 20,
-      groups: 2,
-      sessions: 100,
-      storage: 100,
-    },
-  },
-  PROFESSIONAL: {
-    name: '????? ??????????',
-    monthlyPrice: 500,
-    yearlyPrice: 5000,
-    limits: {
-      students: 100,
-      groups: 10,
-      sessions: 1000,
-      storage: 1000,
-    },
-  },
-  ENTERPRISE: {
-    name: '??? ????????',
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    limits: {
-      students: Number.MAX_SAFE_INTEGER,
-      groups: Number.MAX_SAFE_INTEGER,
-      sessions: Number.MAX_SAFE_INTEGER,
-      storage: Number.MAX_SAFE_INTEGER,
-    },
-  },
-}
+export const SUBSCRIPTION_PLANS = DEFAULT_SUBSCRIPTION_PLANS
 
-export type SubscriptionLimits = (typeof SUBSCRIPTION_PLANS)[SubscriptionPlanType]['limits']
+export type SubscriptionLimits = {
+  students: number
+  groups: number
+  sessions: number
+  storage: number
+}
 
 function calculateNextBillingAt(baseDate: Date, cycle: BillingCycleType) {
   const next = new Date(baseDate)
@@ -75,7 +39,6 @@ export async function getTeacherSubscription() {
 
   if (!subscription) return null
 
-  // Auto-expire when billing date has passed.
   if (subscription.isActive && new Date() > subscription.nextBillingAt) {
     return db.teacherSubscription.update({
       where: { id: subscription.id },
@@ -86,10 +49,7 @@ export async function getTeacherSubscription() {
   return subscription
 }
 
-export async function createTeacherSubscription(
-  plan: SubscriptionPlanType,
-  cycle: BillingCycleType,
-) {
+export async function createTeacherSubscription(plan: SubscriptionPlanType, cycle: BillingCycleType) {
   const tenant = await requireTenant()
   const actor = await requireAuth()
   return createTeacherSubscriptionForTenant(tenant.id, plan, cycle, actor.id)
@@ -106,10 +66,10 @@ export async function createTeacherSubscriptionForTenant(
   })
 
   if (existing) {
-    throw new Error('?????? ?????? ????? ??????')
+    throw new Error('يوجد اشتراك بالفعل لهذه المؤسسة')
   }
 
-  const config = SUBSCRIPTION_PLANS[plan]
+  const config = await getSubscriptionPlanConfig(plan)
   const amount = cycle === 'MONTHLY' ? config.monthlyPrice : config.yearlyPrice
 
   const nextBillingAt = calculateNextBillingAt(new Date(), cycle)
@@ -148,13 +108,11 @@ export async function activateOrRenewSubscriptionForTenant(
     where: { tenantId },
   })
 
-  const config = SUBSCRIPTION_PLANS[plan]
+  const config = await getSubscriptionPlanConfig(plan)
   const amount = cycle === 'MONTHLY' ? config.monthlyPrice : config.yearlyPrice
   const now = new Date()
 
-  // If renewal happens before expiry, extend from current nextBillingAt.
-  const baseDate =
-    existing?.nextBillingAt && existing.nextBillingAt > now ? existing.nextBillingAt : now
+  const baseDate = existing?.nextBillingAt && existing.nextBillingAt > now ? existing.nextBillingAt : now
   const nextBillingAt = calculateNextBillingAt(baseDate, cycle)
 
   const subscription = existing
@@ -193,10 +151,7 @@ export async function activateOrRenewSubscriptionForTenant(
   return subscription
 }
 
-export async function updateSubscriptionPlan(
-  newPlan: SubscriptionPlanType,
-  newCycle: BillingCycleType,
-) {
+export async function updateSubscriptionPlan(newPlan: SubscriptionPlanType, newCycle: BillingCycleType) {
   const tenant = await requireTenant()
   const actor = await requireAuth()
 
@@ -205,10 +160,10 @@ export async function updateSubscriptionPlan(
   })
 
   if (!subscription) {
-    throw new Error('?? ???? ?????? ???????')
+    throw new Error('لا يوجد اشتراك حالي')
   }
 
-  const config = SUBSCRIPTION_PLANS[newPlan]
+  const config = await getSubscriptionPlanConfig(newPlan)
   const amount = newCycle === 'MONTHLY' ? config.monthlyPrice : config.yearlyPrice
 
   const nextBillingAt = new Date()
@@ -255,12 +210,13 @@ export async function verifyActiveSubscription() {
 }
 
 export async function getSubscriptionLimits(): Promise<SubscriptionLimits> {
+  const configs = await getSubscriptionPlanConfigs()
   const subscription = await getTeacherSubscription()
   if (!subscription || !subscription.isActive) {
-    return SUBSCRIPTION_PLANS.STARTER.limits
+    return configs.STARTER.limits
   }
 
-  return SUBSCRIPTION_PLANS[subscription.subscriptionPlan as SubscriptionPlanType].limits
+  return configs[subscription.subscriptionPlan as SubscriptionPlanType].limits
 }
 
 export async function checkStudentLimit(currentCount: number): Promise<boolean> {
@@ -282,7 +238,7 @@ export async function addKashierApiCredentials(kashierApiKey: string, kashierMer
   })
 
   if (!subscription) {
-    throw new Error('?? ???? ?????? ??? ??????')
+    throw new Error('لا يوجد اشتراك لإضافة API')
   }
 
   const encrypted = encryptKashierKey(kashierApiKey)
@@ -317,7 +273,7 @@ export async function getKashierApiCredentialsByTenantId(tenantId: string) {
   })
 
   if (!subscription?.kashierApiKey || !subscription.kashierMerId) {
-    throw new Error('?????? Kashier API ??? ??????')
+    throw new Error('بيانات Kashier API غير متاحة')
   }
 
   return {
@@ -345,7 +301,7 @@ export async function cancelSubscription() {
   })
 
   if (!subscription) {
-    throw new Error('?? ???? ?????? ???????')
+    throw new Error('لا يوجد اشتراك حالي')
   }
 
   const updated = await db.teacherSubscription.update({
@@ -365,6 +321,5 @@ export async function cancelSubscription() {
     message: 'Subscription cancelled',
   })
 
-  return { success: true, message: '?? ????? ????????' }
+  return { success: true, message: 'تم إلغاء الاشتراك' }
 }
-

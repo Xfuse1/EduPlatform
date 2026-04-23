@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 
@@ -7,6 +7,15 @@ import { Card, CardContent } from '@/components/ui/card'
 
 type PlanKey = 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE'
 type Cycle = 'MONTHLY' | 'YEARLY'
+
+type PlanItem = {
+  key: PlanKey
+  title: string
+  monthly: number
+  yearly: number
+  features: string[]
+  isActive: boolean
+}
 
 function getPlanLabel(plan?: string | null) {
   if (plan === 'STARTER') return 'البداية'
@@ -21,48 +30,20 @@ function getCycleLabel(cycle?: string | null) {
   return null
 }
 
-const plans: Array<{
-  key: PlanKey
-  title: string
-  monthly: number
-  yearly: number
-  features: string[]
-}> = [
-  {
-    key: 'STARTER',
-    title: 'البداية',
-    monthly: 200,
-    yearly: 2000,
-    features: ['حتى 20 طالبًا', 'حتى مجموعتين'],
-  },
-  {
-    key: 'PROFESSIONAL',
-    title: 'الاحترافية',
-    monthly: 500,
-    yearly: 5000,
-    features: ['حتى 100 طالب', 'حتى 10 مجموعات'],
-  },
-  {
-    key: 'ENTERPRISE',
-    title: 'المؤسسات',
-    monthly: 0,
-    yearly: 0,
-    features: ['حدود مخصصة', 'تواصل مع المبيعات'],
-  },
-]
-
 export function SubscriptionPlans({
   currentPlan,
   currentCycle,
   nextBillingAt,
   isActive,
   kashierStatus,
+  plans,
 }: {
   currentPlan?: string | null
   currentCycle?: string | null
   nextBillingAt?: string | null
   isActive?: boolean
   kashierStatus?: string | null
+  plans: PlanItem[]
 }) {
   const [billingCycle, setBillingCycle] = useState<Cycle>('MONTHLY')
   const [error, setError] = useState<string | null>(null)
@@ -81,11 +62,7 @@ export function SubscriptionPlans({
 
         const payload = await res.json().catch(() => null)
         if (!res.ok) {
-          throw new Error(
-            payload?.error?.message ??
-              payload?.message ??
-              'تعذر إنشاء رابط الدفع',
-          )
+          throw new Error(payload?.error?.message ?? payload?.message ?? 'تعذر إنشاء رابط الدفع')
         }
 
         const checkoutUrl = payload?.data?.checkoutUrl
@@ -127,10 +104,8 @@ export function SubscriptionPlans({
           <p className="text-lg font-bold">
             {getPlanLabel(currentPlan) ?? 'لا يوجد اشتراك نشط'} {getCycleLabel(currentCycle) ? `(${getCycleLabel(currentCycle)})` : ''}
           </p>
-          <p className={isActive ? 'text-sm text-emerald-600' : 'text-sm text-amber-600'}>
-            {isActive ? 'نشط' : 'غير نشط'}
-          </p>
-          {nextBillingAt && <p className="text-xs text-slate-500">موعد الفوترة القادم: {new Date(nextBillingAt).toLocaleDateString('ar-EG')}</p>}
+          <p className={isActive ? 'text-sm text-emerald-600' : 'text-sm text-amber-600'}>{isActive ? 'نشط' : 'غير نشط'}</p>
+          {nextBillingAt && <p className="text-xs text-slate-500">موعد الفاتورة القادم: {new Date(nextBillingAt).toLocaleDateString('ar-EG')}</p>}
         </CardContent>
       </Card>
 
@@ -163,8 +138,8 @@ export function SubscriptionPlans({
                     <p key={feature}>- {feature}</p>
                   ))}
                 </div>
-                <Button type="button" disabled={isPending || isCurrent} onClick={() => startCheckout(plan.key)}>
-                  {isCurrent ? 'الخطة الحالية' : isPending ? 'جارٍ المعالجة...' : 'اشترك الآن'}
+                <Button type="button" disabled={isPending || isCurrent || !plan.isActive} onClick={() => startCheckout(plan.key)}>
+                  {isCurrent ? 'الخطة الحالية' : !plan.isActive ? 'مغلقة حالياً' : isPending ? 'جارٍ المعالجة...' : 'اشترك الآن'}
                 </Button>
               </CardContent>
             </Card>

@@ -17,6 +17,9 @@ const pinSchema = z
   .regex(/^\d{4,8}$/, "الـ PIN يجب أن يكون من 4 إلى 8 أرقام");
 
 const redirectMap: Record<string, string> = {
+  SUPER_ADMIN: "/admin",
+  ADMIN: "/center",
+  MANAGER: "/center",
   TEACHER: "/teacher",
   STUDENT: "/student",
   PARENT: "/parent",

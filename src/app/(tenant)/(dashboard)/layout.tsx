@@ -2,13 +2,16 @@ export const dynamic = "force-dynamic";
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import type { UserRole } from "@/generated/client";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
 
-function normalizeRole(role: "TEACHER" | "STUDENT" | "PARENT" | "ASSISTANT") {
+function normalizeRole(role: UserRole) {
+  if (role === "SUPER_ADMIN") return "super_admin";
+  if (role === "CENTER_ADMIN" || role === "ADMIN" || role === "MANAGER") return "teacher";
   if (role === "STUDENT") return "student";
   if (role === "PARENT") return "parent";
   return "teacher";
@@ -24,6 +27,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const headerStore = await headers();
   const currentPath = headerStore.get("next-url") ?? "";
   const role = normalizeRole(user.role);
+
+  if (role === "super_admin") {
+    redirect("/admin");
+  }
 
   if (currentPath.includes("/teacher") && role !== "teacher") {
     redirect(role === "student" ? "/student" : "/parent");

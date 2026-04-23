@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import type { UserRole } from "@/generated/client";
 import { z } from "zod";
 
 import { createAuthSession, setAuthSessionCookie, verifyOTP } from "@/lib/auth";
@@ -17,12 +18,15 @@ type ActionResult = {
   success: boolean;
   message?: string;
   phone?: string;
-  role?: "TEACHER" | "STUDENT" | "PARENT" | "ASSISTANT" | "CENTER_ADMIN";
+  role?: UserRole;
   redirectTo?: string;
   hasPin?: boolean;
 };
 
 const redirectMap: Record<string, string> = {
+  SUPER_ADMIN: "/admin",
+  ADMIN: "/center",
+  MANAGER: "/center",
   TEACHER: "/teacher",
   STUDENT: "/student",
   PARENT: "/parent",
