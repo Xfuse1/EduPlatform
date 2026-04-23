@@ -48,7 +48,7 @@ export const kashierWebhookSchema = z.object({
   amount: z.string().optional(),
   currency: z.string().optional(),
   paymentMethod: z.string().optional(),
-  // Kashier قد يرسل fields إضافية — نتجاهلها
+  hash: z.string().optional(),
 })
 
 export type KashierWebhookPayload = z.infer<typeof kashierWebhookSchema>

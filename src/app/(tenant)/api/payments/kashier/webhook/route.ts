@@ -13,11 +13,6 @@ import { kashierWebhookSchema } from '@/modules/payments/validations'
 export async function POST(req: NextRequest) {
   const rawBody = await req.text()
 
-  const signature = req.headers.get('x-kashier-signature') ?? ''
-  if (!verifyKashierWebhookSignature(rawBody, signature)) {
-    return errorResponse('INVALID_SIGNATURE', 'Invalid webhook signature', 401)
-  }
-
   let body: unknown
   try {
     body = JSON.parse(rawBody)
@@ -30,7 +25,11 @@ export async function POST(req: NextRequest) {
     return errorResponse('INVALID_PAYLOAD', 'Webhook payload is invalid', 400)
   }
 
-  const { orderId, transactionId, status } = parsed.data
+  const { orderId, transactionId, status, amount, currency, hash } = parsed.data
+
+  if (!verifyKashierWebhookSignature(orderId, amount ?? '', currency ?? 'EGP', hash ?? '')) {
+    return errorResponse('INVALID_SIGNATURE', 'Invalid webhook signature', 401)
+  }
 
   const payment = await db.payment.findUnique({
     where: { receiptNumber: orderId },
