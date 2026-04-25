@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, formatPhone } from "@/lib/utils";
 
 interface ParentSettingsPageProps {
   initialData: {
@@ -234,10 +234,11 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
                   <div className="relative">
                     <Phone className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <input
-                      type="tel"
-                      value={initialData.phone}
+                      dir="ltr"
+                      type="text"
+                      value={formatPhone(initialData.phone)}
                       disabled
-                      className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 pr-11 text-sm text-slate-500 cursor-not-allowed dark:border-slate-700 dark:bg-slate-900"
+                      className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 pr-11 text-left text-sm text-slate-500 cursor-not-allowed dark:border-slate-700 dark:bg-slate-900"
                     />
                   </div>
                 </div>

@@ -37,6 +37,7 @@ function PinSetupPrompt({ redirectTo }: { redirectTo: string }) {
   const setCurrent = stage === "enter" ? setPin : setConfirmPin;
 
   const handleKey = (key: string) => {
+    setError("");
     if (key === "del") { setCurrent((v) => v.slice(0, -1)); return; }
     if (current.length >= 8) return;
     setCurrent((v) => v + key);
@@ -48,8 +49,13 @@ function PinSetupPrompt({ redirectTo }: { redirectTo: string }) {
     setError("");
   };
 
-  useEffect(() => {
-    if (stage !== "confirm" || confirmPin.length < pin.length) return;
+  const handleConfirmPinSubmit = () => {
+    if (stage !== "confirm" || confirmPin.length < 4) return;
+
+    if (confirmPin.length !== pin.length) {
+      setError("أعد إدخال نفس عدد أرقام الـ PIN");
+      return;
+    }
 
     if (confirmPin !== pin) {
       setError("الـ PIN غير متطابق، حاول مرة أخرى");
@@ -65,8 +71,7 @@ function PinSetupPrompt({ redirectTo }: { redirectTo: string }) {
       setDone(true);
       window.setTimeout(() => window.location.replace(redirectTo), 1000);
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [confirmPin]);
+  };
 
   if (done) {
     return (
@@ -121,15 +126,25 @@ function PinSetupPrompt({ redirectTo }: { redirectTo: string }) {
         })}
       </div>
 
-      {stage === "enter" && pin.length >= 4 ? (
+      {stage === "enter" ? (
         <button
           type="button"
+          disabled={pin.length < 4 || isPending}
           onClick={confirmPin_entry}
-          className="w-full rounded-2xl bg-sky-500 py-3 text-base font-bold text-white transition hover:bg-sky-400 active:scale-95"
+          className="w-full rounded-2xl bg-sky-500 py-3 text-base font-bold text-white transition hover:bg-sky-400 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-sky-500 disabled:active:scale-100"
         >
           تأكيد الـ PIN
         </button>
-      ) : null}
+      ) : (
+        <button
+          type="button"
+          disabled={confirmPin.length < 4 || isPending}
+          onClick={handleConfirmPinSubmit}
+          className="w-full rounded-2xl bg-sky-500 py-3 text-base font-bold text-white transition hover:bg-sky-400 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-sky-500 disabled:active:scale-100"
+        >
+          تأكيد وحفظ الـ PIN
+        </button>
+      )}
 
       {isPending ? <p className="text-center text-sm text-slate-400">جارٍ الحفظ...</p> : null}
 

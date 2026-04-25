@@ -1,9 +1,9 @@
-import { CalendarClock, CheckCircle2, CreditCard, GraduationCap, School } from "lucide-react";
+import { CalendarClock, CheckCircle2, CreditCard, GraduationCap, Phone, School } from "lucide-react";
 
 import EmptyState from "@/components/shared/EmptyState";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { formatCurrency, formatTime12Hour, toArabicDigits } from "@/lib/utils";
+import { formatCurrency, formatPhone, formatTime12Hour, toArabicDigits } from "@/lib/utils";
 import { LinkChildForm } from "@/modules/parent/components/LinkChildForm";
 import { ChildGroupEnrollmentButton } from "@/modules/parent/components/ChildGroupEnrollmentButton";
 import { RemoveChildButton } from "@/modules/parent/components/RemoveChildButton";
@@ -12,7 +12,7 @@ type ParentChildrenPageProps = {
   data: Awaited<ReturnType<typeof import("@/modules/dashboard/queries").getParentDashboardData>>;
 };
 
-function paymentStatusLabel(status: "PAID" | "PARTIAL" | "PENDING" | "OVERDUE") {
+function paymentStatusLabel(status: string) {
   if (status === "PAID") return "منتظم";
   if (status === "PARTIAL") return "سداد جزئي";
   if (status === "OVERDUE") return "متأخر";
@@ -93,6 +93,10 @@ export function ParentChildrenPage({ data }: ParentChildrenPageProps) {
                     <p className="mt-2 inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                       <School className="h-4 w-4" />
                       {child.tenantName}
+                    </p>
+                    <p className="mt-2 inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                      <Phone className="h-4 w-4" />
+                      <span dir="ltr">{formatPhone(child.phone)}</span>
                     </p>
                   </div>
 
