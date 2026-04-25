@@ -450,6 +450,7 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
         return {
           id: student.id,
           name: student.name,
+          phone: student.phone.startsWith("student-") ? "" : student.phone,
           grade: student.gradeLevel ?? "غير محدد",
           tenantName: student.tenant.name,
           currentGroups,

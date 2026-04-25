@@ -8,7 +8,7 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { EDUCATION_STAGE_OPTIONS, formatGradeLevel, getEducationYears } from "@/lib/grade-levels";
+import { EDUCATION_STAGE_OPTIONS, formatGradeLevel, getEducationYears, type EducationStage } from "@/lib/grade-levels";
 import { linkChildToParent } from "@/modules/parent/actions";
 
 const selectClassName =
@@ -19,22 +19,20 @@ export function LinkChildForm() {
   const [isOpen, setIsOpen] = useState(false);
   const [studentName, setStudentName] = useState("");
   const [studentPhone, setStudentPhone] = useState("");
-  const [gradeLevel, setGradeLevel] = useState("");
+  const [educationStage, setEducationStage] = useState<EducationStage | "">("");
+  const [gradeYear, setGradeYear] = useState("");
   const [tenantSlug, setTenantSlug] = useState("");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  const gradeLevelOptions = EDUCATION_STAGE_OPTIONS.flatMap((stageOption) =>
-    getEducationYears(stageOption.value).map((yearOption) => ({
-      value: formatGradeLevel(stageOption.value, yearOption.value),
-      label: formatGradeLevel(stageOption.value, yearOption.value),
-    })),
-  );
+  const gradeYearOptions = educationStage ? getEducationYears(educationStage) : [];
+  const gradeLevel = educationStage && gradeYear ? formatGradeLevel(educationStage, Number(gradeYear)) : "";
 
   const resetForm = () => {
     setStudentName("");
     setStudentPhone("");
-    setGradeLevel("");
+    setEducationStage("");
+    setGradeYear("");
     setTenantSlug("");
     setError("");
     setIsOpen(false);
@@ -43,6 +41,16 @@ export function LinkChildForm() {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
+
+    if (!educationStage) {
+      setError("المرحلة الدراسية مطلوبة");
+      return;
+    }
+
+    if (!gradeYear) {
+      setError("سنة المرحلة الدراسية مطلوبة");
+      return;
+    }
 
     startTransition(async () => {
       const result = await linkChildToParent({
@@ -124,21 +132,44 @@ export function LinkChildForm() {
                   />
                 </div>
 
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="gradeLevel">الصف الدراسي</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="educationStage">المرحلة الدراسية</Label>
                   <select
-                    aria-label="الصف الدراسي"
+                    aria-label="المرحلة الدراسية"
                     className={selectClassName}
-                    id="gradeLevel"
+                    id="educationStage"
                     onChange={(event) => {
-                      setGradeLevel(event.target.value);
+                      setEducationStage(event.target.value as EducationStage | "");
+                      setGradeYear("");
                       setError("");
                     }}
-                    value={gradeLevel}
+                    value={educationStage}
                   >
-                    <option value="">اختر الصف الدراسي</option>
-                    {gradeLevelOptions.map((option) => (
+                    <option value="">اختر المرحلة الدراسية</option>
+                    {EDUCATION_STAGE_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="gradeYear">السنة الدراسية</Label>
+                  <select
+                    aria-label="السنة الدراسية"
+                    className={selectClassName}
+                    disabled={!educationStage}
+                    id="gradeYear"
+                    onChange={(event) => {
+                      setGradeYear(event.target.value);
+                      setError("");
+                    }}
+                    value={gradeYear}
+                  >
+                    <option value="">{educationStage ? "اختر السنة الدراسية" : "اختر المرحلة أولًا"}</option>
+                    {gradeYearOptions.map((option) => (
+                      <option key={option.value} value={String(option.value)}>
                         {option.label}
                       </option>
                     ))}

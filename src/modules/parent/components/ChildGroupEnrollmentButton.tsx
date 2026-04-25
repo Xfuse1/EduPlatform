@@ -3,6 +3,7 @@
 import { Loader2, Plus, Search, Users, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -128,9 +129,9 @@ export function ChildGroupEnrollmentButton({
         ضم إلى مجموعة
       </Button>
 
-      {isOpen ? (
+      {isOpen && typeof document !== "undefined" ? createPortal((
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-4 sm:items-center">
-          <div className="w-full max-w-3xl rounded-[28px] bg-white p-5 shadow-2xl dark:bg-slate-950 md:p-7">
+          <div className="max-h-[calc(100vh-2rem)] w-full max-w-3xl overflow-y-auto rounded-[28px] bg-white p-5 shadow-2xl dark:bg-slate-950 md:p-7">
             <div className="mb-6 flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-2xl font-extrabold text-slate-950 dark:text-white">ضم {childName} إلى مجموعة</h2>
@@ -290,7 +291,8 @@ export function ChildGroupEnrollmentButton({
               </Button>
             </div>
           </div>
-        </div>
+        </div>),
+        document.body,
       ) : null}
     </>
   );
