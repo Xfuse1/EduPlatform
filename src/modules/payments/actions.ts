@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { env } from '@/config/env'
+import { EnrollmentStatus, UserRole, type Prisma } from '@/generated/client'
 import { requireAuth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { logFinancialEvent } from '@/lib/financial-audit'
@@ -33,6 +34,30 @@ const SUBSCRIPTION_PAYMENT_LINKS: Record<string, string | undefined> = {
 function makeOrderId(prefix: string, tenantSlug: string, count: number) {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
   return `${prefix}-${tenantSlug}-${date}-${String(count + 1).padStart(4, '0')}`
+}
+
+const TENANT_STUDENT_ACCESS_STATUSES = [
+  EnrollmentStatus.ACTIVE,
+  EnrollmentStatus.WAITLIST,
+  EnrollmentStatus.PENDING,
+]
+
+function tenantStudentAccessWhere(tenantId: string, studentId: string): Prisma.UserWhereInput {
+  return {
+    id: studentId,
+    role: UserRole.STUDENT,
+    isActive: true,
+    groupStudents: {
+      some: {
+        status: {
+          in: TENANT_STUDENT_ACCESS_STATUSES,
+        },
+        group: {
+          tenantId,
+        },
+      },
+    },
+  }
 }
 
 function normalizePaymentLinkIdentifier(raw: string) {
@@ -112,11 +137,16 @@ export async function recordPayment(formData: FormData) {
   const receiptNumber = makeOrderId('RCP', tenant.slug, count)
 
   const student = await db.user.findFirst({
-    where: { id: data.studentId, tenantId: tenant.id },
+    where: tenantStudentAccessWhere(tenant.id, data.studentId),
     select: {
       id: true,
       groupStudents: {
-        where: { status: 'ACTIVE' },
+        where: {
+          status: 'ACTIVE',
+          group: {
+            tenantId: tenant.id,
+          },
+        },
         include: { group: { select: { monthlyFee: true } } },
         take: 1,
       },
@@ -180,7 +210,7 @@ export async function sendPaymentReminder(studentIds: string[]) {
   const results = await Promise.allSettled(
     studentIds.map(async (studentId) => {
       const student = await db.user.findFirst({
-        where: { id: studentId, tenantId: tenant.id },
+        where: tenantStudentAccessWhere(tenant.id, studentId),
       })
       if (!student?.parentPhone) return
 
@@ -235,7 +265,7 @@ export async function initiateOnlinePayment(formData: FormData) {
   })
 
   const student = await db.user.findFirst({
-    where: { id: data.studentId, tenantId: tenant.id },
+    where: tenantStudentAccessWhere(tenant.id, data.studentId),
     select: { id: true, name: true, phone: true },
   })
   if (!student) throw new Error('?????? ??? ????? ?? ?? ????? ???? ??????')
@@ -304,7 +334,7 @@ export async function initiateBalanceRecharge(input: {
   })
 
   const student = await db.user.findFirst({
-    where: { id: input.studentId, tenantId: tenant.id },
+    where: tenantStudentAccessWhere(tenant.id, input.studentId),
     select: { id: true, name: true, phone: true },
   })
 
@@ -362,10 +392,7 @@ export async function savePayment(input: {
     const user = await requireAuth()
 
     const student = await db.user.findFirst({
-      where: {
-        id: input.studentId,
-        tenantId: tenant.id,
-      },
+      where: tenantStudentAccessWhere(tenant.id, input.studentId),
       select: { id: true },
     })
 
@@ -464,6 +491,15 @@ export async function debitStudentBalance(input: {
       amount: input.amount,
       reason: input.reason,
     })
+
+    const student = await db.user.findFirst({
+      where: tenantStudentAccessWhere(tenant.id, validated.studentId),
+      select: { id: true },
+    })
+
+    if (!student) {
+      throw new Error('الطالب غير موجود ضمن مجموعات هذا الحساب')
+    }
 
     const count = await db.payment.count({ where: { tenantId: tenant.id } })
     const receiptNumber = makeOrderId('BAL', tenant.slug, count)

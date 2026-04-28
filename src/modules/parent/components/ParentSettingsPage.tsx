@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { cn, formatPhone } from "@/lib/utils";
+import { PinSettingsCard } from "@/modules/settings/components/PinSettingsCard";
 
 interface ParentSettingsPageProps {
   initialData: {
@@ -26,6 +27,7 @@ interface ParentSettingsPageProps {
     phone: string;
     avatarUrl: string | null;
     email?: string | null;
+    hasPin: boolean;
     settings?: any;
     parentStudents?: {
       student: {
@@ -289,6 +291,7 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
 
         {/* Right Column: Linked Children & Prefs */}
         <div className="space-y-8">
+          <PinSettingsCard phone={initialData.phone} hasPin={initialData.hasPin} />
           
           {/* Linked Children Card */}
           <Card className="rounded-[24px] border-slate-200 shadow-sm dark:border-slate-800">

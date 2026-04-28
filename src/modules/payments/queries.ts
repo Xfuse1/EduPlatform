@@ -288,9 +288,18 @@ export const getPaymentByKashierOrderId = cache(async (orderId: string) => {
 export const getPaymentStudentOptions = cache(async (tenantId: string) => {
   return db.user.findMany({
     where: {
-      tenantId,
       role: "STUDENT",
       isActive: true,
+      groupStudents: {
+        some: {
+          status: {
+            in: ["ACTIVE", "WAITLIST", "PENDING"],
+          },
+          group: {
+            tenantId,
+          },
+        },
+      },
     },
     select: {
       id: true,

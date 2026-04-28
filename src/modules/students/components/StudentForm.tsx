@@ -121,14 +121,25 @@ export default function StudentForm({
     startTransition(() => {
       void (async () => {
         try {
-          if (mode === 'create') {
-            await createStudent(formData)
-          } else {
-            if (!studentId) {
-              throw new Error('معرف الطالب مطلوب للتعديل')
-            }
+          const result =
+            mode === 'create'
+              ? await createStudent(formData)
+              : await (async () => {
+                  if (!studentId) {
+                    throw new Error('معرف الطالب مطلوب للتعديل')
+                  }
 
-            await updateStudent(studentId, formData)
+                  return updateStudent(studentId, formData)
+                })()
+
+          if (!result.success) {
+            setSubmitError(
+              result.message ??
+                (mode === 'create'
+                  ? 'تعذر إضافة الطالب الآن'
+                  : 'تعذر حفظ بيانات الطالب الآن'),
+            )
+            return
           }
 
           router.refresh()

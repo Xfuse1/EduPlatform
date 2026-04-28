@@ -51,7 +51,7 @@ async function resolveTargetTenant(tenantSlug?: string) {
     throw new Error("رابط السنتر غير صحيح أو غير متاح حاليًا");
   }
 
-  if (targetTenant.accountType === "PARENT" && targetTenant.id !== currentTenant.id) {
+  if ((targetTenant.accountType as string | undefined) === "PARENT" && targetTenant.id !== currentTenant.id) {
     throw new Error("يمكن استخدام رابط سنتر فقط خارج حسابك الحالي");
   }
 
@@ -389,7 +389,7 @@ export async function removeChildFromParent(input: { studentId: string }) {
     };
   }
 }
-export async function searchGroupsForChild(input: { studentId: string; tenantSlug: string }) {
+export async function searchGroupsForChild(input: { studentId: string; tenantSlug?: string; query?: string }) {
   const parent = await requireAuth();
 
   if (parent.role !== "PARENT") {
@@ -397,6 +397,12 @@ export async function searchGroupsForChild(input: { studentId: string; tenantSlu
   }
 
   try {
+    const searchQuery = (input.query ?? input.tenantSlug ?? "").trim();
+
+    if (!searchQuery) {
+      return { success: false as const, message: "اكتب slug السنتر أو اسم المادة أو اسم المدرس.", groups: [] };
+    }
+
     const relation = await db.parentStudent.findFirst({
       where: { parentId: parent.id, studentId: input.studentId },
       select: {
@@ -417,19 +423,77 @@ export async function searchGroupsForChild(input: { studentId: string; tenantSlu
       return { success: false as const, message: "هذا الابن غير مرتبط بحسابك.", groups: [] };
     }
 
-    const targetTenant = await getTenantBySlug(input.tenantSlug.trim().toLowerCase());
-
-    if (!targetTenant || !targetTenant.isActive) {
-      return { success: false as const, message: "رابط السنتر غير صحيح أو غير متاح.", groups: [] };
-    }
-
     const enrolledGroupIds = new Set(relation.student.groupStudents.map((gs) => gs.groupId));
 
     const { getGradeLevelKey } = await import("@/lib/grade-levels");
     const studentGradeLevelKey = getGradeLevelKey(relation.student.gradeLevel);
+    const matchingTeachers = await db.user.findMany({
+      where: {
+        isActive: true,
+        role: {
+          in: ["TEACHER", "CENTER_ADMIN", "ADMIN", "MANAGER"],
+        },
+        name: {
+          contains: searchQuery,
+          mode: "insensitive",
+        },
+        tenant: {
+          isActive: true,
+        },
+      },
+      select: {
+        id: true,
+      },
+      take: 50,
+    });
+    const matchingTeacherIds = matchingTeachers.map((teacher) => teacher.id);
 
     const groups = await db.group.findMany({
-      where: { tenantId: targetTenant.id, isActive: true },
+      where: {
+        isActive: true,
+        tenant: {
+          isActive: true,
+        },
+        OR: [
+          {
+            tenant: {
+              slug: {
+                contains: searchQuery.toLowerCase(),
+                mode: "insensitive",
+              },
+            },
+          },
+          {
+            tenant: {
+              name: {
+                contains: searchQuery,
+                mode: "insensitive",
+              },
+            },
+          },
+          {
+            subject: {
+              contains: searchQuery,
+              mode: "insensitive",
+            },
+          },
+          {
+            name: {
+              contains: searchQuery,
+              mode: "insensitive",
+            },
+          },
+          ...(matchingTeacherIds.length > 0
+            ? [
+                {
+                  teacherId: {
+                    in: matchingTeacherIds,
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
       select: {
         id: true,
         name: true,
@@ -443,10 +507,36 @@ export async function searchGroupsForChild(input: { studentId: string; tenantSlu
         maxCapacity: true,
         color: true,
         tenantId: true,
+        teacherId: true,
+        tenant: {
+          select: {
+            name: true,
+            slug: true,
+          },
+        },
         groupStudents: { where: { status: "ACTIVE" }, select: { id: true } },
       },
       orderBy: { createdAt: "asc" },
+      take: 50,
     });
+
+    const groupTeacherIds = [
+      ...new Set(groups.map((group) => group.teacherId).filter((teacherId): teacherId is string => Boolean(teacherId))),
+    ];
+    const groupTeachers = groupTeacherIds.length
+      ? await db.user.findMany({
+          where: {
+            id: {
+              in: groupTeacherIds,
+            },
+          },
+          select: {
+            id: true,
+            name: true,
+          },
+        })
+      : [];
+    const teacherNameById = new Map(groupTeachers.map((teacher) => [teacher.id, teacher.name]));
 
     const filtered = groups
       .filter((g) => !studentGradeLevelKey || getGradeLevelKey(g.gradeLevel) === studentGradeLevelKey)
@@ -470,6 +560,9 @@ export async function searchGroupsForChild(input: { studentId: string; tenantSlu
           isFull: remainingCapacity === 0,
           color: g.color,
           tenantId: g.tenantId,
+          tenantName: g.tenant.name,
+          tenantSlug: g.tenant.slug,
+          teacherName: g.teacherId ? teacherNameById.get(g.teacherId) ?? null : g.tenant.name,
         };
       });
 
@@ -592,13 +685,6 @@ export async function enrollChildInGroup(input: { studentId: string; groupId: st
     const nextStatus = activeEnrollmentCount >= group.maxCapacity ? "WAITLIST" : "ACTIVE";
 
     await db.$transaction(async (tx) => {
-      if (relation.student.tenantId !== group.tenantId) {
-        await tx.user.update({
-          where: { id: relation.student.id },
-          data: { tenantId: group.tenantId },
-        });
-      }
-
       if (existingEnrollment) {
         await tx.groupStudent.update({
           where: {

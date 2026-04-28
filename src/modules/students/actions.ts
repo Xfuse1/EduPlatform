@@ -4,9 +4,16 @@ import { randomUUID } from "node:crypto";
 
 import { revalidatePath } from "next/cache";
 
+import { EnrollmentStatus, type Prisma } from "@/generated/client";
 import { db } from "@/lib/db";
 import { normalizeEgyptPhone } from "@/lib/phone";
 import { requireTenant } from "@/lib/tenant";
+
+const ACTIVE_ENROLLMENT_STATUSES = [
+  EnrollmentStatus.ACTIVE,
+  EnrollmentStatus.WAITLIST,
+  EnrollmentStatus.PENDING,
+];
 
 type CreateStudentResult = {
   success: boolean;
@@ -59,6 +66,22 @@ function getGroupIds(formData: FormData) {
 
   const legacyGroupId = getString(formData, "groupId");
   return legacyGroupId ? [legacyGroupId] : [];
+}
+
+function getStudentPhoneLookupValues(value: string) {
+  const normalized = normalizeEgyptPhone(value);
+  const values = new Set<string>();
+
+  if (normalized) {
+    values.add(normalized);
+  }
+
+  if (/^01\d{9}$/.test(normalized)) {
+    values.add(`+20${normalized.slice(1)}`);
+    values.add(`20${normalized.slice(1)}`);
+  }
+
+  return [...values];
 }
 
 function normalizeStudentInput(formData: FormData, studentIdOverride?: string): NormalizedStudentInput {
@@ -249,11 +272,13 @@ async function createStudentForTenant(tenantId: string, input: NormalizedStudent
 
   try {
     if (input.phone) {
+      const phoneLookupValues = getStudentPhoneLookupValues(storedStudentPhone);
       const duplicateStudent = await db.user.findFirst({
         where: {
-          tenantId,
-          phone: storedStudentPhone,
           role: "STUDENT",
+          phone: {
+            in: phoneLookupValues,
+          },
         },
         select: { id: true },
       });
@@ -334,11 +359,13 @@ async function updateStudentForTenant(tenantId: string, input: NormalizedStudent
     }
 
     if (input.phone) {
+      const phoneLookupValues = getStudentPhoneLookupValues(input.phone);
       const duplicateStudent = await db.user.findFirst({
         where: {
-          tenantId,
-          phone: input.phone,
           role: "STUDENT",
+          phone: {
+            in: phoneLookupValues,
+          },
           NOT: {
             id: existingStudent.id,
           },
@@ -534,33 +561,99 @@ export async function deleteStudent(tenantId: string, studentId: string) {
 
 export async function findStudentByPhone(phone: string): Promise<{
   found: boolean;
-  student?: { id: string; name: string; phone: string; gradeLevel: string | null };
+  student?: {
+    id: string;
+    name: string;
+    phone: string;
+    gradeLevel: string | null;
+    isSameTenant: boolean;
+    tenantName: string | null;
+    alreadyEnrolledGroupIds: string[];
+  };
+  isSameTenant?: boolean;
+  tenantName?: string | null;
+  alreadyEnrolledGroupIds?: string[];
   message?: string;
 }> {
   try {
     const tenant = await requireTenant();
     const normalized = normalizeEgyptPhone(phone.trim());
+    const phoneLookupValues = getStudentPhoneLookupValues(normalized);
 
     if (!/^01\d{9}$/.test(normalized)) {
       return { found: false, message: "رقم الهاتف غير صحيح" };
     }
 
-    const student = await db.user.findFirst({
-      where: { tenantId: tenant.id, phone: normalized, role: "STUDENT" },
-      select: { id: true, name: true, phone: true, gradeLevel: true },
+    const studentSelect = {
+      id: true,
+      name: true,
+      phone: true,
+      gradeLevel: true,
+      tenantId: true,
+      tenant: {
+        select: {
+          name: true,
+        },
+      },
+      groupStudents: {
+        where: {
+          status: {
+            in: ACTIVE_ENROLLMENT_STATUSES,
+          },
+          group: {
+            tenantId: tenant.id,
+          },
+        },
+        select: {
+          groupId: true,
+        },
+      },
+    } satisfies Prisma.UserSelect;
+
+    const sameTenantStudent = await db.user.findFirst({
+      where: {
+        tenantId: tenant.id,
+        role: "STUDENT",
+        isActive: true,
+        phone: {
+          in: phoneLookupValues,
+        },
+      },
+      select: studentSelect,
+    });
+
+    const student = sameTenantStudent ?? await db.user.findFirst({
+      where: {
+        role: "STUDENT",
+        isActive: true,
+        phone: {
+          in: phoneLookupValues,
+        },
+      },
+      select: studentSelect,
     });
 
     if (!student) {
       return { found: false };
     }
 
+    const isSameTenant = student.tenantId === tenant.id;
+    const tenantName = isSameTenant ? null : student.tenant?.name ?? null;
+    const alreadyEnrolledGroupIds = student.groupStudents.map((enrollment) => enrollment.groupId);
+
     return {
       found: true,
+      isSameTenant,
+      tenantName,
+      alreadyEnrolledGroupIds,
       student: {
         id: student.id,
         name: student.name,
         phone: student.phone.startsWith("student-") ? "" : student.phone,
         gradeLevel: student.gradeLevel,
+        isSameTenant,
+        tenantName,
+        alreadyEnrolledGroupIds,
       },
     };
   } catch (error) {
@@ -573,16 +666,61 @@ export async function enrollExistingStudent(studentId: string, groupId: string):
   try {
     const tenant = await requireTenant();
 
-    const student = await db.user.findFirst({
-      where: { id: studentId, tenantId: tenant.id, role: "STUDENT" },
-      select: { id: true },
-    });
+    const [student, group] = await Promise.all([
+      db.user.findFirst({
+        where: {
+          id: studentId,
+          role: "STUDENT",
+          isActive: true,
+        },
+        select: { id: true },
+      }),
+      db.group.findFirst({
+        where: {
+          id: groupId,
+          tenantId: tenant.id,
+          isActive: true,
+        },
+        select: { id: true },
+      }),
+    ]);
 
     if (!student) {
       return { success: false, message: "الطالب غير موجود" };
     }
 
-    await enrollInGroup(studentId, groupId);
+    if (!group) {
+      return { success: false, message: "المجموعة غير موجودة أو لا تملك صلاحية استخدامها" };
+    }
+
+    const existingEnrollment = await db.groupStudent.findUnique({
+      where: {
+        groupId_studentId: {
+          groupId,
+          studentId,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (existingEnrollment) {
+      await db.groupStudent.update({
+        where: {
+          id: existingEnrollment.id,
+        },
+        data: {
+          status: "ACTIVE",
+          droppedAt: null,
+        },
+      });
+    } else {
+      await enrollInGroup(studentId, groupId);
+    }
+
+    revalidatePath("/teacher/students");
+    revalidatePath(`/teacher/students/${studentId}`);
     return { success: true };
   } catch (error) {
     console.error("enrollExistingStudent failed:", error);

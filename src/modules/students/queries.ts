@@ -1,14 +1,22 @@
 import { cache } from "react";
 
+import { EnrollmentStatus, type Prisma } from "@/generated/client";
 import { db } from "@/lib/db";
 
+const ACTIVE_ENROLLMENT_STATUSES = [
+  EnrollmentStatus.ACTIVE,
+  EnrollmentStatus.WAITLIST,
+  EnrollmentStatus.PENDING,
+];
 
 function startOfMonth() {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), 1);
 }
 
-function toStudentPaymentStatus(status?: string | null) {
+type StudentPaymentStatus = "PAID" | "PARTIAL" | "PENDING" | "OVERDUE";
+
+function toStudentPaymentStatus(status?: string | null): StudentPaymentStatus {
   if (status === "PAID" || status === "PARTIAL" || status === "OVERDUE") {
     return status;
   }
@@ -18,23 +26,46 @@ function toStudentPaymentStatus(status?: string | null) {
 
 export const getStudentCountSummary = cache(async (tenantId: string) => {
   try {
-    const [total, newThisMonth] = await Promise.all([
-      db.user.count({
+    const [totalEnrollments, recentEnrollments] = await Promise.all([
+      db.groupStudent.findMany({
         where: {
-          tenantId,
-          role: "STUDENT",
-        },
-      }),
-      db.user.count({
-        where: {
-          tenantId,
-          role: "STUDENT",
-          createdAt: {
-            gte: startOfMonth(),
+          status: {
+            in: ACTIVE_ENROLLMENT_STATUSES,
+          },
+          group: {
+            tenantId,
+          },
+          student: {
+            role: "STUDENT",
+            isActive: true,
           },
         },
+        distinct: ["studentId"],
+        select: { studentId: true },
+      }),
+      db.groupStudent.findMany({
+        where: {
+          status: {
+            in: ACTIVE_ENROLLMENT_STATUSES,
+          },
+          enrolledAt: {
+            gte: startOfMonth(),
+          },
+          group: {
+            tenantId,
+          },
+          student: {
+            role: "STUDENT",
+            isActive: true,
+          },
+        },
+        distinct: ["studentId"],
+        select: { studentId: true },
       }),
     ]);
+
+    const total = totalEnrollments.length;
+    const newThisMonth = recentEnrollments.length;
 
     return {
       total,
@@ -53,8 +84,23 @@ export const getStudentProfile = cache(async (tenantId: string, studentId: strin
     const student = await db.user.findFirst({
       where: {
         id: studentId,
-        tenantId,
         role: "STUDENT",
+        OR: [
+          { tenantId },
+          {
+            groupStudents: {
+              some: {
+                status: {
+                  in: ACTIVE_ENROLLMENT_STATUSES,
+                },
+                group: {
+                  tenantId,
+                  ...(_teacherId ? { teacherId: _teacherId } : {}),
+                },
+              },
+            },
+          },
+        ],
       },
       include: {
         childStudents: {
@@ -70,19 +116,33 @@ export const getStudentProfile = cache(async (tenantId: string, studentId: strin
         },
         groupStudents: {
           include: {
-            group: true,
+            group: {
+              include: {
+                tenant: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
           },
           orderBy: {
             enrolledAt: "desc",
           },
         },
         payments: {
+          where: {
+            tenantId,
+          },
           orderBy: {
             createdAt: "desc",
           },
           take: 20,
         },
         attendances: {
+          where: {
+            tenantId,
+          },
           orderBy: {
             markedAt: "desc",
           },
@@ -107,15 +167,26 @@ export const getStudentProfile = cache(async (tenantId: string, studentId: strin
       const parent = student.childStudents[0]?.parent;
       const latestPayment = student.payments[0];
       const activeGroupStatuses = new Set(["ACTIVE", "WAITLIST"]);
-      const enrolledGroups = student.groupStudents
-        .filter((enrollment) => activeGroupStatuses.has(enrollment.status))
+      const visibleGroupStudents = student.groupStudents.filter((enrollment) => {
+        if (!activeGroupStatuses.has(enrollment.status)) {
+          return false;
+        }
+
+        if (!_teacherId) {
+          return true;
+        }
+
+        return enrollment.group.tenantId === tenantId && enrollment.group.teacherId === _teacherId;
+      });
+      const enrolledGroups = visibleGroupStudents
         .map((enrollment) => ({
           id: enrollment.group.id,
           name: enrollment.group.name,
           subject: enrollment.group.subject,
           gradeLevel: enrollment.group.gradeLevel,
           color: enrollment.group.color,
-          enrollmentStatus: enrollment.status,
+          tenantName: enrollment.group.tenant.name,
+          enrollmentStatus: enrollment.status as "ACTIVE" | "WAITLIST",
         }));
       const recentAttendance = student.attendances.map((record) => ({
         id: record.id,
@@ -152,7 +223,7 @@ export const getStudentProfile = cache(async (tenantId: string, studentId: strin
         enrolledGroups,
         recentAttendance,
         enrollments: enrolledGroups.map((group) => {
-          const enrollment = student.groupStudents.find((item) => item.group.id === group.id);
+          const enrollment = visibleGroupStudents.find((item) => item.group.id === group.id);
           return {
             group: {
               id: group.id,
@@ -160,6 +231,7 @@ export const getStudentProfile = cache(async (tenantId: string, studentId: strin
               days: enrollment?.group.days ?? [],
               timeStart: enrollment?.group.timeStart ?? "",
               timeEnd: enrollment?.group.timeEnd ?? "",
+              tenantName: enrollment?.group.tenant.name ?? "",
             },
           };
         }),
@@ -172,14 +244,11 @@ export const getStudentProfile = cache(async (tenantId: string, studentId: strin
   return null;
 });
 
-export const getParentChildren = cache(async (tenantId: string, parentId: string) => {
+export const getParentChildren = cache(async (_tenantId: string, parentId: string) => {
   try {
     const children = await db.parentStudent.findMany({
       where: {
         parentId,
-        student: {
-          tenantId,
-        },
       },
       include: {
         student: {
@@ -196,7 +265,15 @@ export const getParentChildren = cache(async (tenantId: string, parentId: string
                 },
               },
               include: {
-                group: true,
+                group: {
+                  include: {
+                    tenant: {
+                      select: {
+                        name: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -235,30 +312,60 @@ export const getStudents = cache(async (
       return sessionDate;
     };
 
+    const activeEnrollmentWhere: Prisma.GroupStudentWhereInput = {
+      status: {
+        in: ACTIVE_ENROLLMENT_STATUSES,
+      },
+      group: {
+        tenantId,
+        ...(_teacherId ? { teacherId: _teacherId } : {}),
+      },
+    };
+
+    const searchWhere: Prisma.UserWhereInput | undefined = filters.search
+      ? {
+          OR: [
+            { name: { contains: filters.search, mode: "insensitive" as const } },
+            { phone: { contains: filters.search } },
+          ],
+        }
+      : undefined;
+
+    const studentScopeWhere: Prisma.UserWhereInput = filters.groupId
+      ? {
+          groupStudents: {
+            some: {
+              groupId: filters.groupId,
+              status: {
+                in: ACTIVE_ENROLLMENT_STATUSES,
+              },
+              group: {
+                tenantId,
+                ...(_teacherId ? { teacherId: _teacherId } : {}),
+              },
+            },
+          },
+        }
+      : {
+          OR: [
+            {
+              groupStudents: {
+                some: activeEnrollmentWhere,
+              },
+            },
+            {
+              tenantId,
+              groupStudents: {
+                none: activeEnrollmentWhere,
+              },
+            },
+          ],
+        };
+
     const students = await db.user.findMany({
       where: {
-        tenantId,
         role: "STUDENT",
-        ...(filters.search
-          ? {
-              OR: [
-                { name: { contains: filters.search, mode: "insensitive" } },
-                { phone: { contains: filters.search } },
-              ],
-            }
-          : {}),
-        ...(filters.groupId
-          ? {
-              groupStudents: {
-                some: {
-                  groupId: filters.groupId,
-                  status: {
-                    in: ["ACTIVE", "WAITLIST", "PENDING"],
-                  },
-                },
-              },
-            }
-          : {}),
+        AND: [searchWhere, studentScopeWhere].filter(Boolean) as Prisma.UserWhereInput[],
       },
       include: {
         childStudents: {
@@ -273,11 +380,7 @@ export const getStudents = cache(async (
           },
         },
         groupStudents: {
-          where: {
-            status: {
-              in: ["ACTIVE", "WAITLIST", "PENDING"],
-            },
-          },
+          where: activeEnrollmentWhere,
           include: {
             group: {
               select: {
@@ -290,6 +393,9 @@ export const getStudents = cache(async (
           },
         },
         payments: {
+          where: {
+            tenantId,
+          },
           orderBy: {
             createdAt: "desc",
           },
@@ -390,10 +496,14 @@ export const getStudents = cache(async (
       const attendedCount = student.attendances.filter((record) => record.status === "PRESENT" || record.status === "LATE").length;
       const attendance = student.attendances.length > 0 ? Math.round((attendedCount / student.attendances.length) * 100) : 0;
       const parent = student.childStudents[0]?.parent;
+      const groups = student.groupStudents.map((enrollment) => ({
+        id: enrollment.group.id,
+        name: enrollment.group.name,
+      }));
 
       return student.groupStudents.map((enrollment) => {
         const consecutiveAbsences = getConsecutiveAbsences(student.id, enrollment.group.id, enrollment.enrolledAt);
-        const studentStatus = !student.isActive ? "SUSPENDED" : "ACTIVE";
+        const studentStatus: "ACTIVE" | "SUSPENDED" = !student.isActive ? "SUSPENDED" : "ACTIVE";
 
         return {
           id: student.id,
@@ -408,6 +518,7 @@ export const getStudents = cache(async (
           group: enrollment.group.name,
           groupId: enrollment.group.id,
           enrollmentStatus: enrollment.status,
+          groups,
           studentStatus,
           consecutiveAbsences,
           paymentStatus,
@@ -424,7 +535,7 @@ export const getStudents = cache(async (
       const attendedCount = student.attendances.filter((record) => record.status === "PRESENT" || record.status === "LATE").length;
       const attendance = student.attendances.length > 0 ? Math.round((attendedCount / student.attendances.length) * 100) : 0;
       const parent = student.childStudents[0]?.parent;
-      const studentStatus = student.isActive ? "ACTIVE" : "SUSPENDED";
+      const studentStatus: "ACTIVE" | "SUSPENDED" = student.isActive ? "ACTIVE" : "SUSPENDED";
 
       return {
         id: student.id,
@@ -439,6 +550,7 @@ export const getStudents = cache(async (
         group: "غير محدد",
         groupId: "",
         enrollmentStatus: "NONE",
+        groups: [],
         studentStatus,
         consecutiveAbsences: 0,
         paymentStatus,

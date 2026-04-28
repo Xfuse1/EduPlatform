@@ -89,14 +89,14 @@ export function Sidebar({
     <aside
       className={cn(
         // Base styles shared between desktop and mobile
-        "w-[300px] shrink-0 border-s border-slate-200/40 bg-[linear-gradient(180deg,#142138_0%,#12203a_42%,#10203a_100%)] text-white dark:border-white/8 dark:bg-[linear-gradient(180deg,#0b1327_0%,#0e1b32_38%,#10243f_100%)]",
+        "h-screen w-[300px] shrink-0 border-s border-slate-200/40 bg-[linear-gradient(180deg,#142138_0%,#12203a_42%,#10203a_100%)] text-white dark:border-white/8 dark:bg-[linear-gradient(180deg,#0b1327_0%,#0e1b32_38%,#10243f_100%)]",
         // Desktop: always visible, part of the flow
         "hidden xl:block",
         // Mobile: overlay drawer, visible only when isOpen
         isOpen && "fixed inset-y-0 start-0 z-50 flex xl:relative xl:flex",
       )}
     >
-      <div className="sticky top-0 flex min-h-screen flex-col overflow-y-auto overflow-x-hidden px-7 py-7">
+      <div className="relative flex h-full min-h-0 flex-col overflow-y-auto overflow-x-hidden px-7 py-7">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-x-0 top-0 h-52 bg-[radial-gradient(circle_at_top,rgba(125,211,252,0.12),transparent_62%)] dark:bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.10),transparent_58%)]" />
           <div className="absolute inset-y-0 start-0 w-px bg-white/10 dark:bg-white/5" />

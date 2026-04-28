@@ -19,10 +19,13 @@ export default async function StudentSettingsRoutePage() {
       avatarUrl: true,
       email: true,
       gradeLevel: true,
+      pinHash: true,
     },
   });
 
   if (!userData) redirect("/student");
 
-  return <StudentSettingsPage initialData={userData} />;
+  const { pinHash, ...safeUserData } = userData;
+
+  return <StudentSettingsPage initialData={{ ...safeUserData, hasPin: !!pinHash }} />;
 }

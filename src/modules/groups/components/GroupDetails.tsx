@@ -24,7 +24,7 @@ import {
 type GroupStudent = {
   id: string
   studentId: string
-  status: 'ACTIVE' | 'WAITLIST' | 'ARCHIVED' | 'DROPPED'
+  status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'WAITLIST' | 'ARCHIVED' | 'DROPPED'
   paymentStatus: 'PAID' | 'PARTIAL' | 'PENDING' | 'OVERDUE'
   student: {
     id: string
@@ -95,14 +95,18 @@ const paymentStatusVariants = {
 } as const
 
 const enrollmentStatusLabels = {
+  PENDING: 'قيد المراجعة',
   ACTIVE: 'نشط',
+  REJECTED: 'مرفوض',
   WAITLIST: 'قائمة انتظار',
   ARCHIVED: 'مؤرشف',
   DROPPED: 'منسحب',
 } as const
 
 const enrollmentStatusVariants = {
+  PENDING: 'info',
   ACTIVE: 'success',
+  REJECTED: 'danger',
   WAITLIST: 'warning',
   ARCHIVED: 'neutral',
   DROPPED: 'danger',

@@ -18,7 +18,7 @@ export default async function TeacherSettingsPage() {
   const [userData, subscription] = await Promise.all([
     db.user.findUnique({
       where: { id: user.id },
-      select: { avatarUrl: true },
+      select: { avatarUrl: true, phone: true, pinHash: true },
     }),
     db.teacherSubscription.findUnique({
       where: { tenantId: tenant.id },
@@ -33,6 +33,8 @@ export default async function TeacherSettingsPage() {
       tenant={tenant}
       avatarUrl={userData?.avatarUrl}
       hasKashierApi={hasKashierApi}
+      userPhone={userData?.phone}
+      hasPin={!!userData?.pinHash}
     />
   );
 }

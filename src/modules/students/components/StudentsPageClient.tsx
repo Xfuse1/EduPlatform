@@ -9,11 +9,12 @@ import { Progress } from "@/components/ui/progress";
 import { getInitials, toArabicDigits } from "@/lib/utils";
 import { AddStudentForm } from "@/modules/students/components/AddStudentForm";
 
-type StudentPaymentStatus = "PAID" | "OVERDUE" | "PENDING";
+type StudentPaymentStatus = "PAID" | "PARTIAL" | "OVERDUE" | "PENDING";
 
 type GroupOption = {
   id: string;
   name: string;
+  gradeLevel: string;
   remainingCapacity: number;
   isFull: boolean;
 };

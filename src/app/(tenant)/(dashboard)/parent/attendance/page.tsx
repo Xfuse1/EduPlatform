@@ -52,7 +52,11 @@ export default async function ParentAttendancePage({
     );
   }
 
-  const attendance = await getStudentAttendanceSnapshot(selectedChild.student.tenantId, selectedChildId);
+  const attendanceTenantId =
+    selectedChild.student.groupStudents?.find((enrollment: any) => enrollment.status === "ACTIVE")?.group?.tenantId ??
+    selectedChild.student.groupStudents?.[0]?.group?.tenantId ??
+    selectedChild.student.tenantId;
+  const attendance = await getStudentAttendanceSnapshot(attendanceTenantId, selectedChildId);
   const attendanceData = (attendance.records ?? []).map((r: any) => ({
     id: r.id,
     date: new Date(r.session.date).toLocaleDateString("ar-EG"),

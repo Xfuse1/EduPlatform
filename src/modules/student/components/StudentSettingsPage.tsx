@@ -5,6 +5,7 @@ import { User, Phone, Mail, Camera, Loader2, Save, GraduationCap } from "lucide-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { PinSettingsCard } from "@/modules/settings/components/PinSettingsCard";
 
 interface StudentSettingsPageProps {
   initialData: {
@@ -14,6 +15,7 @@ interface StudentSettingsPageProps {
     avatarUrl: string | null;
     email?: string | null;
     gradeLevel?: string | null;
+    hasPin: boolean;
   };
 }
 
@@ -90,6 +92,8 @@ export function StudentSettingsPage({ initialData }: StudentSettingsPageProps) {
         <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">الإعدادات</h1>
         <p className="mt-2 text-slate-600 dark:text-slate-300">إدارة بيانات حسابك الشخصية.</p>
       </div>
+
+      <PinSettingsCard phone={initialData.phone} hasPin={initialData.hasPin} />
 
       <Card className="rounded-[24px] border-slate-200 shadow-sm dark:border-slate-800">
         <CardHeader>

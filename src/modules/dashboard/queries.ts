@@ -189,7 +189,18 @@ export const getAssignmentsByParent = cache(async (tenantId: string, parentId: s
 
 export const getTeacherDashboardData = cache(async (tenantId: string) => {
   try {
-    const [revenue, todaySessions, students, attendance, tenant, overduePayments, repeatedAbsences, revenueSeries, attendanceSeries] = await Promise.all([
+    const [
+      revenue,
+      todaySessions,
+      students,
+      attendance,
+      tenant,
+      overduePayments,
+      repeatedAbsences,
+      revenueSeries,
+      attendanceSeries,
+      teacherSubscription,
+    ] = await Promise.all([
       getRevenueSummary(tenantId),
       getTodaySessions(tenantId),
       getStudentCountSummary(tenantId),
@@ -239,6 +250,15 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
       }),
       getMonthlyRevenueSeries(tenantId),
       getMonthlyAttendanceSeries(tenantId),
+      db.teacherSubscription.findUnique({
+        where: {
+          tenantId,
+        },
+        select: {
+          kashierApiKey: true,
+          kashierMerId: true,
+        },
+      }),
     ]);
 
     const absenceStudents =
@@ -295,6 +315,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
       alerts: [...paymentAlerts, ...absenceAlerts],
       revenueSeries,
       attendanceSeries,
+      kashierApiConfigured: !!(teacherSubscription?.kashierApiKey && teacherSubscription.kashierMerId),
     };
   } catch (error) {
     console.error("DB getTeacherDashboardData failed, using fallback:", error);
@@ -324,6 +345,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
     alerts: [],
     revenueSeries: [],
     attendanceSeries: [],
+    kashierApiConfigured: false,
   };
 });
 
@@ -369,7 +391,11 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
       getAssignmentsByParent(tenantId, parentId),
     ]);
 
-    const childTenantIds = Array.from(new Set(children.map(({ student }) => student.tenantId)));
+    const childTenantIds = Array.from(new Set(
+      children.flatMap(({ student }) =>
+        student.groupStudents.map((enrollment) => enrollment.group.tenantId),
+      ),
+    ));
     const groups = childTenantIds.length ? await db.group.findMany({
         where: {
           tenantId: { in: childTenantIds },
@@ -388,6 +414,11 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
           monthlyFee: true,
           maxCapacity: true,
           color: true,
+          tenant: {
+            select: {
+              name: true,
+            },
+          },
           groupStudents: {
             where: {
               status: "ACTIVE",
@@ -404,14 +435,14 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
 
     const childrenData = await Promise.all(
       children.map(async ({ student }) => {
-        const [attendance, payment] = await Promise.all([
-          getStudentAttendanceSnapshot(student.tenantId, student.id),
-          getStudentPaymentSnapshot(student.tenantId, student.id),
-        ]);
-
         const currentEnrollmentStatuses = new Set(["ACTIVE", "WAITLIST"]);
         const activeEnrollments = student.groupStudents.filter((enrollment) => enrollment.status === "ACTIVE");
         const currentEnrollments = student.groupStudents.filter((enrollment) => currentEnrollmentStatuses.has(enrollment.status));
+        const scopedTenantId = activeEnrollments[0]?.group.tenantId ?? currentEnrollments[0]?.group.tenantId ?? student.tenantId;
+        const [attendance, payment] = await Promise.all([
+          getStudentAttendanceSnapshot(scopedTenantId, student.id),
+          getStudentPaymentSnapshot(scopedTenantId, student.id),
+        ]);
         const enrolledGroupIds = new Set(currentEnrollments.map((enrollment) => enrollment.group.id));
         const studentGradeLevelKey = getGradeLevelKey(student.gradeLevel);
 
@@ -419,10 +450,10 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
           id: enrollment.group.id,
           name: enrollment.group.name,
           subject: enrollment.group.subject,
+          tenantName: enrollment.group.tenant?.name ?? null,
         }));
 
         const availableGroups = groups
-          .filter((group) => group.tenantId === student.tenantId)
           .filter((group) => !studentGradeLevelKey || getGradeLevelKey(group.gradeLevel) === studentGradeLevelKey)
           .filter((group) => !enrolledGroupIds.has(group.id))
           .map((group) => {
@@ -444,6 +475,7 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
               maxCapacity: group.maxCapacity,
               isFull: remainingCapacity === 0,
               color: group.color,
+              tenantName: group.tenant.name,
             };
           });
 
@@ -452,7 +484,7 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
           name: student.name,
           phone: student.phone.startsWith("student-") ? "" : student.phone,
           grade: student.gradeLevel ?? "غير محدد",
-          tenantName: student.tenant.name,
+          tenantName: currentEnrollments[0]?.group.tenant?.name ?? student.tenant.name,
           currentGroups,
           availableGroups,
           attendanceRate: attendance.rate,
