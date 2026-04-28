@@ -1,12 +1,10 @@
 'use client';
 
-import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { cn } from "@/lib/utils";
 
 export function AppShell({
   children,
@@ -52,8 +50,8 @@ export function AppShell({
   } as const;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.14),_transparent_28%),linear-gradient(180deg,_#f8fafc_0%,_#eef4f8_100%)] dark:bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.10),_transparent_22%),radial-gradient(circle_at_85%_18%,_rgba(15,118,110,0.12),_transparent_18%),linear-gradient(180deg,_#081120_0%,_#0b1628_42%,_#111827_100%)]">
-      <div className="flex min-h-screen">
+    <div className="h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.14),_transparent_28%),linear-gradient(180deg,_#f8fafc_0%,_#eef4f8_100%)] dark:bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.10),_transparent_22%),radial-gradient(circle_at_85%_18%,_rgba(15,118,110,0.12),_transparent_18%),linear-gradient(180deg,_#081120_0%,_#0b1628_42%,_#111827_100%)]">
+      <div className="flex h-screen overflow-hidden">
         {/* Mobile sidebar overlay backdrop */}
         {sidebarOpen && (
           <button
@@ -71,14 +69,16 @@ export function AppShell({
           onClose={() => setSidebarOpen(false)}
         />
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
           <Header
             tenantName={tenantName}
             userName={userName}
             avatarUrl={avatarUrl}
             onMenuToggle={() => setSidebarOpen((prev) => !prev)}
           />
-          <main className="page-enter mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+          <main className="page-enter min-h-0 flex-1 overflow-y-auto">
+            <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
+          </main>
         </div>
       </div>
     </div>

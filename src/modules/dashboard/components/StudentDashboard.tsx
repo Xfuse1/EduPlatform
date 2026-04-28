@@ -123,6 +123,11 @@ export function StudentDashboard({ data, availableGroups }: StudentDashboardProp
               <div key={enrollment.group.id} className="rounded-[18px] border bg-white p-4 dark:bg-slate-900">
                 <div className="mb-4 h-1.5 rounded-full" style={{ backgroundColor: groupColors[index % groupColors.length] }} />
                 <p className="text-lg font-bold text-slate-900 dark:text-white">{enrollment.group.name}</p>
+                {enrollment.group.tenantName && (
+                  <p className="mt-1 text-xs font-bold text-slate-500 dark:text-slate-400">
+                    {enrollment.group.tenantName}
+                  </p>
+                )}
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{enrollment.group.days.join(" • ")}</p>
                 <p className="mt-2 text-sm font-semibold text-primary dark:text-sky-300">
                   <span dir="ltr">

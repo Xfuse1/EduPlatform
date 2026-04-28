@@ -32,7 +32,6 @@ export async function getGroups(tenantId: string, teacherId?: string) {
         where: {
           status: EnrollmentStatus.ACTIVE,
           student: {
-            tenantId,
             role: UserRole.STUDENT,
             isActive: true,
           },
@@ -68,7 +67,6 @@ export async function getGroupStudents(tenantId: string, groupId: string, teache
         ...(teacherId ? { teacherId } : {}),
       },
       student: {
-        tenantId,
         role: UserRole.STUDENT,
         isActive: true,
       },
@@ -193,11 +191,9 @@ export async function getStudentScheduleItems(tenantId: string, studentId: strin
       studentId,
       status: EnrollmentStatus.ACTIVE,
       student: {
-        tenantId,
         role: UserRole.STUDENT,
       },
       group: {
-        tenantId,
         isActive: true,
       },
     },

@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { addTeacherKashierApi } from "@/modules/payments/actions";
 import { updateTenantSettings } from "@/modules/settings/actions";
+import { PinSettingsCard } from "@/modules/settings/components/PinSettingsCard";
 
 type TenantSettings = {
   id: string;
@@ -37,10 +38,12 @@ const planLabels: Record<TenantSettings["plan"], string> = {
   BUSINESS: "أعمال",
 };
 
-export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierApi = false }: { 
+export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierApi = false, userPhone, hasPin = false }: { 
   tenant: TenantSettings;
   avatarUrl?: string | null;
   hasKashierApi?: boolean;
+  userPhone?: string | null;
+  hasPin?: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -215,6 +218,8 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierAp
         <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">الإعدادات</h1>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">حدّث بيانات السنتر والهوية البصرية ومعلومات التواصل من نفس الصفحة.</p>
       </div>
+
+      <PinSettingsCard phone={userPhone ?? null} hasPin={hasPin} />
 
       <form className="space-y-6" onSubmit={handleSubmit}>
         {/* ——— Teacher Personal Avatar Card ——— */}

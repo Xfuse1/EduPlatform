@@ -1,12 +1,11 @@
 export const dynamic = "force-dynamic";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
-import { requireTenant } from "@/lib/tenant";
 import { db } from "@/lib/db";
 import { ParentSettingsPage } from "@/modules/parent/components/ParentSettingsPage";
 
 export default async function ParentSettingsRoutePage() {
-  const [user, tenant] = await Promise.all([requireAuth(), requireTenant()]);
+  const user = await requireAuth();
   if (user.role !== "PARENT") {
     redirect(user.role === "STUDENT" ? "/student" : "/teacher");
   }
@@ -19,11 +18,9 @@ export default async function ParentSettingsRoutePage() {
       phone: true,
       avatarUrl: true,
       email: true,
+      pinHash: true,
       settings: true,
       parentStudents: {
-        where: {
-          student: { tenantId: tenant.id },
-        },
         include: {
           student: {
             select: {
@@ -40,5 +37,7 @@ export default async function ParentSettingsRoutePage() {
 
   if (!userData) redirect("/parent");
 
-  return <ParentSettingsPage initialData={userData} />;
+  const { pinHash, ...safeUserData } = userData;
+
+  return <ParentSettingsPage initialData={{ ...safeUserData, hasPin: !!pinHash }} />;
 }

@@ -25,6 +25,9 @@ type AvailableGroup = {
   maxCapacity: number;
   isFull: boolean;
   color: string;
+  tenantName?: string | null;
+  tenantSlug?: string | null;
+  teacherName?: string | null;
 };
 
 type CurrentGroup = {
@@ -54,11 +57,12 @@ export function ChildGroupEnrollmentButton({
   const [slugInput, setSlugInput] = useState("");
   const [searchedGroups, setSearchedGroups] = useState<AvailableGroup[]>([]);
   const [searchError, setSearchError] = useState("");
+  const [hasSearchRun, setHasSearchRun] = useState(false);
   const [isSearching, startSearchTransition] = useTransition();
 
   const safeCurrentGroups = currentGroups ?? [];
   const safeAvailableGroups = availableGroups ?? [];
-  const displayGroups = safeAvailableGroups.length > 0 ? safeAvailableGroups : searchedGroups;
+  const displayGroups = hasSearchRun ? searchedGroups : safeAvailableGroups;
 
   const selectedGroup = useMemo(
     () => displayGroups.find((group) => group.id === selectedGroupId) ?? null,
@@ -72,6 +76,7 @@ export function ChildGroupEnrollmentButton({
     setSlugInput("");
     setSearchedGroups([]);
     setSearchError("");
+    setHasSearchRun(false);
   }
 
   function handleSlugSearch() {
@@ -79,15 +84,16 @@ export function ChildGroupEnrollmentButton({
     setSearchError("");
     setSearchedGroups([]);
     setSelectedGroupId("");
+    setHasSearchRun(true);
 
     startSearchTransition(async () => {
-      const result = await searchGroupsForChild({ studentId: childId, tenantSlug: slugInput.trim() });
+      const result = await searchGroupsForChild({ studentId: childId, query: slugInput.trim() });
       if (!result.success) {
         setSearchError(result.message ?? "تعذر البحث");
         return;
       }
       if (result.groups.length === 0) {
-        setSearchError("لا توجد مجموعات متاحة لهذا الابن في هذا السنتر.");
+        setSearchError("لا توجد مجموعات متاحة لهذا الابن بهذا البحث.");
         return;
       }
       setSearchedGroups(result.groups);
@@ -169,10 +175,10 @@ export function ChildGroupEnrollmentButton({
             <div className="mb-4 flex gap-2">
               <Input
                 className="flex-1"
-                dir="ltr"
+                dir="auto"
                 onChange={(e) => { setSlugInput(e.target.value); setSearchError(""); }}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleSlugSearch(); } }}
-                placeholder="ابحث بـ slug السنتر مثل: alamal"
+                placeholder="ابحث بـ slug السنتر أو المادة أو اسم المدرس"
                 value={slugInput}
               />
               <Button
@@ -195,7 +201,7 @@ export function ChildGroupEnrollmentButton({
 
             {displayGroups.length === 0 ? (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-                لا توجد مجموعات متاحة. ابحث بـ slug السنتر الخاص بالمدرس لعرض مجموعاته.
+                لا توجد مجموعات متاحة. ابحث بـ slug السنتر أو اسم المادة أو اسم المدرس لعرض المجموعات المناسبة.
               </div>
             ) : (
               <div className="space-y-3">
@@ -236,6 +242,13 @@ export function ChildGroupEnrollmentButton({
                             {formatTimeRange12Hour(group.timeStart, group.timeEnd)}
                             {group.room ? ` - ${group.room}` : ""}
                           </p>
+                          {group.teacherName || group.tenantName ? (
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                              {group.teacherName ? `المدرس: ${group.teacherName}` : ""}
+                              {group.teacherName && group.tenantName ? " - " : ""}
+                              {group.tenantName ? `السنتر: ${group.tenantName}` : ""}
+                            </p>
+                          ) : null}
                         </div>
 
                         <div className="min-w-[132px] rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-end dark:border-slate-700 dark:bg-slate-950">

@@ -275,6 +275,20 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                   <Progress className="h-3" value={child.attendanceRate} />
                 </div>
 
+                {child.currentGroups?.length ? (
+                  <div className="rounded-[20px] bg-slate-50 p-5 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                    <p className="mb-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">المجموعات الحالية</p>
+                    <div className="flex flex-wrap gap-2">
+                      {child.currentGroups.map((group: any) => (
+                        <span key={group.id} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200">
+                          {group.name}
+                          {group.tenantName ? ` - ${group.tenantName}` : ""}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="flex items-start gap-4 rounded-[20px] bg-slate-50 p-5 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                   <CalendarClock className="mt-1 h-6 w-6 text-primary dark:text-sky-300" />
                   <div className="flex-1">

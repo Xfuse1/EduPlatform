@@ -5,6 +5,8 @@ import { cookies } from "next/headers";
 
 import { createAuthSession, setAuthSessionCookie } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { verifyFirebasePhoneIdToken } from "@/lib/firebase-admin";
+import { normalizeEgyptPhone } from "@/lib/phone";
 import { requireTenant } from "@/lib/tenant";
 import { requireAuth } from "@/lib/auth";
 import { phoneSchema } from "@/modules/auth/validations";
@@ -110,6 +112,43 @@ export async function setPinAction(
   });
 
   return { success: true, message: "تم تفعيل الـ PIN بنجاح" };
+}
+
+const setPinWithOtpSchema = z.object({
+  idToken: z.string().trim().min(1),
+  pin: pinSchema,
+});
+
+export async function setPinWithOtpAction(
+  input: z.infer<typeof setPinWithOtpSchema>,
+): Promise<{ success: boolean; message?: string }> {
+  const parsed = setPinWithOtpSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues[0]?.message ?? "بيانات غير صالحة" };
+  }
+
+  const user = await requireAuth();
+
+  try {
+    const verified = await verifyFirebasePhoneIdToken(parsed.data.idToken);
+
+    if (verified.phoneNumber !== normalizeEgyptPhone(user.phone)) {
+      return { success: false, message: "كود التحقق لا يطابق رقم هاتف الحساب الحالي" };
+    }
+
+    const hash = await bcrypt.hash(parsed.data.pin, 10);
+
+    await db.user.update({
+      where: { id: user.id },
+      data: { pinHash: hash },
+    });
+
+    return { success: true, message: "تم حفظ الـ PIN بنجاح" };
+  } catch (error) {
+    console.error("setPinWithOtpAction failed:", error);
+    return { success: false, message: "تعذر التحقق من كود الهاتف حاليا" };
+  }
 }
 
 // Remove PIN

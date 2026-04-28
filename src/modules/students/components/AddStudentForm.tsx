@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { isSameGradeLevel } from "@/lib/grade-levels";
 import { cn } from "@/lib/utils";
 import { createStudent, enrollExistingStudent, findStudentByPhone, updateStudent } from "@/modules/students/actions";
 
 type GroupOption = {
   id: string;
   name: string;
+  gradeLevel: string;
   remainingCapacity: number;
   isFull: boolean;
 };
@@ -70,7 +72,15 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
   const [phoneStep, setPhoneStep] = useState<"lookup" | "found" | "new">(isEditMode ? "new" : "lookup");
   const [lookupPhone, setLookupPhone] = useState("");
   const [lookupPending, startLookupTransition] = useTransition();
-  const [foundStudent, setFoundStudent] = useState<{ id: string; name: string; gradeLevel: string | null } | null>(null);
+  const [foundStudent, setFoundStudent] = useState<{
+    id: string;
+    name: string;
+    phone: string;
+    gradeLevel: string | null;
+    isSameTenant: boolean;
+    tenantName: string | null;
+    alreadyEnrolledGroupIds: string[];
+  } | null>(null);
   const [enrollGroupId, setEnrollGroupId] = useState("");
 
   // ─── Full form state (for new student creation) ───────────────────────────────
@@ -101,10 +111,30 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
     return () => window.clearTimeout(timeout);
   }, [router, successMessage]);
 
-  const availableGroups = useMemo(() => {
+  const capacityAvailableGroups = useMemo(() => {
     if (!student?.groupId) return groups.filter((g) => !g.isFull);
     return groups.filter((g) => !g.isFull || g.id === student.groupId);
   }, [groups, student?.groupId]);
+
+  const formGradeGroups = useMemo(() => {
+    if (!formState.gradeLevel.trim()) return [];
+    return capacityAvailableGroups.filter((group) => isSameGradeLevel(group.gradeLevel, formState.gradeLevel));
+  }, [capacityAvailableGroups, formState.gradeLevel]);
+
+  const selectedFormGradeGroupIds = useMemo(() => {
+    const formGradeGroupIds = new Set(formGradeGroups.map((group) => group.id));
+    return formState.groupIds.filter((groupId) => formGradeGroupIds.has(groupId));
+  }, [formGradeGroups, formState.groupIds]);
+
+  const foundStudentGradeGroups = useMemo(() => {
+    if (!foundStudent?.gradeLevel) return [];
+    return capacityAvailableGroups.filter((group) => isSameGradeLevel(group.gradeLevel, foundStudent.gradeLevel));
+  }, [capacityAvailableGroups, foundStudent?.gradeLevel]);
+
+  const availableEnrollmentGroups = useMemo(() => {
+    const enrolledGroupIds = new Set(foundStudent?.alreadyEnrolledGroupIds ?? []);
+    return foundStudentGradeGroups.filter((group) => !enrolledGroupIds.has(group.id));
+  }, [foundStudent?.alreadyEnrolledGroupIds, foundStudentGradeGroups]);
 
   const resetForm = () => {
     setOpen(false);
@@ -139,7 +169,7 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
   const handleSelectAllGroups = () => {
     setFormState((current) => ({
       ...current,
-      groupIds: current.groupIds.length === groups.length ? [] : groups.map((g) => g.id),
+      groupIds: selectedFormGradeGroupIds.length === formGradeGroups.length ? [] : formGradeGroups.map((g) => g.id),
     }));
   };
 
@@ -191,13 +221,15 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
     event.preventDefault();
 
     startTransition(async () => {
+      const allowedGroupIds = new Set(formGradeGroups.map((group) => group.id));
+      const selectedGroupIds = formState.groupIds.filter((id) => allowedGroupIds.has(id));
       const formData = new FormData();
       formData.set("studentName", formState.studentName);
       formData.set("studentPhone", formState.studentPhone);
       formData.set("parentName", formState.parentName);
       formData.set("parentPhone", formState.parentPhone);
       formData.set("gradeLevel", formState.gradeLevel);
-      formState.groupIds.forEach((id) => formData.append("groupIds", id));
+      selectedGroupIds.forEach((id) => formData.append("groupIds", id));
 
       const result = isEditMode && student
         ? await (() => { formData.set("studentId", student.id); return updateStudent(formData); })()
@@ -300,6 +332,11 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
                 {foundStudent.gradeLevel && (
                   <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{foundStudent.gradeLevel}</p>
                 )}
+                {!foundStudent.isSameTenant && (
+                  <p className="mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-200">
+                    هذا الحساب موجود بالفعل في {foundStudent.tenantName ?? "سنتر آخر"}، وسيتم ضمه للمجموعة بدون نقل حسابه.
+                  </p>
+                )}
               </div>
 
               <div>
@@ -311,12 +348,21 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
                   onChange={(e) => { setEnrollGroupId(e.target.value); setErrorMessage(""); }}
                 >
                   <option value="">اختر المجموعة</option>
-                  {availableGroups.map((g) => (
+                  {availableEnrollmentGroups.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name} - الأماكن المتاحة: {g.remainingCapacity}
                     </option>
                   ))}
                 </select>
+                {availableEnrollmentGroups.length === 0 && (
+                  <p className="mt-2 text-xs font-bold text-amber-600 dark:text-amber-300">
+                    {!foundStudent.gradeLevel
+                      ? "لا يوجد صف دراسي مسجل للطالب، لذلك لا يمكن تحديد مجموعات مناسبة."
+                      : foundStudentGradeGroups.length === 0
+                        ? "لا توجد مجموعات متاحة لنفس الصف الدراسي حاليا."
+                        : "الطالب منضم بالفعل لكل مجموعات نفس الصف المتاحة حاليا."}
+                  </p>
+                )}
               </div>
 
               {errorMessage && (
@@ -410,12 +456,12 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
                       onClick={handleSelectAllGroups}
                       className="text-xs font-bold text-primary hover:underline"
                     >
-                      {formState.groupIds.length === groups.length ? "إلغاء الكل" : "اختيار كل المجموعات"}
+                      {formGradeGroups.length > 0 && selectedFormGradeGroupIds.length === formGradeGroups.length ? "إلغاء الكل" : "اختيار كل المجموعات"}
                     </button>
                   </div>
                   
                   <div className="grid gap-2 max-h-[200px] overflow-y-auto p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                    {groups.map((group) => (
+                    {formGradeGroups.map((group) => (
                       <label 
                         key={group.id} 
                         className={cn(
@@ -442,8 +488,11 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
                         )}
                       </label>
                     ))}
-                    {groups.length === 0 && (
-                      <p className="text-center py-4 text-xs text-slate-400 font-bold">لا توجد مجموعات متاحة حالياً</p>
+                    {!formState.gradeLevel.trim() && (
+                      <p className="text-center py-4 text-xs text-slate-400 font-bold">أدخل الصف الدراسي أولاً لعرض المجموعات المناسبة</p>
+                    )}
+                    {formState.gradeLevel.trim() && formGradeGroups.length === 0 && (
+                      <p className="text-center py-4 text-xs text-slate-400 font-bold">لا توجد مجموعات متاحة لنفس الصف الدراسي حالياً</p>
                     )}
                   </div>
                 </div>

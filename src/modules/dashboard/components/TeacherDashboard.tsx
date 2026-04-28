@@ -1,4 +1,5 @@
 import { AlertTriangle, ArrowUpLeft, CalendarClock, CheckCircle2, DollarSign, Users } from "lucide-react";
+import Link from "next/link";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatTimeRange12Hour, getSessionStatusLabel, toArabicDigits } from "@/lib/utils";
@@ -62,6 +63,30 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
           كل مؤشرات اليوم بين يديك: الحضور، التحصيل، الحصص.
         </p>
       </section>
+
+      {!data.kashierApiConfigured ? (
+        <section className="rounded-[22px] border border-amber-200 bg-amber-50 px-5 py-4 text-amber-950 shadow-sm dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-200">
+                <AlertTriangle className="h-5 w-5" />
+              </span>
+              <div>
+                <h2 className="text-start text-base font-extrabold">التحويل التلقائي غير مفعل</h2>
+                <p className="mt-1 text-start text-sm leading-7 text-amber-800 dark:text-amber-100/85">
+                  لم يتم إضافة متغيرات Kashier الخاصة بك بعد. أي فلوس يتم دفعها أونلاين لن تتحول تلقائيًا، وستحتاج للتواصل مع الإدارة لسحب الفلوس.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/teacher/settings"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-2xl bg-amber-600 px-4 text-sm font-bold text-white transition hover:bg-amber-700 dark:bg-amber-400 dark:text-amber-950 dark:hover:bg-amber-300"
+            >
+              إضافة بيانات Kashier
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat, index) => {
