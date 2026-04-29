@@ -48,7 +48,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const [userTenant, userData] = await Promise.all([
     db.tenant.findUnique({
       where: { id: user.tenantId },
-      select: { name: true },
+      select: { name: true, isActive: true },
     }),
     db.user.findUnique({
       where: { id: user.id },
@@ -58,6 +58,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const tenantName = userTenant?.name ?? "EduPlatform";
   const avatarUrl = userData?.avatarUrl ?? null;
+
+  if (userTenant && !userTenant.isActive) {
+    redirect("/account-restricted");
+  }
 
   return (
     <AppShell

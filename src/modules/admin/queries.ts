@@ -4,6 +4,20 @@ import type { UserRole } from "@/generated/client";
 import { db } from "@/lib/db";
 
 export const getPlatformOverview = cache(async () => {
+  const tenantWhere = {
+    users: {
+      none: {
+        role: "SUPER_ADMIN" as const,
+      },
+    },
+  };
+  const userWhere = {
+    role: {
+      not: "SUPER_ADMIN" as const,
+    },
+    tenant: tenantWhere,
+  };
+
   const [
     tenantsTotal,
     tenantsActive,
@@ -14,9 +28,9 @@ export const getPlatformOverview = cache(async () => {
     pendingTransfers,
     failedTransfers,
   ] = await Promise.all([
-    db.tenant.count(),
-    db.tenant.count({ where: { isActive: true } }),
-    db.user.count(),
+    db.tenant.count({ where: tenantWhere }),
+    db.tenant.count({ where: { ...tenantWhere, isActive: true } }),
+    db.user.count({ where: userWhere }),
     db.payment.count(),
     db.payment.aggregate({ where: { status: "PAID" }, _sum: { amount: true } }),
     db.teacherSubscription.count({ where: { isActive: true } }),
@@ -47,6 +61,11 @@ export async function getPlatformTenants(input?: {
   const offset = Math.max(input?.offset ?? 0, 0);
 
   const where = {
+    users: {
+      none: {
+        role: "SUPER_ADMIN" as const,
+      },
+    },
     ...(input?.status === "ACTIVE"
       ? { isActive: true }
       : input?.status === "INACTIVE"
@@ -123,7 +142,21 @@ export async function getPlatformUsers(input?: {
       ? (input.role as UserRole)
       : undefined;
 
+  if (roleFilter === "SUPER_ADMIN") {
+    return { items: [], total: 0, limit, offset };
+  }
+
   const where = {
+    role: {
+      not: "SUPER_ADMIN" as const,
+    },
+    tenant: {
+      users: {
+        none: {
+          role: "SUPER_ADMIN" as const,
+        },
+      },
+    },
     ...(input?.tenantId ? { tenantId: input.tenantId } : {}),
     ...(roleFilter ? { role: roleFilter } : {}),
     ...(search
