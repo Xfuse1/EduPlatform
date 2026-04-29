@@ -38,44 +38,52 @@ model Tenant {
   studentBalances     StudentBalance[]
   balanceTransactions BalanceTransaction[]
   teacherTransfers    TeacherTransfer[]
+  userWallets         UserWallet[]
+  walletTransactions  WalletTransaction[]
+  walletWithdrawals   WalletWithdrawal[]
   financialAuditLogs  FinancialAuditLog[]
 
   @@index([slug])
 }
 
 model User {
-  id                    String                 @id @default(cuid())
-  tenantId              String
-  phone                 String
-  name                  String
-  role                  UserRole
-  avatarUrl             String?
-  gradeLevel            String?
-  parentName            String?
-  parentPhone           String?
-  isActive              Boolean                @default(true)
-  lastLoginAt           DateTime?
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
-  pinHash               String?
-  email                 String?
-  settings              Json?                  @default("{}")
-  assignmentSubmissions AssignmentSubmission[]
-  markedAttendances     Attendance[]           @relation("MarkedByAttendance")
-  attendances           Attendance[]           @relation("StudentAttendance")
-  authSessions          AuthSession[]
-  examSubmissions       ExamSubmission[]
-  groupStudents         GroupStudent[]
-  receivedMessages      Message[]              @relation("ReceivedMessages")
-  sentMessages          Message[]              @relation("SentMessages")
-  notifications         Notification[]
-  parentStudents        ParentStudent[]        @relation("ParentRelation")
-  childStudents         ParentStudent[]        @relation("StudentRelation")
-  recordedPayments      Payment[]              @relation("RecordedPayments")
-  payments              Payment[]              @relation("StudentPayments")
-  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  studentBalance        StudentBalance[]       @relation("StudentBalance")
-  parentBalance         StudentBalance[]       @relation("ParentBalance")
+  id                         String                 @id @default(cuid())
+  tenantId                   String
+  phone                      String
+  name                       String
+  role                       UserRole
+  avatarUrl                  String?
+  gradeLevel                 String?
+  parentName                 String?
+  parentPhone                String?
+  isActive                   Boolean                @default(true)
+  lastLoginAt                DateTime?
+  createdAt                  DateTime               @default(now())
+  updatedAt                  DateTime               @updatedAt
+  pinHash                    String?
+  email                      String?
+  settings                   Json?                  @default("{}")
+  assignmentSubmissions      AssignmentSubmission[]
+  markedAttendances          Attendance[]           @relation("MarkedByAttendance")
+  attendances                Attendance[]           @relation("StudentAttendance")
+  authSessions               AuthSession[]
+  examSubmissions            ExamSubmission[]
+  groupStudents              GroupStudent[]
+  receivedMessages           Message[]              @relation("ReceivedMessages")
+  sentMessages               Message[]              @relation("SentMessages")
+  notifications              Notification[]
+  parentStudents             ParentStudent[]        @relation("ParentRelation")
+  childStudents              ParentStudent[]        @relation("StudentRelation")
+  recordedPayments           Payment[]              @relation("RecordedPayments")
+  payments                   Payment[]              @relation("StudentPayments")
+  tenant                     Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  studentBalance             StudentBalance[]       @relation("StudentBalance")
+  parentBalance              StudentBalance[]       @relation("ParentBalance")
+  userWallets                UserWallet[]           @relation("UserWalletOwner")
+  walletTransactions         WalletTransaction[]    @relation("WalletTransactionOwner")
+  createdWalletTransactions  WalletTransaction[]    @relation("WalletTransactionCreator")
+  walletWithdrawals          WalletWithdrawal[]     @relation("WalletWithdrawalOwner")
+  processedWalletWithdrawals WalletWithdrawal[]     @relation("WalletWithdrawalProcessor")
 
   @@unique([tenantId, phone])
   @@index([tenantId])
@@ -209,6 +217,7 @@ model Payment {
   tenant              Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   balanceTransactions BalanceTransaction[]
   teacherTransfers    TeacherTransfer[]
+  walletTransactions  WalletTransaction[]
 
   @@index([tenantId, studentId])
   @@index([tenantId, month])
@@ -547,25 +556,105 @@ model BalanceTransaction {
 }
 
 model TeacherTransfer {
-  id            String         @id @default(cuid())
-  tenantId      String
-  paymentId     String
-  amount        Int // Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â¨Ã™â€žÃ˜Âº Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â­Ã™Ë†Ã™â€ž
-  fee           Int // Ã˜Â±Ã˜Â³Ã™Ë†Ã™â€¦ Ã˜Â§Ã™â€žÃ™â€¦Ã™â€ Ã˜ÂµÃ˜Â©
-  status        TransferStatus @default(PENDING)
-  attemptCount  Int            @default(0)
-  lastAttemptAt DateTime?
-  failureReason String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  payment       Payment        @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                 String              @id @default(cuid())
+  tenantId           String
+  paymentId          String
+  amount             Int // Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â¨Ã™â€žÃ˜Âº Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â­Ã™Ë†Ã™â€ž
+  fee                Int // Ã˜Â±Ã˜Â³Ã™Ë†Ã™â€¦ Ã˜Â§Ã™â€žÃ™â€¦Ã™â€ Ã˜ÂµÃ˜Â©
+  status             TransferStatus      @default(PENDING)
+  attemptCount       Int                 @default(0)
+  lastAttemptAt      DateTime?
+  failureReason      String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  payment            Payment             @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  walletTransactions WalletTransaction[]
 
   @@unique([paymentId])
   @@index([tenantId, status])
   @@index([tenantId, createdAt])
   @@index([paymentId])
   @@index([status, attemptCount])
+}
+
+model UserWallet {
+  id           String              @id @default(cuid())
+  tenantId     String
+  userId       String
+  balance      Int                 @default(0)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  tenant       Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User                @relation("UserWalletOwner", fields: [userId], references: [id], onDelete: Cascade)
+  transactions WalletTransaction[]
+  withdrawals  WalletWithdrawal[]
+
+  @@unique([tenantId, userId])
+  @@index([tenantId, userId])
+  @@index([tenantId, balance])
+}
+
+model WalletTransaction {
+  id                  String                @id @default(cuid())
+  tenantId            String
+  walletId            String
+  userId              String
+  type                WalletTransactionType
+  amount              Int
+  reason              String
+  status              TransactionStatus     @default(COMPLETED)
+  relatedPaymentId    String?
+  relatedTransferId   String?
+  relatedWithdrawalId String?
+  createdById         String?
+  metadata            Json?
+  createdAt           DateTime              @default(now())
+  tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  wallet              UserWallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  user                User                  @relation("WalletTransactionOwner", fields: [userId], references: [id], onDelete: Cascade)
+  createdBy           User?                 @relation("WalletTransactionCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  payment             Payment?              @relation(fields: [relatedPaymentId], references: [id], onDelete: SetNull)
+  transfer            TeacherTransfer?      @relation(fields: [relatedTransferId], references: [id], onDelete: SetNull)
+  withdrawal          WalletWithdrawal?     @relation(fields: [relatedWithdrawalId], references: [id], onDelete: SetNull)
+
+  @@unique([relatedPaymentId, type, userId])
+  @@unique([relatedTransferId, type, userId])
+  @@unique([relatedWithdrawalId, type, userId])
+  @@index([tenantId, userId])
+  @@index([tenantId, walletId])
+  @@index([walletId, createdAt])
+  @@index([status, createdAt])
+}
+
+model WalletWithdrawal {
+  id            String                       @id @default(cuid())
+  tenantId      String
+  userId        String
+  walletId      String
+  amount        Int
+  method        WalletWithdrawalMethod       @default(KASHIER)
+  adminMethod   WalletWithdrawalAdminMethod?
+  status        WalletWithdrawalStatus       @default(PENDING)
+  failureReason String?
+  transactionId String?
+  processedById String?
+  attemptCount  Int                          @default(0)
+  requestedAt   DateTime                     @default(now())
+  processedAt   DateTime?
+  updatedAt     DateTime                     @updatedAt
+  tenant        Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user          User                         @relation("WalletWithdrawalOwner", fields: [userId], references: [id], onDelete: Cascade)
+  wallet        UserWallet                   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  processedBy   User?                        @relation("WalletWithdrawalProcessor", fields: [processedById], references: [id], onDelete: SetNull)
+  transactions  WalletTransaction[]
+
+  @@index([tenantId, userId])
+  @@index([tenantId, status])
+  @@index([tenantId, method])
+  @@index([tenantId, adminMethod])
+  @@index([processedById])
+  @@index([walletId, requestedAt])
 }
 
 model FinancialAuditLog {
@@ -607,6 +696,32 @@ enum TransactionStatus {
   COMPLETED
   FAILED
   REFUNDED
+}
+
+enum WalletTransactionType {
+  CREDIT
+  DEBIT
+  ADMIN_ADJUSTMENT
+  PAYOUT
+}
+
+enum WalletWithdrawalMethod {
+  KASHIER
+  ADMIN
+}
+
+enum WalletWithdrawalAdminMethod {
+  CASH
+  ELECTRONIC_WALLET
+  INSTAPAY
+  BANK_TRANSFER
+  OTHER
+}
+
+enum WalletWithdrawalStatus {
+  PENDING
+  SUCCESS
+  FAILED
 }
 
 enum PaymentGateway {

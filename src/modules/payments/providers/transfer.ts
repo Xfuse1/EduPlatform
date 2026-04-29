@@ -1,145 +1,234 @@
-﻿import { env } from '@/config/env'
 import { db } from '@/lib/db'
 import { logFinancialEvent } from '@/lib/financial-audit'
+import {
+  calculatePlatformFee,
+  creditUserWallet,
+  debitUserWallet,
+  getOrCreateWallet,
+  resolveTenantPayeeUserId,
+} from '@/modules/wallet/provider'
 import { getKashierApiCredentialsByTenantId } from './subscription'
 
-function calculateFee(amount: number): number {
-  const percent = env.TEACHER_TRANSFER_FEE_PERCENT
-  return Math.round((amount * percent) / 100)
+type PaymentForSettlement = {
+  id: string
+  tenantId: string
+  amount: number
+  status: string
+  notes: string | null
+  receiptNumber: string | null
 }
 
-async function executeTeacherTransfer(transferId: string): Promise<{ success: boolean; failureReason?: string }> {
-  const transfer = await db.teacherTransfer.findUnique({
-    where: { id: transferId },
-    include: {
-      payment: true,
-    },
-  })
+function isTuitionSettlementPayment(payment: PaymentForSettlement) {
+  const notes = payment.notes ?? ''
+  const receiptNumber = payment.receiptNumber ?? ''
 
-  if (!transfer) {
-    return { success: false, failureReason: 'TRANSFER_NOT_FOUND' }
-  }
-
-  try {
-    // If teacher credentials are missing, retry later.
-    await getKashierApiCredentialsByTenantId(transfer.tenantId)
-  } catch {
-    return { success: false, failureReason: 'TEACHER_API_NOT_CONFIGURED' }
-  }
-
-  // Placeholder for real Kashier split transfer API call.
-  // We keep this deterministic and auditable until gateway transfer API is wired.
-  return { success: true }
+  return !(
+    receiptNumber.startsWith('RCH-') ||
+    receiptNumber.startsWith('SUBK-') ||
+    notes.startsWith('RECHARGE:') ||
+    notes.startsWith('SUBSCRIPTION:')
+  )
 }
 
-export async function enqueueTeacherTransferForPayment(paymentId: string) {
+async function callKashierTransferApi(params: {
+  withdrawalId: string
+  amount: number
+  teacherMerId: string
+  teacherApiKey: string
+}): Promise<{ success: boolean; transactionId?: string; failureReason?: string }> {
+  // TODO: wire Kashier's real transfer/disbursement endpoint when it is available.
+  void params
+  return { success: false, failureReason: 'KASHIER_TRANSFER_API_PENDING_INTEGRATION' }
+}
+
+export async function settleTeacherPaymentToWallet(paymentId: string) {
   const payment = await db.payment.findUnique({
     where: { id: paymentId },
+    select: {
+      id: true,
+      tenantId: true,
+      amount: true,
+      status: true,
+      notes: true,
+      receiptNumber: true,
+    },
   })
 
   if (!payment || payment.status !== 'PAID') {
-    return { queued: false, reason: 'PAYMENT_NOT_READY' as const }
+    return { settled: false, reason: 'PAYMENT_NOT_READY' as const }
   }
 
-  const existing = await db.teacherTransfer.findUnique({
-    where: { paymentId: payment.id },
-  })
-
-  if (existing) {
-    return { queued: false, reason: 'ALREADY_QUEUED' as const, transferId: existing.id }
+  if (!isTuitionSettlementPayment(payment)) {
+    return { settled: false, reason: 'NOT_TUITION_PAYMENT' as const }
   }
 
-  const fee = calculateFee(payment.amount)
-  const transfer = await db.teacherTransfer.create({
-    data: {
-      tenantId: payment.tenantId,
-      paymentId: payment.id,
-      amount: Math.max(payment.amount - fee, 0),
-      fee,
-      status: 'PENDING',
-    },
-  })
+  const teacherUserId = await resolveTenantPayeeUserId(payment.tenantId)
+  const fee = calculatePlatformFee(payment.amount)
+  const netAmount = Math.max(payment.amount - fee, 0)
 
-  await db.payment.update({
-    where: { id: payment.id },
-    data: { teacherApiUsed: true },
-  })
+  if (netAmount <= 0) {
+    return { settled: false, reason: 'ZERO_NET_AMOUNT' as const }
+  }
 
-  await logFinancialEvent({
+  const result = await creditUserWallet({
     tenantId: payment.tenantId,
-    eventType: 'TRANSFER_ENQUEUED',
-    entityType: 'TRANSFER',
-    entityId: transfer.id,
-    message: 'Teacher transfer queued',
-    metadata: { paymentId: payment.id, amount: transfer.amount, fee: transfer.fee },
+    userId: teacherUserId,
+    amount: netAmount,
+    reason: 'Teacher wallet settlement from payment',
+    relatedPaymentId: payment.id,
+    metadata: { grossAmount: payment.amount, fee },
   })
 
-  return { queued: true, transferId: transfer.id }
+  return { settled: true, walletId: result.wallet.id, transactionId: result.transaction.id }
 }
 
-export async function processPendingTeacherTransfers(limit: number = 20) {
-  const transfers = await db.teacherTransfer.findMany({
+export async function reconcileTeacherWalletsFromPaidPayments(input?: { tenantId?: string; limit?: number }) {
+  const payments = await db.payment.findMany({
     where: {
-      status: { in: ['PENDING', 'RETRY'] },
-      attemptCount: { lt: 5 },
+      ...(input?.tenantId ? { tenantId: input.tenantId } : {}),
+      status: 'PAID',
+      walletTransactions: {
+        none: {
+          type: 'CREDIT',
+        },
+      },
+      NOT: [
+        { receiptNumber: { startsWith: 'RCH-' } },
+        { receiptNumber: { startsWith: 'SUBK-' } },
+        { notes: { startsWith: 'RECHARGE:' } },
+        { notes: { startsWith: 'SUBSCRIPTION:' } },
+      ],
     },
-    orderBy: { createdAt: 'asc' },
-    take: limit,
+    select: { id: true },
+    orderBy: { paidAt: 'asc' },
+    take: Math.min(Math.max(input?.limit ?? 100, 1), 500),
   })
 
-  let processed = 0
-  let succeeded = 0
-  let failed = 0
+  let settled = 0
+  let skipped = 0
 
-  for (const transfer of transfers) {
-    processed += 1
+  for (const payment of payments) {
+    const result = await settleTeacherPaymentToWallet(payment.id)
+    if (result.settled) settled += 1
+    else skipped += 1
+  }
 
-    const result = await executeTeacherTransfer(transfer.id)
-    if (result.success) {
-      succeeded += 1
-      await db.teacherTransfer.update({
-        where: { id: transfer.id },
-        data: {
-          status: 'SUCCESS',
-          lastAttemptAt: new Date(),
-          attemptCount: { increment: 1 },
-          failureReason: null,
-        },
-      })
+  return { processed: payments.length, settled, skipped }
+}
 
-      await logFinancialEvent({
-        tenantId: transfer.tenantId,
-        eventType: 'TRANSFER_SUCCESS',
-        entityType: 'TRANSFER',
-        entityId: transfer.id,
-        message: 'Teacher transfer succeeded',
-      })
+export async function requestTeacherKashierWithdrawal(input: {
+  tenantId: string
+  userId: string
+  amount: number
+}) {
+  if (!Number.isInteger(input.amount) || input.amount <= 0) {
+    throw new Error('المبلغ يجب أن يكون رقمًا صحيحًا موجبًا')
+  }
 
-      continue
-    }
+  const credentials = await getKashierApiCredentialsByTenantId(input.tenantId)
+  const wallet = await getOrCreateWallet(input.tenantId, input.userId)
 
-    failed += 1
-    const nextStatus = transfer.attemptCount + 1 >= 5 ? 'FAILED' : 'RETRY'
+  if (wallet.balance < input.amount) {
+    throw new Error('الرصيد غير كافٍ لإتمام السحب')
+  }
 
-    await db.teacherTransfer.update({
-      where: { id: transfer.id },
+  const withdrawal = await db.walletWithdrawal.create({
+    data: {
+      tenantId: input.tenantId,
+      userId: input.userId,
+      walletId: wallet.id,
+      amount: input.amount,
+      method: 'KASHIER',
+      status: 'PENDING',
+      attemptCount: 1,
+    },
+  })
+
+  const transferResult: { success: boolean; transactionId?: string; failureReason?: string } = await callKashierTransferApi({
+    withdrawalId: withdrawal.id,
+    amount: input.amount,
+    teacherMerId: credentials.merId,
+    teacherApiKey: credentials.apiKey,
+  }).catch((error) => ({
+    success: false,
+    failureReason: error instanceof Error ? error.message : 'KASHIER_TRANSFER_API_ERROR',
+  }))
+
+  if (!transferResult.success) {
+    const failedWithdrawal = await db.walletWithdrawal.update({
+      where: { id: withdrawal.id },
       data: {
-        status: nextStatus,
-        lastAttemptAt: new Date(),
-        attemptCount: { increment: 1 },
-        failureReason: result.failureReason ?? 'UNKNOWN_TRANSFER_ERROR',
+        status: 'FAILED',
+        failureReason: transferResult.failureReason ?? 'KASHIER_TRANSFER_FAILED',
+        processedAt: new Date(),
       },
     })
 
     await logFinancialEvent({
-      tenantId: transfer.tenantId,
+      tenantId: input.tenantId,
       eventType: 'TRANSFER_FAILED',
       entityType: 'TRANSFER',
-      entityId: transfer.id,
-      message: `Teacher transfer failed (${result.failureReason ?? 'UNKNOWN'})`,
+      entityId: failedWithdrawal.id,
+      message: `Wallet withdrawal failed (${failedWithdrawal.failureReason ?? 'UNKNOWN'})`,
     })
+
+    return { success: false as const, withdrawal: failedWithdrawal }
   }
 
-  return { processed, succeeded, failed }
+  try {
+    const result = await db.$transaction(async (tx) => {
+      await debitUserWallet({
+        tenantId: input.tenantId,
+        userId: input.userId,
+        amount: input.amount,
+        reason: 'Teacher wallet withdrawal via Kashier',
+        type: 'PAYOUT',
+        relatedWithdrawalId: withdrawal.id,
+        tx,
+      })
+
+      return tx.walletWithdrawal.update({
+        where: { id: withdrawal.id },
+        data: {
+          status: 'SUCCESS',
+          transactionId: transferResult.transactionId ?? withdrawal.id,
+          processedAt: new Date(),
+          failureReason: null,
+        },
+      })
+    })
+
+    await logFinancialEvent({
+      tenantId: input.tenantId,
+      eventType: 'TRANSFER_SUCCESS',
+      entityType: 'TRANSFER',
+      entityId: result.id,
+      message: 'Wallet withdrawal succeeded',
+    })
+
+    return { success: true as const, withdrawal: result }
+  } catch (error) {
+    const failedWithdrawal = await db.walletWithdrawal.update({
+      where: { id: withdrawal.id },
+      data: {
+        status: 'FAILED',
+        failureReason: error instanceof Error ? error.message : 'PAYOUT_WALLET_DEBIT_FAILED',
+        processedAt: new Date(),
+      },
+    })
+
+    await logFinancialEvent({
+      tenantId: input.tenantId,
+      eventType: 'TRANSFER_FAILED',
+      entityType: 'TRANSFER',
+      entityId: failedWithdrawal.id,
+      message: `Wallet withdrawal failed (${failedWithdrawal.failureReason ?? 'UNKNOWN'})`,
+    })
+
+    return { success: false as const, withdrawal: failedWithdrawal }
+  }
 }
 
+export async function processPendingTeacherTransfers(_limit: number = 20) {
+  return { processed: 0, succeeded: 0, failed: 0, skipped: 'TEACHER_TRANSFERS_ARE_MANUAL_WITHDRAWALS' }
+}

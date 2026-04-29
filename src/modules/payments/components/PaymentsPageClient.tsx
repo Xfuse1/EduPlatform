@@ -201,7 +201,7 @@ export function PaymentsPageClient({
 
         <Link
           className="group rounded-[18px] border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
-          href="/payments/transfers"
+          href="/payments/wallet"
         >
           <div className="flex items-center justify-between gap-3">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-sky-400/20 dark:text-sky-300">
@@ -209,8 +209,8 @@ export function PaymentsPageClient({
             </span>
             <ArrowUpLeft className="h-4 w-4 text-slate-400 transition group-hover:text-primary" />
           </div>
-          <p className="mt-3 text-start text-base font-bold text-slate-900 dark:text-white">التحويلات</p>
-          <p className="mt-1 text-start text-sm text-slate-500 dark:text-slate-400">متابعة تحويلات المعلم وحالات المحاولات.</p>
+          <p className="mt-3 text-start text-base font-bold text-slate-900 dark:text-white">السحب</p>
+          <p className="mt-1 text-start text-sm text-slate-500 dark:text-slate-400">سحب رصيد المعلم أو التواصل مع الإدارة.</p>
         </Link>
       </div>
 

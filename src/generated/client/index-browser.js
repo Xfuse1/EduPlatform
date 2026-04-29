@@ -425,6 +425,50 @@ exports.Prisma.TeacherTransferScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.UserWalletScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  balance: 'balance',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.WalletTransactionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  walletId: 'walletId',
+  userId: 'userId',
+  type: 'type',
+  amount: 'amount',
+  reason: 'reason',
+  status: 'status',
+  relatedPaymentId: 'relatedPaymentId',
+  relatedTransferId: 'relatedTransferId',
+  relatedWithdrawalId: 'relatedWithdrawalId',
+  createdById: 'createdById',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.WalletWithdrawalScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  walletId: 'walletId',
+  amount: 'amount',
+  method: 'method',
+  adminMethod: 'adminMethod',
+  status: 'status',
+  failureReason: 'failureReason',
+  transactionId: 'transactionId',
+  processedById: 'processedById',
+  attemptCount: 'attemptCount',
+  requestedAt: 'requestedAt',
+  processedAt: 'processedAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.FinancialAuditLogScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -602,6 +646,32 @@ exports.TransferStatus = exports.$Enums.TransferStatus = {
   RETRY: 'RETRY'
 };
 
+exports.WalletTransactionType = exports.$Enums.WalletTransactionType = {
+  CREDIT: 'CREDIT',
+  DEBIT: 'DEBIT',
+  ADMIN_ADJUSTMENT: 'ADMIN_ADJUSTMENT',
+  PAYOUT: 'PAYOUT'
+};
+
+exports.WalletWithdrawalMethod = exports.$Enums.WalletWithdrawalMethod = {
+  KASHIER: 'KASHIER',
+  ADMIN: 'ADMIN'
+};
+
+exports.WalletWithdrawalAdminMethod = exports.$Enums.WalletWithdrawalAdminMethod = {
+  CASH: 'CASH',
+  ELECTRONIC_WALLET: 'ELECTRONIC_WALLET',
+  INSTAPAY: 'INSTAPAY',
+  BANK_TRANSFER: 'BANK_TRANSFER',
+  OTHER: 'OTHER'
+};
+
+exports.WalletWithdrawalStatus = exports.$Enums.WalletWithdrawalStatus = {
+  PENDING: 'PENDING',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED'
+};
+
 exports.FinancialEventType = exports.$Enums.FinancialEventType = {
   PAYMENT_CREATED: 'PAYMENT_CREATED',
   PAYMENT_CONFIRMED: 'PAYMENT_CONFIRMED',
@@ -645,6 +715,9 @@ exports.Prisma.ModelName = {
   StudentBalance: 'StudentBalance',
   BalanceTransaction: 'BalanceTransaction',
   TeacherTransfer: 'TeacherTransfer',
+  UserWallet: 'UserWallet',
+  WalletTransaction: 'WalletTransaction',
+  WalletWithdrawal: 'WalletWithdrawal',
   FinancialAuditLog: 'FinancialAuditLog'
 };
 

@@ -279,3 +279,144 @@ export async function getPlatformTransfers(input?: { status?: "PENDING" | "SUCCE
 
   return { items, total, limit, offset };
 }
+
+export async function getPlatformWallets(input?: {
+  search?: string;
+  role?: string;
+  balance?: "POSITIVE" | "ZERO";
+  limit?: number;
+  offset?: number;
+}) {
+  const search = input?.search?.trim();
+  const limit = Math.min(Math.max(input?.limit ?? 30, 1), 100);
+  const offset = Math.max(input?.offset ?? 0, 0);
+  const validRoles: UserRole[] = [
+    "SUPER_ADMIN",
+    "CENTER_ADMIN",
+    "ADMIN",
+    "MANAGER",
+    "TEACHER",
+    "STUDENT",
+    "PARENT",
+    "ASSISTANT",
+  ];
+  const roleFilter =
+    input?.role && validRoles.includes(input.role as UserRole)
+      ? (input.role as UserRole)
+      : undefined;
+
+  const where = {
+    AND: [
+      ...(roleFilter ? [{ role: roleFilter }] : []),
+      ...(search
+        ? [
+            {
+              OR: [
+                { name: { contains: search, mode: "insensitive" as const } },
+                { phone: { contains: search, mode: "insensitive" as const } },
+              ],
+            },
+          ]
+        : []),
+      ...(input?.balance === "POSITIVE"
+        ? [{ userWallets: { some: { balance: { gt: 0 } } } }]
+        : input?.balance === "ZERO"
+          ? [
+              {
+                OR: [
+                  { userWallets: { none: {} } },
+                  { userWallets: { some: { balance: 0 } } },
+                ],
+              },
+            ]
+          : []),
+    ],
+  };
+
+  const [items, total] = await Promise.all([
+    db.user.findMany({
+      where,
+      skip: offset,
+      take: limit,
+      orderBy: { updatedAt: "desc" },
+      select: {
+        id: true,
+        tenantId: true,
+        name: true,
+        phone: true,
+        role: true,
+        updatedAt: true,
+        tenant: {
+          select: { name: true, slug: true },
+        },
+        userWallets: {
+          select: { id: true, balance: true, updatedAt: true },
+        },
+      },
+    }),
+    db.user.count({ where }),
+  ]);
+
+  return {
+    items: items.map((user) => {
+      const wallet = user.userWallets.find((item) => item.id) ?? null;
+      return {
+        id: wallet?.id ?? `wallet-${user.id}`,
+        tenantId: user.tenantId,
+        userId: user.id,
+        balance: wallet?.balance ?? 0,
+        updatedAt: wallet?.updatedAt ?? user.updatedAt,
+        tenant: user.tenant,
+        user: {
+          name: user.name,
+          phone: user.phone,
+          role: user.role,
+        },
+      };
+    }),
+    total,
+    limit,
+    offset,
+  };
+}
+
+export async function getPlatformWalletWithdrawals(input?: {
+  status?: "PENDING" | "SUCCESS" | "FAILED";
+  limit?: number;
+  offset?: number;
+}) {
+  const limit = Math.min(Math.max(input?.limit ?? 20, 1), 100);
+  const offset = Math.max(input?.offset ?? 0, 0);
+  const where = input?.status ? { status: input.status } : {};
+
+  const [items, total] = await Promise.all([
+    db.walletWithdrawal.findMany({
+      where,
+      skip: offset,
+      take: limit,
+      orderBy: { requestedAt: "desc" },
+      select: {
+        id: true,
+        amount: true,
+        method: true,
+        adminMethod: true,
+        status: true,
+        failureReason: true,
+        requestedAt: true,
+        processedAt: true,
+        processedBy: {
+          select: { name: true, phone: true },
+        },
+        tenant: {
+          select: { name: true, slug: true },
+        },
+        user: {
+          select: { name: true, phone: true, role: true },
+        },
+      },
+    }),
+    db.walletWithdrawal.count({ where }),
+  ]);
+
+  return { items, total, limit, offset };
+}

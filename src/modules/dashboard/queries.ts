@@ -7,6 +7,7 @@ import { getAssignmentsByStudent } from "@/modules/assignments/queries";
 import { getAttendanceOverview, getStudentAttendanceSnapshot, getTodaySessions } from "@/modules/attendance/queries";
 import { getRevenueSummary, getStudentPaymentSnapshot } from "@/modules/payments/queries";
 import { getParentChildren, getStudentCountSummary, getStudentProfile } from "@/modules/students/queries";
+import { getOrCreateWallet, resolveTenantPayeeUserId } from "@/modules/wallet/provider";
 
 const arabicDaysByIndex = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"] as const;
 
@@ -200,6 +201,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
       revenueSeries,
       attendanceSeries,
       teacherSubscription,
+      withdrawalSummary,
     ] = await Promise.all([
       getRevenueSummary(tenantId),
       getTodaySessions(tenantId),
@@ -259,7 +261,16 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
           kashierMerId: true,
         },
       }),
+      db.walletWithdrawal.groupBy({
+        by: ["status"],
+        where: { tenantId },
+        _sum: { amount: true },
+        _count: { status: true },
+      }),
     ]);
+
+    const teacherUserId = await resolveTenantPayeeUserId(tenantId);
+    const wallet = await getOrCreateWallet(tenantId, teacherUserId);
 
     const absenceStudents =
       repeatedAbsences.length > 0
@@ -316,6 +327,22 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
       revenueSeries,
       attendanceSeries,
       kashierApiConfigured: !!(teacherSubscription?.kashierApiKey && teacherSubscription.kashierMerId),
+      wallet: {
+        balance: wallet.balance,
+        transfers: withdrawalSummary.reduce(
+          (acc, item) => {
+            acc[item.status] = { amount: item._sum.amount ?? 0, count: item._count.status };
+            return acc;
+          },
+          {
+            PENDING: { amount: 0, count: 0 },
+            RETRY: { amount: 0, count: 0 },
+            SUCCESS: { amount: 0, count: 0 },
+            FAILED: { amount: 0, count: 0 },
+            fees: 0,
+          } as Record<"PENDING" | "RETRY" | "SUCCESS" | "FAILED", { amount: number; count: number }> & { fees: number },
+        ),
+      },
     };
   } catch (error) {
     console.error("DB getTeacherDashboardData failed, using fallback:", error);
@@ -346,6 +373,16 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
     revenueSeries: [],
     attendanceSeries: [],
     kashierApiConfigured: false,
+    wallet: {
+      balance: 0,
+      transfers: {
+        PENDING: { amount: 0, count: 0 },
+        RETRY: { amount: 0, count: 0 },
+        SUCCESS: { amount: 0, count: 0 },
+        FAILED: { amount: 0, count: 0 },
+        fees: 0,
+      },
+    },
   };
 });
 
