@@ -62,10 +62,12 @@ function mapFirebaseAuthError(error: unknown) {
         ? "فشل Firebase في إرسال الكود محليًا. على localhost استخدم رقم اختبار مضافًا في Firebase أو جرّب الدومين المنشور."
         : "تعذر إكمال التحقق عبر Firebase الآن";
     default:
-      if (process.env.NODE_ENV !== "production") {
-        console.error("[firebase-phone-otp]", error);
-      }
-      return "تعذر إكمال التحقق عبر Firebase الآن";
+      console.error("[firebase-phone-otp] unhandled error:", error);
+      return `خطأ Firebase غير معروف: ${
+        typeof error === "object" && error !== null && "code" in error
+          ? String((error as { code: string }).code)
+          : String(error)
+      }`;
   }
 }
 

@@ -386,34 +386,155 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
   };
 });
 
-export const getStudentDashboardData = cache(async (tenantId: string, studentId: string) => {
+export const getStudentDashboardData = cache(async (_tenantId: string, studentId: string) => {
   try {
-    const [profile, attendance, payment, assignments] = await Promise.all([
-      getStudentProfile(tenantId, studentId),
-      getStudentAttendanceSnapshot(tenantId, studentId),
-      getStudentPaymentSnapshot(tenantId, studentId),
-      getAssignmentsByStudent(studentId),
-    ]);
+    // 1. Fetch Student Profile with ALL enrollments across all tenants
+    const student = await db.user.findUnique({
+      where: { id: studentId },
+      include: {
+        groupStudents: {
+          include: {
+            group: {
+              include: {
+                tenant: { select: { name: true } },
+              },
+            },
+          },
+          orderBy: { enrolledAt: "desc" },
+        },
+        childStudents: {
+          include: {
+            parent: { select: { id: true, name: true, phone: true } },
+          },
+        },
+      },
+    });
+
+    if (!student) throw new Error("Student not found");
+
+    // 2. Fetch All Payments across all tenants
+    const payments = await db.payment.findMany({
+      where: { studentId },
+      include: { tenant: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+
+    // 3. Fetch All Attendance across all tenants
+    const attendanceRecords = await db.attendance.findMany({
+      where: { studentId },
+      include: {
+        tenant: { select: { name: true } },
+        group: { select: { name: true } },
+        session: { select: { date: true } },
+      },
+      orderBy: { markedAt: "desc" },
+      take: 20,
+    });
+
+    // 4. Fetch All Assignments across all tenants
+    const groupIds = student.groupStudents.map((gs) => gs.groupId);
+    const assignments = await db.assignment.findMany({
+      where: { groupId: { in: groupIds } },
+      include: {
+        tenant: { select: { name: true } },
+        group: { select: { name: true, subject: true } },
+        submissions: { where: { studentId } },
+      },
+      orderBy: { dueDate: "asc" },
+    });
+
+    // 5. Fetch All Exams across all tenants
+    const exams = await db.exam.findMany({
+      where: { groupId: { in: groupIds } },
+      include: {
+        tenant: { select: { name: true } },
+        group: { select: { name: true } },
+        submissions: { where: { studentId } },
+      },
+      orderBy: { startAt: "desc" },
+    });
+
+    // Process assignments to match the format expected by the UI and include tenant names
+    const mappedAssignments = assignments.map((a) => {
+      const submission = a.submissions[0] || null;
+      let status: "pending" | "submitted" | "graded" | "overdue" = "pending";
+      if (submission) {
+        status = submission.grade !== null ? "graded" : "submitted";
+      } else if (a.dueDate && new Date() > new Date(a.dueDate)) {
+        status = "overdue";
+      }
+      return {
+        ...a,
+        submission,
+        status,
+        group: {
+          ...a.group,
+          // Include tenant name in group name for display in Assignment cards
+          name: `${a.group.name} — ${a.tenant.name}`,
+        },
+      };
+    });
+
+    // Calculate Aggregates
+    const attendedCount = attendanceRecords.filter((r) => r.status === "PRESENT" || r.status === "LATE").length;
+    const attendanceRate = attendanceRecords.length > 0 ? Math.round((attendedCount / attendanceRecords.length) * 100) : 0;
+
+    const latestPayment = payments[0];
+    const parent = student.childStudents[0]?.parent;
 
     return {
-      profile,
-      attendance,
-      payment,
-      assignments,
-      nextSession: getNextSessionFromEnrollments(profile?.enrollments ?? []),
+      profile: {
+        student: {
+          name: student.name,
+          phone: student.phone.startsWith("student-") ? "" : student.phone,
+          parentName: parent?.name ?? student.parentName ?? null,
+          parentPhone: parent?.phone ?? student.parentPhone ?? null,
+          gradeLevel: student.gradeLevel,
+        },
+        enrollments: student.groupStudents.map((gs) => ({
+          group: {
+            id: gs.group.id,
+            name: gs.group.name,
+            days: gs.group.days,
+            timeStart: gs.group.timeStart,
+            timeEnd: gs.group.timeEnd,
+            tenantName: gs.group.tenant.name,
+            subject: gs.group.subject,
+            color: gs.group.color,
+          },
+        })),
+      },
+      attendance: {
+        rate: attendanceRate,
+        records: attendanceRecords,
+      },
+      payment: {
+        status: latestPayment?.status ?? "PAID",
+        amount: latestPayment && latestPayment.status !== "PAID" ? latestPayment.amount : 0,
+        payments: payments.map((p) => ({
+          ...p,
+          tenantName: p.tenant.name,
+        })),
+      },
+      assignments: mappedAssignments,
+      exams: exams.map((e) => ({
+        ...e,
+        tenantName: e.tenant.name,
+        myScore: e.submissions[0]?.totalGrade ?? null,
+      })),
+      nextSession: getNextSessionFromEnrollments(student.groupStudents),
     };
   } catch (error) {
-    console.error("DB getStudentDashboardData failed, using fallback:", error);
+    console.error("Unified getStudentDashboardData failed:", error);
+    return {
+      profile: null,
+      attendance: { rate: 0, records: [] },
+      payment: { status: "PAID", amount: 0, payments: [] },
+      assignments: [],
+      exams: [],
+      nextSession: null,
+    };
   }
-
-  const [profile, attendance, payment, assignments] = await Promise.all([
-    getStudentProfile(tenantId, studentId),
-    getStudentAttendanceSnapshot(tenantId, studentId),
-    getStudentPaymentSnapshot(tenantId, studentId),
-    getAssignmentsByStudent(studentId),
-  ]);
-
-  return { profile, attendance, payment, assignments, nextSession: null };
 });
 
 export const getParentDashboardData = cache(async (tenantId: string, parentId: string) => {
