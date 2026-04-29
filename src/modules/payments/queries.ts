@@ -1,6 +1,7 @@
 ﻿import { cache } from "react";
 
 import { db } from "@/lib/db";
+import { getOrCreateWallet, resolveRechargeWalletOwner, resolveTenantPayeeUserId } from "@/modules/wallet/provider";
 
 
 function startOfCurrentMonth() {
@@ -313,27 +314,14 @@ export const getPaymentStudentOptions = cache(async (tenantId: string) => {
 });
 
 export const getStudentWallet = cache(async (tenantId: string, studentId: string) => {
-  const parentLink = await db.parentStudent.findFirst({
-    where: { studentId },
-    select: { parentId: true },
-  })
-
-  const walletOwnerId = parentLink?.parentId ?? studentId
-
-  const wallet = await db.studentBalance.findUnique({
-    where: {
-      tenantId_studentId: {
-        tenantId,
-        studentId: walletOwnerId,
-      },
-    },
-  })
+  const owner = await resolveRechargeWalletOwner(studentId, tenantId)
+  const wallet = await getOrCreateWallet(tenantId, owner.ownerUserId)
 
   return {
-    ownerType: parentLink ? 'PARENT' : 'STUDENT',
-    ownerId: walletOwnerId,
-    balance: wallet?.balance ?? 0,
-    updatedAt: wallet?.updatedAt ?? null,
+    ownerType: owner.ownerType,
+    ownerId: owner.ownerUserId,
+    balance: wallet.balance,
+    updatedAt: wallet.updatedAt,
   }
 })
 
@@ -354,5 +342,82 @@ export const getTeacherTransfers = cache(async (tenantId: string, limit: number 
     orderBy: { createdAt: 'desc' },
     take: limit,
   })
+})
+
+export const getTeacherWalletPageData = cache(async (tenantId: string) => {
+  const teacherUserId = await resolveTenantPayeeUserId(tenantId)
+  const wallet = await getOrCreateWallet(tenantId, teacherUserId)
+
+  const [creditAggregate, payoutAggregate, transactions, withdrawals, subscription, adminUser] = await Promise.all([
+    db.walletTransaction.aggregate({
+      where: {
+        tenantId,
+        walletId: wallet.id,
+        type: 'CREDIT',
+        status: 'COMPLETED',
+      },
+      _sum: { amount: true },
+    }),
+    db.walletTransaction.aggregate({
+      where: {
+        tenantId,
+        walletId: wallet.id,
+        type: 'PAYOUT',
+        status: 'COMPLETED',
+      },
+      _sum: { amount: true },
+    }),
+    db.walletTransaction.findMany({
+      where: { tenantId, walletId: wallet.id },
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+    }),
+    db.walletWithdrawal.findMany({
+      where: { tenantId, walletId: wallet.id },
+      orderBy: { requestedAt: 'desc' },
+      take: 20,
+    }),
+    db.teacherSubscription.findUnique({
+      where: { tenantId },
+      select: { kashierApiKey: true, kashierMerId: true },
+    }),
+    db.user.findFirst({
+      where: { role: 'SUPER_ADMIN', isActive: true },
+      orderBy: { createdAt: 'asc' },
+      select: { name: true, phone: true },
+    }),
+  ])
+
+  return {
+    wallet: {
+      id: wallet.id,
+      balance: wallet.balance,
+      updatedAt: wallet.updatedAt.toISOString(),
+    },
+    totals: {
+      received: creditAggregate._sum.amount ?? 0,
+      withdrawn: payoutAggregate._sum.amount ?? 0,
+    },
+    transactions: transactions.map((transaction) => ({
+      id: transaction.id,
+      type: transaction.type,
+      amount: transaction.amount,
+      reason: transaction.reason,
+      status: transaction.status,
+      createdAt: transaction.createdAt.toISOString(),
+    })),
+    withdrawals: withdrawals.map((withdrawal) => ({
+      id: withdrawal.id,
+      amount: withdrawal.amount,
+      method: withdrawal.method,
+      adminMethod: withdrawal.adminMethod,
+      status: withdrawal.status,
+      failureReason: withdrawal.failureReason,
+      requestedAt: withdrawal.requestedAt.toISOString(),
+      processedAt: withdrawal.processedAt?.toISOString() ?? null,
+    })),
+    kashierApiConfigured: !!(subscription?.kashierApiKey && subscription.kashierMerId),
+    adminContact: adminUser ? { name: adminUser.name, phone: adminUser.phone } : null,
+  }
 })
 

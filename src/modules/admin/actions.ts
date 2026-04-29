@@ -3,8 +3,23 @@
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/lib/db";
+import { logFinancialEvent } from "@/lib/financial-audit";
 import { requireSuperAdminPage } from "@/lib/platform-admin";
 import { upsertSubscriptionPlanConfig } from "@/modules/payments/providers/plan-config";
+import { creditUserWallet, debitUserWallet, getOrCreateWallet } from "@/modules/wallet/provider";
+
+const ADMIN_WITHDRAWAL_METHODS = ["CASH", "ELECTRONIC_WALLET", "INSTAPAY", "BANK_TRANSFER", "OTHER"] as const;
+
+type AdminWithdrawalMethod = (typeof ADMIN_WITHDRAWAL_METHODS)[number];
+
+function parseAdminWithdrawalMethod(value: FormDataEntryValue | null): AdminWithdrawalMethod {
+  const method = String(value ?? "").trim();
+  if (ADMIN_WITHDRAWAL_METHODS.includes(method as AdminWithdrawalMethod)) {
+    return method as AdminWithdrawalMethod;
+  }
+
+  throw new Error("اختر طريقة السحب اليدوي من الإدارة");
+}
 
 export async function setTenantStatusAction(formData: FormData) {
   await requireSuperAdminPage();
@@ -66,4 +81,105 @@ export async function updatePlanConfigAction(formData: FormData) {
   revalidatePath("/admin/finance");
   revalidatePath("/admin/plans");
   revalidatePath("/payments/subscription");
+}
+
+export async function adjustUserWalletAction(formData: FormData) {
+  const admin = await requireSuperAdminPage();
+
+  const tenantId = String(formData.get("tenantId") ?? "").trim();
+  const userId = String(formData.get("userId") ?? "").trim();
+  const operation = String(formData.get("operation") ?? "").trim();
+  const amount = Number(formData.get("amount") ?? 0);
+  const reason = String(formData.get("reason") ?? "").trim() || "Admin wallet adjustment";
+  const adminWithdrawalMethod = operation === "PAYOUT"
+    ? parseAdminWithdrawalMethod(formData.get("adminWithdrawalMethod"))
+    : null;
+
+  if (!tenantId || !userId || !["CREDIT", "DEBIT", "PAYOUT"].includes(operation)) {
+    throw new Error("بيانات تعديل المحفظة غير صالحة");
+  }
+
+  if (!Number.isInteger(amount) || amount <= 0) {
+    throw new Error("المبلغ يجب أن يكون رقمًا صحيحًا موجبًا");
+  }
+
+  const user = await db.user.findFirst({
+    where: { id: userId, tenantId },
+    select: { id: true },
+  });
+
+  if (!user) {
+    throw new Error("المستخدم غير موجود داخل هذا الحساب");
+  }
+
+  if (operation === "CREDIT") {
+    await creditUserWallet({
+      tenantId,
+      userId,
+      amount,
+      reason,
+      type: "ADMIN_ADJUSTMENT",
+      createdById: admin.id,
+      metadata: { direction: "CREDIT" },
+    });
+  } else if (operation === "DEBIT") {
+    await debitUserWallet({
+      tenantId,
+      userId,
+      amount,
+      reason,
+      type: "ADMIN_ADJUSTMENT",
+      createdById: admin.id,
+      metadata: { direction: operation },
+    });
+  } else {
+    const withdrawal = await db.$transaction(async (tx) => {
+      const wallet = await getOrCreateWallet(tenantId, userId, tx);
+      const manualWithdrawal = await tx.walletWithdrawal.create({
+        data: {
+          tenantId,
+          userId,
+          walletId: wallet.id,
+          amount,
+          method: "ADMIN",
+          adminMethod: adminWithdrawalMethod,
+          status: "SUCCESS",
+          attemptCount: 1,
+          processedById: admin.id,
+          processedAt: new Date(),
+        },
+      });
+
+      await debitUserWallet({
+        tenantId,
+        userId,
+        amount,
+        reason,
+        type: "PAYOUT",
+        relatedWithdrawalId: manualWithdrawal.id,
+        createdById: admin.id,
+        metadata: {
+          direction: "PAYOUT",
+          withdrawalMethod: "ADMIN",
+          adminMethod: adminWithdrawalMethod,
+        },
+        tx,
+      });
+
+      return manualWithdrawal;
+    });
+
+    await logFinancialEvent({
+      tenantId,
+      actorId: admin.id,
+      eventType: "TRANSFER_SUCCESS",
+      entityType: "TRANSFER",
+      entityId: withdrawal.id,
+      message: `Manual wallet withdrawal recorded (${adminWithdrawalMethod})`,
+      metadata: { userId, amount, adminMethod: adminWithdrawalMethod },
+    });
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/finance");
 }

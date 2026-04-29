@@ -88,6 +88,40 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
         </section>
       ) : null}
 
+      <section className="grid gap-4 md:grid-cols-4">
+        <Card className="md:col-span-2">
+          <CardContent className="p-5">
+            <p className="text-start text-sm font-semibold text-slate-500 dark:text-slate-400">رصيد محفظة المعلم</p>
+            <p className="mt-3 text-start text-3xl font-extrabold text-slate-950 dark:text-white">{formatCurrency(data.wallet.balance)}</p>
+            <p className="mt-2 text-start text-xs leading-6 text-slate-500 dark:text-slate-400">
+              الرصيد الداخلي المتاح للسحب. السحب يتم فقط من صفحة المحفظة عند طلبه صراحة.
+            </p>
+            <Link
+              href="/payments/wallet"
+              className="mt-4 inline-flex min-h-10 items-center justify-center rounded-xl bg-sky-600 px-4 text-sm font-bold text-white transition hover:bg-sky-700"
+            >
+              فتح المحفظة والسحب
+            </Link>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5">
+            <p className="text-start text-sm font-semibold text-slate-500 dark:text-slate-400">سحوبات ناجحة</p>
+            <p className="mt-3 text-start text-2xl font-extrabold text-emerald-600 dark:text-emerald-300">{formatCurrency(data.wallet.transfers.SUCCESS.amount)}</p>
+            <p className="mt-2 text-start text-xs text-slate-500 dark:text-slate-400">{toArabicDigits(data.wallet.transfers.SUCCESS.count)} عملية</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5">
+            <p className="text-start text-sm font-semibold text-slate-500 dark:text-slate-400">سحوبات معلقة</p>
+            <p className="mt-3 text-start text-2xl font-extrabold text-amber-600 dark:text-amber-300">{formatCurrency(data.wallet.transfers.PENDING.amount + data.wallet.transfers.RETRY.amount)}</p>
+            <p className="mt-2 text-start text-xs text-slate-500 dark:text-slate-400">
+              {toArabicDigits(data.wallet.transfers.PENDING.count + data.wallet.transfers.RETRY.count)} عملية
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat, index) => {
           const Icon = statIcons[index];

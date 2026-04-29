@@ -7,7 +7,7 @@ import { logFinancialEvent } from '@/lib/financial-audit'
 import { creditBalanceForTenant } from '@/modules/payments/providers/balance'
 import { verifyKashierWebhookSignature } from '@/modules/payments/providers/kashier'
 import { activateOrRenewSubscriptionForTenant } from '@/modules/payments/providers/subscription'
-import { enqueueTeacherTransferForPayment } from '@/modules/payments/providers/transfer'
+import { settleTeacherPaymentToWallet } from '@/modules/payments/providers/transfer'
 import { kashierWebhookSchema } from '@/modules/payments/validations'
 
 export async function POST(req: NextRequest) {
@@ -39,23 +39,22 @@ export async function POST(req: NextRequest) {
     return successResponse({ received: true })
   }
 
-  if (payment.status === 'PAID') {
-    return successResponse({ received: true, idempotent: true })
-  }
+  const wasAlreadyPaid = payment.status === 'PAID'
+  const newStatus = wasAlreadyPaid ? 'PAID' : status === 'SUCCESS' ? 'PAID' : status === 'FAILED' ? 'OVERDUE' : 'PENDING'
 
-  const newStatus = status === 'SUCCESS' ? 'PAID' : status === 'FAILED' ? 'OVERDUE' : 'PENDING'
-
-  const updatedPayment = await db.payment.update({
-    where: { id: payment.id },
-    data: {
-      status: newStatus,
-      transactionId: transactionId ?? payment.transactionId,
-      paidAt: status === 'SUCCESS' ? new Date() : null,
-      notes: transactionId
-        ? `${payment.notes ?? ''}\nKashier transaction: ${transactionId}`.trim()
-        : payment.notes,
-    },
-  })
+  const updatedPayment = wasAlreadyPaid
+    ? payment
+    : await db.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: newStatus,
+          transactionId: transactionId ?? payment.transactionId,
+          paidAt: status === 'SUCCESS' ? new Date() : null,
+          notes: transactionId
+            ? `${payment.notes ?? ''}\nKashier transaction: ${transactionId}`.trim()
+            : payment.notes,
+        },
+      })
 
   if (newStatus === 'PAID') {
     const notes = updatedPayment.notes ?? ''
@@ -86,14 +85,7 @@ export async function POST(req: NextRequest) {
         )
       }
     } else {
-      const teacherApi = await db.teacherSubscription.findUnique({
-        where: { tenantId: updatedPayment.tenantId },
-        select: { kashierApiKey: true, kashierMerId: true },
-      })
-
-      if (teacherApi?.kashierApiKey && teacherApi.kashierMerId) {
-        await enqueueTeacherTransferForPayment(updatedPayment.id)
-      }
+      await settleTeacherPaymentToWallet(updatedPayment.id)
     }
 
     await logFinancialEvent({
@@ -120,6 +112,6 @@ export async function POST(req: NextRequest) {
   revalidatePath('/payments')
   revalidatePath('/dashboard')
 
-  return successResponse({ received: true })
+  return successResponse({ received: true, idempotent: wasAlreadyPaid })
 }
 

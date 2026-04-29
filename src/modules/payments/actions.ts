@@ -21,6 +21,8 @@ import { creditBalance, debitBalance } from './providers/balance'
 import { createKashierCheckoutUrl } from './providers/kashier'
 import { createTeacherSubscription } from './providers/subscription'
 import { getSubscriptionPlanConfig } from './providers/plan-config'
+import { requestTeacherKashierWithdrawal, settleTeacherPaymentToWallet } from './providers/transfer'
+import { getOrCreateWallet, resolveTenantPayeeUserId } from '@/modules/wallet/provider'
 
 const SUBSCRIPTION_PAYMENT_LINKS: Record<string, string | undefined> = {
   STARTER_MONTHLY: env.KASHIER_SUBSCRIPTION_LINK_STARTER_MONTHLY,
@@ -333,12 +335,33 @@ export async function initiateBalanceRecharge(input: {
     description: input.description,
   })
 
-  const student = await db.user.findFirst({
-    where: tenantStudentAccessWhere(tenant.id, input.studentId),
+  const walletOwner = await db.user.findFirst({
+    where: {
+      id: input.studentId,
+      isActive: true,
+      OR: [
+        tenantStudentAccessWhere(tenant.id, input.studentId),
+        {
+          role: UserRole.PARENT,
+          parentStudents: {
+            some: {
+              student: {
+                groupStudents: {
+                  some: {
+                    status: { in: TENANT_STUDENT_ACCESS_STATUSES },
+                    group: { tenantId: tenant.id },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
     select: { id: true, name: true, phone: true },
   })
 
-  if (!student) throw new Error('???????? ???????? ????? ??? ?????')
+  if (!walletOwner) throw new Error('المحفظة المطلوبة غير متاحة')
 
   const count = await db.payment.count({ where: { tenantId: tenant.id } })
   const orderId = makeOrderId('RCH', tenant.slug, count)
@@ -347,7 +370,7 @@ export async function initiateBalanceRecharge(input: {
   await db.payment.create({
     data: {
       tenantId: tenant.id,
-      studentId: student.id,
+      studentId: walletOwner.id,
       amount: data.amount,
       month,
       status: 'PENDING',
@@ -366,12 +389,12 @@ export async function initiateBalanceRecharge(input: {
   const checkoutUrl = createKashierCheckoutUrl({
     orderId,
     amount: data.amount,
-    studentName: student.name ?? '????',
-    customerPhone: student.phone,
+    studentName: walletOwner.name ?? 'User',
+    customerPhone: walletOwner.phone,
     metadata: {
       paymentType: 'wallet_recharge',
       tenantId: tenant.id,
-      studentId: student.id,
+      studentId: walletOwner.id,
     },
     callbackUrl,
     webhookUrl,
@@ -530,6 +553,8 @@ export async function debitStudentBalance(input: {
       },
     })
 
+    await settleTeacherPaymentToWallet(payment.id)
+
     await logFinancialEvent({
       tenantId: tenant.id,
       actorId: user.id,
@@ -578,7 +603,7 @@ export async function creditBalanceAfterPayment(input: {
     return {
       success: true,
       message: '?? ????? ?????? ?????',
-      balance: result.balance,
+      balance: result.wallet,
     }
   } catch (error) {
     return {
@@ -596,12 +621,63 @@ export async function addTeacherKashierApi(input: { kashierApiKey: string; kashi
     const result = await addKashierApiCredentials(validated.kashierApiKey, validated.kashierMerId)
 
     revalidatePath('/settings')
+    revalidatePath('/teacher')
+    revalidatePath('/payments/transfers')
+    revalidatePath('/payments/wallet')
 
     return result
   } catch (error) {
     return {
       success: false,
       message: error instanceof Error ? error.message : '??? ??? ?????? Kashier',
+    }
+  }
+}
+
+export async function requestTeacherWalletWithdrawal(input: { amount: number }) {
+  try {
+    const tenant = await requireTenant()
+    const user = await requireAuth()
+
+    if (!['TEACHER', 'CENTER_ADMIN'].includes(user.role)) {
+      throw new Error('السحب متاح لحساب المعلم أو السنتر فقط')
+    }
+
+    const payeeUserId = await resolveTenantPayeeUserId(tenant.id)
+    if (payeeUserId !== user.id) {
+      throw new Error('هذا الرصيد يخص مالك الحساب المالي')
+    }
+
+    const amount = Number(input.amount)
+    const wallet = await getOrCreateWallet(tenant.id, payeeUserId)
+    if (!Number.isInteger(amount) || amount <= 0) {
+      throw new Error('أدخل مبلغ سحب صحيح')
+    }
+    if (amount > wallet.balance) {
+      throw new Error('مبلغ السحب أكبر من الرصيد المتاح')
+    }
+
+    const result = await requestTeacherKashierWithdrawal({
+      tenantId: tenant.id,
+      userId: payeeUserId,
+      amount,
+    })
+
+    revalidatePath('/payments/wallet')
+    revalidatePath('/teacher')
+    revalidatePath('/admin/finance')
+
+    return {
+      success: result.success,
+      message: result.success
+        ? 'تم تنفيذ طلب السحب بنجاح'
+        : result.withdrawal.failureReason ?? 'فشل تنفيذ السحب عبر Kashier',
+      withdrawal: result.withdrawal,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'تعذر تنفيذ السحب',
     }
   }
 }
