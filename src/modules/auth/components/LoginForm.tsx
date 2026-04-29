@@ -171,7 +171,8 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
       router.push(`/verify?${params.toString()}`);
     } catch (err) {
       console.error("[LoginForm] sendOTP failed:", err);
-      setError("تعذر إرسال كود التحقق. تأكد من رقم الهاتف وحاول مرة أخرى.");
+      const message = err instanceof Error ? err.message : String(err);
+      setError(`فشل إرسال كود التحقق: ${message}`);
     }
   };
 

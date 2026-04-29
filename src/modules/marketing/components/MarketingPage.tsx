@@ -86,34 +86,6 @@ const audienceCards = [
       "تقارير مالية واضحة",
     ],
   },
-  {
-    title: "لولي الأمر",
-    icon: Heart,
-    iconClassName: "bg-[#27AE60]/15 text-[#27AE60]",
-    borderClassName: "border-[#27AE60]/30",
-    accentClassName: "from-[#27AE60]/20 to-transparent",
-    badge: "اطمئنان يومي",
-    points: [
-      "اعرف حضور ابنك يومياً",
-      "تلقّ إشعار فور انتهاء الحصة",
-      "تابع المصاريف والمدفوع",
-      "بدون ما تتصل بالمعلم",
-    ],
-  },
-  {
-    title: "للطالب",
-    icon: BookOpen,
-    iconClassName: "bg-[#8E44AD]/15 text-[#8E44AD]",
-    borderClassName: "border-[#8E44AD]/30",
-    accentClassName: "from-[#8E44AD]/20 to-transparent",
-    badge: "تجربة منظمة",
-    points: [
-      "شوف جدولك الأسبوعي",
-      "تابع نسبة حضورك",
-      "اعرف موعد الحصة القادمة",
-      "كل معلوماتك في مكان واحد",
-    ],
-  },
 ] as const;
 
 const testimonials = [
@@ -198,12 +170,6 @@ export default function MarketingPage() {
                   تسجيل الدخول
                 </Link>
                 <Link
-                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:hover:bg-emerald-400/15"
-                  href="/parent-register"
-                >
-                  إنشاء حساب ولي أمر
-                </Link>
-                <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-[0_16px_35px_rgba(46,134,193,0.35)] transition hover:bg-secondary"
                   href="/signup"
                 >
@@ -216,12 +182,6 @@ export default function MarketingPage() {
                   href="/login"
                 >
                   دخول
-                </Link>
-                <Link
-                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:hover:bg-emerald-400/15"
-                  href="/parent-register"
-                >
-                  ولي أمر
                 </Link>
                 <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-3 py-3 text-sm font-bold text-white transition hover:bg-secondary"
@@ -246,7 +206,7 @@ export default function MarketingPage() {
                   حوّل إدارة سنترك إلى تجربة أنيقة وسريعة وواضحة.
                 </h1>
                 <p className="mt-5 max-w-2xl text-start text-base leading-8 text-white/88">
-                  متابعة الحضور، تحصيل المصاريف، تنظيم الجداول، وتجربة احترافية للمعلمين والطلاب وأولياء الأمور في مكان واحد.
+                  متابعة الحضور، تحصيل المصاريف، تنظيم الجداول، وتجربة احترافية للمعلم في مكان واحد.
                 </p>
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <Link
@@ -357,9 +317,9 @@ export default function MarketingPage() {
 
           <section className="rounded-[32px] border border-slate-200 bg-white/90 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm [&_.text-white]:text-slate-900 [&_.text-slate-200]:text-slate-700 [&_.text-slate-300]:text-slate-600 dark:border-white/10 dark:bg-white/[0.03] dark:[&_.text-slate-200]:text-slate-200 dark:[&_.text-slate-300]:text-slate-300 dark:[&_.text-white]:text-white dark:shadow-[0_30px_80px_rgba(15,23,42,0.18)] sm:p-6 lg:p-8">
             <div className="max-w-2xl">
-              <p className="text-start text-sm font-semibold text-sky-300">لكل أطراف العملية التعليمية</p>
-              <h2 className="mt-3 text-start text-3xl font-extrabold text-white sm:text-4xl">لكل أطراف العملية التعليمية</h2>
-              <p className="mt-3 text-start text-sm leading-7 text-slate-300 sm:text-base">منصة واحدة تخدم الجميع</p>
+              <p className="text-start text-sm font-semibold text-sky-300">أدوات ذكية للمعلم</p>
+              <h2 className="mt-3 text-start text-3xl font-extrabold text-white sm:text-4xl">منصة مصممة لخدمة المعلم</h2>
+              <p className="mt-3 text-start text-sm leading-7 text-slate-300 sm:text-base">كل ما تحتاجه لإدارة مجموعاتك بتركيز</p>
             </div>
 
             <div className="mt-6 grid gap-4 lg:grid-cols-3">

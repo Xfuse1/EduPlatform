@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
+import { requireTenant } from "@/lib/tenant";
 import { ParentRegisterLauncher } from "@/modules/public-pages/components/ParentRegisterLauncher";
 
 export default async function ParentRegisterPage({
@@ -8,6 +9,8 @@ export default async function ParentRegisterPage({
 }: {
   searchParams: Promise<{ phone?: string }>;
 }) {
+  // Ensure we are on a valid tenant subdomain
+  await requireTenant();
   const params = await searchParams;
 
   return (
