@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { logFinancialEvent } from "@/lib/financial-audit";
 import { requireSuperAdminPage } from "@/lib/platform-admin";
 import { upsertSubscriptionPlanConfig } from "@/modules/payments/providers/plan-config";
-import { creditUserWallet, debitUserWallet, getOrCreateWallet } from "@/modules/wallet/provider";
+import { creditUserWallet, debitUserWallet, getOrCreateWallet, resolveRechargeWalletOwner } from "@/modules/wallet/provider";
 
 const ADMIN_WITHDRAWAL_METHODS = ["CASH", "ELECTRONIC_WALLET", "INSTAPAY", "BANK_TRANSFER", "OTHER"] as const;
 
@@ -37,6 +37,7 @@ export async function setTenantStatusAction(formData: FormData) {
   });
 
   revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
   revalidatePath("/admin/tenants");
 }
 
@@ -113,24 +114,34 @@ export async function adjustUserWalletAction(formData: FormData) {
   }
 
   if (operation === "CREDIT") {
+    const walletOwner = await resolveRechargeWalletOwner(userId, tenantId);
     await creditUserWallet({
       tenantId,
-      userId,
+      userId: walletOwner.ownerUserId,
       amount,
       reason,
       type: "ADMIN_ADJUSTMENT",
       createdById: admin.id,
-      metadata: { direction: "CREDIT" },
+      metadata: {
+        direction: "CREDIT",
+        requestedUserId: userId,
+        ownerType: walletOwner.ownerType,
+      },
     });
   } else if (operation === "DEBIT") {
+    const walletOwner = await resolveRechargeWalletOwner(userId, tenantId);
     await debitUserWallet({
       tenantId,
-      userId,
+      userId: walletOwner.ownerUserId,
       amount,
       reason,
       type: "ADMIN_ADJUSTMENT",
       createdById: admin.id,
-      metadata: { direction: operation },
+      metadata: {
+        direction: operation,
+        requestedUserId: userId,
+        ownerType: walletOwner.ownerType,
+      },
     });
   } else {
     const withdrawal = await db.$transaction(async (tx) => {

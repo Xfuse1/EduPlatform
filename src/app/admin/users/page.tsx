@@ -4,7 +4,6 @@ import { getPlatformTenants, getPlatformUsers } from "@/modules/admin/queries";
 
 const roleOptions = [
   { value: "", label: "كل الأدوار" },
-  { value: "SUPER_ADMIN", label: "سوبر أدمن" },
   { value: "CENTER_ADMIN", label: "مدير مؤسسة" },
   { value: "ADMIN", label: "أدمن" },
   { value: "MANAGER", label: "مشرف" },
