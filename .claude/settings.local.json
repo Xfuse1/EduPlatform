@@ -7,7 +7,8 @@
       "Bash(DIRECT_URL=\"postgresql://postgres.tbcxiuckxvboppyvmjca:XQCV9V5vAW6b21d6@aws-1-eu-west-1.pooler.supabase.com:5432/postgres\" DATABASE_URL=\"postgresql://postgres.tbcxiuckxvboppyvmjca:XQCV9V5vAW6b21d6@aws-1-eu-west-1.pooler.supabase.com:5432/postgres\" npx prisma migrate dev --name add_account_type --create-only)",
       "Bash(npm install:*)",
       "Bash(npm uninstall:*)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

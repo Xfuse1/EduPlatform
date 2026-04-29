@@ -1,13 +1,449 @@
 
 > eduplatform@0.1.0 dev
-> next dev
+> node --max-old-space-size=4096 ./node_modules/next/dist/bin/next dev -p 3000
 
-   ▲ Next.js 15.5.12
-   - Local:        http://localhost:3000
-   - Network:      http://172.19.16.1:3000
-   - Experiments (use with caution):
-     · serverActions
-     ⨯ devtoolSegmentExplorer
+▲ Next.js 16.2.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.56.1:3000
+- Environments: .env.local
+✓ Ready in 827ms
+Creating turbopack project { dir: 'D:\\eduplatform', testMode: true }
+- Experiments (use with caution):
+  · serverActions
 
- ✓ Starting...
- ✓ Ready in 3.6s
+ GET / 200 in 1648ms (next.js: 426ms, proxy.ts: 146ms, application-code: 1076ms)
+ GET /favicon.ico 404 in 1030ms (next.js: 961ms, application-code: 70ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ GET /login 200 in 1670ms (next.js: 53ms, proxy.ts: 9ms, application-code: 1608ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /login 200 in 526ms (next.js: 5ms, proxy.ts: 8ms, application-code: 512ms)
+  └─ ƒ checkUserPin("01068361156") in 488ms src/modules/auth/pin-actions.ts
+🔍 host: localhost:3000 → subdomain: localhost
+ GET /verify?phone=01068361156&tenantId=cmoeuvu130000jr042jhv3zpk 200 in 299ms (next.js: 66ms, proxy.ts: 7ms, application-code: 225ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /verify?phone=01068361156&tenantId=cmoeuvu130000jr042jhv3zpk 200 in 1247ms (next.js: 4ms, proxy.ts: 6ms, application-code: 1238ms)
+  └─ ƒ verifyOTPAction({}) in 789ms src/modules/auth/actions.ts
+ GET /teacher 200 in 3.7s (next.js: 78ms, proxy.ts: 4ms, application-code: 3.7s)
+ GET /api/notifications 200 in 1914ms (next.js: 129ms, application-code: 1785ms)
+ GET /api/notifications 200 in 241ms (next.js: 4ms, application-code: 237ms)
+ GET /teacher/groups 200 in 1444ms (next.js: 608ms, proxy.ts: 4ms, application-code: 832ms)
+ GET /teacher/students 200 in 1208ms (next.js: 512ms, proxy.ts: 6ms, application-code: 690ms)
+ POST /teacher/students 200 in 418ms (next.js: 4ms, proxy.ts: 9ms, application-code: 405ms)
+  └─ ƒ findStudentByPhone("01000000001") in 395ms src/modules/students/actions.ts
+ GET / 200 in 92ms (next.js: 6ms, proxy.ts: 8ms, application-code: 78ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ GET /login 200 in 905ms (next.js: 6ms, proxy.ts: 5ms, application-code: 894ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /login 200 in 496ms (next.js: 5ms, proxy.ts: 5ms, application-code: 486ms)
+  └─ ƒ checkUserPin("01068298970") in 474ms src/modules/auth/pin-actions.ts
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /login 200 in 373ms (next.js: 4ms, proxy.ts: 5ms, application-code: 364ms)
+  └─ ƒ checkUserPin("01234567890") in 347ms src/modules/auth/pin-actions.ts
+🔍 host: localhost:3000 → subdomain: localhost
+ GET /verify?phone=01234567890&tenantId=cmoeuqest0000lb04m23ckzrs 200 in 146ms (next.js: 19ms, proxy.ts: 6ms, application-code: 121ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /verify?phone=01234567890&tenantId=cmoeuqest0000lb04m23ckzrs 200 in 981ms (next.js: 7ms, proxy.ts: 9ms, application-code: 965ms)
+  └─ ƒ verifyOTPAction({}) in 436ms src/modules/auth/actions.ts
+ GET /api/notifications 200 in 1445ms (next.js: 4ms, application-code: 1441ms)
+ GET /api/notifications 200 in 538ms (next.js: 3ms, application-code: 536ms)
+ GET /parent 200 in 4.1s (next.js: 574ms, proxy.ts: 3ms, application-code: 3.5s)
+ GET /parent/children 200 in 2.1s (next.js: 555ms, proxy.ts: 4ms, application-code: 1505ms)
+ POST /teacher/students 200 in 523ms (next.js: 16ms, proxy.ts: 3ms, application-code: 504ms)
+  └─ ƒ findStudentByPhone("01000000001") in 493ms src/modules/students/actions.ts
+ GET / 200 in 115ms (next.js: 19ms, proxy.ts: 5ms, application-code: 90ms)
+ GET /favicon.ico 404 in 153ms (next.js: 66ms, application-code: 87ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ GET /login 200 in 1821ms (next.js: 4ms, proxy.ts: 3ms, application-code: 1814ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /login 200 in 563ms (next.js: 4ms, proxy.ts: 3ms, application-code: 556ms)
+  └─ ƒ checkUserPin("01000000001") in 549ms src/modules/auth/pin-actions.ts
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /login 200 in 360ms (next.js: 3ms, proxy.ts: 5ms, application-code: 352ms)
+  └─ ƒ checkUserPin("01000000001") in 337ms src/modules/auth/pin-actions.ts
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /login 200 in 355ms (next.js: 8ms, proxy.ts: 4ms, application-code: 342ms)
+  └─ ƒ checkUserPin("01000000001") in 330ms src/modules/auth/pin-actions.ts
+🔍 host: localhost:3000 → subdomain: localhost
+ GET /verify?phone=01000000001&tenantId=cmoeuqest0000lb04m23ckzrs 200 in 131ms (next.js: 5ms, proxy.ts: 4ms, application-code: 122ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /verify?phone=01000000001&tenantId=cmoeuqest0000lb04m23ckzrs 200 in 1265ms (next.js: 5ms, proxy.ts: 4ms, application-code: 1256ms)
+  └─ ƒ verifyOTPAction({}) in 749ms src/modules/auth/actions.ts
+ GET /api/notifications 200 in 1973ms (next.js: 3ms, application-code: 1970ms)
+ GET /student 200 in 3.9s (next.js: 844ms, proxy.ts: 3ms, application-code: 3.0s)
+ GET /api/notifications 200 in 384ms (next.js: 3ms, application-code: 381ms)
+ GET /api/auth/session 200 in 742ms (next.js: 350ms, application-code: 393ms)
+ GET /api/auth/session 200 in 414ms (next.js: 3ms, application-code: 411ms)
+ GET /student/settings 200 in 976ms (next.js: 477ms, proxy.ts: 6ms, application-code: 493ms)
+ POST /teacher/students 200 in 479ms (next.js: 5ms, proxy.ts: 5ms, application-code: 468ms)
+  └─ ƒ findStudentByPhone("01000000001") in 461ms src/modules/students/actions.ts
+✓ Compiled in 965ms
+ GET /student/settings 200 in 6.5s (next.js: 468ms, proxy.ts: 307ms, application-code: 5.8s)
+ GET /student/settings 200 in 6.8s (next.js: 23ms, proxy.ts: 13ms, application-code: 6.8s)
+ GET /student/settings 200 in 7.4s (next.js: 30ms, proxy.ts: 75ms, application-code: 7.3s)
+ GET /parent/children 200 in 17.3s (next.js: 572ms, proxy.ts: 147ms, application-code: 16.5s)
+ GET /parent/children 200 in 16.6s (next.js: 79ms, proxy.ts: 6ms, application-code: 16.6s)
+ GET /parent/children 200 in 16.7s (next.js: 100ms, proxy.ts: 16ms, application-code: 16.6s)
+ GET /student/settings 200 in 4.4s (next.js: 479ms, proxy.ts: 54ms, application-code: 3.8s)
+ GET /student/settings 200 in 4.4s (next.js: 126ms, proxy.ts: 13ms, application-code: 4.3s)
+ GET /parent/children 200 in 9.3s (next.js: 260ms, proxy.ts: 51ms, application-code: 9.0s)
+ GET /parent/children 200 in 9.6s (next.js: 17ms, proxy.ts: 15ms, application-code: 9.6s)
+✓ Compiled in 762ms
+ GET /student/settings 200 in 5.6s (next.js: 423ms, proxy.ts: 44ms, application-code: 5.1s)
+ GET /student/settings 200 in 5.8s (next.js: 100ms, proxy.ts: 9ms, application-code: 5.7s)
+ GET /student/settings 200 in 6.8s (next.js: 93ms, proxy.ts: 11ms, application-code: 6.7s)
+✓ Compiled in 739ms
+ GET /parent/children 200 in 18.1s (next.js: 217ms, proxy.ts: 46ms, application-code: 17.8s)
+ GET /parent/children 200 in 18.0s (next.js: 19ms, proxy.ts: 18ms, application-code: 18.0s)
+ GET /parent/children 200 in 19.9s (next.js: 41ms, proxy.ts: 70ms, application-code: 19.7s)
+ GET /parent/children 200 in 13.4s (next.js: 8ms, proxy.ts: 9ms, application-code: 13.4s)
+ GET /parent/children 200 in 13.3s (next.js: 300ms, proxy.ts: 41ms, application-code: 13.0s)
+ GET /parent/children 200 in 13.0s (next.js: 20ms, proxy.ts: 8ms, application-code: 13.0s)
+✓ Compiled in 913ms
+ GET /parent/children 200 in 9.1s (next.js: 345ms, proxy.ts: 14ms, application-code: 8.7s)
+ GET /parent/children 200 in 8.6s (next.js: 298ms, proxy.ts: 48ms, application-code: 8.3s)
+ GET /parent/children 200 in 8.3s (next.js: 7ms, proxy.ts: 7ms, application-code: 8.3s)
+✓ Compiled in 762ms
+ GET /parent/children 200 in 7.5s (next.js: 10ms, proxy.ts: 9ms, application-code: 7.5s)
+ GET /parent/children 200 in 7.5s (next.js: 220ms, proxy.ts: 40ms, application-code: 7.2s)
+ GET /parent/children 200 in 7.3s (next.js: 13ms, proxy.ts: 9ms, application-code: 7.2s)
+✓ Compiled in 704ms
+✓ Compiled in 596ms
+ GET /parent/children 200 in 15.7s (next.js: 272ms, proxy.ts: 29ms, application-code: 15.4s)
+ GET /parent/children 200 in 15.6s (next.js: 9ms, proxy.ts: 8ms, application-code: 15.6s)
+ GET /parent/children 200 in 16.1s (next.js: 7ms, proxy.ts: 24ms, application-code: 16.1s)
+ GET /parent/children 200 in 16.4s (next.js: 20ms, proxy.ts: 12ms, application-code: 16.3s)
+ GET /parent/children 200 in 16.6s (next.js: 13ms, proxy.ts: 10ms, application-code: 16.6s)
+ GET /parent/children 200 in 19.9s (next.js: 250ms, proxy.ts: 5ms, application-code: 19.7s)
+ GET /parent/children 200 in 19.7s (next.js: 8ms, proxy.ts: 5ms, application-code: 19.6s)
+ GET /parent/children 200 in 19.5s (next.js: 6ms, proxy.ts: 3ms, application-code: 19.5s)
+ GET /parent/children 200 in 19.1s (next.js: 12ms, proxy.ts: 7ms, application-code: 19.1s)
+ GET /parent/children 200 in 19.1s (next.js: 7ms, proxy.ts: 4ms, application-code: 19.1s)
+✓ Compiled in 761ms
+✓ Compiled in 713ms
+✓ Compiled in 658ms
+ GET /parent/children 200 in 22.6s (next.js: 287ms, proxy.ts: 17ms, application-code: 22.3s)
+ GET /parent/children 200 in 22.8s (next.js: 14ms, proxy.ts: 11ms, application-code: 22.7s)
+ GET /parent/children 200 in 22.9s (next.js: 10ms, proxy.ts: 8ms, application-code: 22.9s)
+ GET /parent/children 200 in 23.3s (next.js: 8ms, proxy.ts: 17ms, application-code: 23.2s)
+ GET /parent/children 200 in 23.4s (next.js: 10ms, proxy.ts: 14ms, application-code: 23.3s)
+✓ Compiled in 747ms
+ GET /parent/children 200 in 21.5s (next.js: 276ms, proxy.ts: 9ms, application-code: 21.2s)
+✓ Compiled in 748ms
+ GET /parent/children 200 in 21.9s (next.js: 259ms, proxy.ts: 6ms, application-code: 21.7s)
+ GET /parent/children 200 in 22.3s (next.js: 156ms, proxy.ts: 12ms, application-code: 22.1s)
+ GET /parent/children 200 in 22.2s (next.js: 7ms, proxy.ts: 6ms, application-code: 22.2s)
+ GET /parent/children 200 in 22.1s (next.js: 816ms, proxy.ts: 11ms, application-code: 21.3s)
+ GET /parent/children 200 in 21.4s (next.js: 11ms, proxy.ts: 12ms, application-code: 21.3s)
+✓ Compiled in 652ms
+ GET /parent/children 200 in 22.9s (next.js: 10ms, proxy.ts: 7ms, application-code: 22.9s)
+✓ Compiled in 629ms
+✓ Compiled in 747ms
+ GET /parent/children 200 in 19.6s (next.js: 221ms, proxy.ts: 9ms, application-code: 19.4s)
+ GET /parent/children 200 in 19.1s (next.js: 6ms, proxy.ts: 7ms, application-code: 19.1s)
+ GET /parent/children 200 in 19.2s (next.js: 8ms, proxy.ts: 10ms, application-code: 19.2s)
+ GET /parent/children 200 in 19.0s (next.js: 13ms, proxy.ts: 11ms, application-code: 19.0s)
+ GET /parent/children 200 in 19.7s (next.js: 7ms, proxy.ts: 7ms, application-code: 19.6s)
+✓ Compiled in 766ms
+ GET /parent/children 200 in 18.2s (next.js: 242ms, proxy.ts: 9ms, application-code: 17.9s)
+ GET /parent/children 200 in 20.3s (next.js: 238ms, proxy.ts: 4ms, application-code: 20.0s)
+ GET /parent/children 200 in 19.9s (next.js: 8ms, proxy.ts: 8ms, application-code: 19.9s)
+ GET /parent/children 200 in 19.8s (next.js: 6ms, proxy.ts: 8ms, application-code: 19.8s)
+ GET /parent/children 200 in 19.8s (next.js: 6ms, proxy.ts: 9ms, application-code: 19.8s)
+ GET /parent/children 200 in 19.3s (next.js: 13ms, proxy.ts: 10ms, application-code: 19.3s)
+✓ Compiled in 607ms
+ GET /parent/children 200 in 19.1s (next.js: 247ms, proxy.ts: 8ms, application-code: 18.8s)
+ GET /parent/children 200 in 19.7s (next.js: 11ms, proxy.ts: 9ms, application-code: 19.7s)
+ GET /parent/children 200 in 19.7s (next.js: 5ms, proxy.ts: 8ms, application-code: 19.7s)
+ GET /parent/children 200 in 19.7s (next.js: 8ms, proxy.ts: 9ms, application-code: 19.7s)
+ GET /parent/children 200 in 20.1s (next.js: 9ms, proxy.ts: 21ms, application-code: 20.0s)
+ GET /parent/children 200 in 20.0s (next.js: 8ms, proxy.ts: 8ms, application-code: 20.0s)
+ GET /parent/children 200 in 18.5s (next.js: 325ms, proxy.ts: 8ms, application-code: 18.2s)
+✓ Compiled in 687ms
+ GET /parent/children 200 in 22.4s (next.js: 9ms, proxy.ts: 3ms, application-code: 22.4s)
+ GET /parent/children 200 in 22.7s (next.js: 7ms, proxy.ts: 4ms, application-code: 22.7s)
+ GET /parent/children 200 in 23.0s (next.js: 12ms, proxy.ts: 8ms, application-code: 23.0s)
+ GET /parent/children 200 in 22.9s (next.js: 6ms, proxy.ts: 13ms, application-code: 22.8s)
+ GET /parent/children 200 in 22.9s (next.js: 23ms, proxy.ts: 4ms, application-code: 22.8s)
+ GET /parent/children 200 in 23.6s (next.js: 10ms, proxy.ts: 6ms, application-code: 23.6s)
+ GET /parent/children 200 in 20.6s (next.js: 261ms, proxy.ts: 8ms, application-code: 20.3s)
+ GET /parent/children 200 in 20.3s (next.js: 10ms, proxy.ts: 8ms, application-code: 20.2s)
+ GET /parent/children 200 in 20.0s (next.js: 12ms, proxy.ts: 9ms, application-code: 20.0s)
+ GET /parent/children 200 in 20.2s (next.js: 8ms, proxy.ts: 3ms, application-code: 20.2s)
+ GET /parent/children 200 in 20.1s (next.js: 13ms, proxy.ts: 9ms, application-code: 20.1s)
+ GET /parent/children 200 in 19.4s (next.js: 7ms, proxy.ts: 11ms, application-code: 19.3s)
+✓ Compiled in 696ms
+ GET /parent/children 200 in 20.8s (next.js: 18ms, proxy.ts: 3ms, application-code: 20.8s)
+ GET /parent/children 200 in 21.4s (next.js: 10ms, proxy.ts: 8ms, application-code: 21.4s)
+ GET /parent/children 200 in 21.2s (next.js: 5ms, proxy.ts: 7ms, application-code: 21.2s)
+ GET /parent/children 200 in 20.7s (next.js: 9ms, proxy.ts: 16ms, application-code: 20.7s)
+ GET /parent/children 200 in 20.8s (next.js: 6ms, proxy.ts: 6ms, application-code: 20.8s)
+ GET /parent/children 200 in 19.8s (next.js: 10ms, proxy.ts: 20ms, application-code: 19.7s)
+ GET /parent/children 200 in 17.9s (next.js: 328ms, proxy.ts: 91ms, application-code: 17.5s)
+ GET /parent/children 200 in 17.3s (next.js: 13ms, proxy.ts: 10ms, application-code: 17.3s)
+ GET /parent/children 200 in 17.5s (next.js: 103ms, proxy.ts: 8ms, application-code: 17.3s)
+✓ Compiled in 631ms
+ GET /parent/children 200 in 18.4s (next.js: 12ms, proxy.ts: 9ms, application-code: 18.4s)
+ GET /parent/children 200 in 17.9s (next.js: 8ms, proxy.ts: 9ms, application-code: 17.9s)
+ GET /parent/children 200 in 18.3s (next.js: 9ms, proxy.ts: 8ms, application-code: 18.3s)
+ GET /parent/children 200 in 15.4s (next.js: 671ms, proxy.ts: 7ms, application-code: 14.7s)
+ GET /parent/children 200 in 16.5s (next.js: 8ms, proxy.ts: 7ms, application-code: 16.5s)
+ GET /parent/children 200 in 14.8s (next.js: 15ms, proxy.ts: 7ms, application-code: 14.8s)
+ GET /parent/children 200 in 14.7s (next.js: 12ms, proxy.ts: 8ms, application-code: 14.7s)
+ GET /parent/children 200 in 14.6s (next.js: 14ms, proxy.ts: 13ms, application-code: 14.6s)
+ GET /parent/children 200 in 16.4s (next.js: 8ms, proxy.ts: 16ms, application-code: 16.4s)
+✓ Compiled in 708ms
+ GET /parent/children 200 in 3.7s (next.js: 133ms, proxy.ts: 9ms, application-code: 3.6s)
+ GET /parent/children 200 in 7.5s (next.js: 384ms, proxy.ts: 7ms, application-code: 7.1s)
+ GET /parent/children 200 in 7.4s (next.js: 11ms, proxy.ts: 7ms, application-code: 7.3s)
+ GET /parent/children 200 in 7.5s (next.js: 10ms, proxy.ts: 13ms, application-code: 7.4s)
+ GET /parent/children 200 in 7.6s (next.js: 7ms, proxy.ts: 18ms, application-code: 7.5s)
+ GET /parent/children 200 in 7.4s (next.js: 290ms, proxy.ts: 7ms, application-code: 7.1s)
+ GET /parent/children 200 in 7.1s (next.js: 24ms, proxy.ts: 14ms, application-code: 7.0s)
+ GET /parent/children 200 in 5.8s (next.js: 5ms, proxy.ts: 12ms, application-code: 5.8s)
+ GET /parent/children 200 in 5.6s (next.js: 8ms, proxy.ts: 8ms, application-code: 5.6s)
+✓ Compiled in 734ms
+✓ Compiled in 728ms
+ GET /parent/children 200 in 10.9s (next.js: 571ms, proxy.ts: 14ms, application-code: 10.3s)
+ GET /parent/children 200 in 10.3s (next.js: 10ms, proxy.ts: 15ms, application-code: 10.3s)
+ GET /parent/children 200 in 10.6s (next.js: 11ms, proxy.ts: 13ms, application-code: 10.6s)
+ GET /parent/children 200 in 10.6s (next.js: 27ms, proxy.ts: 14ms, application-code: 10.5s)
+ GET /parent/children 200 in 10.7s (next.js: 16ms, proxy.ts: 10ms, application-code: 10.7s)
+✓ Compiled in 801ms
+ GET /parent/children 200 in 8.4s (next.js: 296ms, proxy.ts: 11ms, application-code: 8.1s)
+ GET /parent/children 200 in 8.4s (next.js: 8ms, proxy.ts: 24ms, application-code: 8.3s)
+ GET /parent/children 200 in 8.4s (next.js: 10ms, proxy.ts: 8ms, application-code: 8.4s)
+ GET /parent/children 200 in 8.3s (next.js: 87ms, proxy.ts: 39ms, application-code: 8.2s)
+ GET /parent/children 200 in 8.3s (next.js: 14ms, proxy.ts: 24ms, application-code: 8.3s)
+ GET /parent/children 200 in 8.6s (next.js: 326ms, proxy.ts: 32ms, application-code: 8.2s)
+ GET /parent/children 200 in 8.5s (next.js: 16ms, proxy.ts: 9ms, application-code: 8.4s)
+ GET /parent/children 200 in 6.6s (next.js: 8ms, proxy.ts: 3ms, application-code: 6.6s)
+ GET /parent/children 200 in 6.5s (next.js: 7ms, proxy.ts: 6ms, application-code: 6.5s)
+ GET /parent/children 200 in 6.3s (next.js: 9ms, proxy.ts: 9ms, application-code: 6.3s)
+ GET /parent/children 200 in 8.9s (next.js: 216ms, proxy.ts: 56ms, application-code: 8.7s)
+ GET /parent/children 200 in 8.7s (next.js: 11ms, proxy.ts: 7ms, application-code: 8.7s)
+ GET /parent/children 200 in 8.7s (next.js: 8ms, proxy.ts: 7ms, application-code: 8.7s)
+ GET /parent/children 200 in 8.8s (next.js: 8ms, proxy.ts: 9ms, application-code: 8.8s)
+ GET /parent/children 200 in 8.9s (next.js: 22ms, proxy.ts: 16ms, application-code: 8.9s)
+ GET /parent/children 200 in 9.0s (next.js: 7ms, proxy.ts: 6ms, application-code: 9.0s)
+✓ Compiled in 783ms
+ GET /parent/children 200 in 12.0s (next.js: 869ms, proxy.ts: 17ms, application-code: 11.2s)
+ GET /parent/children 200 in 11.3s (next.js: 33ms, proxy.ts: 34ms, application-code: 11.3s)
+ GET /parent/children 200 in 11.2s (next.js: 7ms, proxy.ts: 7ms, application-code: 11.2s)
+ GET /parent/children 200 in 11.6s (next.js: 12ms, proxy.ts: 8ms, application-code: 11.5s)
+ GET /parent/children 200 in 11.5s (next.js: 11ms, proxy.ts: 13ms, application-code: 11.4s)
+ GET /parent/children 200 in 11.4s (next.js: 19ms, proxy.ts: 10ms, application-code: 11.3s)
+ GET /parent/children 200 in 3.8s (next.js: 7ms, proxy.ts: 6ms, application-code: 3.8s)
+ GET /parent/children 200 in 3.6s (next.js: 115ms, proxy.ts: 9ms, application-code: 3.5s)
+✓ Compiled in 873ms
+✓ Compiled in 573ms
+ GET /parent/children 200 in 1801ms (next.js: 5ms, proxy.ts: 6ms, application-code: 1790ms)
+✓ Compiled in 584ms
+ GET /parent/children 200 in 1701ms (next.js: 8ms, proxy.ts: 16ms, application-code: 1678ms)
+✓ Compiled in 1080ms
+✓ Compiled in 1606ms
+ GET /parent/children 200 in 7.3s (next.js: 12ms, proxy.ts: 10ms, application-code: 7.3s)
+ GET /parent/children 200 in 7.1s (next.js: 201ms, proxy.ts: 131ms, application-code: 6.8s)
+ GET /parent/children 200 in 7.7s (next.js: 10ms, proxy.ts: 12ms, application-code: 7.7s)
+ GET /parent/children 200 in 7.6s (next.js: 11ms, proxy.ts: 12ms, application-code: 7.6s)
+ GET /parent/children 200 in 7.5s (next.js: 47ms, proxy.ts: 16ms, application-code: 7.4s)
+✓ Compiled in 691ms
+✓ Compiled in 664ms
+ GET /parent/children 200 in 9.5s (next.js: 283ms, proxy.ts: 30ms, application-code: 9.2s)
+ GET /parent/children 200 in 9.1s (next.js: 10ms, proxy.ts: 8ms, application-code: 9.1s)
+ GET /parent/children 200 in 9.1s (next.js: 14ms, proxy.ts: 9ms, application-code: 9.1s)
+ GET /parent/children 200 in 9.1s (next.js: 20ms, proxy.ts: 10ms, application-code: 9.1s)
+ GET /parent/children 200 in 9.2s (next.js: 10ms, proxy.ts: 8ms, application-code: 9.2s)
+✓ Compiled in 642ms
+✓ Compiled in 721ms
+✓ Compiled in 796ms
+ GET /parent/children 200 in 4.5s (next.js: 10ms, proxy.ts: 11ms, application-code: 4.5s)
+ GET /parent/children 200 in 4.4s (next.js: 208ms, proxy.ts: 33ms, application-code: 4.2s)
+ GET /parent/children 200 in 4.2s (next.js: 17ms, proxy.ts: 15ms, application-code: 4.2s)
+✓ Compiled in 856ms
+ GET /parent/children 200 in 5.0s (next.js: 348ms, proxy.ts: 8ms, application-code: 4.6s)
+ GET /parent/children 200 in 4.6s (next.js: 229ms, proxy.ts: 42ms, application-code: 4.3s)
+ GET /parent/children 200 in 4.2s (next.js: 28ms, proxy.ts: 33ms, application-code: 4.2s)
+ GET /parent/children 200 in 12.4s (next.js: 288ms, proxy.ts: 25ms, application-code: 12.1s)
+ GET /parent/children 200 in 12.5s (next.js: 35ms, proxy.ts: 19ms, application-code: 12.4s)
+ GET /parent/children 200 in 12.8s (next.js: 14ms, proxy.ts: 19ms, application-code: 12.8s)
+ GET /parent/children 200 in 12.9s (next.js: 28ms, proxy.ts: 7ms, application-code: 12.8s)
+ GET /parent/children 200 in 13.0s (next.js: 13ms, proxy.ts: 13ms, application-code: 12.9s)
+ GET /parent/children 200 in 12.6s (next.js: 232ms, proxy.ts: 8ms, application-code: 12.3s)
+ GET /parent/children 200 in 12.4s (next.js: 9ms, proxy.ts: 9ms, application-code: 12.4s)
+ GET /parent/children 200 in 12.8s (next.js: 10ms, proxy.ts: 23ms, application-code: 12.7s)
+ GET /parent/children 200 in 13.2s (next.js: 20ms, proxy.ts: 10ms, application-code: 13.1s)
+ GET /parent/children 200 in 13.7s (next.js: 9ms, proxy.ts: 7ms, application-code: 13.7s)
+✓ Compiled in 772ms
+ GET /parent/children 200 in 7.5s (next.js: 266ms, proxy.ts: 14ms, application-code: 7.3s)
+ GET /parent/children 200 in 7.3s (next.js: 10ms, proxy.ts: 8ms, application-code: 7.3s)
+ GET /parent/children 200 in 7.3s (next.js: 14ms, proxy.ts: 7ms, application-code: 7.3s)
+ GET /parent/children 200 in 7.3s (next.js: 13ms, proxy.ts: 12ms, application-code: 7.3s)
+ GET /parent/children 200 in 7.4s (next.js: 24ms, proxy.ts: 8ms, application-code: 7.3s)
+✓ Compiled in 774ms
+ GET /parent/children 200 in 7.9s (next.js: 383ms, proxy.ts: 10ms, application-code: 7.5s)
+ GET /parent/children 200 in 7.5s (next.js: 12ms, proxy.ts: 20ms, application-code: 7.4s)
+ GET /parent/children 200 in 7.3s (next.js: 27ms, proxy.ts: 147ms, application-code: 7.1s)
+ GET /parent/children 200 in 7.1s (next.js: 17ms, proxy.ts: 18ms, application-code: 7.1s)
+ GET /parent/children 200 in 7.0s (next.js: 9ms, proxy.ts: 11ms, application-code: 7.0s)
+✓ Compiled in 757ms
+ GET /parent/children 200 in 10.4s (next.js: 288ms, proxy.ts: 9ms, application-code: 10.1s)
+ GET /parent/children 200 in 10.0s (next.js: 19ms, proxy.ts: 11ms, application-code: 9.9s)
+ GET /parent/children 200 in 10.1s (next.js: 23ms, proxy.ts: 15ms, application-code: 10.0s)
+ GET /parent/children 200 in 9.9s (next.js: 14ms, proxy.ts: 13ms, application-code: 9.9s)
+ GET /parent/children 200 in 9.9s (next.js: 17ms, proxy.ts: 17ms, application-code: 9.9s)
+✓ Compiled in 704ms
+ GET /parent/children 200 in 8.9s (next.js: 255ms, proxy.ts: 8ms, application-code: 8.6s)
+ GET /parent/children 200 in 8.6s (next.js: 10ms, proxy.ts: 10ms, application-code: 8.6s)
+ GET /parent/children 200 in 8.8s (next.js: 16ms, proxy.ts: 31ms, application-code: 8.7s)
+ GET /parent/children 200 in 8.4s (next.js: 18ms, proxy.ts: 205ms, application-code: 8.1s)
+ GET /parent/children 200 in 8.2s (next.js: 10ms, proxy.ts: 11ms, application-code: 8.2s)
+✓ Compiled in 833ms
+ GET /parent/children 200 in 14.9s (next.js: 996ms, proxy.ts: 257ms, application-code: 13.7s)
+ GET /parent/children 200 in 13.8s (next.js: 12ms, proxy.ts: 33ms, application-code: 13.7s)
+ GET /parent/children 200 in 13.7s (next.js: 9ms, proxy.ts: 7ms, application-code: 13.6s)
+ GET /parent/children 200 in 14.2s (next.js: 9ms, proxy.ts: 11ms, application-code: 14.2s)
+ GET /parent/children 200 in 14.2s (next.js: 18ms, proxy.ts: 8ms, application-code: 14.2s)
+ GET /parent/children 200 in 14.3s (next.js: 12ms, proxy.ts: 7ms, application-code: 14.3s)
+✓ Compiled in 728ms
+ GET /parent/children 200 in 9.3s (next.js: 8ms, proxy.ts: 9ms, application-code: 9.2s)
+ GET /parent/children 200 in 9.2s (next.js: 7ms, proxy.ts: 6ms, application-code: 9.2s)
+ GET /parent/children 200 in 9.4s (next.js: 101ms, proxy.ts: 50ms, application-code: 9.2s)
+ GET /parent/children 200 in 9.0s (next.js: 677ms, proxy.ts: 104ms, application-code: 8.2s)
+ GET /parent/children 200 in 8.3s (next.js: 15ms, proxy.ts: 9ms, application-code: 8.2s)
+ GET / 200 in 412ms (next.js: 89ms, proxy.ts: 6ms, application-code: 316ms)
+ GET /login 200 in 590ms (next.js: 163ms, proxy.ts: 3ms, application-code: 424ms)
+ POST /login 200 in 412ms (next.js: 6ms, proxy.ts: 6ms, application-code: 400ms)
+  └─ ƒ checkUserPin("01068361156") in 378ms src/modules/auth/pin-actions.ts
+ GET /verify?phone=01068361156 200 in 502ms (next.js: 164ms, proxy.ts: 3ms, application-code: 335ms)
+ POST /verify?phone=01068361156 200 in 893ms (next.js: 8ms, proxy.ts: 4ms, application-code: 882ms)
+  └─ ƒ verifyOTPAction({}) in 580ms src/modules/auth/actions.ts
+ GET /teacher 200 in 3.7s (next.js: 157ms, proxy.ts: 4ms, application-code: 3.5s)
+ GET /api/notifications 200 in 2.7s (next.js: 126ms, application-code: 2.6s)
+ GET /api/notifications 200 in 230ms (next.js: 3ms, application-code: 227ms)
+ GET /teacher/students 200 in 1026ms (next.js: 171ms, proxy.ts: 6ms, application-code: 849ms)
+ POST /teacher/students 200 in 786ms (next.js: 4ms, proxy.ts: 4ms, application-code: 779ms)
+  └─ ƒ findStudentByPhone("01000000001") in 760ms src/modules/students/actions.ts
+ GET /teacher/settings 200 in 1656ms (next.js: 913ms, proxy.ts: 3ms, application-code: 740ms)
+ POST /teacher/settings 200 in 651ms (next.js: 11ms, proxy.ts: 12ms, application-code: 627ms)
+  └─ ƒ setPinWithOtpAction({"idToken":"eyJhbGciOiJSUzI1NiIsImtpZCI6IjJiMzZhYjQxYTczOTJlMTRlNjM1ZmRlM2M2YWYwOWZlYmFhM2YyZDYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZWR1cGxhdGZvcm0tMzdhNmYiLCJhdWQiOiJlZHVwbGF0Zm9ybS0zN2E2ZiIsImF1dGhfdGltZSI6MTc3NzM3MDU4MiwidXNlcl9pZCI6IjIxVDl5RWxGOTNTQVAxbUo4UmpPMFUzaGxJVDIiLCJzdWIiOiIyMVQ5eUVsRjkzU0FQMW1KOFJqTzBVM2hsSVQyIiwiaWF0IjoxNzc3MzcwNTgyLCJleHAiOjE3NzczNzQxODIsInBob25lX251bWJlciI6IisyMDEwNjgzNjExNTYiLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7InBob25lIjpbIisyMDEwNjgzNjExNTYiXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwaG9uZSJ9fQ.nohNOh33zsLoxhRFt_4C3kaOk1MRNpg1r8UAiJahYkSNMbhu_lwwcC7MudRZBWdSUhFhj4DuoMhY0MhJ4rZt3XjlFnMT-3qPpOXs8__FdFjZzznf18XEDggh_c_UOpQxbwS-1Jz_KOG8XuUR0YeKk9JlZye1Fp9IgyPbeoGWvbzGFF75vjt-gS7Z4oODhQ5Ojq-OlwpzetE0PcirONVqlajI6M-f4G92F1V1c72_60ZOKcSJSpE09oljlhf2NXbljqbIvrbGCY9M3Y9UrPGQwAwmmUtHXXVhI3kYVhlAMxA5OOR4D_DAaRKpUEc5FO_I2RzWogf1RZ-d-aYtik9Hig","pin":"11111111"}) in 596ms src/modules/auth/pin-actions.ts
+ GET /teacher/settings 200 in 953ms (next.js: 11ms, proxy.ts: 8ms, application-code: 934ms)
+ POST /api/auth/logout 200 in 63ms (next.js: 52ms, application-code: 11ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ GET /login 200 in 200ms (next.js: 3ms, proxy.ts: 3ms, application-code: 194ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /login 200 in 354ms (next.js: 5ms, proxy.ts: 4ms, application-code: 346ms)
+  └─ ƒ checkUserPin("01068361156") in 335ms src/modules/auth/pin-actions.ts
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /login 200 in 387ms (next.js: 12ms, proxy.ts: 4ms, application-code: 371ms)
+  └─ ƒ verifyPinAction("01068361156", "00000000", "cmoeuvu130000jr042jhv3zpk") in 360ms src/modules/auth/pin-actions.ts
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /login 200 in 306ms (next.js: 4ms, proxy.ts: 4ms, application-code: 297ms)
+  └─ ƒ verifyPinAction("01068361156", "00000000", "cmoeuvu130000jr042jhv3zpk") in 289ms src/modules/auth/pin-actions.ts
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /login 200 in 519ms (next.js: 4ms, proxy.ts: 4ms, application-code: 511ms)
+  └─ ƒ verifyPinAction("01068361156", "11111111", "cmoeuvu130000jr042jhv3zpk") in 373ms src/modules/auth/pin-actions.ts
+ GET /teacher 200 in 2.1s (next.js: 11ms, proxy.ts: 4ms, application-code: 2.1s)
+ GET /api/notifications 200 in 1468ms (next.js: 3ms, application-code: 1465ms)
+ GET /api/notifications 200 in 248ms (next.js: 3ms, application-code: 245ms)
+ GET /teacher/students 200 in 1772ms (next.js: 6ms, proxy.ts: 4ms, application-code: 1762ms)
+ POST /teacher/students 200 in 883ms (next.js: 5ms, proxy.ts: 8ms, application-code: 869ms)
+  └─ ƒ findStudentByPhone("01000000001") in 856ms src/modules/students/actions.ts
+ GET /student/settings 200 in 2.7s (next.js: 231ms, proxy.ts: 13ms, application-code: 2.4s)
+ GET /student/settings 200 in 2.5s (next.js: 16ms, proxy.ts: 7ms, application-code: 2.5s)
+ GET /student/settings 200 in 2.6s (next.js: 18ms, proxy.ts: 8ms, application-code: 2.6s)
+ GET /student/settings 200 in 2.9s (next.js: 71ms, proxy.ts: 8ms, application-code: 2.8s)
+ GET /student/settings 200 in 3.0s (next.js: 119ms, proxy.ts: 9ms, application-code: 2.9s)
+ GET /student/settings 200 in 3.2s (next.js: 68ms, proxy.ts: 107ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.0s (next.js: 5ms, proxy.ts: 4ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.1s (next.js: 17ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 6ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.0s (next.js: 7ms, proxy.ts: 10ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 5ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 7ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 3ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 5ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 11ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 3ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 3ms, proxy.ts: 6ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 5ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.0s (next.js: 3ms, proxy.ts: 4ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 5ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 5ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 5ms, proxy.ts: 5ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 10ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 5ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.0s (next.js: 3ms, proxy.ts: 3ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 3ms, proxy.ts: 3ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 4ms, proxy.ts: 4ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 3ms, proxy.ts: 4ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 4ms, proxy.ts: 3ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 5ms, proxy.ts: 3ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 3ms, proxy.ts: 3ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 5ms, proxy.ts: 3ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 4ms, proxy.ts: 3ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 4ms, proxy.ts: 8ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.1s (next.js: 3ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 6ms, proxy.ts: 8ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 7ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 4ms, proxy.ts: 3ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.1s (next.js: 3ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.0s (next.js: 4ms, proxy.ts: 3ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 5ms, proxy.ts: 5ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 9ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 4ms, proxy.ts: 8ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.1s (next.js: 6ms, proxy.ts: 3ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 5ms, proxy.ts: 5ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.1s (next.js: 6ms, proxy.ts: 12ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 9ms, proxy.ts: 6ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 4ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 5ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 5ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 5ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.1s (next.js: 5ms, proxy.ts: 5ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.0s (next.js: 5ms, proxy.ts: 4ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 3.0s (next.js: 3ms, proxy.ts: 3ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.0s (next.js: 5ms, proxy.ts: 6ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.1s (next.js: 10ms, proxy.ts: 6ms, application-code: 3.0s)
+ GET /student/settings 200 in 3.5s (next.js: 3ms, proxy.ts: 4ms, application-code: 3.5s)
+ GET /student/settings 200 in 3.3s (next.js: 4ms, proxy.ts: 3ms, application-code: 3.3s)
+ GET /student/settings 200 in 2.7s (next.js: 4ms, proxy.ts: 4ms, application-code: 2.7s)
+ GET /student/settings 200 in 3.1s (next.js: 4ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /student/settings 200 in 2.9s (next.js: 5ms, proxy.ts: 5ms, application-code: 2.9s)
+ GET /student/settings 200 in 1830ms (next.js: 7ms, proxy.ts: 7ms, application-code: 1816ms)
+ GET /api/notifications 200 in 315ms (next.js: 4ms, application-code: 311ms)
+ GET /api/notifications 200 in 243ms (next.js: 2ms, application-code: 241ms)
+ POST /api/auth/logout 200 in 15ms (next.js: 3ms, application-code: 12ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ GET /login 200 in 205ms (next.js: 7ms, proxy.ts: 3ms, application-code: 195ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /login 200 in 494ms (next.js: 5ms, proxy.ts: 6ms, application-code: 482ms)
+  └─ ƒ checkUserPin("01234567890") in 472ms src/modules/auth/pin-actions.ts
+🔍 host: localhost:3000 → subdomain: localhost
+ GET /verify?phone=01234567890&tenantId=cmoeuqest0000lb04m23ckzrs 200 in 144ms (next.js: 4ms, proxy.ts: 3ms, application-code: 137ms)
+🔍 host: localhost:3000 → subdomain: localhost
+ POST /verify?phone=01234567890&tenantId=cmoeuqest0000lb04m23ckzrs 200 in 737ms (next.js: 13ms, proxy.ts: 17ms, application-code: 707ms)
+  └─ ƒ verifyOTPAction({}) in 407ms src/modules/auth/actions.ts
+ GET /api/notifications 200 in 1303ms (next.js: 4ms, application-code: 1298ms)
+ GET /api/notifications 200 in 492ms (next.js: 4ms, application-code: 489ms)
+ GET /parent 200 in 3.3s (next.js: 152ms, proxy.ts: 3ms, application-code: 3.1s)
+ GET /parent/children 200 in 1387ms (next.js: 11ms, proxy.ts: 3ms, application-code: 1372ms)
+ GET /teacher 200 in 2.6s (next.js: 5ms, proxy.ts: 4ms, application-code: 2.6s)
+ POST /parent/children 200 in 1320ms (next.js: 4ms, proxy.ts: 6ms, application-code: 1310ms)
+  └─ ƒ searchGroupsForChild({"query":"علي جاد","studentId":"cmoevwg5w0001kt040v60fnav"}) in 1278ms src/modules/parent/actions.ts
+ POST /parent/children 200 in 976ms (next.js: 5ms, proxy.ts: 6ms, application-code: 965ms)
+  └─ ƒ searchGroupsForChild({"query":"عربي","studentId":"cmoevwg5w0001kt040v60fnav"}) in 951ms src/modules/parent/actions.ts
+ GET /teacher/students 200 in 6.1s (next.js: 18ms, proxy.ts: 8ms, application-code: 6.0s)
+ POST /teacher/students 200 in 1901ms (next.js: 5ms, proxy.ts: 3ms, application-code: 1893ms)
+  └─ ƒ findStudentByPhone("01000000001") in 1877ms src/modules/students/actions.ts
+prisma:error Error in PostgreSQL connection: Error { kind: Db, cause: Some(DbError { severity: "FATAL", parsed_severity: Some(Fatal), code: SqlState(E57P01), message: "terminating connection due to administrator command", detail: None, hint: None, position: None, where_: None, schema: None, table: None, column: None, datatype: None, constraint: None, file: None, line: None, routine: None }) }
