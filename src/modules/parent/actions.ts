@@ -109,29 +109,15 @@ export async function linkChildToParent(input: {
       where: {
         role: "STUDENT",
         isActive: true,
-        name: {
-          contains: studentName,
-          mode: "insensitive",
-        },
+        name: { contains: studentName, mode: "insensitive" },
         phone: studentPhone,
         parentPhone: parent.phone,
-        ...(gradeLevel
-          ? {
-              gradeLevel: {
-                contains: gradeLevel,
-                mode: "insensitive",
-              },
-            }
-          : {}),
         ...lookupTenantScopeFilter,
       },
-      orderBy: {
-        createdAt: "asc",
-      },
-      take: 2,
       select: {
         id: true,
         name: true,
+        gradeLevel: true,
         tenant: {
           select: {
             name: true,
@@ -141,7 +127,11 @@ export async function linkChildToParent(input: {
       },
     });
 
-    if (matchingStudents.length > 1) {
+    const filteredStudents = gradeLevel
+      ? matchingStudents.filter((s) => isSameGradeLevel(s.gradeLevel, gradeLevel))
+      : matchingStudents;
+
+    if (filteredStudents.length > 1) {
       const missingHints = [
         gradeLevel ? null : "الصف الدراسي",
         tenantSlug ? null : "رابط السنتر",
@@ -155,8 +145,8 @@ export async function linkChildToParent(input: {
       };
     }
 
-    if (matchingStudents.length === 1) {
-      const [student] = matchingStudents;
+    if (filteredStudents.length === 1) {
+      const [student] = filteredStudents;
 
       const existingRelation = await db.parentStudent.findUnique({
         where: {
