@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Link2, Loader2, PlusCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -38,6 +38,18 @@ export function LinkChildForm() {
     setIsOpen(false);
   };
 
+  // استخراج الـ slug من الرابط الكامل
+  const extractSlug = (input: string) => {
+    try {
+      const url = new URL(input);
+      // آخر جزء في الـ path
+      return url.pathname.replace("/", "").trim() || input.trim();
+    } catch {
+      // لو مش URL كامل، استخدمه مباشرة
+      return input.trim();
+    }
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
@@ -57,7 +69,7 @@ export function LinkChildForm() {
         studentName,
         studentPhone,
         gradeLevel,
-        tenantSlug: tenantSlug.trim() || undefined,
+        tenantSlug: extractSlug(tenantSlug) || undefined,
       });
 
       if (!result.success) {
