@@ -177,6 +177,7 @@ exports.Prisma.GroupScalarFieldEnum = {
   timeEnd: 'timeEnd',
   maxCapacity: 'maxCapacity',
   monthlyFee: 'monthlyFee',
+  billingType: 'billingType',
   color: 'color',
   isActive: 'isActive',
   createdAt: 'createdAt',
@@ -207,7 +208,8 @@ exports.Prisma.SessionScalarFieldEnum = {
   notes: 'notes',
   createdAt: 'createdAt',
   qrToken: 'qrToken',
-  qrExpiresAt: 'qrExpiresAt'
+  qrExpiresAt: 'qrExpiresAt',
+  qrScanLimit: 'qrScanLimit'
 };
 
 exports.Prisma.AttendanceScalarFieldEnum = {
@@ -362,6 +364,7 @@ exports.Prisma.TeacherSubscriptionScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
   subscriptionPlan: 'subscriptionPlan',
+  planKey: 'planKey',
   billingCycle: 'billingCycle',
   amount: 'amount',
   isActive: 'isActive',
@@ -376,6 +379,7 @@ exports.Prisma.TeacherSubscriptionScalarFieldEnum = {
 exports.Prisma.SubscriptionPlanConfigScalarFieldEnum = {
   id: 'id',
   plan: 'plan',
+  key: 'key',
   name: 'name',
   monthlyPrice: 'monthlyPrice',
   yearlyPrice: 'yearlyPrice',
@@ -384,6 +388,28 @@ exports.Prisma.SubscriptionPlanConfigScalarFieldEnum = {
   sessionsLimit: 'sessionsLimit',
   storageLimit: 'storageLimit',
   isActive: 'isActive',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GroupBillingChargeScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  groupId: 'groupId',
+  studentId: 'studentId',
+  payerUserId: 'payerUserId',
+  payeeUserId: 'payeeUserId',
+  amount: 'amount',
+  billingType: 'billingType',
+  reason: 'reason',
+  idempotencyKey: 'idempotencyKey',
+  relatedSessionId: 'relatedSessionId',
+  walletDebitTxId: 'walletDebitTxId',
+  walletCreditTxId: 'walletCreditTxId',
+  coveredSessions: 'coveredSessions',
+  consumedSessions: 'consumedSessions',
+  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -528,6 +554,12 @@ exports.UserRole = exports.$Enums.UserRole = {
   ASSISTANT: 'ASSISTANT'
 };
 
+exports.GroupBillingType = exports.$Enums.GroupBillingType = {
+  MONTHLY: 'MONTHLY',
+  PER_SESSION: 'PER_SESSION',
+  FULL_COURSE: 'FULL_COURSE'
+};
+
 exports.EnrollmentStatus = exports.$Enums.EnrollmentStatus = {
   PENDING: 'PENDING',
   ACTIVE: 'ACTIVE',
@@ -627,16 +659,16 @@ exports.BillingCycle = exports.$Enums.BillingCycle = {
   YEARLY: 'YEARLY'
 };
 
-exports.TransactionType = exports.$Enums.TransactionType = {
-  CREDIT: 'CREDIT',
-  DEBIT: 'DEBIT'
-};
-
 exports.TransactionStatus = exports.$Enums.TransactionStatus = {
   PENDING: 'PENDING',
   COMPLETED: 'COMPLETED',
   FAILED: 'FAILED',
   REFUNDED: 'REFUNDED'
+};
+
+exports.TransactionType = exports.$Enums.TransactionType = {
+  CREDIT: 'CREDIT',
+  DEBIT: 'DEBIT'
 };
 
 exports.TransferStatus = exports.$Enums.TransferStatus = {
@@ -712,6 +744,7 @@ exports.Prisma.ModelName = {
   ExamSubmission: 'ExamSubmission',
   TeacherSubscription: 'TeacherSubscription',
   SubscriptionPlanConfig: 'SubscriptionPlanConfig',
+  GroupBillingCharge: 'GroupBillingCharge',
   StudentBalance: 'StudentBalance',
   BalanceTransaction: 'BalanceTransaction',
   TeacherTransfer: 'TeacherTransfer',

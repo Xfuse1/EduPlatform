@@ -60,6 +60,7 @@ const defaultValues: GroupCreateInput = {
   room: undefined,
   maxCapacity: 40,
   monthlyFee: 0,
+  billingType: 'MONTHLY',
   color: '#2E86C1',
 }
 
@@ -173,7 +174,7 @@ export default function GroupForm({
     Array.from({ length: initialSchedule.length }, () => ({})),
   )
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [feeType, setFeeType] = useState<'monthly' | 'per_session' | 'installments' | 'full_course'>('monthly')
+  const [feeType, setFeeType] = useState<'MONTHLY' | 'PER_SESSION' | 'FULL_COURSE'>(initialValues.billingType ?? 'MONTHLY')
   const [monthlyFeeValue, setMonthlyFeeValue] = useState(mode === 'edit' ? String(initialValues.monthlyFee) : '')
   const [educationStage, setEducationStage] = useState<EducationStage | ''>((initialGradeLevelState.stage as EducationStage | '') || '')
   const [gradeYear, setGradeYear] = useState(initialGradeLevelState.year)
@@ -445,10 +446,10 @@ export default function GroupForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={() => setFeeType('monthly')}
+              onClick={() => setFeeType('MONTHLY')}
               className={joinClasses(
                 'flex-1 rounded-2xl border-2 py-3 text-sm font-bold transition-colors',
-                feeType === 'monthly'
+                feeType === 'MONTHLY'
                   ? 'border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
                   : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-950',
               )}
@@ -457,10 +458,10 @@ export default function GroupForm({
             </button>
             <button
               type="button"
-              onClick={() => setFeeType('per_session')}
+              onClick={() => setFeeType('PER_SESSION')}
               className={joinClasses(
                 'flex-1 rounded-2xl border-2 py-3 text-sm font-bold transition-colors',
-                feeType === 'per_session'
+                feeType === 'PER_SESSION'
                   ? 'border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
                   : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-950',
               )}
@@ -469,10 +470,10 @@ export default function GroupForm({
             </button>
             <button
               type="button"
-              onClick={() => setFeeType('installments')}
+              onClick={() => setFeeType('FULL_COURSE')}
               className={joinClasses(
-                'flex-1 rounded-2xl border-2 py-3 text-sm font-bold transition-colors',
-                feeType === 'installments'
+                'hidden flex-1 rounded-2xl border-2 py-3 text-sm font-bold transition-colors',
+                feeType === 'FULL_COURSE'
                   ? 'border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
                   : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-950',
               )}
@@ -481,10 +482,10 @@ export default function GroupForm({
             </button>
             <button
               type="button"
-              onClick={() => setFeeType('full_course')}
+              onClick={() => setFeeType('FULL_COURSE')}
               className={joinClasses(
                 'flex-1 rounded-2xl border-2 py-3 text-sm font-bold transition-colors',
-                feeType === 'full_course'
+                feeType === 'FULL_COURSE'
                   ? 'border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
                   : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-950',
               )}
@@ -496,21 +497,20 @@ export default function GroupForm({
           {/* حقل إدخال المبلغ */}
           <FormField
             label={
-              feeType === 'monthly' ? 'المصاريف الشهرية' : 
-              feeType === 'per_session' ? 'سعر الحصة' :
-              feeType === 'installments' ? 'إجمالي مبلغ الدفعات' :
+              feeType === 'MONTHLY' ? 'المصاريف الشهرية' : 
+              feeType === 'PER_SESSION' ? 'سعر الحصة' :
               'سعر الكورس بالكامل'
             }
             htmlFor="monthlyFee"
             required
             error={errors.monthlyFee}
             hint={
-              feeType === 'monthly' ? 'اكتب المبلغ الشهري بالجنيه المصري' : 
-              feeType === 'per_session' ? 'اكتب سعر الحصة الواحدة بالجنيه المصري' :
-              feeType === 'installments' ? 'اكتب إجمالي قيمة الدفعات المخطط لها' :
+              feeType === 'MONTHLY' ? 'اكتب المبلغ الشهري بالجنيه المصري' : 
+              feeType === 'PER_SESSION' ? 'اكتب سعر الحصة الواحدة بالجنيه المصري' :
               'اكتب السعر الإجمالي للدورة/الكورس'
             }
           >
+            <input name="billingType" type="hidden" value={feeType} />
             <input
               id="monthlyFee"
               name="monthlyFee"

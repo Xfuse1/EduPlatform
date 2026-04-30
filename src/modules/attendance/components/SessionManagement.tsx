@@ -25,6 +25,7 @@ type Session = {
   status: string;
   qrToken: string | null;
   qrExpiresAt: string | Date | null;
+  qrScanLimit?: number | null;
   students: Student[];
 };
 
@@ -32,6 +33,7 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
   const [session, setSession] = useState(initialSession);
   const [loading, setLoading] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [scanLimit, setScanLimit] = useState<string>(String(initialSession.qrScanLimit ?? (initialSession.students.length || 1)));
 
   // Update timer
   useEffect(() => {
@@ -59,13 +61,17 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
   const startSession = async () => {
     setLoading("start");
     try {
-      const res = await fetch(`/api/attendance/sessions/${session.id}/start`, { method: "POST" });
+      const res = await fetch(`/api/attendance/sessions/${session.id}/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scanLimit: Number(scanLimit) }),
+      });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data) {
         throw new Error(data?.error || "استجابة غير صالحة من السيرفر");
       }
       if (data.success) {
-        setSession({ ...session, status: "IN_PROGRESS", qrToken: data.token, qrExpiresAt: data.expiresAt });
+        setSession({ ...session, status: "IN_PROGRESS", qrToken: data.token, qrExpiresAt: data.expiresAt, qrScanLimit: data.scanLimit });
       }
     } catch (error) {
       console.error(error);

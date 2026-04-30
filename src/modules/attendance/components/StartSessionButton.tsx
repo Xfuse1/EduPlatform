@@ -23,8 +23,16 @@ export function StartSessionButton({ sessionId, status }: StartSessionButtonProp
     
     setLoading(true);
     try {
+      const limitInput = window.prompt("أدخل عدد الطلاب المسموح لهم بمسح QR", "1");
+      const scanLimit = Number(limitInput);
+      if (!Number.isInteger(scanLimit) || scanLimit <= 0) {
+        setLoading(false);
+        return;
+      }
       const res = await fetch(`/api/attendance/sessions/${sessionId}/start`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scanLimit }),
       });
       if (res.ok) {
         router.push(`/attendance/${sessionId}`);

@@ -74,13 +74,12 @@ export async function POST(req: NextRequest) {
       const parts = subscriptionMeta.split(':')
       const planRaw = (parts[1] ?? '').trim()
       const cycleRaw = (parts[2] ?? '').trim()
-      const validPlans = new Set(['STARTER', 'PROFESSIONAL', 'ENTERPRISE'])
       const validCycles = new Set(['MONTHLY', 'YEARLY'])
 
-      if (validPlans.has(planRaw) && validCycles.has(cycleRaw)) {
+      if (planRaw && validCycles.has(cycleRaw)) {
         await activateOrRenewSubscriptionForTenant(
           updatedPayment.tenantId,
-          planRaw as 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE',
+          planRaw,
           cycleRaw as 'MONTHLY' | 'YEARLY',
         )
       }

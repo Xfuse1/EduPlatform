@@ -6,6 +6,7 @@ import { z } from "zod";
 import { ROUTES } from "@/config/routes";
 import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { chargeGroupEnrollmentIfNeeded } from "@/modules/groups/billing";
 import { normalizeEgyptPhone } from "@/lib/phone";
 import { isSameGradeLevel } from "@/lib/grade-levels";
 import { getTenantBySlug, requireTenant } from "@/lib/tenant";
@@ -696,16 +697,24 @@ export async function enrollChildInGroup(input: { studentId: string; groupId: st
           },
         });
 
-        return;
+      } else {
+        await tx.groupStudent.create({
+          data: {
+            groupId: group.id,
+            studentId: relation.student.id,
+            status: nextStatus,
+          },
+        });
       }
 
-      await tx.groupStudent.create({
-        data: {
+      if (nextStatus === "ACTIVE" && existingEnrollment?.status !== "ACTIVE") {
+        await chargeGroupEnrollmentIfNeeded({
+          tenantId: group.tenantId,
           groupId: group.id,
           studentId: relation.student.id,
-          status: nextStatus,
-        },
-      });
+          tx,
+        });
+      }
     });
 
     revalidatePath(ROUTES.parent.dashboard);

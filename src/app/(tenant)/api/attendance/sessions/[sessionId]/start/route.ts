@@ -5,13 +5,16 @@ import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
 
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const tenant = await requireTenant();
     const user = await requireAuth();
     const { sessionId } = await params;
+    const body = await req.json().catch(() => ({}));
+    const scanLimitRaw = Number(body?.scanLimit ?? 0);
+    const scanLimit = Number.isInteger(scanLimitRaw) && scanLimitRaw > 0 ? scanLimitRaw : null;
 
     const role = String(user.role);
     if (role === "STUDENT" || role === "PARENT") {
@@ -42,6 +45,7 @@ export async function POST(
         status: "IN_PROGRESS",
         qrToken: token,
         qrExpiresAt: expiresAt,
+        qrScanLimit: scanLimit,
       },
     });
 
@@ -49,6 +53,7 @@ export async function POST(
       success: true,
       token,
       expiresAt: expiresAt.toISOString(),
+      scanLimit,
     });
   } catch (error) {
     console.error("[ATTENDANCE_START_SESSION]", error);

@@ -85,6 +85,7 @@ export const groupCreateSchema = z
       .min(0, "المبلغ لا يمكن أن يكون سالبًا")
       .max(10000, "المبلغ كبير جدًا — الحد الأقصى 10,000 جنيه"),
     color: z.string().trim().regex(hexColorPattern, "اللون يجب أن يكون بصيغة hex مثل #1A5276"),
+    billingType: z.enum(["MONTHLY", "PER_SESSION", "FULL_COURSE"]).default("MONTHLY"),
     room: z.preprocess(
       normalizeOptionalText,
       z.string().trim().max(100, "اسم القاعة طويل جدًا").optional(),

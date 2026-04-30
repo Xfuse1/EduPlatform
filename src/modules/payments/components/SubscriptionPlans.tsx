@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
-type PlanKey = 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE'
+type PlanKey = string
 type Cycle = 'MONTHLY' | 'YEARLY'
 
 type PlanItem = {
@@ -21,7 +21,7 @@ function getPlanLabel(plan?: string | null) {
   if (plan === 'STARTER') return 'البداية'
   if (plan === 'PROFESSIONAL') return 'الاحترافية'
   if (plan === 'ENTERPRISE') return 'المؤسسات'
-  return null
+  return plan
 }
 
 function getCycleLabel(cycle?: string | null) {

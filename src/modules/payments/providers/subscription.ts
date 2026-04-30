@@ -77,7 +77,8 @@ export async function createTeacherSubscriptionForTenant(
   const subscription = await db.teacherSubscription.create({
     data: {
       tenantId,
-      subscriptionPlan: plan,
+      subscriptionPlan: config.legacyPlan ?? 'STARTER',
+      planKey: config.key,
       billingCycle: cycle,
       amount,
       isActive: true,
@@ -91,7 +92,7 @@ export async function createTeacherSubscriptionForTenant(
     eventType: 'SUBSCRIPTION_UPDATED',
     entityType: 'SUBSCRIPTION',
     entityId: subscription.id,
-    message: `Subscription created: ${plan}/${cycle}`,
+    message: `Subscription created: ${config.key}/${cycle}`,
     metadata: { amount },
   })
 
@@ -119,7 +120,8 @@ export async function activateOrRenewSubscriptionForTenant(
     ? await db.teacherSubscription.update({
         where: { id: existing.id },
         data: {
-          subscriptionPlan: plan,
+          subscriptionPlan: config.legacyPlan ?? existing.subscriptionPlan,
+          planKey: config.key,
           billingCycle: cycle,
           amount,
           isActive: true,
@@ -130,7 +132,8 @@ export async function activateOrRenewSubscriptionForTenant(
     : await db.teacherSubscription.create({
         data: {
           tenantId,
-          subscriptionPlan: plan,
+          subscriptionPlan: config.legacyPlan ?? 'STARTER',
+          planKey: config.key,
           billingCycle: cycle,
           amount,
           isActive: true,
@@ -144,7 +147,7 @@ export async function activateOrRenewSubscriptionForTenant(
     eventType: 'SUBSCRIPTION_UPDATED',
     entityType: 'SUBSCRIPTION',
     entityId: subscription.id,
-    message: existing ? `Subscription renewed: ${plan}/${cycle}` : `Subscription created: ${plan}/${cycle}`,
+    message: existing ? `Subscription renewed: ${config.key}/${cycle}` : `Subscription created: ${config.key}/${cycle}`,
     metadata: { amount, nextBillingAt: nextBillingAt.toISOString() },
   })
 
@@ -173,7 +176,8 @@ export async function updateSubscriptionPlan(newPlan: SubscriptionPlanType, newC
   const updated = await db.teacherSubscription.update({
     where: { id: subscription.id },
     data: {
-      subscriptionPlan: newPlan,
+      subscriptionPlan: config.legacyPlan ?? subscription.subscriptionPlan,
+      planKey: config.key,
       billingCycle: newCycle,
       amount,
       nextBillingAt,
@@ -187,7 +191,7 @@ export async function updateSubscriptionPlan(newPlan: SubscriptionPlanType, newC
     eventType: 'SUBSCRIPTION_UPDATED',
     entityType: 'SUBSCRIPTION',
     entityId: updated.id,
-    message: `Subscription updated: ${newPlan}/${newCycle}`,
+    message: `Subscription updated: ${config.key}/${newCycle}`,
     metadata: { amount },
   })
 
@@ -213,10 +217,10 @@ export async function getSubscriptionLimits(): Promise<SubscriptionLimits> {
   const configs = await getSubscriptionPlanConfigs()
   const subscription = await getTeacherSubscription()
   if (!subscription || !subscription.isActive) {
-    return configs.STARTER.limits
+    return configs.STARTER?.limits ?? Object.values(configs)[0]?.limits ?? { students: 0, groups: 0, sessions: 0, storage: 0 }
   }
 
-  return configs[subscription.subscriptionPlan as SubscriptionPlanType].limits
+  return (configs[subscription.planKey] ?? configs[subscription.subscriptionPlan])?.limits ?? configs.STARTER.limits
 }
 
 export async function checkStudentLimit(currentCount: number): Promise<boolean> {

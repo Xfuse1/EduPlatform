@@ -74,6 +74,7 @@ export default async function EditGroupPage({ params }: EditGroupPageProps) {
           room: group.room ?? undefined,
           maxCapacity: group.maxCapacity,
           monthlyFee: group.monthlyFee,
+          billingType: group.billingType,
           color: group.color,
         }}
       />

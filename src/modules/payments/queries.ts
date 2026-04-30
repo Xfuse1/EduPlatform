@@ -18,7 +18,7 @@ function currentMonthKey() {
   return new Date().toISOString().slice(0, 7);
 }
 
-function toClientPaymentStatus(status?: string | null) {
+function toClientPaymentStatus(status?: string | null): "PAID" | "OVERDUE" | "PENDING" {
   if (status === "PAID" || status === "OVERDUE" || status === "PENDING") {
     return status;
   }

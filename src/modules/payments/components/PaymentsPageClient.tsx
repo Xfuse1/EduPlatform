@@ -54,6 +54,7 @@ export function PaymentsPageClient({
   initialPayments: PaymentItem[];
   initialStudentQuery?: string;
   initialStatus?: PaymentFilter;
+  students?: Array<{ id: string; name: string; gradeLevel?: string | null }>;
 }) {
   const [payments, setPayments] = useState(initialPayments);
   const [isOpen, setIsOpen] = useState(false);

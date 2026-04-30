@@ -8,6 +8,7 @@ import { EnrollmentStatus, type Prisma } from "@/generated/client";
 import { db } from "@/lib/db";
 import { normalizeEgyptPhone } from "@/lib/phone";
 import { requireTenant } from "@/lib/tenant";
+import { chargeGroupEnrollmentIfNeeded } from "@/modules/groups/billing";
 
 const ACTIVE_ENROLLMENT_STATUSES = [
   EnrollmentStatus.ACTIVE,
@@ -238,26 +239,38 @@ async function syncGroupMemberships(tenantId: string, studentId: string, groupId
         : "ACTIVE";
 
     if (existingEnrollment) {
-      await db.groupStudent.update({
-        where: {
-          id: existingEnrollment.id,
-        },
-        data: {
-          status: nextStatus,
-          droppedAt: null,
-        },
+      await db.$transaction(async (tx) => {
+        await tx.groupStudent.update({
+          where: {
+            id: existingEnrollment.id,
+          },
+          data: {
+            status: nextStatus,
+            droppedAt: null,
+          },
+        });
+
+        if (nextStatus === "ACTIVE" && existingEnrollment.status !== "ACTIVE") {
+          await chargeGroupEnrollmentIfNeeded({ tenantId, groupId, studentId, tx });
+        }
       });
       continue;
     }
 
-    await db.groupStudent.create({
-      data: {
-        id: generateId(),
-        groupId,
-        studentId,
-        status: nextStatus,
-        enrolledAt: new Date(),
-      },
+    await db.$transaction(async (tx) => {
+      await tx.groupStudent.create({
+        data: {
+          id: generateId(),
+          groupId,
+          studentId,
+          status: nextStatus,
+          enrolledAt: new Date(),
+        },
+      });
+
+      if (nextStatus === "ACTIVE") {
+        await chargeGroupEnrollmentIfNeeded({ tenantId, groupId, studentId, tx });
+      }
     });
   }
 }
@@ -702,22 +715,37 @@ export async function enrollExistingStudent(studentId: string, groupId: string):
       },
       select: {
         id: true,
+        status: true,
       },
     });
 
-    if (existingEnrollment) {
-      await db.groupStudent.update({
-        where: {
-          id: existingEnrollment.id,
-        },
-        data: {
-          status: "ACTIVE",
-          droppedAt: null,
-        },
-      });
-    } else {
-      await enrollInGroup(studentId, groupId);
-    }
+    await db.$transaction(async (tx) => {
+      if (existingEnrollment) {
+        await tx.groupStudent.update({
+          where: {
+            id: existingEnrollment.id,
+          },
+          data: {
+            status: "ACTIVE",
+            droppedAt: null,
+          },
+        });
+      } else {
+        await tx.groupStudent.create({
+          data: {
+            id: generateId(),
+            groupId,
+            studentId,
+            status: "ACTIVE",
+            enrolledAt: new Date(),
+          },
+        });
+      }
+
+      if (existingEnrollment?.status !== "ACTIVE") {
+        await chargeGroupEnrollmentIfNeeded({ tenantId: tenant.id, groupId, studentId, tx });
+      }
+    });
 
     revalidatePath("/teacher/students");
     revalidatePath(`/teacher/students/${studentId}`);
