@@ -114,6 +114,7 @@ export function StudentsPageClient({ students, groups }: { students: StudentItem
     if (status === "ACTIVE") return "نشط";
     if (status === "SUSPENDED") return "موقوف";
     if (status === "REJECTED") return "مرفوض";
+    if (status === "PENDING") return "معلق";
     return "نشط";
   }
 
@@ -121,6 +122,7 @@ export function StudentsPageClient({ students, groups }: { students: StudentItem
     if (status === "ACTIVE") return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300";
     if (status === "SUSPENDED") return "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300";
     if (status === "REJECTED") return "bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300";
+    if (status === "PENDING") return "bg-sky-100 text-sky-700 dark:bg-sky-950/30 dark:text-sky-300";
     return "bg-emerald-100 text-emerald-700";
   }
 
