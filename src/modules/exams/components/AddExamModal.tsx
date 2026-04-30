@@ -150,22 +150,23 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-extrabold text-slate-900 border-b pb-4 dark:text-white">
+      <DialogContent className="w-[min(760px,calc(100vw-2rem))] max-h-[92vh] overflow-hidden border-slate-200 bg-white p-0 shadow-[0_30px_90px_rgba(2,8,23,0.38)] dark:border-slate-800 dark:bg-slate-950" dir="rtl">
+        <DialogHeader className="border-b border-slate-200 bg-slate-50/80 px-6 py-5 dark:border-slate-800 dark:bg-slate-900/35">
+          <DialogTitle className="text-center text-2xl font-extrabold text-slate-950 dark:text-white">
             {examToEdit ? "تعديل الامتحان" : "إضافة امتحان جديد"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
+          <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/30 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="title" className="text-sm font-bold text-slate-700 dark:text-slate-200">عنوان الامتحان</Label>
               <Input
                 id="title"
                 placeholder="مثال: امتحان الشهر الأول - فيزياء"
                 required
-                className="min-h-11 text-sm font-medium"
+                className="min-h-12 rounded-xl bg-white text-sm font-medium shadow-none dark:bg-slate-950"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               />
@@ -177,7 +178,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                 aria-label="المجموعة المختبرة"
                 id="groupId"
                 name="groupId"
-                className="w-full min-h-11 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900 shadow-sm"
+                className="w-full min-h-12 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-secondary focus:ring-4 focus:ring-secondary/15 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                 value={formData.groupId}
                 onChange={(e) => setFormData({ ...formData, groupId: e.target.value })}
               >
@@ -190,13 +191,13 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
             <div className="space-y-2">
               <Label htmlFor="examDate" className="text-sm font-bold text-slate-700 dark:text-slate-200">تاريخ ووقت الامتحان</Label>
               <div className="relative">
-                  <Calendar className="absolute left-3 top-3.5 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <Calendar className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
                     id="examDate"
                     type="datetime-local"
                     required
                     readOnly
-                    className="ps-10 min-h-11 text-sm block w-full cursor-pointer"
+                    className="block min-h-12 w-full cursor-pointer rounded-xl bg-white ps-10 text-sm font-medium dark:bg-slate-950"
                     value={formData.examDate}
                     onChange={(e) => setFormData({ ...formData, examDate: e.target.value })}
                     onClick={(e) => openDatePicker(e.currentTarget)}
@@ -214,7 +215,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                 min="5"
                 required
                 placeholder="مثال: 60"
-                className="min-h-11 text-sm font-bold text-center"
+                className="min-h-12 rounded-xl bg-white text-center text-sm font-bold dark:bg-slate-950"
                 value={formData.durationMinutes}
                 onChange={(e) => setFormData({ ...formData, durationMinutes: e.target.value })}
               />
@@ -228,7 +229,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                 min="1"
                 required
                 placeholder="مثال: 100"
-                className="min-h-11 text-sm font-bold text-center"
+                className="min-h-12 rounded-xl bg-white text-center text-sm font-bold dark:bg-slate-950"
                 value={formData.maxScore}
                 onChange={(e) => setFormData({ ...formData, maxScore: e.target.value })}
               />
@@ -236,13 +237,13 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
           </div>
 
           {/* قسم الأسئلة */}
-          <div className="space-y-4 border-t pt-6">
-            <div className="flex items-center justify-between">
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/20">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <HelpCircle className="h-5 w-5 text-primary" />
                 <h3 className="font-bold text-lg">أسئلة الامتحان</h3>
               </div>
-              <Button type="button" onClick={addQuestion} variant="outline" className="rounded-full shadow-sm min-h-10 px-4">
+              <Button type="button" onClick={addQuestion} variant="outline" className="min-h-10 rounded-xl px-4 shadow-sm">
                 <PlusCircle className="me-1.5 h-4 w-4" />
                 إضافة سؤال
               </Button>
@@ -250,9 +251,9 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
 
             <div className="space-y-4">
               {questions.map((q, index) => (
-                <div key={index} className="border-2 border-slate-100 rounded-2xl p-5 space-y-4 bg-slate-50/50 dark:bg-slate-900/50 dark:border-slate-800 transition hover:border-slate-200 dark:hover:border-slate-700">
+                <div key={index} className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950/55 dark:hover:border-slate-700">
                   <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                        <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0 rounded-lg px-2.5 py-1">
                         سؤال {index + 1}
                        </Badge>
@@ -261,7 +262,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                         name={`question-type-${index}`}
                         value={q.type}
                         onChange={e => updateQuestion(index, 'type', e.target.value)}
-                        className="flex-1 min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900"
+                        className="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold outline-none transition focus:border-secondary focus:ring-4 focus:ring-secondary/15 dark:border-slate-700 dark:bg-slate-900"
                       >
                         <option value="MCQ">اختيار متعدد (MCQ)</option>
                         <option value="ESSAY">سؤال مقالي (Essay)</option>
@@ -274,7 +275,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                       value={q.questionText}
                       onChange={e => updateQuestion(index, 'questionText', e.target.value)}
                       placeholder="اكتب نص السؤال هنا..."
-                      className="w-full text-sm font-medium resize-none min-h-[80px]"
+                      className="min-h-[92px] w-full resize-none rounded-xl bg-white text-sm font-medium dark:bg-slate-900"
                     />
 
                     {q.type === 'MCQ' && (
@@ -295,7 +296,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                               value={opt}
                               onChange={e => updateOption(index, i, e.target.value)}
                               placeholder={`الخيار ${i + 1}`}
-                              className="flex-1 h-10 text-sm bg-white dark:bg-slate-900"
+                              className="h-11 flex-1 rounded-xl bg-white text-sm dark:bg-slate-900"
                             />
                           </div>
                         ))}
@@ -310,7 +311,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                           value={q.correctAnswer}
                           onChange={e => updateQuestion(index, 'correctAnswer', e.target.value)}
                           placeholder="اكتب نموذج الإجابة هنا لمساعدة الـ AI في تصحيح إجابات الطلاب..."
-                          className="w-full text-sm italic border-dashed"
+                          className="w-full rounded-xl border-dashed text-sm italic"
                         />
                       </div>
                     )}
@@ -344,7 +345,7 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3">
+                  <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
                       <Label className="text-xs font-bold text-slate-500">الدرجة:</Label>
                       <Input
@@ -352,14 +353,14 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                         type="number"
                         value={q.grade}
                         onChange={e => updateQuestion(index, 'grade', Number(e.target.value))}
-                        className="w-20 h-9 text-center text-sm font-bold bg-white dark:bg-slate-900 border-slate-200"
+                        className="h-10 w-24 rounded-xl border-slate-200 bg-white text-center text-sm font-bold dark:bg-slate-900"
                       />
                     </div>
                     <Button 
                       type="button" 
                       variant="ghost" 
                       onClick={() => removeQuestion(index)}
-                      className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 min-h-9 px-3"
+                      className="min-h-10 rounded-xl px-3 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/10"
                     >
                       <Trash2 className="h-4 w-4 me-1.5" />
                       حذف السؤال
@@ -369,8 +370,8 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
               ))}
 
               {questions.length === 0 && (
-                <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-2xl dark:border-slate-800">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 dark:bg-slate-900">
+                <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/60 py-12 text-center dark:border-slate-800 dark:bg-slate-950/40">
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm dark:bg-slate-900">
                     <PlusCircle className="h-6 w-6 text-slate-300" />
                   </div>
                   <h4 className="text-sm font-bold text-slate-600 dark:text-slate-400">لا توجد أسئلة بعد</h4>
@@ -379,12 +380,13 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
               )}
             </div>
           </div>
+          </div>
 
-          <div className="flex gap-4 pt-4 border-t sticky bottom-0 bg-white dark:bg-slate-950 pb-2">
-            <Button type="button" variant="outline" className="flex-1 min-h-12 border-slate-200 font-bold" onClick={onClose} disabled={loading}>
+          <div className="grid gap-3 border-t border-slate-200 bg-white/95 p-4 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 sm:grid-cols-2">
+            <Button type="button" variant="outline" className="min-h-12 border-slate-200 font-bold dark:border-slate-700" onClick={onClose} disabled={loading}>
               إلغاء
             </Button>
-            <Button type="submit" className="flex-1 min-h-12 shadow-md bg-primary hover:bg-primary/90 font-bold" disabled={loading || questions.length === 0}>
+            <Button type="submit" className="min-h-12 font-bold shadow-md" disabled={loading || questions.length === 0}>
               {loading ? "جاري الحفظ..." : (
                   <>
                     <Save className="me-2 h-5 w-5" />
