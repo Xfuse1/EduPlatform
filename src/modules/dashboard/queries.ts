@@ -549,6 +549,8 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
       getAssignmentsByParent(tenantId, parentId),
     ]);
 
+    console.log("🔍 parentId:", parentId, "children count:", children.length, "children:", JSON.stringify(children.map(c => c.student.name)));
+
     const childTenantIds = Array.from(new Set(
       children.flatMap(({ student }) =>
         student.groupStudents.map((enrollment) => enrollment.group.tenantId),
