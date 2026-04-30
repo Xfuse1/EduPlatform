@@ -147,39 +147,40 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[520px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-extrabold text-slate-900 border-b pb-4 dark:text-white">
+      <DialogContent className="w-[min(760px,calc(100vw-2rem))] max-h-[92vh] overflow-hidden border-slate-200 bg-white p-0 shadow-[0_30px_90px_rgba(2,8,23,0.38)] dark:border-slate-800 dark:bg-slate-950" dir="rtl">
+        <DialogHeader className="border-b border-slate-200 bg-slate-50/80 px-6 py-5 dark:border-slate-800 dark:bg-slate-900/35">
+          <DialogTitle className="text-center text-2xl font-extrabold text-slate-950 dark:text-white">
             {initialData ? "تعديل الواجب" : "إضافة واجب جديد"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-5">
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
 
-          {/* عنوان الواجب */}
-          <div className="space-y-2">
-            <Label htmlFor="title" className="text-sm font-bold text-slate-700 dark:text-slate-200">
-              عنوان الواجب <span className="text-rose-500">*</span>
-            </Label>
-            <Input
-              id="title"
-              placeholder="مثال: واجب الدرس الأول - الحركة في اتجاه واحد"
-              required
-              className="min-h-12 text-sm"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            />
-          </div>
+          <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/30 md:grid-cols-2">
+            {/* عنوان الواجب */}
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="title" className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                عنوان الواجب <span className="text-rose-500">*</span>
+              </Label>
+              <Input
+                id="title"
+                placeholder="مثال: واجب الدرس الأول - الحركة في اتجاه واحد"
+                required
+                className="min-h-12 rounded-xl bg-white text-sm font-medium shadow-none dark:bg-slate-950"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              />
+            </div>
 
           {/* المجموعة + تاريخ التسليم في صف واحد */}
-          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="groupId" className="text-sm font-bold text-slate-700 dark:text-slate-200">
                 المجموعة <span className="text-rose-500">*</span>
               </Label>
               <select
                 id="groupId"
-                className="w-full min-h-12 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900"
+                className="w-full min-h-12 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-secondary focus:ring-4 focus:ring-secondary/15 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                 value={formData.groupId}
                 onChange={(e) => setFormData({ ...formData, groupId: e.target.value })}
               >
@@ -197,16 +198,14 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
                 id="dueDate"
                 type="date"
                 required
-                className="w-full min-h-12 rounded-xl border border-slate-300 bg-white px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 cursor-pointer"
+                className="w-full min-h-12 cursor-pointer rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition focus:border-secondary focus:ring-4 focus:ring-secondary/15 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                 value={formData.dueDate}
                 onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
                 onClick={(e) => (e.target as HTMLInputElement).showPicker()}
               />
             </div>
-          </div>
-
           {/* الدرجة النهائية */}
-          <div className="space-y-2">
+          <div className="space-y-2 md:col-span-2">
             <Label htmlFor="maxGrade" className="text-sm font-bold text-slate-700 dark:text-slate-200">
               الدرجة النهائية للواجب
               <span className="mr-2 text-xs font-normal text-slate-400">(سيصحح الـ AI بناءً عليها)</span>
@@ -217,14 +216,14 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
               min={1}
               max={1000}
               required
-              className="min-h-12 text-sm"
+              className="min-h-12 rounded-xl bg-white text-center text-sm font-bold dark:bg-slate-950"
               value={formData.maxGrade}
               onChange={(e) => setFormData({ ...formData, maxGrade: Number(e.target.value) })}
             />
           </div>
 
           {/* الوصف */}
-          <div className="space-y-2">
+          <div className="space-y-2 md:col-span-2">
             <Label htmlFor="description" className="text-sm font-bold text-slate-700 dark:text-slate-200">
               وصف / ملاحظات
               <span className="mr-2 text-xs font-normal text-slate-400">(اختياري)</span>
@@ -233,18 +232,21 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
               id="description"
               placeholder="اكتب تفاصيل الواجب هنا..."
               rows={3}
-              className="text-sm resize-none"
+              className="min-h-[92px] resize-none rounded-xl bg-white text-sm font-medium dark:bg-slate-950"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
+          </div>
 
           {/* المرفقات */}
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 bg-slate-50/50 dark:bg-slate-900/50 space-y-4">
-            <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
-              مرفقات الواجب
-              <span className="mr-2 text-xs font-normal text-slate-400">(اختياري)</span>
-            </p>
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/20">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-base font-extrabold text-slate-800 dark:text-slate-100">
+                مرفقات الواجب
+              </p>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-300">اختياري</span>
+            </div>
 
             {/* رابط خارجي */}
             <div className="space-y-2">
@@ -256,7 +258,7 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
                 <Input
                   id="fileLink"
                   placeholder="https://..."
-                  className="pr-10 text-sm"
+                  className="min-h-12 rounded-xl bg-slate-50 pr-10 text-sm dark:bg-slate-950"
                   dir="ltr"
                   value={formData.fileLink}
                   onChange={(e) => setFormData({ ...formData, fileLink: e.target.value })}
@@ -272,7 +274,7 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
 
             {/* عرض الملف الحالي إن وجد */}
             {initialData?.fileUrl && !formData.file && (
-              <div className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-800 rounded-lg px-3 py-2 flex items-center gap-2">
+              <div className="flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-xs text-slate-500 dark:bg-slate-800">
                 <FileText className="h-3 w-3 text-primary" />
                 <span>الملف الحالي: </span>
                 <a href={initialData.fileUrl} target="_blank" rel="noreferrer" className="text-primary underline truncate max-w-[200px]">
@@ -290,7 +292,7 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
               <Input
                 id="file"
                 type="file"
-                className="file:me-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 text-sm cursor-pointer bg-white dark:bg-slate-900"
+                className="min-h-12 cursor-pointer rounded-xl bg-slate-50 text-sm file:me-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-primary hover:file:bg-primary/20 dark:bg-slate-950"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) setFormData({ ...formData, file });
@@ -312,7 +314,7 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
               <Input
                 id="answerKeyFile"
                 type="file"
-                className="file:me-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200 text-sm cursor-pointer bg-white dark:bg-slate-900 border-amber-200 dark:border-amber-900/50"
+                className="min-h-12 cursor-pointer rounded-xl border-amber-200 bg-slate-50 text-sm file:me-3 file:rounded-lg file:border-0 file:bg-amber-100 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-amber-700 hover:file:bg-amber-200 dark:border-amber-900/50 dark:bg-slate-950"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) setFormData({ ...formData, answerKeyFile: file });
@@ -322,18 +324,19 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
           </div>
             {/* عرض ملف الإجابات الحالي إن وجد */}
             {initialData?.answerKeyUrl && !formData.answerKeyFile && (
-              <div className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2 flex items-center gap-2">
+              <div className="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-600 dark:bg-amber-900/20">
                 <Lock className="h-3 w-3" />
                 <span>نموذج الإجابة الحالي محفوظ ✓</span>
               </div>
             )}
+          </div>
 
           {/* أزرار */}
-          <div className="flex gap-3 pt-2">
-            <Button type="button" variant="outline" className="flex-1 min-h-12" onClick={onClose} disabled={loading}>
+          <div className="grid gap-3 border-t border-slate-200 bg-white/95 p-4 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 sm:grid-cols-2">
+            <Button type="button" variant="outline" className="min-h-12 border-slate-200 font-bold dark:border-slate-700" onClick={onClose} disabled={loading}>
               إلغاء
             </Button>
-            <Button type="submit" className="flex-1 min-h-12" disabled={loading}>
+            <Button type="submit" className="min-h-12 font-bold shadow-md" disabled={loading}>
               {loading ? "جاري الحفظ..." : (
                 <>
                   <Save className="me-2 h-4 w-4" />
