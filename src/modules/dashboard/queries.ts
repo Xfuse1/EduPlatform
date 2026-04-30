@@ -598,10 +598,10 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
         const currentEnrollmentStatuses = new Set(["ACTIVE", "WAITLIST"]);
         const activeEnrollments = student.groupStudents.filter((enrollment) => enrollment.status === "ACTIVE");
         const currentEnrollments = student.groupStudents.filter((enrollment) => currentEnrollmentStatuses.has(enrollment.status));
-        const scopedTenantId = activeEnrollments[0]?.group.tenantId ?? currentEnrollments[0]?.group.tenantId ?? student.tenantId;
+        const scopedTenantId = activeEnrollments[0]?.group.tenantId ?? currentEnrollments[0]?.group.tenantId ?? student.tenantId ?? "";
         const [attendance, payment] = await Promise.all([
-          getStudentAttendanceSnapshot(scopedTenantId, student.id),
-          getStudentPaymentSnapshot(scopedTenantId, student.id),
+          scopedTenantId ? getStudentAttendanceSnapshot(scopedTenantId, student.id) : Promise.resolve({ rate: 0, records: [] }),
+          scopedTenantId ? getStudentPaymentSnapshot(scopedTenantId, student.id) : Promise.resolve({ status: "PENDING" as const, amount: 0 }),
         ]);
         const enrolledGroupIds = new Set(currentEnrollments.map((enrollment) => enrollment.group.id));
         const studentGradeLevelKey = getGradeLevelKey(student.gradeLevel);
@@ -644,7 +644,7 @@ export const getParentDashboardData = cache(async (tenantId: string, parentId: s
           name: student.name,
           phone: student.phone.startsWith("student-") ? "" : student.phone,
           grade: student.gradeLevel ?? "غير محدد",
-          tenantName: currentEnrollments[0]?.group.tenant?.name ?? student.tenant.name,
+          tenantName: currentEnrollments[0]?.group.tenant?.name ?? student.tenant?.name ?? "غير محدد",
           currentGroups,
           availableGroups,
           attendanceRate: attendance.rate,
