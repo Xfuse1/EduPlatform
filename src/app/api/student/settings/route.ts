@@ -9,15 +9,26 @@ export async function PATCH(req: Request) {
   }
 
   try {
-    const { name } = await req.json();
+    const { name, parentPhone } = await req.json();
 
     if (!name || typeof name !== "string" || name.trim().length < 2) {
       return NextResponse.json({ error: "الاسم يجب أن يكون حرفين على الأقل" }, { status: 400 });
     }
 
+    // التحقق من رقم هاتف ولي الأمر إذا وجد
+    if (parentPhone) {
+      const egyptPhoneRegex = /^01[0125][0-9]{8}$/;
+      if (!egyptPhoneRegex.test(parentPhone)) {
+        return NextResponse.json({ error: "رقم هاتف ولي الأمر غير صحيح" }, { status: 400 });
+      }
+    }
+
     await db.user.update({
       where: { id: user.id },
-      data: { name: name.trim() },
+      data: { 
+        name: name.trim(),
+        parentPhone: parentPhone || null,
+      },
     });
 
     return NextResponse.json({ success: true });
