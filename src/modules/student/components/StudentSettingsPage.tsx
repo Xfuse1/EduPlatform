@@ -15,6 +15,7 @@ interface StudentSettingsPageProps {
     avatarUrl: string | null;
     email?: string | null;
     gradeLevel?: string | null;
+    parentPhone?: string | null;
     hasPin: boolean;
   };
 }
@@ -23,14 +24,24 @@ export function StudentSettingsPage({ initialData }: StudentSettingsPageProps) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialData.avatarUrl);
   const [isUploading, setIsUploading] = useState(false);
   const [name, setName] = useState(initialData.name);
+  const [parentPhone, setParentPhone] = useState(initialData.parentPhone || "");
   const [isSaving, setIsSaving] = useState(false);
 
-  const isChanged = name.trim() !== initialData.name;
+  const isChanged = name.trim() !== initialData.name || parentPhone !== (initialData.parentPhone || "");
 
-  async function handleSaveName() {
+  async function handleSaveSettings() {
     if (!name.trim() || name.trim().length < 2) {
       toast.error("الاسم يجب أن يكون حرفين على الأقل");
       return;
+    }
+
+    // التحقق من رقم هاتف ولي الأمر إذا وجد
+    if (parentPhone) {
+      const egyptPhoneRegex = /^01[0125][0-9]{8}$/;
+      if (!egyptPhoneRegex.test(parentPhone)) {
+        toast.error("رقم هاتف ولي الأمر غير صحيح");
+        return;
+      }
     }
 
     setIsSaving(true);
@@ -38,15 +49,18 @@ export function StudentSettingsPage({ initialData }: StudentSettingsPageProps) {
       const res = await fetch("/api/student/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim() }),
+        body: JSON.stringify({ 
+          name: name.trim(),
+          parentPhone: parentPhone.trim() || null 
+        }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      toast.success("تم تحديث الاسم بنجاح ✓");
+      toast.success("تم تحديث البيانات بنجاح ✓");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "فشل حفظ الاسم");
+      toast.error(error instanceof Error ? error.message : "فشل حفظ البيانات");
     } finally {
       setIsSaving(false);
     }
@@ -165,6 +179,22 @@ export function StudentSettingsPage({ initialData }: StudentSettingsPageProps) {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">رقم ولي الأمر</label>
+              <div className="relative">
+                <Phone className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  dir="ltr"
+                  maxLength={11}
+                  value={parentPhone}
+                  onChange={(e) => setParentPhone(e.target.value.replace(/\D/g, ""))}
+                  placeholder="01XXXXXXXXX"
+                  className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 pr-11 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950"
+                />
+              </div>
+            </div>
+
             {initialData.gradeLevel && (
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">المرحلة الدراسية</label>
@@ -179,7 +209,7 @@ export function StudentSettingsPage({ initialData }: StudentSettingsPageProps) {
           {isChanged && (
             <div className="flex justify-end pt-2">
               <Button
-                onClick={handleSaveName}
+                onClick={handleSaveSettings}
                 disabled={isSaving}
                 className="h-12 px-8 rounded-2xl font-bold bg-sky-600 hover:bg-sky-700 text-white"
               >

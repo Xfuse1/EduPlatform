@@ -19,6 +19,7 @@ export default async function StudentSettingsRoutePage() {
       avatarUrl: true,
       email: true,
       gradeLevel: true,
+      parentPhone: true,
       pinHash: true,
     },
   });
