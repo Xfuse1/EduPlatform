@@ -29,15 +29,13 @@ export function AppShell({
       { href: "/teacher/groups", label: "المجموعات" },
       { href: "/teacher/students", label: "الطلاب" },
       { href: "/attendance", label: "الحضور" },
-      { href: "/payments", label: "المصاريف" },
-      { href: "/payments/subscription", label: "الاشتراك" },
-      { href: "/payments/transfers", label: "التحويلات" },
+      { href: "/payments", label: "المالية" },
       { href: "/messages", label: "الرسائل" },
     ],
     student: [
       { href: "/student", label: "الرئيسية" },
       { href: "/student/schedule", label: "جدولي" },
-      { href: "/payments/wallet", label: "المحفظة" },
+      { href: "/payments", label: "المالية" },
       { href: "/messages", label: "الرسائل" },
     ],
     parent: [
@@ -45,7 +43,7 @@ export function AppShell({
       { href: "/parent/children", label: "أبنائي" },
       { href: "/parent/assignments", label: "الواجبات" },
       { href: "/parent/exams", label: "الامتحانات" },
-      { href: "/payments/wallet", label: "المحفظة" },
+      { href: "/payments", label: "المالية" },
     ],
   } as const;
 

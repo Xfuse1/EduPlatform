@@ -35,7 +35,7 @@ export function Dialog({
   return <DialogContext.Provider value={{ open, onOpenChange }}>{children}</DialogContext.Provider>;
 }
 
-export function DialogContent({ children, className }: HTMLAttributes<HTMLDivElement>) {
+export function DialogContent({ children, className, ...props }: HTMLAttributes<HTMLDivElement>) {
   const { open, onOpenChange } = useDialogContext();
 
   useEffect(() => {
@@ -72,6 +72,7 @@ export function DialogContent({ children, className }: HTMLAttributes<HTMLDivEle
           className,
         )}
         role="dialog"
+        {...props}
       >
         {children}
       </div>
