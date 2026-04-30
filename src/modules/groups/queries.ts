@@ -146,6 +146,7 @@ export async function getGroupsList(tenantId: string, teacherId?: string) {
     schedule: group.schedule,
     room: group.room,
     monthlyFee: group.monthlyFee,
+    billingType: group.billingType,
     maxCapacity: group.maxCapacity,
     enrolledCount: group.studentCount,
     color: group.color,

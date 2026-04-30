@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
+import { ensureQrBillingBeforeAttendance, incrementMonthlyConsumption } from "@/modules/groups/billing";
 
 async function findActiveSessionByToken(tenantId: string, token: string) {
   const now = new Date();
@@ -24,6 +25,13 @@ async function findActiveSessionByToken(tenantId: string, token: string) {
             select: { studentId: true },
           },
         },
+      },
+      attendances: {
+        where: {
+          status: { in: ["PRESENT", "LATE"] },
+          method: { in: ["QR", "QR_GUEST"] },
+        },
+        select: { studentId: true },
       },
     },
   });
@@ -69,6 +77,8 @@ export async function GET(request: NextRequest) {
         timeStart: session.timeStart,
         timeEnd: session.timeEnd,
         expiresAt: session.qrExpiresAt,
+        scanLimit: session.qrScanLimit,
+        scanCount: new Set(session.attendances.map((attendance) => attendance.studentId)).size,
       },
       alreadyMarked: existingAttendance?.status === "PRESENT" || existingAttendance?.status === "LATE",
     });
@@ -106,32 +116,67 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "الكود غير صالح أو منتهي." }, { status: 404 });
     }
 
-    const now = new Date();
-    const isGuest = !session.group.groupStudents.some((gs) => gs.studentId === user.id);
-
-    await db.attendance.upsert({
+    const existingAttendance = await db.attendance.findUnique({
       where: {
         sessionId_studentId: {
           sessionId: session.id,
           studentId: user.id,
         },
       },
-      update: {
-        status: "PRESENT",
-        method: isGuest ? "QR_GUEST" : "QR",
-        markedAt: now,
-        synced: true,
-      },
-      create: {
+      select: { status: true },
+    });
+
+    if (existingAttendance?.status === "PRESENT" || existingAttendance?.status === "LATE") {
+      return NextResponse.json({ success: true, studentName: user.name, alreadyMarked: true });
+    }
+
+    const scanCount = new Set(session.attendances.map((attendance) => attendance.studentId)).size;
+    if (session.qrScanLimit && scanCount >= session.qrScanLimit) {
+      return NextResponse.json({ success: false, error: "تم الوصول للعدد المسموح به لهذا الـ QR." }, { status: 409 });
+    }
+
+    const now = new Date();
+    const isGuest = !session.group.groupStudents.some((gs) => gs.studentId === user.id);
+
+    await db.$transaction(async (tx) => {
+      await ensureQrBillingBeforeAttendance({
         tenantId: tenant.id,
         sessionId: session.id,
+        studentId: user.id,
+        tx,
+      });
+
+      await tx.attendance.upsert({
+        where: {
+          sessionId_studentId: {
+            sessionId: session.id,
+            studentId: user.id,
+          },
+        },
+        update: {
+          status: "PRESENT",
+          method: isGuest ? "QR_GUEST" : "QR",
+          markedAt: now,
+          synced: true,
+        },
+        create: {
+          tenantId: tenant.id,
+          sessionId: session.id,
+          groupId: session.group.id,
+          studentId: user.id,
+          status: "PRESENT",
+          method: isGuest ? "QR_GUEST" : "QR",
+          markedAt: now,
+          synced: true,
+        },
+      });
+
+      await incrementMonthlyConsumption({
+        tenantId: tenant.id,
         groupId: session.group.id,
         studentId: user.id,
-        status: "PRESENT",
-        method: isGuest ? "QR_GUEST" : "QR",
-        markedAt: now,
-        synced: true,
-      },
+        tx,
+      });
     });
 
     return NextResponse.json({
@@ -144,4 +189,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: "فشل تسجيل الحضور عبر QR." }, { status: 500 });
   }
 }
-

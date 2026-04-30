@@ -81,7 +81,7 @@ function normalizePaymentLinkIdentifier(raw: string) {
 }
 
 function buildSubscriptionPaymentLinkUrl(
-  plan: 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE',
+  plan: string,
   cycle: 'MONTHLY' | 'YEARLY',
   orderId: string,
 ) {
@@ -683,7 +683,7 @@ export async function requestTeacherWalletWithdrawal(input: { amount: number }) 
 }
 
 export async function createTeacherSubscriptionPayment(input: {
-  subscriptionPlan: 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE'
+  subscriptionPlan: string
   billingCycle: 'MONTHLY' | 'YEARLY'
   amount: number
   transactionId: string
@@ -733,7 +733,7 @@ export async function createTeacherSubscriptionPayment(input: {
 }
 
 export async function initiateTeacherSubscriptionCheckout(input: {
-  subscriptionPlan: 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE'
+  subscriptionPlan: string
   billingCycle: 'MONTHLY' | 'YEARLY'
 }) {
   const tenant = await requireTenant()

@@ -5,7 +5,11 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { logFinancialEvent } from "@/lib/financial-audit";
 import { requireSuperAdminPage } from "@/lib/platform-admin";
-import { upsertSubscriptionPlanConfig } from "@/modules/payments/providers/plan-config";
+import {
+  normalizePlanKey,
+  softDeleteSubscriptionPlanConfig,
+  upsertSubscriptionPlanConfig,
+} from "@/modules/payments/providers/plan-config";
 import { creditUserWallet, debitUserWallet, getOrCreateWallet, resolveRechargeWalletOwner } from "@/modules/wallet/provider";
 
 const ADMIN_WITHDRAWAL_METHODS = ["CASH", "ELECTRONIC_WALLET", "INSTAPAY", "BANK_TRANSFER", "OTHER"] as const;
@@ -44,7 +48,7 @@ export async function setTenantStatusAction(formData: FormData) {
 export async function updatePlanConfigAction(formData: FormData) {
   await requireSuperAdminPage();
 
-  const plan = String(formData.get("plan") ?? "").trim() as "STARTER" | "PROFESSIONAL" | "ENTERPRISE";
+  const plan = normalizePlanKey(String(formData.get("plan") ?? "").trim());
   const name = String(formData.get("name") ?? "").trim();
   const monthlyPrice = Number(formData.get("monthlyPrice") ?? 0);
   const yearlyPrice = Number(formData.get("yearlyPrice") ?? 0);
@@ -54,8 +58,8 @@ export async function updatePlanConfigAction(formData: FormData) {
   const storageLimit = Number(formData.get("storageLimit") ?? 0);
   const isActive = formData.getAll("isActive").includes("true");
 
-  if (!["STARTER", "PROFESSIONAL", "ENTERPRISE"].includes(plan)) {
-    throw new Error("الخطة غير صالحة");
+  if (!plan) {
+    throw new Error("مفتاح الباقة غير صالح");
   }
 
   if (!name) {
@@ -67,7 +71,7 @@ export async function updatePlanConfigAction(formData: FormData) {
   }
 
   await upsertSubscriptionPlanConfig({
-    plan,
+    key: plan,
     name,
     monthlyPrice,
     yearlyPrice,
@@ -81,6 +85,61 @@ export async function updatePlanConfigAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/admin/finance");
   revalidatePath("/admin/plans");
+  revalidatePath("/payments/subscription");
+}
+
+export async function createPlanConfigAction(formData: FormData) {
+  await requireSuperAdminPage();
+
+  const key = normalizePlanKey(String(formData.get("key") ?? formData.get("name") ?? "").trim());
+  const name = String(formData.get("name") ?? "").trim();
+  const monthlyPrice = Number(formData.get("monthlyPrice") ?? 0);
+  const yearlyPrice = Number(formData.get("yearlyPrice") ?? 0);
+  const studentsLimit = Number(formData.get("studentsLimit") ?? 0);
+  const groupsLimit = Number(formData.get("groupsLimit") ?? 0);
+  const sessionsLimit = Number(formData.get("sessionsLimit") ?? 0);
+  const storageLimit = Number(formData.get("storageLimit") ?? 0);
+  const isActive = formData.getAll("isActive").includes("true");
+
+  if (!key || !name) {
+    throw new Error("اسم ومفتاح الباقة مطلوبان");
+  }
+
+  if ([monthlyPrice, yearlyPrice, studentsLimit, groupsLimit, sessionsLimit, storageLimit].some((n) => !Number.isFinite(n) || n < 0)) {
+    throw new Error("قيم الباقة غير صالحة");
+  }
+
+  await upsertSubscriptionPlanConfig({
+    key,
+    name,
+    monthlyPrice,
+    yearlyPrice,
+    studentsLimit,
+    groupsLimit,
+    sessionsLimit,
+    storageLimit,
+    isActive,
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/plans");
+  revalidatePath("/payments");
+  revalidatePath("/payments/subscription");
+}
+
+export async function deletePlanConfigAction(formData: FormData) {
+  await requireSuperAdminPage();
+
+  const key = normalizePlanKey(String(formData.get("plan") ?? "").trim());
+  if (!key) {
+    throw new Error("مفتاح الباقة مطلوب");
+  }
+
+  await softDeleteSubscriptionPlanConfig(key);
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/plans");
+  revalidatePath("/payments");
   revalidatePath("/payments/subscription");
 }
 

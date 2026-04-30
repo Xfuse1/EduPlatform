@@ -280,6 +280,7 @@ export const getSessionWithStudents = cache(async (sessionId: string) => {
       timeEnd: session.timeEnd,
       qrToken: session.qrToken,
       qrExpiresAt: session.qrExpiresAt,
+      qrScanLimit: session.qrScanLimit,
       students: students.sort((a, b) => a.name.localeCompare(b.name, "ar")),
     };
   } catch (error) {

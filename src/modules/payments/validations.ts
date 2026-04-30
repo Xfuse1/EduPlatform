@@ -98,7 +98,7 @@ export type AddKashierApiInput = z.infer<typeof addKashierApiSchema>
  * Schema لتحديث خطة الاشتراك للمعلم
  */
 export const updateSubscriptionSchema = z.object({
-  subscriptionPlan: z.enum(['STARTER', 'PROFESSIONAL', 'ENTERPRISE']),
+  subscriptionPlan: z.string().trim().min(1, 'الباقة مطلوبة').max(40, 'مفتاح الباقة طويل جدًا'),
   billingCycle: z.enum(['MONTHLY', 'YEARLY']),
 })
 

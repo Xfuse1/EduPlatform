@@ -103,7 +103,7 @@ model ParentStudent {
 }
 
 model Group {
-  id            String         @id @default(cuid())
+  id            String           @id @default(cuid())
   tenantId      String
   name          String
   subject       String
@@ -111,19 +111,20 @@ model Group {
   days          String[]
   timeStart     String
   timeEnd       String
-  maxCapacity   Int            @default(40)
+  maxCapacity   Int              @default(40)
   monthlyFee    Int
-  color         String         @default("#2E86C1")
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  billingType   GroupBillingType @default(MONTHLY)
+  color         String           @default("#2E86C1")
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
   room          String?
-  schedule      Json           @default("[]")
+  schedule      Json             @default("[]")
   teacherId     String?
   assignments   Assignment[]
   attendances   Attendance[]
   exams         Exam[]
-  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant        Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   groupStudents GroupStudent[]
   sessions      Session[]
 
@@ -160,6 +161,7 @@ model Session {
   createdAt   DateTime      @default(now())
   qrToken     String?       @unique
   qrExpiresAt DateTime?
+  qrScanLimit Int?
   attendances Attendance[]
   group       Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
   tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -477,12 +479,19 @@ enum QuestionType {
   TRUE_FALSE
 }
 
+enum GroupBillingType {
+  MONTHLY
+  PER_SESSION
+  FULL_COURSE
+}
+
 // Ã¢â€â‚¬Ã¢â€â‚¬ Teacher Subscription Models Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model TeacherSubscription {
   id               String           @id @default(cuid())
   tenantId         String           @unique
   subscriptionPlan SubscriptionPlan @default(STARTER)
+  planKey          String           @default("STARTER")
   billingCycle     BillingCycle     @default(MONTHLY)
   amount           Int
   isActive         Boolean          @default(true)
@@ -501,8 +510,9 @@ model TeacherSubscription {
 // Ã¢â€â‚¬Ã¢â€â‚¬ Student Balance / Wallet Models Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 model SubscriptionPlanConfig {
-  id            String           @id @default(cuid())
-  plan          SubscriptionPlan @unique
+  id            String            @id @default(cuid())
+  plan          SubscriptionPlan? @unique
+  key           String            @unique
   name          String
   monthlyPrice  Int
   yearlyPrice   Int
@@ -510,11 +520,39 @@ model SubscriptionPlanConfig {
   groupsLimit   Int
   sessionsLimit Int
   storageLimit  Int
-  isActive      Boolean          @default(true)
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  isActive      Boolean           @default(true)
+  deletedAt     DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 
   @@index([isActive])
+  @@index([deletedAt])
+}
+
+model GroupBillingCharge {
+  id               String            @id @default(cuid())
+  tenantId         String
+  groupId          String
+  studentId        String
+  payerUserId      String
+  payeeUserId      String
+  amount           Int
+  billingType      GroupBillingType
+  reason           String
+  idempotencyKey   String            @unique
+  relatedSessionId String?
+  walletDebitTxId  String?
+  walletCreditTxId String?
+  coveredSessions  Int?
+  consumedSessions Int               @default(0)
+  status           TransactionStatus @default(COMPLETED)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([tenantId, groupId, studentId])
+  @@index([tenantId, payerUserId])
+  @@index([relatedSessionId])
+  @@index([billingType, status])
 }
 
 model StudentBalance {
