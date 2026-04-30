@@ -504,10 +504,10 @@ export const getStudents = cache(async (
       return student.groupStudents.map((enrollment) => {
         const consecutiveAbsences = getConsecutiveAbsences(student.id, enrollment.group.id, enrollment.enrolledAt);
         const studentStatus: "ACTIVE" | "SUSPENDED" | "PENDING" = enrollment.status === "PENDING" 
-+          ? "PENDING" 
-+          : !student.isActive 
-+            ? "SUSPENDED" 
-+            : "ACTIVE";
+          ? "PENDING" 
+          : !student.isActive 
+            ? "SUSPENDED" 
+            : "ACTIVE";
 
         return {
           id: student.id,
