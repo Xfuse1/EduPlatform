@@ -188,7 +188,7 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
         setPin("");
         return;
       }
-      window.location.replace(safeNextPath || result.redirectTo || "/teacher");
+      window.location.replace(result.redirectTo || safeNextPath || "/teacher");
     });
   };
 
