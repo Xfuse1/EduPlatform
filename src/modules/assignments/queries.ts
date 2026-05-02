@@ -93,10 +93,10 @@ export const getAssignmentsByStudent = cache(async (studentId: string) => {
   }
 });
 
-export const getAssignmentsByParent = cache(async (_tenantId: string, parentId: string) => {
+export const getAssignmentsByParent = cache(async (tenantId: string, parentId: string) => {
   try {
     const parentChildren = await db.parentStudent.findMany({
-      where: { parentId },
+      where: { parentId, student: { tenantId } },
       include: {
         student: { select: { id: true, name: true } }
       }

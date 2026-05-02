@@ -15,7 +15,7 @@ export default async function ParentChildrenRoutePage() {
     redirect(user.role === "STUDENT" ? "/student" : "/teacher");
   }
 
-  const data = await getParentDashboardData(user.tenantId, user.id);
+  const data = await getParentDashboardData(tenant.id, user.id);
 
   return <ParentChildrenPage data={data} />;
 }

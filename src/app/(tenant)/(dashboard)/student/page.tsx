@@ -18,7 +18,7 @@ export default async function StudentDashboardPage() {
   }
 
   const [data, allGroups] = await Promise.all([
-    getStudentDashboardData("", user.id),
+    getStudentDashboardData(tenant.id, user.id),
     getPublicGroups(tenant.id),
   ]);
 
