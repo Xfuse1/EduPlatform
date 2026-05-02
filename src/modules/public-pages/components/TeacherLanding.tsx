@@ -107,7 +107,7 @@ export function TeacherLanding({
                   teacher.name.slice(0, 1)
                 )}
               </div>
-              <p className="mt-6 text-center text-sm leading-7 text-white/85">استعرض المجموعات المفتوحة وحدد أفضل موعد للانضمام مباشرة.</p>
+              <p className="mt-6 text-center text-sm leading-7 text-white/85" suppressHydrationWarning>استعرض المجموعات المفتوحة وحدد أفضل موعد للانضمام مباشرة.</p>
               <div className="mt-6 flex flex-col gap-3">
                 <Link
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-primary transition hover:bg-slate-100"
@@ -130,7 +130,7 @@ export function TeacherLanding({
 
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">المجموعات المتاحة</h2>
+            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white" suppressHydrationWarning>المجموعات المتاحة</h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">اطلع على السعة المتبقية والرسوم والجدول لكل مجموعة.</p>
           </div>
           <Link className="hidden rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white sm:inline-flex" href="/register">
@@ -148,7 +148,7 @@ export function TeacherLanding({
                 <CardContent className="space-y-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">{group.name}</h3>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white" suppressHydrationWarning>{group.name}</h3>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {group.days.map((day) => (
                           <span
