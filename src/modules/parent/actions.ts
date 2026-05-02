@@ -673,7 +673,7 @@ export async function enrollChildInGroup(input: { studentId: string; groupId: st
       },
     });
 
-    const nextStatus = "PENDING";
+    const nextStatus: "ACTIVE" | "PENDING" | "WAITLIST" = "PENDING";
 
     await db.$transaction(async (tx) => {
       if (existingEnrollment) {

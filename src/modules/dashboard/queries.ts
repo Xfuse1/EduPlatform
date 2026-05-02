@@ -386,13 +386,18 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
   };
 });
 
-export const getStudentDashboardData = cache(async (_tenantId: string, studentId: string) => {
+export const getStudentDashboardData = cache(async (tenantId: string, studentId: string) => {
   try {
-    // 1. Fetch Student Profile with ALL enrollments across all tenants
+    // 1. Fetch Student Profile with enrollments for the current tenant
     const student = await db.user.findUnique({
       where: { id: studentId },
       include: {
         groupStudents: {
+          where: {
+            group: {
+              tenantId,
+            },
+          },
           include: {
             group: {
               include: {
@@ -412,16 +417,16 @@ export const getStudentDashboardData = cache(async (_tenantId: string, studentId
 
     if (!student) throw new Error("Student not found");
 
-    // 2. Fetch All Payments across all tenants
+    // 2. Fetch Payments for current tenant
     const payments = await db.payment.findMany({
-      where: { studentId },
+      where: { studentId, tenantId },
       include: { tenant: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
     });
 
-    // 3. Fetch All Attendance across all tenants
+    // 3. Fetch Attendance for current tenant
     const attendanceRecords = await db.attendance.findMany({
-      where: { studentId },
+      where: { studentId, tenantId },
       include: {
         tenant: { select: { name: true } },
         group: { select: { name: true } },
@@ -431,10 +436,10 @@ export const getStudentDashboardData = cache(async (_tenantId: string, studentId
       take: 20,
     });
 
-    // 4. Fetch All Assignments across all tenants
+    // 4. Fetch Assignments for current tenant
     const groupIds = student.groupStudents.map((gs) => gs.groupId);
     const assignments = await db.assignment.findMany({
-      where: { groupId: { in: groupIds } },
+      where: { groupId: { in: groupIds }, tenantId },
       include: {
         tenant: { select: { name: true } },
         group: { select: { name: true, subject: true } },
@@ -443,9 +448,9 @@ export const getStudentDashboardData = cache(async (_tenantId: string, studentId
       orderBy: { dueDate: "asc" },
     });
 
-    // 5. Fetch All Exams across all tenants
+    // 5. Fetch Exams for current tenant
     const exams = await db.exam.findMany({
-      where: { groupId: { in: groupIds } },
+      where: { groupId: { in: groupIds }, tenantId },
       include: {
         tenant: { select: { name: true } },
         group: { select: { name: true } },
