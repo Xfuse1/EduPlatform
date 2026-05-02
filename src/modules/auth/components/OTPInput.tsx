@@ -230,9 +230,9 @@ export function OTPInput({
 
           // Only show PIN setup if user doesn't have one yet
           if (result.hasPin) {
-            window.location.replace(safeNextPath || result.redirectTo || "/teacher");
+            window.location.replace(result.redirectTo || safeNextPath || "/teacher");
           } else {
-            setPinSetupRedirectTo(safeNextPath || result.redirectTo || "/teacher");
+            setPinSetupRedirectTo(result.redirectTo || safeNextPath || "/teacher");
           }
         } catch (err: unknown) {
           console.error("OTP confirm failed:", err);
