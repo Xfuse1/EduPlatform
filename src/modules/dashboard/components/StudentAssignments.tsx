@@ -143,6 +143,37 @@ export function StudentAssignments({
     }
   }
 
+  const handleDeleteFile = async () => {
+    if (!confirm("هل تريد حذف الملف المرفوع؟")) return;
+    
+    try {
+      const res = await fetch(`/api/assignments/${selectedAssignment?.id}/submissions`, {
+        method: "DELETE"
+      });
+      
+      if (res.ok) {
+        // تحديث الواجهة
+        const updatedAssignments = assignments.map(a => 
+          a.id === selectedAssignment?.id 
+            ? { ...a, status: "pending" as const, submission: { ...a.submission, fileUrl: null } } 
+            : a
+        );
+        setAssignments(updatedAssignments);
+        setSelectedAssignment(prev => prev ? {
+          ...prev,
+          status: "pending",
+          submission: { ...prev.submission, fileUrl: null }
+        } : null);
+        showToast.success("تم حذف الملف بنجاح")
+      } else {
+        throw new Error("Failed to delete file")
+      }
+    } catch (error) {
+      console.error("Delete failed:", error)
+      showToast.error("فشل حذف الملف")
+    }
+  };
+
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
   const [currentFeedback, setCurrentFeedback] = useState<any>(null)
 
@@ -280,6 +311,32 @@ export function StudentAssignments({
 
             {selectedAssignment && (
               <form onSubmit={handleSubmit} className="space-y-6">
+                {selectedAssignment.submission?.fileUrl && (
+                  <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800 animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                      <span className="text-sm font-medium">ملف مرفوع بالفعل</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <a
+                        href={selectedAssignment.submission.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary font-bold hover:underline"
+                      >
+                        عرض الملف
+                      </a>
+                      <button
+                        type="button"
+                        onClick={handleDeleteFile}
+                        className="text-xs text-red-500 hover:text-red-700 font-bold flex items-center gap-1 bg-red-50 dark:bg-red-950/20 px-2 py-1 rounded-lg transition-colors"
+                      >
+                        🗑️ حذف
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 backdrop-blur-sm">
                   <Label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">الواجب المختار</Label>
                   <div className="flex items-center gap-3">

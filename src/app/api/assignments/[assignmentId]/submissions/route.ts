@@ -2,6 +2,14 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { sendNotification } from "@/modules/notifications/actions";
+import { createClient } from "@supabase/supabase-js";
+
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function POST(
   req: NextRequest,
@@ -81,6 +89,65 @@ export async function POST(
     return NextResponse.json({ success: true, submission });
   } catch (error) {
     console.error("Failed to submit assignment:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ assignmentId: string }> }
+) {
+  try {
+    const user = await requireAuth();
+    if (user.role !== "STUDENT") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    const { assignmentId } = await params;
+
+    const submission = await db.assignmentSubmission.findUnique({
+      where: {
+        assignmentId_studentId: {
+          assignmentId,
+          studentId: user.id
+        }
+      }
+    });
+
+    if (!submission) {
+      return NextResponse.json({ error: "Submission not found" }, { status: 404 });
+    }
+
+    if (submission.grade !== null) {
+      return NextResponse.json({ error: "Cannot delete graded assignment" }, { status: 403 });
+    }
+
+    // Optional: Delete from storage if URL exists
+    if (submission.fileUrl) {
+      try {
+        const supabase = getSupabase();
+        // Extract path from public URL
+        // URL format: .../storage/v1/object/public/assignments/folder/file
+        const urlParts = submission.fileUrl.split("/public/assignments/");
+        if (urlParts.length > 1) {
+          const storagePath = urlParts[1];
+          await supabase.storage.from("assignments").remove([storagePath]);
+        }
+      } catch (storageError) {
+        console.error("Failed to delete file from storage:", storageError);
+        // We continue anyway to update the DB
+      }
+    }
+
+    // Update database to remove file URL
+    await db.assignmentSubmission.update({
+      where: { id: submission.id },
+      data: { fileUrl: null }
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Failed to delete submission file:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
