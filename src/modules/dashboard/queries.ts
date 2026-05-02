@@ -397,6 +397,7 @@ export const getStudentDashboardData = cache(async (tenantId: string, studentId:
             group: {
               tenantId,
             },
+            status: "ACTIVE",
           },
           include: {
             group: {
