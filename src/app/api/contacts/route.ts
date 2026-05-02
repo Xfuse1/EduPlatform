@@ -39,7 +39,10 @@ export async function GET() {
     if (user.role === "TEACHER") {
       // جلب الطلاب المسجلين في مجموعات المدرس
       const enrollments = await db.groupStudent.findMany({
-        where: { group: { tenantId: user.tenantId }, status: "ACTIVE" },
+        where: { 
+          group: { teacherId: user.id }, 
+          status: "ACTIVE" 
+        },
         select: { studentId: true },
       });
 
