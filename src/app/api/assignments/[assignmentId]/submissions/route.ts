@@ -139,10 +139,9 @@ export async function DELETE(
       }
     }
 
-    // Update database to remove file URL
-    await db.assignmentSubmission.update({
-      where: { id: submission.id },
-      data: { fileUrl: null }
+    // Delete the entire submission record
+    await db.assignmentSubmission.delete({
+      where: { id: submission.id }
     });
 
     return NextResponse.json({ success: true });
