@@ -40,6 +40,15 @@ export async function getGroups(tenantId: string, teacherId?: string) {
           id: true,
         },
       },
+      _count: {
+        select: {
+          groupStudents: {
+            where: {
+              status: { in: [EnrollmentStatus.PENDING, EnrollmentStatus.WAITLIST] }
+            }
+          }
+        }
+      }
     },
   })
 
@@ -51,6 +60,7 @@ export async function getGroups(tenantId: string, teacherId?: string) {
       timeEnd: group.timeEnd,
     }),
     studentCount: groupStudents.length,
+    pendingCount: group._count.groupStudents,
   }))
 }
 
@@ -59,7 +69,7 @@ export async function getGroupStudents(tenantId: string, groupId: string, teache
     where: {
       groupId,
       status: {
-        in: ACTIVE_GROUP_STATUSES,
+        in: [...ACTIVE_GROUP_STATUSES, EnrollmentStatus.PENDING],
       },
       group: {
         id: groupId,
@@ -149,6 +159,7 @@ export async function getGroupsList(tenantId: string, teacherId?: string) {
     billingType: group.billingType,
     maxCapacity: group.maxCapacity,
     enrolledCount: group.studentCount,
+    pendingCount: group.pendingCount,
     color: group.color,
   }))
 }

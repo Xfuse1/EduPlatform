@@ -525,28 +525,37 @@ export async function enrollInGroup(studentId: string, groupId: string) {
 
 export async function removeFromGroup(studentId: string, groupId: string) {
   const tenant = await requireTenant();
-  const currentGroups = await db.groupStudent.findMany({
+
+  // ✅ تأكد أن المجموعة تنتمي لهذا الـ tenant (أمان)
+  const group = await db.group.findFirst({
     where: {
-      studentId,
-      status: {
-        in: ["ACTIVE", "WAITLIST"],
-      },
-      group: {
-        tenantId: tenant.id,
-      },
+      id: groupId,
+      tenantId: tenant.id,
     },
-    select: {
-      groupId: true,
+    select: { id: true },
+  });
+
+  if (!group) {
+    return { success: false, message: "المجموعة غير موجودة" };
+  }
+
+  // ✅ حذف السجل نهائياً
+  await db.groupStudent.delete({
+    where: {
+      groupId_studentId: {
+        groupId,
+        studentId,
+      },
     },
   });
 
-  await syncGroupMemberships(
-    tenant.id,
-    studentId,
-    currentGroups.map((group) => group.groupId).filter((currentGroupId) => currentGroupId !== groupId),
-  );
   revalidatePath("/teacher/groups");
+  revalidatePath(`/teacher/groups/${groupId}`);
+  revalidatePath("/student");
+
+  return { success: true };
 }
+
 
 export async function deleteStudent(tenantId: string, studentId: string) {
   // 1. تحقق من ملكية الحساب للـ tenant

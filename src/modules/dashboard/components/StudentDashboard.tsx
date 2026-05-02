@@ -23,13 +23,14 @@ type StudentDashboardProps = {
     isFull: boolean;
     color: string | null;
   }>;
+  pendingGroupIds?: string[];
 };
 
 const groupColors = ["#1A5276", "#2E86C1", "#27AE60"];
 
 import { StudentAssignments } from "./StudentAssignments";
 
-export function StudentDashboard({ data, availableGroups }: StudentDashboardProps) {
+export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }: StudentDashboardProps) {
   const pendingAssignments = (data.assignments as Array<{ status: string }>).filter(
     (assignment) => assignment.status === "pending" || assignment.status === "overdue",
   );
@@ -172,7 +173,11 @@ export function StudentDashboard({ data, availableGroups }: StudentDashboardProp
                     </div>
                   </div>
 
-                  <JoinGroupButton groupId={group.id} isFull={group.isFull} />
+                  <JoinGroupButton 
+                    groupId={group.id} 
+                    isFull={group.isFull} 
+                    isAlreadyPending={pendingGroupIds.includes(group.id)}
+                  />
                 </div>
               ))}
           </CardContent>
@@ -182,9 +187,19 @@ export function StudentDashboard({ data, availableGroups }: StudentDashboardProp
   );
 }
 
-function JoinGroupButton({ groupId, isFull }: { groupId: string; isFull: boolean }) {
-  const [isPending, startTransition] = useTransition();
-  const [status, setStatus] = useState<'idle' | 'pending' | 'joined'>('idle');
+function JoinGroupButton({ 
+  groupId, 
+  isFull, 
+  isAlreadyPending 
+}: { 
+  groupId: string; 
+  isFull: boolean; 
+  isAlreadyPending: boolean;
+}) {
+  const [isTransitioning, startTransition] = useTransition();
+  const [status, setStatus] = useState<'idle' | 'joined'>(
+    isAlreadyPending ? 'joined' : 'idle'
+  );
 
   function handleJoin() {
     startTransition(async () => {
@@ -206,15 +221,16 @@ function JoinGroupButton({ groupId, isFull }: { groupId: string; isFull: boolean
     <button
       type="button"
       onClick={handleJoin}
-      disabled={isFull || isPending}
+      disabled={isFull || isTransitioning}
       className={`mt-3 w-full rounded-xl py-2.5 text-sm font-bold transition ${
         isFull
           ? "bg-slate-100 text-slate-400 cursor-not-allowed"
           : "bg-primary text-white hover:bg-primary/90"
       }`}
     >
-      {isPending ? "جاري الإرسال..." : isFull ? "المجموعة ممتلئة" : "طلب الانضمام"}
+      {isTransitioning ? "جاري الإرسال..." : isFull ? "المجموعة ممتلئة" : "طلب الانضمام"}
     </button>
   );
 }
+
 

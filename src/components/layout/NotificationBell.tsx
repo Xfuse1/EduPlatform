@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, CheckCheck, CheckCircle, XCircle, BookOpen, Star, CreditCard, Calendar, LucideIcon, Loader2, X } from "lucide-react";
+import { Bell, CheckCheck, CheckCircle, XCircle, BookOpen, Star, CreditCard, Calendar, LucideIcon, Loader2, X, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,8 @@ export type NotificationType =
   | "CLASS_REMINDER"
   | "SCHEDULE_CHANGED"
   | "PAYMENT_REMINDER"
-  | "PAYMENT_OVERDUE";
+  | "PAYMENT_OVERDUE"
+  | "NEW_JOIN_REQUEST";
 
 export type NotificationItem = {
   id: string;
@@ -24,9 +25,10 @@ export type NotificationItem = {
   message: string;
   createdAt: string;
   status: string;
+  meta?: any;
 };
 
-const NOTIFICATION_CONFIG: Record<string, { icon: LucideIcon; color: string; bgColor: string }> = {
+const NOTIFICATION_CONFIG: Record<string, { icon: LucideIcon; color: string; bgColor: string; getLink?: (n: any) => string }> = {
   ATTENDANCE_PRESENT: { icon: CheckCircle, color: "text-emerald-600", bgColor: "bg-emerald-50 dark:bg-emerald-950/30" },
   ATTENDANCE_ABSENT: { icon: XCircle, color: "text-rose-600", bgColor: "bg-rose-50 dark:bg-rose-950/30" },
   ASSIGNMENT_DUE: { icon: BookOpen, color: "text-blue-600", bgColor: "bg-blue-50 dark:bg-blue-950/30" },
@@ -36,6 +38,12 @@ const NOTIFICATION_CONFIG: Record<string, { icon: LucideIcon; color: string; bgC
   PAYMENT_OVERDUE: { icon: CreditCard, color: "text-rose-600", bgColor: "bg-rose-50 dark:bg-rose-950/30" },
   CLASS_REMINDER: { icon: Bell, color: "text-purple-600", bgColor: "bg-purple-50 dark:bg-purple-950/30" },
   SCHEDULE_CHANGED: { icon: Calendar, color: "text-slate-600", bgColor: "bg-slate-50 dark:bg-slate-900" },
+  NEW_JOIN_REQUEST: {
+    icon: Users,
+    color: "text-rose-600",
+    bgColor: "bg-rose-50 dark:bg-rose-950/30",
+    getLink: (n: any) => `/teacher/groups/${n.meta?.groupId}`,
+  },
 };
 
 const DEFAULT_CONFIG = { icon: Bell, color: "text-slate-600", bgColor: "bg-slate-50 dark:bg-slate-900" };
@@ -146,6 +154,46 @@ export function NotificationBell() {
                   {notifications.map((n) => {
                     const config = NOTIFICATION_CONFIG[n.type] ?? DEFAULT_CONFIG;
                     const isUnread = !readIds.has(n.id) && n.status === "QUEUED";
+                    const link = config.getLink?.(n);
+
+                    const content = (
+                      <div className="flex gap-4">
+                        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-4 ring-white dark:ring-slate-900", config.bgColor, config.color)}>
+                          <config.icon className="h-5 w-5" />
+                        </div>
+                        <div className="space-y-1 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className={cn("text-xs font-bold leading-tight", isUnread ? "text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400")}>
+                              {n.message}
+                            </p>
+                            <span className="text-[9px] font-medium text-slate-400 shrink-0">
+                              {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: ar })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+
+                    if (link) {
+                      return (
+                        <Link
+                          key={n.id}
+                          href={link}
+                          className={cn(
+                            "group relative p-4 block transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer overflow-hidden",
+                            isUnread && "bg-primary/5 dark:bg-sky-400/5"
+                          )}
+                          onClick={() => {
+                            setReadIds(prev => new Set([...prev, n.id]));
+                            setIsOpen(false);
+                          }}
+                        >
+                          {isUnread && <div className="absolute right-0 top-0 bottom-0 w-1 bg-primary" />}
+                          {content}
+                        </Link>
+                      );
+                    }
+
                     return (
                       <div
                         key={n.id}
@@ -156,21 +204,7 @@ export function NotificationBell() {
                         onClick={() => setReadIds(prev => new Set([...prev, n.id]))}
                       >
                         {isUnread && <div className="absolute right-0 top-0 bottom-0 w-1 bg-primary" />}
-                        <div className="flex gap-4">
-                          <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-4 ring-white dark:ring-slate-900", config.bgColor, config.color)}>
-                            <config.icon className="h-5 w-5" />
-                          </div>
-                          <div className="space-y-1 flex-1">
-                            <div className="flex items-start justify-between gap-2">
-                              <p className={cn("text-xs font-bold leading-tight", isUnread ? "text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400")}>
-                                {n.message}
-                              </p>
-                              <span className="text-[9px] font-medium text-slate-400 shrink-0">
-                                {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: ar })}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                        {content}
                       </div>
                     );
                   })}
