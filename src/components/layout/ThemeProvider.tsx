@@ -85,8 +85,14 @@ export function useTheme() {
   const context = useContext(ThemeContext);
 
   if (!context) {
-    throw new Error("useTheme must be used within ThemeProvider");
+    // Return a default context instead of throwing to prevent SSR/Hydration crashes
+    return {
+      theme: "system" as Theme,
+      resolvedTheme: "light" as ResolvedTheme,
+      setTheme: () => {},
+    };
   }
 
   return context;
 }
+

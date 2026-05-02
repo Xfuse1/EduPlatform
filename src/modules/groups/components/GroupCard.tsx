@@ -17,6 +17,7 @@ type GroupCardProps = {
     color: string
     room: string | null
     studentCount: number
+    pendingCount: number
   }
 }
 
@@ -67,6 +68,11 @@ export default function GroupCard({ group }: GroupCardProps) {
             <h3 className="truncate text-lg font-bold text-slate-950 dark:text-white">
               {group.name}
             </h3>
+            {group.pendingCount > 0 && (
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600 border border-rose-100">
+                🔴 {group.pendingCount} طلب انضمام
+              </span>
+            )}
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               {group.gradeLevel}
             </p>
