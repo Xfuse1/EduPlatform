@@ -67,14 +67,9 @@ export async function resolveStudentWalletPayer(studentId: string, tenantId: str
   const student = await tx.user.findFirst({
     where: {
       id: studentId,
+      tenantId,
       role: UserRole.STUDENT,
       isActive: true,
-      groupStudents: {
-        some: {
-          status: { in: [...TENANT_STUDENT_ACCESS_STATUSES] },
-          group: { tenantId },
-        },
-      },
     },
     select: {
       id: true,
