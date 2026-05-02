@@ -140,15 +140,28 @@ async function callGeminiModel(params: {
   model: string;
   apiKey: string;
   prompt: string;
+  fileBuffer?: Buffer;
+  mimeType?: string;
 }): Promise<{ response: Response; data: any }> {
-  const { model, apiKey, prompt } = params;
+  const { model, apiKey, prompt, fileBuffer, mimeType } = params;
+
+  const parts: any[] = [{ text: prompt }];
+  if (fileBuffer && mimeType) {
+    parts.push({
+      inlineData: {
+        mimeType: mimeType,
+        data: fileBuffer.toString("base64"),
+      },
+    });
+  }
+
   const response = await fetchWithRetry(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        contents: [{ role: "user", parts }],
         generationConfig: {
           temperature: 0.0,
           topP: 0.1,
@@ -157,7 +170,7 @@ async function callGeminiModel(params: {
         },
       }),
     },
-    { retries: 2, timeoutMs: 45000, retryDelayMs: 1500 },
+    { retries: 2, timeoutMs: 60000, retryDelayMs: 1500 },
   );
 
   const raw = await response.text();
@@ -171,17 +184,6 @@ async function callGeminiModel(params: {
 
   return { response, data };
 }
-
-const SYSTEM_PROMPT = `أنت مصحح واجبات ذكي وعادل.
-
-قواعد التصحيح:
-1. مرجعك الأساسي هو نموذج إجابة المعلم.
-2. اقبل الإجابة كصحيحة إذا كانت تحمل نفس المعنى أو المفهوم حتى لو الصياغة مختلفة.
-3. اقبل المرادفات والتعبيرات المختلفة التي تؤدي نفس المعنى.
-4. تجاهل الأخطاء الإملائية البسيطة التي لا تغير المعنى.
-5. لا تشترط التطابق الحرفي مع نموذج الإجابة.
-6. لا تستخدم معرفتك الخارجية لإضافة درجات غير مستحقة.
-7. كن عادلاً — الإجابة الصحيحة بمعناها تستحق الدرجة الكاملة.`;
 
 function extractJsonObjectText(rawText: string): string {
   const trimmed = rawText.trim();
@@ -221,35 +223,65 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "GEMINI_API_KEY is missing" }, { status: 500 });
     }
 
-    const [questionsText, answerKeyText, studentAnswerText] = await Promise.all([
+    // استخراج النصوص وتحميل الملف للطالب (Vision)
+    const [questionsText, answerKeyText, studentAnswerText, submissionFileResponse] = await Promise.all([
       extractTextFromFileUrl(assignmentFileUrl),
       extractTextFromFileUrl(answerKeyUrl),
-      extractTextFromFileUrl(submissionFileUrl),
+      extractTextFromFileUrl(submissionFileUrl).catch(() => ""), // استخراج النص كاحتياطي
+      fetch(submissionFileUrl).then((res) => res.arrayBuffer()),
     ]);
+
+    const submissionBuffer = Buffer.from(submissionFileResponse);
+    const extension = getFileExtension(submissionFileUrl);
+    let mimeType = "application/pdf";
+    if (["jpg", "jpeg"].includes(extension)) mimeType = "image/jpeg";
+    else if (extension === "png") mimeType = "image/png";
+
+    const systemPrompt = `أنت مصحح واجبات دقيق ومتخصص. اتبع هذه القواعد بصرامة:
+
+1. صحح كل سؤال بشكل مستقل ومنفصل تماماً.
+2. لكل سؤال: قارن إجابة الطالب بنموذج المعلم من حيث المعنى والمحتوى.
+3. سلّم الدرجة الكاملة إذا كان المعنى صحيحاً حتى لو الصياغة مختلفة.
+4. سلّم صفراً إذا كانت الإجابة خاطئة أو غائبة تماماً.
+5. سلّم درجة جزئية فقط إذا كانت الإجابة صحيحة جزئياً بشكل واضح.
+6. لا تضف معلومات من خارج إجابة الطالب.
+7. لا تتأثر بأسلوب الكتابة أو الإملاء.
+8. مجموع الدرجات يجب أن يساوي بالضبط ما يستحقه الطالب وليس أكثر من ${maxGrade || 100}.`;
 
     const userPrompt = `## الأسئلة:
 ${questionsText}
 
-## نموذج إجابة المعلم (للفهم والمعنى فقط، ليس للمطابقة الحرفية):
+## نموذج إجابة المعلم:
 ${answerKeyText}
 
-## إجابة الطالب:
-${studentAnswerText}
+${studentAnswerText ? `## نص إجابة الطالب (تم استخراجه آلياً): \n${studentAnswerText}` : ""}
 
-## تعليمات التصحيح:
-- تحقق أولاً: هل الملف يحتوي على إجابات للأسئلة المطروحة؟
-- إذا كان الملف لا علاقة له بالأسئلة (CV، موضوع مختلف، فارغ)، أعطِ درجة 0 واكتب سبباً واضحاً
-- إذا كانت إجابة الطالب تعطي نفس المعنى الصحيح بأسلوبه الخاص، أعطِه الدرجة كاملة
-- لا تخصم درجات بسبب اختلاف الصياغة أو الأسلوب إذا كان المعنى صحيحاً
+## تعليمات إضافية:
+- لقد تم تزويدك بملف إجابة الطالب المرفق (صورة أو PDF). يرجى قراءته مباشرة وتصحيحه بدقة، خاصة إذا كان مكتوباً بخط اليد.
+- مجموع الدرجات القصوى هو ${maxGrade || 100}.
 
-## الدرجة النهائية للواجب: ${maxGrade || 100} درجة
-- وزّع الدرجات على الأسئلة بحيث يكون مجموعها ${maxGrade || 100} درجة كحد أقصى
+## مطلوب منك:
+صحح كل سؤال بشكل مستقل والتزم بهذا التنسيق JSON فقط بدون أي نص إضافي:
 
-يجب أن يكون ردك JSON صالح فقط:
-{"grade":${maxGrade || 100},"feedback":[{"question":1,"score":${Math.round((maxGrade || 100) / 4)},"maxScore":${Math.round((maxGrade || 100) / 4)},"comment":"تعليق"}],"summary":"ملخص"}`;
+{
+  "totalScore": <المجموع الفعلي>,
+  "maxScore": ${maxGrade || 100},
+  "questions": [
+    {
+      "questionNumber": 1,
+      "questionText": "<نص السؤال>",
+      "maxScore": <درجة السؤال>,
+      "studentScore": <درجة الطالب>,
+      "studentAnswer": "<ملخص إجابة الطالب من الملف>",
+      "correctAnswer": "<ملخص الإجابة الصحيحة>",
+      "feedback": "<سبب الدرجة في جملة واحدة>"
+    }
+  ],
+  "generalFeedback": "<تعليق عام على أداء الطالب>"
+}`;
 
     const models = getGeminiModels();
-    const prompt = `${SYSTEM_PROMPT}\n\n${userPrompt}`;
+    const prompt = `${systemPrompt}\n\n${userPrompt}`;
 
     let successfulModel: string | null = null;
     let successfulData: any = null;
@@ -259,10 +291,13 @@ ${studentAnswerText}
 
     for (const model of models) {
       try {
+        // نستخدم الموديل مع إرسال الملف (Vision)
         const { response, data } = await callGeminiModel({
           model,
           apiKey: process.env.GEMINI_API_KEY,
           prompt,
+          fileBuffer: submissionBuffer,
+          mimeType: mimeType,
         });
 
         if (response.ok) {
@@ -301,22 +336,23 @@ ${studentAnswerText}
     }
 
     const rawText = successfulData.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-    console.log(`Gemini model success: ${successfulModel}`);
-    console.log("Finish reason:", successfulData.candidates?.[0]?.finishReason);
-    console.log("Raw:", String(rawText).substring(0, 200));
-
     const jsonText = extractJsonObjectText(rawText);
     if (!jsonText) {
       throw new Error(`Gemini returned non-JSON content from model ${successfulModel}`);
     }
 
-    const result = JSON.parse(jsonText);
+    const aiResult = JSON.parse(jsonText);
 
-    // احسب الدرجة من مجموع الـ scores بدل ما نثق في الـ AI
-    if (result.feedback && Array.isArray(result.feedback)) {
-      const totalScore = result.feedback.reduce((sum: number, item: any) => sum + (item.score || 0), 0);
-      result.grade = Math.min(totalScore, maxGrade || 100);
-    }
+    // تحويل التنسيق الجديد إلى التنسيق الذي تتوقعه الواجهة الأمامية
+    const result = {
+      grade: aiResult.totalScore ?? 0,
+      summary: aiResult.generalFeedback ?? "",
+      feedback: (aiResult.questions || []).map((q: any) => ({
+        question: q.questionNumber || q.questionText,
+        score: q.studentScore ?? 0,
+        comment: q.feedback || "",
+      })),
+    };
 
     return NextResponse.json(result);
   } catch (error) {
@@ -324,3 +360,4 @@ ${studentAnswerText}
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
+
