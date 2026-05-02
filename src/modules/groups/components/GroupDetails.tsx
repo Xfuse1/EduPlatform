@@ -224,10 +224,10 @@ export default function GroupDetails({
   }
 
   const pendingStudents = group.students.filter(
-    s => s.status === 'PENDING'
+    s => s.status === 'PENDING' || s.status === 'WAITLIST'
   )
   const activeStudents = group.students.filter(
-    s => s.status !== 'PENDING'
+    s => s.status === 'ACTIVE'
   )
 
   return (

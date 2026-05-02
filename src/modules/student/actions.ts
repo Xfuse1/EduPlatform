@@ -91,7 +91,7 @@ export async function enrollStudentInGroup(input: { groupId: string }) {
       },
     });
 
-    const nextStatus = activeEnrollmentCount >= group.maxCapacity ? "WAITLIST" : "WAITLIST";
+    const nextStatus = activeEnrollmentCount >= group.maxCapacity ? "WAITLIST" : "PENDING";
     // Students self-enrolling always go to WAITLIST pending teacher approval
 
     await db.$transaction(async (tx) => {
