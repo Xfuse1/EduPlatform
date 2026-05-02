@@ -36,9 +36,6 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
   });
 
   const [questions, setQuestions] = useState<any[]>([]);
-  const openDatePicker = (element: HTMLInputElement | null) => {
-    element?.showPicker?.();
-  };
 
   // Reset form when modal opens or examToEdit changes
   useEffect(() => {
@@ -196,13 +193,10 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
                     id="examDate"
                     type="datetime-local"
                     required
-                    readOnly
                     className="block min-h-12 w-full cursor-pointer rounded-xl bg-white ps-10 text-sm font-medium dark:bg-slate-950"
                     value={formData.examDate}
                     onChange={(e) => setFormData({ ...formData, examDate: e.target.value })}
-                    onClick={(e) => openDatePicker(e.currentTarget)}
-                    onFocus={(e) => openDatePicker(e.currentTarget)}
-                    onKeyDown={(e) => e.preventDefault()}
+                    onClick={(e) => e.currentTarget.showPicker?.()}
                   />
               </div>
             </div>
