@@ -186,6 +186,7 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("[ATTENDANCE_QR_CHECKIN_POST]", error);
-    return NextResponse.json({ success: false, error: "فشل تسجيل الحضور عبر QR." }, { status: 500 });
+    const message = error instanceof Error ? error.message : "فشل تسجيل الحضور عبر QR.";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
