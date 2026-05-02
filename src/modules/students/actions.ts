@@ -8,6 +8,7 @@ import { EnrollmentStatus, type Prisma } from "@/generated/client";
 import { db } from "@/lib/db";
 import { normalizeEgyptPhone } from "@/lib/phone";
 import { requireTenant } from "@/lib/tenant";
+import { requireAuth } from "@/lib/auth";
 import { chargeGroupEnrollmentIfNeeded } from "@/modules/groups/billing";
 
 const ACTIVE_ENROLLMENT_STATUSES = [
@@ -754,4 +755,40 @@ export async function enrollExistingStudent(studentId: string, groupId: string):
     console.error("enrollExistingStudent failed:", error);
     return { success: false, message: "تعذر إضافة الطالب للمجموعة" };
   }
+}
+
+export async function approveEnrollment(groupId: string, studentId: string) {
+  const tenant = await requireTenant()
+  const user = await requireAuth()
+  if (!['TEACHER', 'ASSISTANT'].includes(user.role)) 
+    throw new Error('غير مصرح')
+
+  await db.groupStudent.update({
+    where: {
+      groupId_studentId: { groupId, studentId },
+      group: { tenantId: tenant.id }
+    },
+    data: { status: 'ACTIVE' }
+  })
+
+  revalidatePath(`/teacher/groups/${groupId}`)
+  return { success: true }
+}
+
+export async function rejectEnrollment(groupId: string, studentId: string) {
+  const tenant = await requireTenant()
+  const user = await requireAuth()
+  if (!['TEACHER', 'ASSISTANT'].includes(user.role)) 
+    throw new Error('غير مصرح')
+
+  await db.groupStudent.update({
+    where: {
+      groupId_studentId: { groupId, studentId },
+      group: { tenantId: tenant.id }
+    },
+    data: { status: 'DROPPED' }
+  })
+
+  revalidatePath(`/teacher/groups/${groupId}`)
+  return { success: true }
 }

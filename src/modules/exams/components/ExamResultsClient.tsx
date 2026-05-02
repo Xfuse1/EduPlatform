@@ -285,7 +285,7 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
                   <td className="p-4">
                      <div className="flex items-center gap-1">
                         <span className={`text-lg font-extrabold ${isGradeApproved ? 'text-primary' : 'text-slate-300'}`}>
-                           {isGradeApproved ? toArabicDigits(s.totalGrade) : '--'}
+                           {isGradeApproved ? toArabicDigits(s.totalGrade ?? 0) : '--'}
                         </span>
                         <span className="text-xs text-slate-400 font-bold">/ {toArabicDigits(exam.questions.reduce((a, b) => a + b.grade, 0))}</span>
                      </div>

@@ -12,11 +12,11 @@ let recaptchaRenderNonce = 0;
 
 // Store confirmation on window to survive Turbopack cross-page module isolation
 const getConfirmation = (): ConfirmationResult | null =>
-  (typeof window !== "undefined" ? (window as Record<string, unknown>).__otp_confirmation as ConfirmationResult : null) ?? null;
+  (typeof window !== "undefined" ? (window as any).__otp_confirmation as ConfirmationResult : null) ?? null;
 
 const setConfirmation = (result: ConfirmationResult | null) => {
   if (typeof window !== "undefined") {
-    (window as Record<string, unknown>).__otp_confirmation = result;
+    (window as any).__otp_confirmation = result;
   }
 };
 

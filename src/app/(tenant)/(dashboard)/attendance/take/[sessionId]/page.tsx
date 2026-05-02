@@ -46,7 +46,7 @@ export default async function TakeAttendancePage({ params }: Props) {
 
         <AttendanceSheet
           sessionId={sessionId}
-          students={data.students.filter((s: any) => s.attendanceStatus !== 'NOT_ENROLLED')}
+          students={data.students.filter((s: any) => s.attendanceStatus !== 'NOT_ENROLLED') as any}
         />
 
         <div className="mt-6">
