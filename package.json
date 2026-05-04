@@ -9,9 +9,6 @@
     "lint": "next lint",
     "db:push": "prisma db push"
   },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
-  },
   "dependencies": {
     "@prisma/client": "^6.5.0",
     "@supabase/ssr": "^0.10.0",
