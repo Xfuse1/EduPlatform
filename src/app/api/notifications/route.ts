@@ -17,7 +17,6 @@ export async function GET() {
       id: true,
       type: true,
       message: true,
-      isRead: true,
       createdAt: true,
       status: true,
     },
@@ -67,7 +66,10 @@ export async function GET() {
   }
 
   // دمج الإشعارات وترتيبها بالأحدث أولاً
-  const merged = [...joinRequests, ...notifications]
+  const merged = [...joinRequests, ...notifications.map((notification) => ({
+    ...notification,
+    isRead: notification.status !== "QUEUED",
+  }))]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 20);
 
@@ -95,7 +97,7 @@ export async function PATCH(req: Request) {
           userId: user.id,
           id: { in: realIds },
         },
-        data: { isRead: true, status: "SENT" },
+        data: { status: "SENT" },
       });
     }
 
