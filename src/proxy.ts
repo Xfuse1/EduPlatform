@@ -16,22 +16,21 @@ function extractSubdomain(host: string): string {
   return parts.length > 2 ? (parts[0] ?? "") : "";
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const host = request.headers.get("host") ?? "";
   const subdomain = extractSubdomain(host);
+  const pathname = request.nextUrl.pathname;
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("next-url", pathname);
 
   if (!IGNORED_SUBDOMAINS.has(subdomain)) {
-    const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-tenant-slug", subdomain);
-
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
   }
 
-  return NextResponse.next();
+  return NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 }
 
 export const config = {
