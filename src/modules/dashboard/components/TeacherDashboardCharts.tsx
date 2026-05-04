@@ -97,7 +97,7 @@ export function TeacherDashboardCharts({
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
       <ChartCard title="إيرادات آخر 6 أشهر">
         {hasRevenue ? (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minHeight={200} minWidth={0}>
             <AreaChart data={revenueData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
               <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />
               <XAxis axisLine={false} dataKey="month" tick={axisStyle} tickLine={false} />
@@ -125,7 +125,7 @@ export function TeacherDashboardCharts({
 
       <ChartCard title="نسبة الحضور الشهرية">
         {hasAttendance ? (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minHeight={200} minWidth={0}>
             <BarChart data={attendanceData} margin={{ top: 8, right: 16, left: 24, bottom: 0 }}>
               <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />
               <XAxis axisLine={false} dataKey="month" tick={axisStyle} tickLine={false} />

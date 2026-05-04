@@ -2,8 +2,10 @@
 
 import { LogOut, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 import { NotificationBell } from "@/components/layout/NotificationBell";
+import { TeacherShareButton } from "@/components/layout/TeacherShareButton";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 function getInitials(name: string) {
@@ -17,16 +19,39 @@ function getInitials(name: string) {
 
 export function Header({
   tenantName,
+  tenantSlug,
   userName,
   avatarUrl,
+  role,
+  hasSubscription,
   onMenuToggle,
 }: {
   tenantName: string;
+  tenantSlug?: string;
   userName: string;
   avatarUrl?: string | null;
+  role?: "teacher" | "student" | "parent";
+  hasSubscription?: boolean;
   onMenuToggle?: () => void;
 }) {
   const router = useRouter();
+  const [avatarFailed, setAvatarFailed] = useState(false);
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [avatarUrl]);
+
+  const shouldRenderAvatar = useMemo(() => {
+    if (!avatarUrl || avatarFailed) {
+      return false;
+    }
+
+    if (typeof window !== "undefined" && !window.location.hostname.includes("localhost") && avatarUrl.includes("/uploads/avatars/")) {
+      return false;
+    }
+
+    return true;
+  }, [avatarFailed, avatarUrl]);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -38,8 +63,8 @@ export function Header({
       <div className="flex h-full items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex items-center gap-2">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-sm font-extrabold text-white shadow-lg shadow-primary/20 overflow-hidden">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" />
+            {shouldRenderAvatar ? (
+              <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" onError={() => setAvatarFailed(true)} />
             ) : (
               getInitials(userName)
             )}
@@ -70,6 +95,9 @@ export function Header({
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <NotificationBell />
+          {role === "teacher" && tenantSlug ? (
+            <TeacherShareButton tenantName={tenantName} tenantSlug={tenantSlug} hasSubscription={hasSubscription} />
+          ) : null}
           <div className="text-end">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">المعلم</p>
             <h1 className="text-base font-extrabold text-primary dark:text-sky-300">{tenantName}</h1>
