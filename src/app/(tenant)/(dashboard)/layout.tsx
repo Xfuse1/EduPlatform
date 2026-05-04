@@ -5,9 +5,10 @@ import { redirect } from "next/navigation";
 import type { UserRole } from "@/generated/client";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { TenantSuspendedNotice } from "@/components/layout/TenantSuspendedNotice";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { requireTenant } from "@/lib/tenant";
+import { verifyActiveSubscription } from "@/modules/payments/providers/subscription";
 
 function normalizeRole(role: UserRole) {
   if (role === "SUPER_ADMIN") return "super_admin";
@@ -45,31 +46,53 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   // Use user's actual tenantId to get the correct tenant (avoids localhost first-tenant fallback bug)
-  const [userTenant, userData] = await Promise.all([
+  const [userTenant, userData, adminContact] = await Promise.all([
     db.tenant.findUnique({
       where: { id: user.tenantId },
-      select: { name: true, isActive: true },
+      select: { name: true, slug: true, isActive: true },
     }),
     db.user.findUnique({
       where: { id: user.id },
       select: { avatarUrl: true },
     }),
+    db.user.findFirst({
+      where: { role: "SUPER_ADMIN", isActive: true },
+      orderBy: { createdAt: "asc" },
+      select: { phone: true },
+    }),
   ]);
 
   const tenantName = userTenant?.name ?? "EduPlatform";
+  const tenantSlug = userTenant?.slug;
   const avatarUrl = userData?.avatarUrl ?? null;
 
   if (userTenant && !userTenant.isActive) {
-    redirect("/account-restricted");
+    return (
+      <AppShell
+        currentPath={currentPath}
+        role={role}
+        tenantName={tenantName}
+        tenantSlug={tenantSlug}
+        userName={user.name}
+        avatarUrl={avatarUrl}
+        hasSubscription={false}
+      >
+        <TenantSuspendedNotice tenantName={tenantName} adminPhone={adminContact?.phone ?? null} />
+      </AppShell>
+    );
   }
+
+  const hasSubscription = role === "teacher" ? await verifyActiveSubscription() : true;
 
   return (
     <AppShell
       currentPath={currentPath}
       role={role}
       tenantName={tenantName}
+      tenantSlug={tenantSlug}
       userName={user.name}
       avatarUrl={avatarUrl}
+      hasSubscription={hasSubscription}
     >
       {children}
     </AppShell>

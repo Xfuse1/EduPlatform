@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Clock, Plus, QrCode, RefreshCcw, User, X } from "lucide-react";
+import { Check, Clock, Plus, QrCode, RefreshCcw, StopCircle, User, X } from "lucide-react";
 import Link from "next/link";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
@@ -23,6 +23,8 @@ type Session = {
   groupId: string;
   title: string;
   status: string;
+  sessionEndAt?: string | Date | null;
+  autoEndEnabled?: boolean;
   qrToken: string | null;
   qrExpiresAt: string | Date | null;
   qrScanLimit?: number | null;
@@ -105,6 +107,70 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
     }
   };
 
+  const endSession = async () => {
+    setLoading("end");
+    try {
+      const res = await fetch(`/api/attendance/sessions/${session.id}/end`, {
+        method: "POST",
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || "استجابة غير صالحة من السيرفر");
+      }
+      setSession({ ...session, status: "COMPLETED", qrToken: null, qrExpiresAt: new Date() });
+      setTimeLeft(0);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const updateAutoEnd = async (enabled: boolean) => {
+    const previous = session.autoEndEnabled ?? true;
+    setSession({ ...session, autoEndEnabled: enabled });
+    setLoading("auto-end");
+    try {
+      const res = await fetch(`/api/attendance/sessions/${session.id}/auto-end`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || "استجابة غير صالحة من السيرفر");
+      }
+    } catch (error) {
+      setSession((current) => ({ ...current, autoEndEnabled: previous }));
+      console.error(error);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const canManageAttendance = session.status !== "COMPLETED";
+  const autoEndEnabled = session.autoEndEnabled ?? true;
+
+  useEffect(() => {
+    if (!autoEndEnabled || session.status !== "IN_PROGRESS" || !session.sessionEndAt) {
+      return;
+    }
+
+    const endAt = new Date(session.sessionEndAt).getTime();
+    const delay = endAt - Date.now();
+
+    if (delay <= 0) {
+      void endSession();
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      void endSession();
+    }, delay);
+
+    return () => window.clearTimeout(timeout);
+  }, [autoEndEnabled, session.sessionEndAt, session.status]);
+
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       {/* Session Controls & QR */}
@@ -115,12 +181,25 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
             <p className="text-sm text-slate-500">الحالة: {session.status}</p>
           </div>
 
+          {session.status !== "COMPLETED" && (
+            <label className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-bold text-slate-700 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200">
+              <span>إنهاء الحصة تلقائيا في موعد الانتهاء</span>
+              <input
+                checked={autoEndEnabled}
+                className="h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary"
+                disabled={loading === "auto-end"}
+                onChange={(event) => updateAutoEnd(event.target.checked)}
+                type="checkbox"
+              />
+            </label>
+          )}
+
           {session.status === "SCHEDULED" ? (
             <Button className="w-full" disabled={loading === "start"} onClick={startSession}>
               <QrCode className="me-2 h-5 w-5" />
               ابدأ الحصة وتوليد QR
             </Button>
-          ) : (
+          ) : session.status === "IN_PROGRESS" ? (
             <div className="space-y-6">
               <div className="mx-auto flex aspect-square w-full max-w-[200px] items-center justify-center rounded-2xl bg-white p-4 shadow-inner ring-1 ring-slate-200">
                 {session.qrToken ? (
@@ -133,7 +212,7 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
               {timeLeft > 0 ? (
                 <div className="flex items-center justify-center gap-2 text-rose-500 font-bold">
                   <Clock className="h-4 w-4" />
-                  <span>ينتهي خلال {formatTime(timeLeft)}</span>
+                  <span>ينتهي كود الـ QR خلال {formatTime(timeLeft)}</span>
                 </div>
               ) : (
                 <Button className="w-full" onClick={startSession} variant="outline">
@@ -141,6 +220,22 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
                   تجديد كود الـ QR
                 </Button>
               )}
+
+              <Button
+                className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:border-rose-900/60 dark:text-rose-300 dark:hover:bg-rose-950/30"
+                disabled={loading === "end"}
+                onClick={endSession}
+                variant="outline"
+              >
+                <StopCircle className="me-2 h-4 w-4" />
+                إنهاء الحصة
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:text-emerald-300">
+              <Check className="mx-auto h-8 w-8" />
+              <p className="font-bold">تم إنهاء الحصة</p>
+              <p className="text-xs">تم إيقاف QR وتسجيل الحصة كمنتهية.</p>
             </div>
           )}
         </CardContent>
@@ -177,7 +272,7 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
                         student.status === "PRESENT" ? "bg-emerald-500 hover:bg-emerald-600" : "bg-white dark:bg-slate-900"
                     )}
                     title="حاضر"
-                    disabled={loading === student.id}
+                    disabled={!canManageAttendance || loading === student.id}
                   >
                     <Check className="h-4 w-4" />
                   </Button>
@@ -189,7 +284,7 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
                         student.status === "LATE" ? "bg-amber-500 hover:bg-amber-600" : "bg-white dark:bg-slate-900"
                     )}
                     title="متأخر"
-                    disabled={loading === student.id}
+                    disabled={!canManageAttendance || loading === student.id}
                   >
                     <Clock className="h-4 w-4" />
                   </Button>
@@ -201,7 +296,7 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
                         student.status === "ABSENT" ? "bg-rose-500 text-white hover:bg-rose-600 shadow-rose-200" : "bg-white dark:bg-slate-900"
                     )}
                     title="غائب"
-                    disabled={loading === student.id}
+                    disabled={!canManageAttendance || loading === student.id}
                   >
                     <X className="h-4 w-4" />
                   </Button>

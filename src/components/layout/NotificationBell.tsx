@@ -24,6 +24,7 @@ export type NotificationItem = {
   type: NotificationType;
   message: string;
   createdAt: string;
+  isRead: boolean;
   status: string;
   meta?: any;
 };
@@ -48,13 +49,20 @@ const NOTIFICATION_CONFIG: Record<string, { icon: LucideIcon; color: string; bgC
 
 const DEFAULT_CONFIG = { icon: Bell, color: "text-slate-600", bgColor: "bg-slate-50 dark:bg-slate-900" };
 
+async function patchRead(ids: string[]) {
+  await fetch("/api/notifications", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids }),
+  });
+}
+
 export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [readIds, setReadIds] = useState<Set<string>>(new Set());
 
-  const unreadCount = notifications.filter(n => !readIds.has(n.id) && n.status === "QUEUED").length;
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   useEffect(() => {
     async function fetchNotifications() {
@@ -74,25 +82,30 @@ export function NotificationBell() {
     fetchNotifications();
   }, []);
 
-  const markAllAsRead = async () => {
-    const newReadIds = new Set(notifications.map(n => n.id));
-    setReadIds(newReadIds);
-
+  const markAsRead = async (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
     try {
-      await fetch("/api/notifications", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: Array.from(newReadIds) }),
-      });
+      await patchRead([id]);
     } catch (error) {
       console.error("Failed to mark as read:", error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    const unreadIds = notifications.filter(n => !n.isRead).map(n => n.id);
+    if (!unreadIds.length) return;
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    try {
+      await patchRead(unreadIds);
+    } catch (error) {
+      console.error("Failed to mark all as read:", error);
     }
   };
 
   return (
     <div className="relative">
       <button
-        aria-expanded={isOpen}
+        aria-expanded={isOpen ? "true" : "false"}
         aria-label="الإشعارات"
         className="touch-target relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition hover:border-secondary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
         onClick={() => setIsOpen((current) => !current)}
@@ -109,6 +122,7 @@ export function NotificationBell() {
       {isOpen && (
         <>
           <button
+            aria-label="إغلاق الإشعارات"
             className="fixed inset-0 z-30 cursor-default bg-transparent"
             onClick={() => setIsOpen(false)}
             type="button"
@@ -120,12 +134,13 @@ export function NotificationBell() {
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 dark:text-white">الإشعارات</h3>
                 <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
-                  لديك {unreadCount} تنبيهات غير مقروءة
+                  {unreadCount > 0 ? `لديك ${unreadCount} تنبيهات غير مقروءة` : "كل الإشعارات مقروءة"}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <button
+                    type="button"
                     onClick={markAllAsRead}
                     className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1 ml-2"
                   >
@@ -134,6 +149,7 @@ export function NotificationBell() {
                   </button>
                 )}
                 <button
+                  type="button"
                   onClick={() => setIsOpen(false)}
                   className="h-8 w-8 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-200 dark:text-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all active:scale-95"
                   aria-label="إغلاق"
@@ -153,7 +169,7 @@ export function NotificationBell() {
                 <div className="divide-y divide-slate-50 dark:divide-slate-900">
                   {notifications.map((n) => {
                     const config = NOTIFICATION_CONFIG[n.type] ?? DEFAULT_CONFIG;
-                    const isUnread = !readIds.has(n.id) && n.status === "QUEUED";
+                    const isUnread = !n.isRead;
                     const link = config.getLink?.(n);
 
                     const content = (
@@ -184,7 +200,9 @@ export function NotificationBell() {
                             isUnread && "bg-primary/5 dark:bg-sky-400/5"
                           )}
                           onClick={() => {
-                            setReadIds(prev => new Set([...prev, n.id]));
+                            if (isUnread) {
+                              void markAsRead(n.id);
+                            }
                             setIsOpen(false);
                           }}
                         >
@@ -201,7 +219,7 @@ export function NotificationBell() {
                           "group relative p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer overflow-hidden",
                           isUnread && "bg-primary/5 dark:bg-sky-400/5"
                         )}
-                        onClick={() => setReadIds(prev => new Set([...prev, n.id]))}
+                        onClick={() => isUnread && markAsRead(n.id)}
                       >
                         {isUnread && <div className="absolute right-0 top-0 bottom-0 w-1 bg-primary" />}
                         {content}
