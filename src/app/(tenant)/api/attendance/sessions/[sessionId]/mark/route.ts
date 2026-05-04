@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
+import { completeExpiredSession } from "@/modules/attendance/sessionStatus";
 
 const ALLOWED_STATUSES = ["PRESENT", "ABSENT", "LATE", "EXCUSED"] as const;
 
@@ -36,7 +37,7 @@ export async function POST(
 
     const session = await db.session.findFirst({
       where: { id: sessionId, tenantId: tenant.id },
-      select: { id: true, groupId: true },
+      select: { id: true, groupId: true, date: true, timeEnd: true, status: true, notes: true },
     });
 
     if (!session) {
@@ -46,10 +47,18 @@ export async function POST(
       );
     }
 
+    const currentSession = await completeExpiredSession(session);
+    if (currentSession.status === "COMPLETED") {
+      return NextResponse.json(
+        { success: false, error: "لا يمكن تعديل الحضور بعد انتهاء الحصة." },
+        { status: 409 }
+      );
+    }
+
     await db.attendance.upsert({
       where: {
         sessionId_studentId: {
-          sessionId: session.id,
+          sessionId: currentSession.id,
           studentId,
         },
       },
@@ -62,8 +71,8 @@ export async function POST(
       },
       create: {
         tenantId: tenant.id,
-        sessionId: session.id,
-        groupId: session.groupId,
+        sessionId: currentSession.id,
+        groupId: currentSession.groupId,
         studentId,
         status: status as "PRESENT" | "ABSENT" | "LATE" | "EXCUSED",
         method: "MANUAL",

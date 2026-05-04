@@ -12,7 +12,15 @@ export async function GET() {
   const notifications = await db.notification.findMany({
     where: { tenantId: user.tenantId, userId: user.id },
     orderBy: { createdAt: "desc" },
-    take: 20,
+    take: 50,
+    select: {
+      id: true,
+      type: true,
+      message: true,
+      isRead: true,
+      createdAt: true,
+      status: true,
+    },
   });
 
   // ✅ إضافة طلبات الانضمام المعلقة للمعلم فقط
@@ -76,7 +84,9 @@ export async function PATCH(req: Request) {
     const { ids } = await req.json();
 
     // ✅ تجاهل الـ ids الخاصة بطلبات الانضمام (تبدأ بـ "join_")
-    const realIds = ids?.filter((id: string) => !id.startsWith("join_"));
+    const realIds = Array.isArray(ids)
+      ? ids.filter((id: string) => !id.startsWith("join_"))
+      : [];
 
     if (realIds?.length > 0) {
       await db.notification.updateMany({
@@ -85,12 +95,12 @@ export async function PATCH(req: Request) {
           userId: user.id,
           id: { in: realIds },
         },
-        data: { status: "SENT" },
+        data: { isRead: true, status: "SENT" },
       });
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "فشل التحديث" }, { status: 500 });
   }
 }

@@ -3,12 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
+import { completeExpiredSession } from "@/modules/attendance/sessionStatus";
 import { ensureQrBillingBeforeAttendance, incrementMonthlyConsumption } from "@/modules/groups/billing";
 
 async function findActiveSessionByToken(tenantId: string, token: string) {
   const now = new Date();
 
-  return db.session.findFirst({
+  const session = await db.session.findFirst({
     where: {
       tenantId,
       qrToken: token,
@@ -35,6 +36,13 @@ async function findActiveSessionByToken(tenantId: string, token: string) {
       },
     },
   });
+
+  if (!session) {
+    return null;
+  }
+
+  const currentSession = await completeExpiredSession(session);
+  return currentSession.status === "IN_PROGRESS" ? currentSession : null;
 }
 
 export async function GET(request: NextRequest) {

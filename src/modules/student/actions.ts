@@ -12,8 +12,7 @@ const enrollSchema = z.object({
 });
 
 /**
- * Student self-enroll into a group.
- * If the group is full the student is placed on the WAITLIST.
+ * Student self-enroll requests are pending teacher approval.
  */
 export async function enrollStudentInGroup(input: { groupId: string }) {
   const user = await requireAuth();
@@ -84,6 +83,13 @@ export async function enrollStudentInGroup(input: { groupId: string }) {
       };
     }
 
+    if (existingEnrollment?.status === "PENDING") {
+      return {
+        success: false,
+        message: "طلب الانضمام لهذه المجموعة قيد المراجعة بالفعل.",
+      };
+    }
+
     const activeEnrollmentCount = await db.groupStudent.count({
       where: {
         groupId: group.id,
@@ -92,7 +98,6 @@ export async function enrollStudentInGroup(input: { groupId: string }) {
     });
 
     const nextStatus = activeEnrollmentCount >= group.maxCapacity ? "WAITLIST" : "PENDING";
-    // Students self-enrolling always go to WAITLIST pending teacher approval
 
     await db.$transaction(async (tx) => {
       if (existingEnrollment) {

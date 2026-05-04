@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowLeft, Delete, Phone } from "lucide-react";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -193,6 +193,36 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
   };
 
   // ─── Phone Step ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (step !== "pin" || isPending) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (/^\d$/.test(event.key)) {
+        event.preventDefault();
+        setError("");
+        setPin((currentPin) => (currentPin.length < PIN_MAX_LENGTH ? currentPin + event.key : currentPin));
+        return;
+      }
+
+      if (event.key === "Backspace" || event.key === "Delete") {
+        event.preventDefault();
+        setError("");
+        setPin((currentPin) => currentPin.slice(0, -1));
+        return;
+      }
+
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handlePinSubmit(pin);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isPending, pin, step]);
+
   if (step === "phone") {
     return (
       <Card className="overflow-hidden rounded-[24px] border-white/30 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">

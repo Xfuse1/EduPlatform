@@ -2,6 +2,7 @@ import { cache } from "react";
 
 import { db } from "@/lib/db";
 import { parseStoredGroupSchedule } from "@/modules/groups/schedule";
+import { completeExpiredSession, getSessionAutoEndEnabled, getSessionEndDate } from "@/modules/attendance/sessionStatus";
 
 const dayValueByIndex = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
 
@@ -59,7 +60,7 @@ export const getTodaySessions = cache(async (tenantId: string) => {
 
     const sessions = await Promise.all(
       matchingGroups.map(async ({ group, scheduleEntry }) => {
-        const session = await db.session.upsert({
+        const savedSession = await db.session.upsert({
           where: {
             groupId_date: {
               groupId: group.id,
@@ -91,6 +92,7 @@ export const getTodaySessions = cache(async (tenantId: string) => {
             },
           },
         });
+        const session = await completeExpiredSession(savedSession);
 
         return {
           id: session.id,
@@ -240,9 +242,11 @@ export const getSessionWithStudents = cache(async (sessionId: string) => {
 
     if (!session) return null;
 
+    const currentSession = await completeExpiredSession(session);
+
     // Get all student IDs involved (either in group or in attendance)
-    const groupStudentIds = new Set(session.group.groupStudents.map((gs) => gs.studentId));
-    const attendanceStudentIds = new Set(session.attendances.map((a) => a.studentId));
+    const groupStudentIds = new Set(currentSession.group.groupStudents.map((gs) => gs.studentId));
+    const attendanceStudentIds = new Set(currentSession.attendances.map((a) => a.studentId));
     const allStudentIds = new Set([...groupStudentIds, ...attendanceStudentIds]);
 
     // Fetch details for students who are not in the group but are in attendance (guests)
@@ -256,31 +260,33 @@ export const getSessionWithStudents = cache(async (sessionId: string) => {
 
     // Map all students
     const students = [...allStudentIds].map((id) => {
-      const gs = session.group.groupStudents.find((s) => s.studentId === id);
-      const record = session.attendances.find((a) => a.studentId === id);
+      const gs = currentSession.group.groupStudents.find((s) => s.studentId === id);
+      const record = currentSession.attendances.find((a) => a.studentId === id);
       const guestInfo = guestStudents.find((s) => s.id === id);
 
       return {
         id: id,
         name: gs ? gs.student.name : (guestInfo ? guestInfo.name : "طالب غير معروف"),
         phone: gs ? gs.student.phone : (guestInfo ? guestInfo.phone : ""),
-        status: record ? record.status : (gs && gs.enrolledAt > session.date ? "NOT_ENROLLED" : "ABSENT"),
+        status: record ? record.status : (gs && gs.enrolledAt > currentSession.date ? "NOT_ENROLLED" : "ABSENT"),
         method: record ? record.method : "MANUAL",
         markedAt: record ? record.markedAt : null,
       };
     });
 
     return {
-      id: session.id,
-      groupId: session.groupId,
-      tenantId: session.tenantId,
-      title: session.group.name,
-      status: session.status,
-      timeStart: session.timeStart,
-      timeEnd: session.timeEnd,
-      qrToken: session.qrToken,
-      qrExpiresAt: session.qrExpiresAt,
-      qrScanLimit: session.qrScanLimit,
+      id: currentSession.id,
+      groupId: currentSession.groupId,
+      tenantId: currentSession.tenantId,
+      title: currentSession.group.name,
+      status: currentSession.status,
+      timeStart: currentSession.timeStart,
+      timeEnd: currentSession.timeEnd,
+      sessionEndAt: getSessionEndDate(currentSession)?.toISOString() ?? null,
+      autoEndEnabled: getSessionAutoEndEnabled(currentSession),
+      qrToken: currentSession.qrToken,
+      qrExpiresAt: currentSession.qrExpiresAt,
+      qrScanLimit: currentSession.qrScanLimit,
       students: students.sort((a, b) => a.name.localeCompare(b.name, "ar")),
     };
   } catch (error) {
