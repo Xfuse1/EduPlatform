@@ -31,10 +31,8 @@ export async function GET(req: NextRequest) {
   // غير ذلك => صفحة المدفوعات
   let destinationPath = '/payments'
   const notes = payment?.notes ?? ''
-  if (orderId.startsWith('SUBK-') || notes.startsWith('SUBSCRIPTION:')) {
-    destinationPath = '/payments/subscription'
-  } else if (orderId.startsWith('RCH-') || notes.startsWith('RECHARGE:')) {
-    destinationPath = '/payments/wallet'
+  if (orderId.startsWith('RCH-') || notes.startsWith('RECHARGE:')) {
+    destinationPath = '/payments'
   }
 
   // بناء redirect URL — نحافظ على الـ subdomain الحالي

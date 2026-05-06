@@ -7,6 +7,26 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { requestTeacherWalletWithdrawal } from '@/modules/payments/actions'
+import { toWhatsAppUrl } from '@/lib/phone'
+
+const WITHDRAWAL_STATUS_LABELS: Record<string, string> = {
+  PENDING: 'قيد الانتظار',
+  SUCCESS: 'تم بنجاح',
+  FAILED: 'فشل',
+  CANCELLED: 'ملغي',
+}
+
+const FAILURE_REASON_LABELS: Record<string, string> = {
+  KASHIER_TRANSFER_API_PENDING_INTEGRATION: 'ميزة السحب المباشر عبر Kashier قيد التطوير وستتاح قريبًا',
+  KASHIER_TRANSFER_API_ERROR: 'خطأ في الاتصال بـ Kashier',
+  KASHIER_TRANSFER_FAILED: 'فشل تحويل Kashier',
+  PAYOUT_WALLET_DEBIT_FAILED: 'فشل خصم الرصيد من المحفظة',
+}
+
+function formatFailureReason(reason: string | null | undefined) {
+  if (!reason) return null
+  return FAILURE_REASON_LABELS[reason] ?? reason
+}
 
 type TeacherWalletData = Awaited<ReturnType<typeof import('@/modules/payments/queries').getTeacherWalletPageData>>
 
@@ -19,12 +39,6 @@ function formatDate(value: Date | string | null) {
   return new Date(value).toLocaleString('ar-EG')
 }
 
-function toWhatsappUrl(phone: string) {
-  const digits = phone.replace(/\D/g, '')
-  const normalized = digits.startsWith('0') ? `20${digits.slice(1)}` : digits
-  return `https://wa.me/${normalized}`
-}
-
 export function TeacherWalletPageClient({ data }: { data: TeacherWalletData }) {
   const [amount, setAmount] = useState(String(data.wallet.balance > 0 ? data.wallet.balance : ''))
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -32,7 +46,7 @@ export function TeacherWalletPageClient({ data }: { data: TeacherWalletData }) {
 
   const adminContactUrl = useMemo(() => {
     if (!data.adminContact?.phone) return null
-    return toWhatsappUrl(data.adminContact.phone)
+    return toWhatsAppUrl(data.adminContact.phone)
   }, [data.adminContact?.phone])
 
   function handleWithdraw() {
@@ -93,15 +107,20 @@ export function TeacherWalletPageClient({ data }: { data: TeacherWalletData }) {
             </Link>
           </div>
 
+          <p className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-800 dark:border-sky-900/40 dark:bg-sky-950/30 dark:text-sky-300">
+            ميزة السحب المباشر عبر Kashier قيد التطوير وستتاح قريبًا. للسحب الآن تواصل مع الإدارة.
+          </p>
+
           <div className="grid gap-3 md:grid-cols-[1fr_auto_auto]">
             <Input
               inputMode="numeric"
               value={amount}
               onChange={(event) => setAmount(event.target.value.replace(/[^0-9]/g, ''))}
               placeholder="مبلغ السحب"
+              disabled
             />
-            <Button type="button" onClick={handleWithdraw} disabled={isPending || !data.kashierApiConfigured || data.wallet.balance <= 0}>
-              {isPending ? 'جاري السحب...' : 'سحب عبر Kashier'}
+            <Button type="button" onClick={handleWithdraw} disabled>
+              سحب عبر Kashier
             </Button>
             {adminContactUrl ? (
               <a
@@ -118,17 +137,6 @@ export function TeacherWalletPageClient({ data }: { data: TeacherWalletData }) {
               </Button>
             )}
           </div>
-
-          {!data.kashierApiConfigured ? (
-            <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-              أضف بيانات Kashier من الإعدادات لتفعيل السحب عبر Kashier.
-            </p>
-          ) : null}
-          {message ? (
-            <p className={message.type === 'success' ? 'text-sm font-bold text-emerald-600' : 'text-sm font-bold text-rose-600'}>
-              {message.text}
-            </p>
-          ) : null}
         </CardContent>
       </Card>
 
@@ -164,12 +172,14 @@ export function TeacherWalletPageClient({ data }: { data: TeacherWalletData }) {
                 <div key={withdrawal.id} className="rounded-lg border p-3 text-sm">
                   <div className="flex items-center justify-between gap-3">
                     <p className="font-bold">{formatCurrency(withdrawal.amount)}</p>
-                    <p className="font-bold text-sky-600">{withdrawal.status}</p>
+                    <p className={`font-bold ${withdrawal.status === 'FAILED' ? 'text-rose-600' : withdrawal.status === 'SUCCESS' ? 'text-emerald-600' : 'text-sky-600'}`}>
+                      {WITHDRAWAL_STATUS_LABELS[withdrawal.status] ?? withdrawal.status}
+                    </p>
                   </div>
                   <p className="mt-1 text-xs text-slate-500">
                     {withdrawal.method}{withdrawal.adminMethod ? ` / ${withdrawal.adminMethod}` : ''} | {formatDate(withdrawal.requestedAt)}
                   </p>
-                  {withdrawal.failureReason ? <p className="mt-1 text-xs text-rose-600">{withdrawal.failureReason}</p> : null}
+                  {withdrawal.failureReason ? <p className="mt-1 text-xs text-rose-600">{formatFailureReason(withdrawal.failureReason)}</p> : null}
                 </div>
               ))
             )}

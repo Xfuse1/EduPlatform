@@ -120,17 +120,28 @@ export async function registerStudentAction(formData: FormData): Promise<ActionR
 
     const existing = await db.user.findFirst({
       where: { phone: normalizedPhone, tenantId },
-      select: { id: true, role: true, pinHash: true },
+      select: { id: true, role: true, pinHash: true, isActive: true },
     });
 
     if (existing) {
+      if (existing.role !== "STUDENT") {
+        return {
+          success: false,
+          message: "هذا الرقم مستخدم بالفعل لحساب آخر. استخدم رقم الطالب أو سجّل الدخول بالحساب الحالي.",
+        };
+      }
+
+      if (!existing.isActive) {
+        return { success: false, message: "حساب الطالب غير نشط حالياً. تواصل مع إدارة المنصة." };
+      }
+
       const session = await createAuthSession({ id: existing.id, tenantId });
       const cookieStore = await cookies();
       setAuthSessionCookie(cookieStore, session.token, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
       return {
         success: true,
-        role: existing.role as ActionResult["role"],
-        redirectTo: redirectMap[existing.role] ?? "/student",
+        role: "STUDENT",
+        redirectTo: "/student",
         hasPin: !!existing.pinHash,
       };
     }

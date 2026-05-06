@@ -746,6 +746,9 @@ export async function initiateTeacherSubscriptionCheckout(input: {
     throw new Error('هذه الباقة غير متاحة حالياً')
   }
   const amount = validated.billingCycle === 'MONTHLY' ? planConfig.monthlyPrice : planConfig.yearlyPrice
+  if (amount === 0) {
+    throw new Error('هذه الباقة تتطلب التواصل مع الإدارة مباشرة')
+  }
 
   const count = await db.payment.count({ where: { tenantId: tenant.id } })
   const orderId = makeOrderId('SUBK', tenant.slug, count)

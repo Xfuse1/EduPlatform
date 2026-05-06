@@ -234,6 +234,7 @@ model Notification {
   message        String
   channel        NotificationChannel
   status         NotificationStatus  @default(QUEUED)
+  isRead         Boolean             @default(false)
   recipientPhone String
   sentAt         DateTime?
   errorMessage   String?
@@ -243,6 +244,7 @@ model Notification {
   user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, status])
+  @@index([tenantId, isRead])
   @@index([userId])
   @@index([status, createdAt])
 }
@@ -508,6 +510,12 @@ model TeacherSubscription {
 }
 
 // Ã¢â€â‚¬Ã¢â€â‚¬ Student Balance / Wallet Models Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+
+model PlatformConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
 
 model SubscriptionPlanConfig {
   id            String            @id @default(cuid())

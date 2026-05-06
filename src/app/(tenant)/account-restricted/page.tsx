@@ -6,12 +6,7 @@ import { AlertTriangle, Phone } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-
-function toWhatsappUrl(phone: string) {
-  const digits = phone.replace(/\D/g, "");
-  const normalized = digits.startsWith("0") ? `20${digits.slice(1)}` : digits;
-  return `https://wa.me/${normalized}`;
-}
+import { toWhatsAppUrl } from "@/lib/phone";
 
 export default async function AccountRestrictedPage() {
   const user = await getCurrentUser();
@@ -60,7 +55,7 @@ export default async function AccountRestrictedPage() {
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <a
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-sky-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-sky-400"
-              href={toWhatsappUrl(adminPhone)}
+              href={toWhatsAppUrl(adminPhone)}
               rel="noreferrer"
               target="_blank"
             >

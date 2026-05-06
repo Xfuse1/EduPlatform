@@ -256,6 +256,7 @@ exports.Prisma.NotificationScalarFieldEnum = {
   message: 'message',
   channel: 'channel',
   status: 'status',
+  isRead: 'isRead',
   recipientPhone: 'recipientPhone',
   sentAt: 'sentAt',
   errorMessage: 'errorMessage',
@@ -373,6 +374,12 @@ exports.Prisma.TeacherSubscriptionScalarFieldEnum = {
   kashierApiKey: 'kashierApiKey',
   kashierMerId: 'kashierMerId',
   createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PlatformConfigScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
   updatedAt: 'updatedAt'
 };
 
@@ -743,6 +750,7 @@ exports.Prisma.ModelName = {
   ExamQuestion: 'ExamQuestion',
   ExamSubmission: 'ExamSubmission',
   TeacherSubscription: 'TeacherSubscription',
+  PlatformConfig: 'PlatformConfig',
   SubscriptionPlanConfig: 'SubscriptionPlanConfig',
   GroupBillingCharge: 'GroupBillingCharge',
   StudentBalance: 'StudentBalance',

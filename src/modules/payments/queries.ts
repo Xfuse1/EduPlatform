@@ -222,6 +222,7 @@ export const getPayments = cache(async (
   const payments = await db.payment.findMany({
     where: {
       tenantId,
+      NOT: { notes: { startsWith: 'SUBSCRIPTION:' } },
       ...(filters.studentId ? { studentId: filters.studentId } : {}),
       ...(filters.month ? { month: filters.month } : {}),
       ...(filters.status ? { status: filters.status as any } : {}),

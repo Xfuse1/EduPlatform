@@ -237,21 +237,24 @@ export async function addKashierApiCredentials(kashierApiKey: string, kashierMer
   const tenant = await requireTenant()
   const actor = await requireAuth()
 
-  const subscription = await db.teacherSubscription.findUnique({
-    where: { tenantId: tenant.id },
-  })
-
-  if (!subscription) {
-    throw new Error('لا يوجد اشتراك لإضافة API')
-  }
-
   const encrypted = encryptKashierKey(kashierApiKey)
 
-  const updated = await db.teacherSubscription.update({
-    where: { id: subscription.id },
-    data: {
+  const updated = await db.teacherSubscription.upsert({
+    where: { tenantId: tenant.id },
+    update: {
       kashierApiKey: encrypted,
       kashierMerId,
+    },
+    create: {
+      tenantId: tenant.id,
+      kashierApiKey: encrypted,
+      kashierMerId,
+      isActive: false,
+      amount: 0,
+      nextBillingAt: new Date('2099-12-31'),
+      subscriptionPlan: 'STARTER',
+      planKey: 'STARTER',
+      billingCycle: 'MONTHLY',
     },
   })
 

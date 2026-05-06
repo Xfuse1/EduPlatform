@@ -1,13 +1,31 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
+
+const MAX_AVATAR_SIZE_BYTES = 10 * 1024 * 1024;
+
+function getImageExtension(fileType: string) {
+  if (fileType === "image/png") return "png";
+  if (fileType === "image/webp") return "webp";
+  if (fileType === "image/gif") return "gif";
+  return "jpg";
+}
 
 // Supabase client بصلاحيات الـ service role — lazy init to avoid build-time crash
 function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const supabaseServiceKey = (
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_SERVICE_KEY
+  )?.trim();
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return null;
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey);
 }
 
 export async function POST(req: Request) {
@@ -29,21 +47,31 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "يجب أن يكون الملف صورة" }, { status: 400 });
     }
 
-    // التحقق من حجم الملف (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      return NextResponse.json({ error: "حجم الصورة يجب أن يكون أقل من 2MB" }, { status: 400 });
+    // التحقق من حجم الملف (max 10MB)
+    if (file.size > MAX_AVATAR_SIZE_BYTES) {
+      return NextResponse.json({ error: "حجم الصورة يجب أن يكون أقل من 10MB" }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/avatar.${ext}`;
+    const ext = getImageExtension(file.type);
+    const storagePath = `${user.id}/avatar.${ext}`;
+
+    const supabase = getSupabase();
+    if (!supabase) {
+      const uploadDirectory = path.join(process.cwd(), "public", "uploads", "avatars", user.id);
+      await mkdir(uploadDirectory, { recursive: true });
+
+      const fileName = `avatar.${ext}`;
+      await writeFile(path.join(uploadDirectory, fileName), buffer);
+
+      return NextResponse.json({ url: `/uploads/avatars/${user.id}/${fileName}` });
+    }
 
     // رفع الصورة لـ Supabase Storage
-    const supabase = getSupabase();
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(path, buffer, {
+      .upload(storagePath, buffer, {
         contentType: file.type,
         upsert: true, // استبدال الصورة القديمة
       });
@@ -53,7 +81,7 @@ export async function POST(req: Request) {
     }
 
     // جيب الـ URL العام
-    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    const { data } = supabase.storage.from("avatars").getPublicUrl(storagePath);
 
     return NextResponse.json({ url: data.publicUrl });
   } catch (error) {

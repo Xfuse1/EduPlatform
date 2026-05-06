@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
 import { getMinutesFromTime, getLegacyGroupScheduleFields, parseStoredGroupSchedule } from "@/modules/groups/schedule";
 import { groupCreateSchema, normalizeGroupFormData, parseGroupFormData } from "@/modules/groups/validations";
+import { canAddGroup } from "@/lib/subscription-helpers";
 
 function canManageGroups(role: string) {
   return role === "TEACHER" || role === "ASSISTANT" || role === "CENTER_ADMIN";
@@ -122,6 +123,11 @@ export async function createGroup(formData: FormData): Promise<GroupActionResult
 
     if (!canManageGroups(user.role)) {
       return { success: false, message: "غير مسموح لك بالقيام بهذا الإجراء" };
+    }
+
+    const subscriptionCheck = await canAddGroup(tenant.id);
+    if (!subscriptionCheck.allowed) {
+      return { success: false, message: subscriptionCheck.message ?? 'لا يمكن إضافة مجموعات بدون اشتراك نشط' };
     }
 
     const validationResult = getValidationErrors(formData);

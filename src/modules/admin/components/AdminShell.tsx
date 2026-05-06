@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, CreditCard, LayoutDashboard, Loader2, LogOut, Package, Users } from "lucide-react";
+import { Building2, CreditCard, LayoutDashboard, Loader2, LogOut, Package, Settings, Users } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ const navItems = [
   { href: "/admin/users", label: "المستخدمون", icon: Users },
   { href: "/admin/finance", label: "المالية", icon: CreditCard },
   { href: "/admin/plans", label: "الباقات", icon: Package },
+  { href: "/admin/settings", label: "الإعدادات", icon: Settings },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {

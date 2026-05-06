@@ -31,7 +31,7 @@ type StudentItem = {
   group: string;
   groupId: string;
   enrollmentStatus?: string;
-  studentStatus: "ACTIVE" | "SUSPENDED";
+  studentStatus: "ACTIVE" | "SUSPENDED" | "PENDING";
   consecutiveAbsences: number;
   paymentStatus: StudentPaymentStatus;
   attendance: number;
@@ -58,7 +58,7 @@ const filters: Array<{ label: string; value: FilterValue }> = [
   { label: "متأخر", value: "OVERDUE" },
 ];
 
-export function StudentsPageClient({ students, groups }: { students: StudentItem[]; groups: GroupOption[] }) {
+export function StudentsPageClient({ students, groups, canAddStudents = true }: { students: StudentItem[]; groups: GroupOption[]; canAddStudents?: boolean }) {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterValue>("ALL");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -133,9 +133,11 @@ export function StudentsPageClient({ students, groups }: { students: StudentItem
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">الطلاب</h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">بحث سريع ومؤشرات واضحة للحضور والسداد لكل طالب.</p>
         </div>
-        <div className="w-full sm:w-auto">
-          <AddStudentForm groups={groups} />
-        </div>
+        {canAddStudents && (
+          <div className="w-full sm:w-auto">
+            <AddStudentForm groups={groups} />
+          </div>
+        )}
       </div>
 
       <Card>
