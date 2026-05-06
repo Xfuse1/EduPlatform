@@ -6,8 +6,10 @@ import { db } from "@/lib/db";
 import { logFinancialEvent } from "@/lib/financial-audit";
 import { requireSuperAdminPage } from "@/lib/platform-admin";
 import {
+  generatePlanKeyFromName,
   normalizePlanKey,
   softDeleteSubscriptionPlanConfig,
+  updateSubscriptionPlanConfig,
   upsertSubscriptionPlanConfig,
 } from "@/modules/payments/providers/plan-config";
 import { creditUserWallet, debitUserWallet, getOrCreateWallet, resolveRechargeWalletOwner } from "@/modules/wallet/provider";
@@ -48,17 +50,17 @@ export async function setTenantStatusAction(formData: FormData) {
 export async function updatePlanConfigAction(formData: FormData) {
   await requireSuperAdminPage();
 
-  const plan = normalizePlanKey(String(formData.get("plan") ?? "").trim());
+  const originalPlan = normalizePlanKey(String(formData.get("plan") ?? "").trim());
+  const keyInput = String(formData.get("key") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
   const monthlyPrice = Number(formData.get("monthlyPrice") ?? 0);
   const yearlyPrice = Number(formData.get("yearlyPrice") ?? 0);
   const studentsLimit = Number(formData.get("studentsLimit") ?? 0);
   const groupsLimit = Number(formData.get("groupsLimit") ?? 0);
   const sessionsLimit = Number(formData.get("sessionsLimit") ?? 0);
-  const storageLimit = Number(formData.get("storageLimit") ?? 0);
   const isActive = formData.getAll("isActive").includes("true");
 
-  if (!plan) {
+  if (!originalPlan) {
     throw new Error("مفتاح الباقة غير صالح");
   }
 
@@ -66,19 +68,22 @@ export async function updatePlanConfigAction(formData: FormData) {
     throw new Error("اسم الباقة مطلوب");
   }
 
-  if ([monthlyPrice, yearlyPrice, studentsLimit, groupsLimit, sessionsLimit, storageLimit].some((n) => !Number.isFinite(n) || n < 0)) {
+  if ([monthlyPrice, yearlyPrice, studentsLimit, groupsLimit, sessionsLimit].some((n) => !Number.isFinite(n) || n < 0)) {
     throw new Error("قيم الباقة غير صالحة");
   }
 
-  await upsertSubscriptionPlanConfig({
-    key: plan,
+  const nextKey = normalizePlanKey(keyInput) || originalPlan;
+
+  await updateSubscriptionPlanConfig({
+    originalKey: originalPlan,
+    nextKey,
     name,
     monthlyPrice,
     yearlyPrice,
     studentsLimit,
     groupsLimit,
     sessionsLimit,
-    storageLimit,
+    storageLimit: 0,
     isActive,
   });
 
@@ -91,23 +96,24 @@ export async function updatePlanConfigAction(formData: FormData) {
 export async function createPlanConfigAction(formData: FormData) {
   await requireSuperAdminPage();
 
-  const key = normalizePlanKey(String(formData.get("key") ?? formData.get("name") ?? "").trim());
+  const keyInput = String(formData.get("key") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
   const monthlyPrice = Number(formData.get("monthlyPrice") ?? 0);
   const yearlyPrice = Number(formData.get("yearlyPrice") ?? 0);
   const studentsLimit = Number(formData.get("studentsLimit") ?? 0);
   const groupsLimit = Number(formData.get("groupsLimit") ?? 0);
   const sessionsLimit = Number(formData.get("sessionsLimit") ?? 0);
-  const storageLimit = Number(formData.get("storageLimit") ?? 0);
   const isActive = formData.getAll("isActive").includes("true");
 
-  if (!key || !name) {
-    throw new Error("اسم ومفتاح الباقة مطلوبان");
+  if (!name) {
+    throw new Error("اسم الباقة مطلوب");
   }
 
-  if ([monthlyPrice, yearlyPrice, studentsLimit, groupsLimit, sessionsLimit, storageLimit].some((n) => !Number.isFinite(n) || n < 0)) {
+  if ([monthlyPrice, yearlyPrice, studentsLimit, groupsLimit, sessionsLimit].some((n) => !Number.isFinite(n) || n < 0)) {
     throw new Error("قيم الباقة غير صالحة");
   }
+
+  const key = normalizePlanKey(keyInput) || await generatePlanKeyFromName(name);
 
   await upsertSubscriptionPlanConfig({
     key,
@@ -117,7 +123,7 @@ export async function createPlanConfigAction(formData: FormData) {
     studentsLimit,
     groupsLimit,
     sessionsLimit,
-    storageLimit,
+    storageLimit: 0,
     isActive,
   });
 
