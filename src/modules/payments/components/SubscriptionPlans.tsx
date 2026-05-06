@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { toWhatsAppUrl } from '@/lib/phone'
 
 type PlanKey = string
 type Cycle = 'MONTHLY' | 'YEARLY'
@@ -37,6 +38,7 @@ export function SubscriptionPlans({
   isActive,
   kashierStatus,
   plans,
+  adminContact,
 }: {
   currentPlan?: string | null
   currentCycle?: string | null
@@ -44,6 +46,7 @@ export function SubscriptionPlans({
   isActive?: boolean
   kashierStatus?: string | null
   plans: PlanItem[]
+  adminContact?: string | null
 }) {
   const [billingCycle, setBillingCycle] = useState<Cycle>('MONTHLY')
   const [error, setError] = useState<string | null>(null)
@@ -138,9 +141,26 @@ export function SubscriptionPlans({
                     <p key={feature}>- {feature}</p>
                   ))}
                 </div>
-                <Button type="button" disabled={isPending || isCurrent || !plan.isActive} onClick={() => startCheckout(plan.key)}>
-                  {isCurrent ? 'الخطة الحالية' : !plan.isActive ? 'مغلقة حالياً' : isPending ? 'جارٍ المعالجة...' : 'اشترك الآن'}
-                </Button>
+                {price === 0 ? (
+                  adminContact ? (
+                    <a
+                      href={toWhatsAppUrl(adminContact)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-emerald-500"
+                    >
+                      تواصل مع الإدارة عبر واتساب
+                    </a>
+                  ) : (
+                    <p className="rounded-lg bg-slate-100 px-3 py-2 text-center text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      للاشتراك في هذه الباقة تواصل مع الإدارة
+                    </p>
+                  )
+                ) : (
+                  <Button type="button" disabled={isPending || isCurrent || !plan.isActive} onClick={() => startCheckout(plan.key)}>
+                    {isCurrent ? 'الخطة الحالية' : !plan.isActive ? 'مغلقة حالياً' : isPending ? 'جارٍ المعالجة...' : 'اشترك الآن'}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           )

@@ -253,3 +253,21 @@ export async function adjustUserWalletAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/admin/finance");
 }
+
+export async function updatePlatformConfigAction(key: string, value: string) {
+  await requireSuperAdminPage();
+
+  await db.platformConfig.upsert({
+    where: { key },
+    update: { value },
+    create: { key, value },
+  });
+
+  revalidatePath("/admin/settings");
+  revalidatePath("/payments");
+}
+
+export async function getPlatformConfigValue(key: string): Promise<string | null> {
+  const row = await db.platformConfig.findUnique({ where: { key } });
+  return row?.value ?? null;
+}

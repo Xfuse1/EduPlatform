@@ -123,7 +123,14 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
             data.profile.enrollments.map((enrollment, index) => (
               <div key={enrollment.group.id} className="rounded-[18px] border bg-white p-4 dark:bg-slate-900">
                 <div className="mb-4 h-1.5 rounded-full" style={{ backgroundColor: groupColors[index % groupColors.length] }} />
-                <p className="text-lg font-bold text-slate-900 dark:text-white">{enrollment.group.name}</p>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-lg font-bold text-slate-900 dark:text-white">{enrollment.group.name}</p>
+                  {enrollment.status === "PENDING" ? (
+                    <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">
+                      قيد المراجعة
+                    </span>
+                  ) : null}
+                </div>
                 {enrollment.group.tenantName && (
                   <p className="mt-1 text-xs font-bold text-slate-500 dark:text-slate-400">
                     {enrollment.group.tenantName}

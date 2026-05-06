@@ -10,6 +10,7 @@ import { normalizeEgyptPhone } from "@/lib/phone";
 import { requireTenant } from "@/lib/tenant";
 import { requireAuth } from "@/lib/auth";
 import { chargeGroupEnrollmentIfNeeded } from "@/modules/groups/billing";
+import { canAddStudent } from "@/lib/subscription-helpers";
 
 const ACTIVE_ENROLLMENT_STATUSES = [
   EnrollmentStatus.ACTIVE,
@@ -280,6 +281,11 @@ async function createStudentForTenant(tenantId: string, input: NormalizedStudent
   const validationMessage = validateStudentInput(input);
   if (validationMessage) {
     return { success: false, message: validationMessage };
+  }
+
+  const subscriptionCheck = await canAddStudent(tenantId);
+  if (!subscriptionCheck.allowed) {
+    return { success: false, message: subscriptionCheck.message ?? 'لا يمكن إضافة طلاب بدون اشتراك نشط' };
   }
 
   const storedStudentPhone = input.phone || `student-${generateId()}`;

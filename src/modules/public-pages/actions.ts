@@ -105,7 +105,7 @@ export async function registerStudent(formData: FormData): Promise<RegistrationR
     const student = await db.user.create({
       data: {
         tenantId: tenant.id,
-        phone: `${parentPhone}-${Date.now()}`,
+        phone: `student-${Date.now()}`,
         name: studentName,
         role: "STUDENT",
         gradeLevel: grade,
@@ -122,7 +122,7 @@ export async function registerStudent(formData: FormData): Promise<RegistrationR
       data: {
         groupId: group.id,
         studentId: student.id,
-        status: "ACTIVE",
+        status: "PENDING",
       },
     });
 
@@ -138,7 +138,7 @@ export async function registerStudent(formData: FormData): Promise<RegistrationR
 
     return {
       success: true,
-      message: "تم التسجيل بنجاح! ✅",
+      message: "تم إرسال طلب التسجيل بنجاح! ✅",
     };
   } catch (error) {
     console.error("DB registerStudent failed:", error);

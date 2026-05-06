@@ -498,6 +498,7 @@ export const getStudentDashboardData = cache(async (tenantId: string, studentId:
           gradeLevel: student.gradeLevel,
         },
         enrollments: student.groupStudents.map((gs) => ({
+          status: gs.status,
           group: {
             id: gs.group.id,
             name: gs.group.name,

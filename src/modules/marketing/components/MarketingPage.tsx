@@ -132,6 +132,10 @@ const footerGroups = [
 ] as const;
 
 export default function MarketingPage() {
+  const scrollToSection = (sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <main
       className="min-h-screen scroll-smooth bg-[#F8FAFC] font-[Cairo] text-[#1E293B] dark:bg-[#0F172A] dark:text-white"
@@ -216,12 +220,13 @@ export default function MarketingPage() {
                     ابدأ مجاناً — سجّل الآن
                     <ArrowLeft className="h-4 w-4" />
                   </Link>
-                  <Link
+                  <button
                     className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/30 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/15"
-                    href="#how-it-works"
+                    onClick={() => scrollToSection("how-it-works")}
+                    type="button"
                   >
                     شاهد كيف يعمل
-                  </Link>
+                  </button>
                 </div>
               </div>
 

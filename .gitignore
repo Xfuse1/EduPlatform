@@ -9,3 +9,4 @@ tsconfig.tsbuildinfo
 *.tmp*
 *.dll
 *.node
+public/uploads/

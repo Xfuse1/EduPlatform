@@ -38,12 +38,15 @@ const planLabels: Record<TenantSettings["plan"], string> = {
   BUSINESS: "أعمال",
 };
 
-export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierApi = false, userPhone, hasPin = false }: { 
+export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierApi = false, kashierApiKey: initialKashierApiKey = "", kashierMerId: initialKashierMerId = "", userPhone, hasPin = false, hasSubscription = false }: {
   tenant: TenantSettings;
   avatarUrl?: string | null;
   hasKashierApi?: boolean;
+  kashierApiKey?: string;
+  kashierMerId?: string;
   userPhone?: string | null;
   hasPin?: boolean;
+  hasSubscription?: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -57,8 +60,8 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierAp
   const [toast, setToast] = useState<ToastState>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl ?? null);
   const [isUploading, setIsUploading] = useState(false);
-  const [kashierApiKey, setKashierApiKey] = useState("");
-  const [kashierMerId, setKashierMerId] = useState("");
+  const [kashierApiKey, setKashierApiKey] = useState(initialKashierApiKey);
+  const [kashierMerId, setKashierMerId] = useState(initialKashierMerId);
   const [isKashierConnected, setIsKashierConnected] = useState(hasKashierApi);
   const [publicPageUrl, setPublicPageUrl] = useState(`https://${tenant.slug}.eduplatform.com`);
   const [publicPageHost, setPublicPageHost] = useState(`${tenant.slug}.eduplatform.com`);
@@ -271,7 +274,7 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierAp
                   اضغط على أيقونة الكاميرا لتغيير الصورة
                 </p>
                 <p className="text-xs text-slate-500 mt-1">
-                  PNG، JPG — بحد أقصى 2MB
+                  PNG، JPG — بحد أقصى 10MB
                 </p>
               </div>
             </div>
@@ -295,19 +298,27 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierAp
               <div className="sm:col-span-2">
                 <Label>رابط صفحتك الشخصية</Label>
                 <div className="mt-1 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
-                  <span className="flex-1 text-sm font-mono text-slate-700 dark:text-slate-300" dir="ltr">
-                    {publicPageHost}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(publicPageUrl);
-                      showToast("success", "✅ تم نسخ الرابط");
-                    }}
-                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white transition hover:opacity-90"
-                  >
-                    نسخ الرابط
-                  </button>
+                  {hasSubscription ? (
+                    <>
+                      <span className="flex-1 text-sm font-mono text-slate-700 dark:text-slate-300" dir="ltr">
+                        {publicPageHost}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(publicPageUrl);
+                          showToast("success", "✅ تم نسخ الرابط");
+                        }}
+                        className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white transition hover:opacity-90"
+                      >
+                        نسخ الرابط
+                      </button>
+                    </>
+                  ) : (
+                    <span className="flex-1 text-sm text-slate-400 dark:text-slate-500">
+                      اشترك في باقة لعرض رابط صفحتك الشخصية
+                    </span>
+                  )}
                 </div>
                 <p className="mt-2 text-xs text-slate-500">أرسل هذا الرابط للطلاب وأولياء الأمور للتسجيل في سنترك</p>
               </div>

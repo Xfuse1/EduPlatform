@@ -9,16 +9,20 @@ import { Sidebar } from "@/components/layout/Sidebar";
 export function AppShell({
   children,
   role,
+  tenantSlug,
   tenantName,
   userName,
   avatarUrl,
+  hasSubscription,
 }: {
   children: React.ReactNode;
   role: "teacher" | "student" | "parent";
   currentPath: string;
+  tenantSlug?: string;
   tenantName: string;
   userName: string;
   avatarUrl?: string | null;
+  hasSubscription?: boolean;
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -70,8 +74,11 @@ export function AppShell({
         <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
           <Header
             tenantName={tenantName}
+            tenantSlug={tenantSlug}
             userName={userName}
             avatarUrl={avatarUrl}
+            role={role}
+            hasSubscription={hasSubscription}
             onMenuToggle={() => setSidebarOpen((prev) => !prev)}
           />
           <main className="page-enter min-h-0 flex-1 overflow-y-auto">

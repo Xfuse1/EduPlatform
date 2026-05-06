@@ -7,20 +7,32 @@ import { cn } from "@/lib/utils";
 
 const faqItems = [
   {
-    question: "هل يشتغل الموقع من الموبايل؟",
-    answer: "نعم، المنصة مصممة للموبايل أولًا وتشتغل بسلاسة على كل الأجهزة.",
+    question: "هل أقدر أبدأ كمدرس لوحدي من غير سنتر؟",
+    answer: "نعم، يمكنك إنشاء حساب معلم وإدارة مجموعاتك وطلابك وحضورك ومصاريفك من نفس المنصة.",
   },
   {
-    question: "هل بياناتي آمنة؟",
-    answer: "نعم، كل بياناتك محمية ومعزولة تمامًا عن باقي المستخدمين.",
+    question: "هل كل مدرس أو سنتر له رابط خاص؟",
+    answer: "نعم، أثناء التسجيل تختار رابطًا خاصًا لحسابك ليصل الطلاب وأولياء الأمور إلى صفحتك بسهولة.",
   },
   {
-    question: "هل يمكنني إلغاء الاشتراك؟",
-    answer: "نعم، يمكنك الإلغاء في أي وقت بدون أي رسوم إضافية.",
+    question: "هل ولي الأمر يقدر يتابع ابنه؟",
+    answer: "نعم، ولي الأمر يستطيع متابعة الحضور، الحصص القادمة، حالة المصروفات، الواجبات، والدرجات المتاحة.",
   },
   {
-    question: "كيف أبدأ؟",
-    answer: "فقط اضغط على ابدأ مجانًا وأنشئ حسابك في أقل من دقيقة.",
+    question: "هل أقدر أعرف مين دفع ومين عليه متأخرات؟",
+    answer: "نعم، المنصة تعرض المدفوعات والمتأخرات والفواتير، وتساعدك تتابع التحصيل لكل طالب أو مجموعة.",
+  },
+  {
+    question: "هل النظام يدعم الحضور بالـ QR؟",
+    answer: "نعم، يمكنك إدارة جلسات الحضور وتسجيل الطلاب بسرعة، مع دعم تسجيل الحضور عبر QR في مسارات الحضور.",
+  },
+  {
+    question: "هل أقدر أعمل واجبات أو امتحانات للطلاب؟",
+    answer: "نعم، المنصة تحتوي على أقسام للواجبات والامتحانات ونتائج الطلاب، بما يناسب متابعة الأداء الدراسي.",
+  },
+  {
+    question: "هل أقدر أستخدم المنصة من الموبايل؟",
+    answer: "نعم، الواجهة تعمل من الموبايل والتابلت والكمبيوتر حتى تتابع يومك من أي جهاز.",
   },
 ] as const;
 
@@ -40,15 +52,15 @@ export function MarketingFaq() {
           </div>
           <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-5xl">أسئلة شائعة</h2>
           <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-slate-300 sm:text-base">
-            جمعنا أكثر الأسئلة التي قد تخطر ببالك في مكان واحد، حتى تكون التجربة أوضح وأريح من أول نظرة.
+            إجابات مباشرة على الأسئلة التي يسألها المدرس أو السنتر قبل الاعتماد على منصة لإدارة الطلاب والحضور والمصاريف.
           </p>
         </div>
 
         <div className="hidden rounded-[28px] border border-sky-100/80 bg-[radial-gradient(circle_at_top,rgba(46,134,193,0.18),transparent_68%),linear-gradient(180deg,#f8fbff_0%,#eef5fb_100%)] p-5 text-right shadow-[0_16px_45px_rgba(46,134,193,0.12)] dark:border-slate-600/60 dark:bg-[radial-gradient(circle_at_top,rgba(46,134,193,0.16),transparent_70%),linear-gradient(180deg,rgba(18,31,52,0.95)_0%,rgba(15,26,45,0.98)_100%)] dark:shadow-[0_16px_50px_rgba(2,8,20,0.35)] lg:block lg:w-[280px]">
-          <p className="text-sm font-semibold text-slate-500 dark:text-slate-300">إجابة سريعة</p>
-          <p className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-white">كل ما تحتاجه في دقائق</p>
+          <p className="text-sm font-semibold text-slate-500 dark:text-slate-300">قبل ما تبدأ</p>
+          <p className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-white">اعرف هل المنصة مناسبة لطريقة شغلك</p>
           <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-slate-300">
-            الأسئلة مرتبة بشكل بسيط وواضح حتى تصل للمعلومة مباشرة بدون تشتيت.
+            ركزنا على الأسئلة العملية: التسجيل، الرابط الخاص، متابعة ولي الأمر، الحضور، والتحصيل.
           </p>
         </div>
       </div>
