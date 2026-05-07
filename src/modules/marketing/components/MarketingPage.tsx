@@ -300,15 +300,16 @@ export default function MarketingPage() {
                     ابدأ مجاناً — سجّل الآن
                     <ArrowLeft className="h-5 w-5" />
                   </Link>
-                  <Link
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection("how-it-works")}
                     className="group relative flex h-16 items-center justify-center gap-3 overflow-hidden rounded-[20px] border border-slate-200 bg-slate-50 px-10 text-lg font-bold text-slate-900 backdrop-blur-md transition-all hover:bg-slate-100 hover:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:border-white/20"
-                    href="#how-it-works"
                   >
                     <span>شاهد كيف يعمل</span>
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 transition-transform group-hover:scale-110">
                       <div className="h-2 w-2 rounded-full bg-sky-400" />
                     </div>
-                  </Link>
+                  </button>
                 </div>
               </div>
 
