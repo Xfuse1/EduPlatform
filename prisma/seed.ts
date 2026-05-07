@@ -1,4 +1,4 @@
-import { PrismaClient, AttendanceMethod, AttendanceStatus, PaymentMethod, PaymentStatus, SessionStatus, SessionType, UserRole } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -35,14 +35,14 @@ async function main() {
     },
     update: {
       name: "أحمد حسن",
-      role: UserRole.TEACHER,
+      role: "TEACHER",
       isActive: true,
     },
     create: {
       tenantId: tenant.id,
       phone: "01000000000",
       name: "أحمد حسن",
-      role: UserRole.TEACHER,
+      role: "TEACHER",
       isActive: true,
     },
   });
@@ -56,7 +56,7 @@ async function main() {
     },
     update: {
       name: "محمد خالد",
-      role: UserRole.STUDENT,
+      role: "STUDENT",
       gradeLevel: "الصف الثالث الإعدادي",
       isActive: true,
     },
@@ -64,7 +64,7 @@ async function main() {
       tenantId: tenant.id,
       phone: "01000000001",
       name: "محمد خالد",
-      role: UserRole.STUDENT,
+      role: "STUDENT",
       gradeLevel: "الصف الثالث الإعدادي",
       isActive: true,
     },
@@ -79,7 +79,7 @@ async function main() {
     },
     update: {
       name: "خالد محمد",
-      role: UserRole.PARENT,
+      role: "PARENT",
       parentName: "ولي أمر محمد خالد",
       parentPhone: "01000000002",
       isActive: true,
@@ -88,7 +88,7 @@ async function main() {
       tenantId: tenant.id,
       phone: "01000000002",
       name: "خالد محمد",
-      role: UserRole.PARENT,
+      role: "PARENT",
       parentName: "ولي أمر محمد خالد",
       parentPhone: "01000000002",
       isActive: true,
@@ -220,8 +220,8 @@ async function main() {
       tenantId: tenant.id,
       timeStart: "16:00",
       timeEnd: "18:00",
-      status: SessionStatus.COMPLETED,
-      type: SessionType.REGULAR,
+      status: "COMPLETED",
+      type: "REGULAR",
       notes: "مراجعة على الجبر والمعادلات.",
     },
     create: {
@@ -230,8 +230,8 @@ async function main() {
       date: sessionOneDate,
       timeStart: "16:00",
       timeEnd: "18:00",
-      status: SessionStatus.COMPLETED,
-      type: SessionType.REGULAR,
+      status: "COMPLETED",
+      type: "REGULAR",
       notes: "مراجعة على الجبر والمعادلات.",
     },
   });
@@ -247,8 +247,8 @@ async function main() {
       tenantId: tenant.id,
       timeStart: "18:30",
       timeEnd: "20:00",
-      status: SessionStatus.COMPLETED,
-      type: SessionType.REGULAR,
+      status: "COMPLETED",
+      type: "REGULAR",
       notes: "شرح عملي لدرس الجهاز الدوري.",
     },
     create: {
@@ -257,8 +257,8 @@ async function main() {
       date: sessionTwoDate,
       timeStart: "18:30",
       timeEnd: "20:00",
-      status: SessionStatus.COMPLETED,
-      type: SessionType.REGULAR,
+      status: "COMPLETED",
+      type: "REGULAR",
       notes: "شرح عملي لدرس الجهاز الدوري.",
     },
   });
@@ -270,8 +270,8 @@ async function main() {
       studentId: student.id,
       amount: 350,
       month: "2026-03",
-      status: PaymentStatus.PAID,
-      method: PaymentMethod.CASH,
+      status: "PAID",
+      method: "CASH",
       paidAt: new Date("2026-03-05T12:00:00.000Z"),
       recordedById: teacher.id,
       notes: "سداد اشتراك مجموعة الرياضيات.",
@@ -281,8 +281,8 @@ async function main() {
       studentId: student.id,
       amount: 350,
       month: "2026-03",
-      status: PaymentStatus.PAID,
-      method: PaymentMethod.CASH,
+      status: "PAID",
+      method: "CASH",
       receiptNumber: "REC-AHMED-001",
       paidAt: new Date("2026-03-05T12:00:00.000Z"),
       recordedById: teacher.id,
@@ -297,8 +297,8 @@ async function main() {
       studentId: student.id,
       amount: 300,
       month: "2026-03",
-      status: PaymentStatus.PARTIAL,
-      method: PaymentMethod.INSTAPAY,
+      status: "PARTIAL",
+      method: "INSTAPAY",
       recordedById: teacher.id,
       notes: "دفعة أولى لمجموعة العلوم.",
     },
@@ -307,8 +307,8 @@ async function main() {
       studentId: student.id,
       amount: 300,
       month: "2026-03",
-      status: PaymentStatus.PARTIAL,
-      method: PaymentMethod.INSTAPAY,
+      status: "PARTIAL",
+      method: "INSTAPAY",
       receiptNumber: "REC-AHMED-002",
       recordedById: teacher.id,
       notes: "دفعة أولى لمجموعة العلوم.",
@@ -325,9 +325,9 @@ async function main() {
     update: {
       tenantId: tenant.id,
       groupId: groupOne.id,
-      status: AttendanceStatus.PRESENT,
+      status: "PRESENT",
       markedById: teacher.id,
-      method: AttendanceMethod.MANUAL,
+      method: "MANUAL",
       synced: true,
     },
     create: {
@@ -335,9 +335,9 @@ async function main() {
       sessionId: sessionOne.id,
       groupId: groupOne.id,
       studentId: student.id,
-      status: AttendanceStatus.PRESENT,
+      status: "PRESENT",
       markedById: teacher.id,
-      method: AttendanceMethod.MANUAL,
+      method: "MANUAL",
       synced: true,
     },
   });
@@ -352,9 +352,9 @@ async function main() {
     update: {
       tenantId: tenant.id,
       groupId: groupTwo.id,
-      status: AttendanceStatus.LATE,
+      status: "LATE",
       markedById: teacher.id,
-      method: AttendanceMethod.MANUAL,
+      method: "MANUAL",
       synced: true,
     },
     create: {
@@ -362,10 +362,92 @@ async function main() {
       sessionId: sessionTwo.id,
       groupId: groupTwo.id,
       studentId: student.id,
-      status: AttendanceStatus.LATE,
+      status: "LATE",
       markedById: teacher.id,
-      method: AttendanceMethod.MANUAL,
+      method: "MANUAL",
       synced: true,
+    },
+  });
+
+  // Seed default subscription plans
+  await prisma.subscriptionPlanConfig.upsert({
+    where: { key: "STARTER" },
+    update: {
+      name: "البداية",
+      monthlyPrice: 200,
+      yearlyPrice: 2000,
+      studentsLimit: 20,
+      groupsLimit: 2,
+      sessionsLimit: 100,
+      storageLimit: 100,
+      isActive: true,
+      deletedAt: null,
+    },
+    create: {
+      key: "STARTER",
+      plan: "STARTER",
+      name: "البداية",
+      monthlyPrice: 200,
+      yearlyPrice: 2000,
+      studentsLimit: 20,
+      groupsLimit: 2,
+      sessionsLimit: 100,
+      storageLimit: 100,
+      isActive: true,
+    },
+  });
+
+  await prisma.subscriptionPlanConfig.upsert({
+    where: { key: "PROFESSIONAL" },
+    update: {
+      name: "الاحترافية",
+      monthlyPrice: 500,
+      yearlyPrice: 5000,
+      studentsLimit: 100,
+      groupsLimit: 10,
+      sessionsLimit: 1000,
+      storageLimit: 1000,
+      isActive: true,
+      deletedAt: null,
+    },
+    create: {
+      key: "PROFESSIONAL",
+      plan: "PROFESSIONAL",
+      name: "الاحترافية",
+      monthlyPrice: 500,
+      yearlyPrice: 5000,
+      studentsLimit: 100,
+      groupsLimit: 10,
+      sessionsLimit: 1000,
+      storageLimit: 1000,
+      isActive: true,
+    },
+  });
+
+  await prisma.subscriptionPlanConfig.upsert({
+    where: { key: "ENTERPRISE" },
+    update: {
+      name: "المؤسسات",
+      monthlyPrice: 0,
+      yearlyPrice: 0,
+      studentsLimit: 9999,
+      groupsLimit: 9999,
+      sessionsLimit: 9999,
+      storageLimit: 9999,
+      isActive: true,
+      deletedAt: null,
+    },
+    create: {
+      key: "ENTERPRISE",
+      plan: "ENTERPRISE",
+      name: "المؤسسات",
+      monthlyPrice: 0,
+      yearlyPrice: 0,
+      studentsLimit: 9999,
+      groupsLimit: 9999,
+      sessionsLimit: 9999,
+      storageLimit: 9999,
+      isActive: true,
     },
   });
 
@@ -380,3 +462,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
