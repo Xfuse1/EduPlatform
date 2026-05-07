@@ -1,5 +1,5 @@
 ﻿import { db } from '@/lib/db'
-import { getSubscriptionPlanConfigs } from '@/modules/payments/providers/plan-config'
+import { getPlanConfigFromMap, getSubscriptionPlanConfigs } from '@/modules/payments/providers/plan-config'
 
 export async function canAddStudent(tenantId: string): Promise<{
   allowed: boolean
@@ -33,7 +33,9 @@ export async function canAddStudent(tenantId: string): Promise<{
     })
 
     const plans = await getSubscriptionPlanConfigs()
-    const limit = plans[subscription.subscriptionPlan].limits.students
+    const plan = getPlanConfigFromMap(plans, subscription.planKey, subscription.subscriptionPlan)
+    if (!plan) throw new Error('Subscription plan config not found')
+    const limit = plan.limits.students
 
     return {
       allowed: studentCount < limit,
@@ -73,7 +75,9 @@ export async function canAddGroup(tenantId: string): Promise<{
     const groupCount = await db.group.count({ where: { tenantId, isActive: true } })
 
     const plans = await getSubscriptionPlanConfigs()
-    const limit = plans[subscription.subscriptionPlan].limits.groups
+    const plan = getPlanConfigFromMap(plans, subscription.planKey, subscription.subscriptionPlan)
+    if (!plan) throw new Error('Subscription plan config not found')
+    const limit = plan.limits.groups
 
     return {
       allowed: groupCount < limit,
@@ -104,7 +108,9 @@ export async function getSubscriptionUsage(tenantId: string) {
     const groupCount = await db.group.count({ where: { tenantId } })
 
     const plans = await getSubscriptionPlanConfigs()
-    const limit = plans[subscription.subscriptionPlan].limits
+    const plan = getPlanConfigFromMap(plans, subscription.planKey, subscription.subscriptionPlan)
+    if (!plan) throw new Error('Subscription plan config not found')
+    const limit = plan.limits
 
     const daysUntilExpiry = Math.ceil(
       (subscription.nextBillingAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
@@ -113,7 +119,7 @@ export async function getSubscriptionUsage(tenantId: string) {
     return {
       status: subscription.isActive ? 'active' : 'inactive',
       data: {
-        plan: subscription.subscriptionPlan,
+        plan: subscription.planKey,
         billingCycle: subscription.billingCycle,
         nextBillingAt: subscription.nextBillingAt,
         daysUntilExpiry,

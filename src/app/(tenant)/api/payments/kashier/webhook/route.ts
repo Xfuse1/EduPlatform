@@ -9,6 +9,22 @@ import { verifyKashierWebhookSignature } from '@/modules/payments/providers/kash
 import { activateOrRenewSubscriptionForTenant } from '@/modules/payments/providers/subscription'
 import { settleTeacherPaymentToWallet } from '@/modules/payments/providers/transfer'
 import { kashierWebhookSchema } from '@/modules/payments/validations'
+import { debitUserWallet, resolveTenantPayeeUserId } from '@/modules/wallet/provider'
+
+function getNoteNumber(notes: string, key: string) {
+  const line = notes.split('\n').find((item) => item.startsWith(`${key}:`))
+  const value = Number(line?.slice(key.length + 1) ?? 0)
+  return Number.isFinite(value) && value > 0 ? Math.trunc(value) : 0
+}
+
+function hasSubscriptionApplied(notes: string) {
+  return notes.split('\n').some((line) => line.startsWith('SUBSCRIPTION_APPLIED:'))
+}
+
+function appendSubscriptionApplied(notes: string) {
+  if (hasSubscriptionApplied(notes)) return notes
+  return `${notes}\nSUBSCRIPTION_APPLIED:${new Date().toISOString()}`.trim()
+}
 
 export async function POST(req: NextRequest) {
   const rawBody = await req.text()
@@ -75,13 +91,40 @@ export async function POST(req: NextRequest) {
       const planRaw = (parts[1] ?? '').trim()
       const cycleRaw = (parts[2] ?? '').trim()
       const validCycles = new Set(['MONTHLY', 'YEARLY'])
+      const hasWalletSplitMetadata = notes.includes('WALLET_CONTRIBUTION:') || notes.includes('SUBSCRIPTION_TOTAL:')
 
-      if (planRaw && validCycles.has(cycleRaw)) {
+      if (planRaw && validCycles.has(cycleRaw) && !hasSubscriptionApplied(notes) && (!wasAlreadyPaid || hasWalletSplitMetadata)) {
+        const walletContribution = getNoteNumber(notes, 'WALLET_CONTRIBUTION')
+        if (walletContribution > 0) {
+          const payeeUserId = await resolveTenantPayeeUserId(updatedPayment.tenantId)
+          await debitUserWallet({
+            tenantId: updatedPayment.tenantId,
+            userId: payeeUserId,
+            amount: walletContribution,
+            reason: `Subscription wallet contribution - ${planRaw}`,
+            relatedPaymentId: updatedPayment.id,
+            metadata: {
+              source: 'TEACHER_SUBSCRIPTION',
+              plan: planRaw,
+              cycle: cycleRaw,
+              totalAmount: getNoteNumber(notes, 'SUBSCRIPTION_TOTAL') || updatedPayment.amount,
+              walletContribution,
+              kashierAmount: getNoteNumber(notes, 'KASHIER_AMOUNT') || updatedPayment.amount,
+              orderId,
+            },
+          })
+        }
+
         await activateOrRenewSubscriptionForTenant(
           updatedPayment.tenantId,
           planRaw,
           cycleRaw as 'MONTHLY' | 'YEARLY',
         )
+
+        await db.payment.update({
+          where: { id: updatedPayment.id },
+          data: { notes: appendSubscriptionApplied(notes) },
+        })
       }
     } else {
       await settleTeacherPaymentToWallet(updatedPayment.id)

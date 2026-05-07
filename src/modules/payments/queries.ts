@@ -345,6 +345,15 @@ export const getTeacherTransfers = cache(async (tenantId: string, limit: number 
   })
 })
 
+function getWalletTransactionDirection(metadata: unknown) {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata) || !('direction' in metadata)) {
+    return null
+  }
+
+  const direction = metadata.direction
+  return direction === 'CREDIT' || direction === 'DEBIT' ? direction : null
+}
+
 export const getTeacherWalletPageData = cache(async (tenantId: string) => {
   const teacherUserId = await resolveTenantPayeeUserId(tenantId)
   const wallet = await getOrCreateWallet(tenantId, teacherUserId)
@@ -370,6 +379,34 @@ export const getTeacherWalletPageData = cache(async (tenantId: string) => {
     }),
     db.walletTransaction.findMany({
       where: { tenantId, walletId: wallet.id },
+      include: {
+        payment: {
+          select: {
+            id: true,
+            amount: true,
+            month: true,
+            method: true,
+            status: true,
+            notes: true,
+            receiptNumber: true,
+            transactionId: true,
+            paymentGateway: true,
+            paidAt: true,
+            student: { select: { name: true } },
+          },
+        },
+        withdrawal: {
+          select: {
+            id: true,
+            amount: true,
+            method: true,
+            adminMethod: true,
+            status: true,
+            requestedAt: true,
+            processedAt: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
       take: 20,
     }),
@@ -389,6 +426,170 @@ export const getTeacherWalletPageData = cache(async (tenantId: string) => {
     }),
   ])
 
+  const transactionIds = transactions.map((transaction) => transaction.id)
+  const groupCharges = transactionIds.length > 0
+    ? await db.groupBillingCharge.findMany({
+        where: {
+          tenantId,
+          walletCreditTxId: { in: transactionIds },
+          relatedSessionId: { not: null },
+          status: 'COMPLETED',
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+    : []
+
+  const groupIds = [...new Set(groupCharges.map((charge) => charge.groupId))]
+  const sessionIds = [...new Set(groupCharges.map((charge) => charge.relatedSessionId).filter(Boolean))] as string[]
+  const studentIds = [...new Set(groupCharges.map((charge) => charge.studentId))]
+
+  const [groups, sessions, students, attendances] = await Promise.all([
+    groupIds.length > 0
+      ? db.group.findMany({
+          where: { tenantId, id: { in: groupIds } },
+          select: { id: true, name: true },
+        })
+      : Promise.resolve([]),
+    sessionIds.length > 0
+      ? db.session.findMany({
+          where: { tenantId, id: { in: sessionIds } },
+          select: { id: true, groupId: true, date: true },
+        })
+      : Promise.resolve([]),
+    studentIds.length > 0
+      ? db.user.findMany({
+          where: { tenantId, id: { in: studentIds } },
+          select: { id: true, name: true },
+        })
+      : Promise.resolve([]),
+    sessionIds.length > 0 && studentIds.length > 0
+      ? db.attendance.findMany({
+          where: {
+            tenantId,
+            sessionId: { in: sessionIds },
+            studentId: { in: studentIds },
+          },
+          select: {
+            sessionId: true,
+            studentId: true,
+            status: true,
+            method: true,
+            markedAt: true,
+          },
+        })
+      : Promise.resolve([]),
+  ])
+
+  const groupsById = new Map(groups.map((group) => [group.id, group]))
+  const sessionsById = new Map(sessions.map((session) => [session.id, session]))
+  const studentsById = new Map(students.map((student) => [student.id, student]))
+  const attendanceBySessionStudent = new Map(
+    attendances.map((attendance) => [`${attendance.sessionId}:${attendance.studentId}`, attendance]),
+  )
+  const chargesBySessionGroup = new Map<string, typeof groupCharges>()
+
+  for (const charge of groupCharges) {
+    if (!charge.relatedSessionId) continue
+    const key = `${charge.relatedSessionId}:${charge.groupId}`
+    const charges = chargesBySessionGroup.get(key) ?? []
+    charges.push(charge)
+    chargesBySessionGroup.set(key, charges)
+  }
+
+  const groupedCreditTransactionIds = new Set(
+    groupCharges.map((charge) => charge.walletCreditTxId).filter(Boolean) as string[],
+  )
+
+  const groupedActivityItems = [...chargesBySessionGroup.entries()].map(([key, charges]) => {
+    const [sessionId, groupId] = key.split(':')
+    const session = sessionsById.get(sessionId)
+    const group = groupsById.get(groupId)
+    const latestCreatedAt = charges.reduce(
+      (latest, charge) => (charge.createdAt > latest ? charge.createdAt : latest),
+      charges[0]?.createdAt ?? new Date(0),
+    )
+    const totalAmount = charges.reduce((sum, charge) => sum + charge.amount, 0)
+    const sessionDate = session?.date ?? latestCreatedAt
+
+    return {
+      kind: 'GROUP_SESSION' as const,
+      id: `group-session:${sessionId}:${groupId}`,
+      title: group?.name ?? 'مجموعة غير معروفة',
+      groupName: group?.name ?? 'مجموعة غير معروفة',
+      sessionDate: sessionDate.toISOString(),
+      createdAt: latestCreatedAt.toISOString(),
+      sortAt: latestCreatedAt.toISOString(),
+      amount: totalAmount,
+      type: 'CREDIT' as const,
+      status: 'COMPLETED' as const,
+      studentCount: charges.length,
+      details: charges.map((charge) => {
+        const attendance = charge.relatedSessionId
+          ? attendanceBySessionStudent.get(`${charge.relatedSessionId}:${charge.studentId}`)
+          : null
+
+        return {
+          id: charge.id,
+          studentName: studentsById.get(charge.studentId)?.name ?? 'طالب غير معروف',
+          amount: charge.amount,
+          attendanceMethod: attendance?.method ?? null,
+          attendanceStatus: attendance?.status ?? null,
+          markedAt: attendance?.markedAt?.toISOString() ?? null,
+        }
+      }),
+    }
+  })
+
+  const transactionActivityItems = transactions
+    .filter((transaction) => !groupedCreditTransactionIds.has(transaction.id))
+    .map((transaction) => {
+      const direction = getWalletTransactionDirection(transaction.metadata)
+
+      return {
+        kind: 'TRANSACTION' as const,
+        id: transaction.id,
+        title: transaction.reason,
+        amount: transaction.amount,
+        type: transaction.type,
+        status: transaction.status,
+        direction,
+        createdAt: transaction.createdAt.toISOString(),
+        sortAt: transaction.createdAt.toISOString(),
+        reason: transaction.reason,
+        metadata: transaction.metadata,
+        payment: transaction.payment
+          ? {
+              id: transaction.payment.id,
+              amount: transaction.payment.amount,
+              month: transaction.payment.month,
+              method: transaction.payment.method,
+              status: transaction.payment.status,
+              notes: transaction.payment.notes,
+              receiptNumber: transaction.payment.receiptNumber,
+              transactionId: transaction.payment.transactionId,
+              paymentGateway: transaction.payment.paymentGateway,
+              paidAt: transaction.payment.paidAt?.toISOString() ?? null,
+              studentName: transaction.payment.student.name,
+            }
+          : null,
+        withdrawal: transaction.withdrawal
+          ? {
+              id: transaction.withdrawal.id,
+              amount: transaction.withdrawal.amount,
+              method: transaction.withdrawal.method,
+              adminMethod: transaction.withdrawal.adminMethod,
+              status: transaction.withdrawal.status,
+              requestedAt: transaction.withdrawal.requestedAt.toISOString(),
+              processedAt: transaction.withdrawal.processedAt?.toISOString() ?? null,
+            }
+          : null,
+      }
+    })
+
+  const activityItems = [...groupedActivityItems, ...transactionActivityItems]
+    .sort((first, second) => new Date(second.sortAt).getTime() - new Date(first.sortAt).getTime())
+    .slice(0, 20)
+
   return {
     wallet: {
       id: wallet.id,
@@ -399,12 +600,14 @@ export const getTeacherWalletPageData = cache(async (tenantId: string) => {
       received: creditAggregate._sum.amount ?? 0,
       withdrawn: payoutAggregate._sum.amount ?? 0,
     },
+    activityItems,
     transactions: transactions.map((transaction) => ({
       id: transaction.id,
       type: transaction.type,
       amount: transaction.amount,
       reason: transaction.reason,
       status: transaction.status,
+      metadata: transaction.metadata,
       createdAt: transaction.createdAt.toISOString(),
     })),
     withdrawals: withdrawals.map((withdrawal) => ({
