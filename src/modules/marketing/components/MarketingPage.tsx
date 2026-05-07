@@ -146,8 +146,24 @@ const footerGroups = [
 
 export default function MarketingPage() {
   const scrollToSection = (sectionId: string) => {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const section = document.getElementById(sectionId);
+
+    if (!section) {
+      return;
+    }
+
+    const headerOffset = 96;
+    const targetTop = section.getBoundingClientRect().top + window.scrollY - headerOffset;
+    const maxScrollTop = document.documentElement.scrollHeight - window.innerHeight;
+
+    window.scrollTo({
+      top: Math.min(Math.max(targetTop, 0), maxScrollTop),
+      behavior: "smooth",
+    });
+
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
   };
+  const scrollToHash = (hash: string) => scrollToSection(hash.replace("#", ""));
 
   return (
     <main
@@ -277,14 +293,15 @@ export default function MarketingPage() {
             {/* Navigation Links */}
             <nav className="hidden items-center gap-10 lg:flex">
               {navigationLinks.map((link) => (
-                <Link
+                <button
                   key={link.href}
+                  type="button"
+                  onClick={() => scrollToHash(link.href)}
                   className="relative text-sm font-semibold text-slate-600 transition-colors hover:text-sky-600 group dark:text-slate-400 dark:hover:text-white"
-                  href={link.href}
                 >
                   {link.label}
                   <span className="absolute -bottom-1 left-0 h-px w-0 bg-sky-400 transition-all group-hover:w-full" />
-                </Link>
+                </button>
               ))}
             </nav>
 
@@ -746,9 +763,13 @@ export default function MarketingPage() {
                     <ul className="space-y-4">
                       {group.links.map((link) => (
                         <li key={link.label}>
-                          <Link className="text-sm text-slate-500 transition-colors hover:text-white" href={link.href}>
+                          <button
+                            type="button"
+                            className="text-sm text-slate-500 transition-colors hover:text-white"
+                            onClick={() => scrollToHash(link.href)}
+                          >
                             {link.label}
-                          </Link>
+                          </button>
                         </li>
                       ))}
                     </ul>
