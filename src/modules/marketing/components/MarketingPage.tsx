@@ -1,17 +1,11 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  BookOpen,
   Check,
-  CreditCard,
-  GraduationCap,
-  Heart,
-  MessageSquareQuote,
-  ShieldCheck,
   Sparkles,
-  Users,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,20 +17,17 @@ const features = [
   {
     title: "إدارة الحضور",
     description: "متابعة الحصص والغياب والتأخير من شاشة واضحة وسريعة.",
-    icon: ShieldCheck,
-    color: "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300",
+    image: "/images/attendance.png",
   },
   {
     title: "تحصيل المصاريف",
     description: "عرض واضح للمدفوع والمتأخر مع مؤشرات بصرية فورية.",
-    icon: CreditCard,
-    color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
+    image: "/images/fees.png",
   },
   {
     title: "إشعارات للأهالي",
     description: "تجربة تواصل منظمة مع أولياء الأمور والطلاب.",
-    icon: Users,
-    color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300",
+    image: "/images/notifications.png",
   },
 ] as const;
 
@@ -73,17 +64,39 @@ const steps = [
 
 const audienceCards = [
   {
-    title: "للمعلم",
-    icon: GraduationCap,
-    iconClassName: "bg-[#2E86C1]/15 text-[#2E86C1]",
-    borderClassName: "border-[#2E86C1]/30",
-    accentClassName: "from-[#2E86C1]/20 to-transparent",
-    badge: "إدارة لحظية",
+    title: "تنظيم المجموعات",
+    description: "أنشئ مجموعاتك وحدد مواعيدها وأسعارها في دقائق",
+    illustration: "/images/Group Management.png",
+    badge: "تخطيط ذكي",
     points: [
-      "تتبع الحضور في ثوانٍ",
-      "اعرف مين دفع ومين لأ",
-      "إشعارات تلقائية للأهالي",
-      "تقارير مالية واضحة",
+      "إدارة عدد غير محدود من الطلاب",
+      "ترتيب المواعيد والجداول بسهولة",
+      "توزيع الطلاب على مستويات",
+      "قاعدة بيانات منظمة وآمنة",
+    ],
+  },
+  {
+    title: "إدارة دروسك بذكاء",
+    description: "تفرّغ للإبداع في الشرح واترك لنا عناء تنظيم الحضور والتحصيل المالي.",
+    illustration: "/images/Smart Management Start.png",
+    badge: "سرعة التنفيذ",
+    points: [
+      "تسجيل حضور طلابك في ثوانٍ",
+      "تحصيل المصاريف آلياً وبدون إحراج",
+      "تنبيهات فورية لطلابك المتأخرين",
+      "كل بيانات طلابك في جيبك",
+    ],
+  },
+  {
+    title: "التقارير والمتابعة",
+    description: "تابع أداء كل طالب وأرسل تقارير للأهالي بنقرة واحدة",
+    illustration: "/images/Reports and Follow-up.png",
+    badge: "رؤية شاملة",
+    points: [
+      "تقارير مالية شهرية وأسبوعية",
+      "إحصائيات حضور وغياب دقيقة",
+      "متابعة تطور مستوى الطلاب",
+      "إرسال تقارير للأهالي بنقرة",
     ],
   },
 ] as const;
@@ -138,334 +151,494 @@ export default function MarketingPage() {
 
   return (
     <main
-      className="min-h-screen scroll-smooth bg-[#F8FAFC] font-[Cairo] text-[#1E293B] dark:bg-[#0F172A] dark:text-white"
+      className="min-h-screen scroll-smooth bg-white font-[Cairo] text-slate-900 dark:bg-[#0F172A] dark:text-white"
       dir="rtl"
       id="home"
     >
-      <div className="bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.12),_transparent_28%),linear-gradient(180deg,_#F8FAFC_0%,_#EEF4F8_48%,_#F8FAFC_100%)] dark:bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.2),_transparent_28%),linear-gradient(180deg,_#0F172A_0%,_#111827_48%,_#0F172A_100%)]">
-        <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/75">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-sm font-extrabold text-slate-900 shadow-[0_12px_30px_rgba(15,23,42,0.12)] dark:bg-white/10 dark:text-white dark:shadow-[0_12px_30px_rgba(15,23,42,0.35)]">
-                E
-              </span>
-              <span className="text-base font-extrabold text-slate-900 dark:text-white sm:text-lg">EduPlatform</span>
-            </div>
+      <div className="relative overflow-hidden bg-white dark:bg-[#050814]">
+        {/* Background SVG Wisps - Chic, Intertwined, and Flowy */}
+        <div className="absolute inset-0 z-0 opacity-20 dark:opacity-70">
+          <svg className="h-full w-full opacity-70" preserveAspectRatio="none" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="wisp-blur-soft">
+                <feGaussianBlur stdDeviation="8" />
+              </filter>
+              <filter id="wisp-blur-medium">
+                <feGaussianBlur stdDeviation="15" />
+              </filter>
+              <linearGradient id="chic-spectral" x1="0%" x2="100%" y1="0%" y2="0%">
+                <stop offset="0%" stopColor="#38bdf8" stopOpacity="0" />
+                <stop offset="20%" stopColor="#38bdf8" stopOpacity="0.6" />
+                <stop offset="40%" stopColor="#818cf8" stopOpacity="0.5" />
+                <stop offset="60%" stopColor="#c084fc" stopOpacity="0.4" />
+                <stop offset="80%" stopColor="#34d399" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
+              </linearGradient>
+            </defs>
 
-            <nav className="hidden items-center gap-6 lg:flex">
-              {navigationLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  className="text-sm font-semibold text-slate-600 transition hover:text-slate-900 dark:text-white/75 dark:hover:text-white"
-                  href={link.href}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
+            {/* Background Base Glow - Deep & Calm */}
+            <circle cx="200" cy="300" fill="#1e3a8a" r="500" className="opacity-[0.05] dark:opacity-15" style={{ filter: "blur(200px)" }} />
 
-            <div className="flex items-center gap-2">
-              <div className="hidden items-center gap-2 sm:flex">
-                <ThemeToggle />
+            {/* Intertwined Flowy Paths */}
+            <g filter="url(#wisp-blur-soft)" style={{ mixBlendMode: "screen" }}>
+              {/* Complex web of light */}
+              <path d="M-100,200 C300,100 400,600 600,400 S800,800 1100,700" fill="none" stroke="url(#chic-spectral)" strokeWidth="18" />
+              <path d="M1100,100 C800,300 600,100 400,500 S100,800 -100,900" fill="none" stroke="url(#chic-spectral)" strokeWidth="14" style={{ opacity: 0.7 }} />
+              <path d="M500,-100 C600,300 300,500 700,700 S900,1000 1100,1100" fill="none" stroke="url(#chic-spectral)" strokeWidth="22" style={{ opacity: 0.5 }} />
+              <path d="M-100,600 C200,400 500,800 800,500 S1000,100 1200,200" fill="none" stroke="url(#chic-spectral)" strokeWidth="12" style={{ opacity: 0.8 }} />
+
+              {/* Intersecting Wisps for depth */}
+              <path d="M200,1100 C400,800 100,400 500,200 S900,-100 1000,0" fill="none" stroke="url(#chic-spectral)" strokeWidth="10" style={{ opacity: 0.6 }} />
+              <path d="M1000,1000 C700,700 800,400 500,300 S100,100 -100,0" fill="none" stroke="url(#chic-spectral)" strokeWidth="28" style={{ opacity: 0.4 }} />
+              <path d="M0,800 C300,700 200,300 600,200 S1100,400 1200,600" fill="none" stroke="url(#chic-spectral)" strokeWidth="14" style={{ opacity: 0.5 }} />
+            </g>
+
+            {/* Additional Heavy Blur Layer for Atmosphere */}
+            <g filter="url(#wisp-blur-medium)" style={{ mixBlendMode: "screen", opacity: 0.5 }}>
+              <path d="M-200,500 C200,300 800,700 1200,500" fill="none" stroke="#38bdf8" strokeWidth="60" />
+              <path d="M500,-200 C700,400 300,800 500,1200" fill="none" stroke="#818cf8" strokeWidth="50" />
+            </g>
+          </svg>
+        </div>
+
+        {/* Texture Overlay for that premium feel */}
+        <div className="pointer-events-none absolute inset-0 z-[1] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10" />
+
+        {/* Floating blurred blobs for additional depth */}
+        <div className="absolute left-[5%] top-[15%] h-[500px] w-[500px] rounded-full bg-blue-600/15 blur-[150px]" />
+        <div className="absolute bottom-[-15%] right-[0%] h-[600px] w-[600px] rounded-full bg-indigo-900/10 blur-[180px]" />
+
+        <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl dark:border-white/[0.03] dark:bg-slate-950/40">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+            {/* Action Buttons */}
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+              <div className="hidden items-center gap-3 sm:flex">
                 <Link
-                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-300 bg-transparent px-4 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-100 dark:border-white/30 dark:text-white dark:hover:bg-white/10"
+                  className="group relative flex items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-100 px-6 py-2.5 text-sm font-bold text-slate-700 transition-all hover:border-sky-500/50 hover:bg-sky-500/5 dark:border-sky-500/30 dark:bg-sky-500/5 dark:text-sky-400 dark:hover:bg-sky-500/10"
                   href="/login"
                 >
-                  تسجيل الدخول
+                  <span className="relative z-10">تسجيل الدخول</span>
+                  <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-sky-500/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
                 </Link>
                 <Link
-                  className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-[0_16px_35px_rgba(46,134,193,0.35)] transition hover:bg-secondary"
+                  className="relative flex items-center justify-center overflow-hidden rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all hover:bg-emerald-600 hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] active:scale-95"
                   href="/signup"
                 >
                   ابدأ مجاناً
                 </Link>
               </div>
-              <div className="flex items-center gap-2 sm:hidden">
+            </div>
+
+            {/* Navigation Links */}
+            <nav className="hidden items-center gap-10 lg:flex">
+              {navigationLinks.map((link) => (
                 <Link
-                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-300 bg-transparent px-3 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-100 dark:border-white/30 dark:text-white dark:hover:bg-white/10"
-                  href="/login"
+                  key={link.href}
+                  className="relative text-sm font-semibold text-slate-600 transition-colors hover:text-sky-600 group dark:text-slate-400 dark:hover:text-white"
+                  href={link.href}
                 >
-                  دخول
+                  {link.label}
+                  <span className="absolute -bottom-1 left-0 h-px w-0 bg-sky-400 transition-all group-hover:w-full" />
                 </Link>
-                <Link
-                  className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-3 py-3 text-sm font-bold text-white transition hover:bg-secondary"
-                  href="/signup"
-                >
-                  ابدأ
-                </Link>
+              ))}
+            </nav>
+
+            {/* Logo */}
+            <div className="flex items-center gap-4">
+              <div className="flex flex-col items-end">
+                <span className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                  EduPlatform
+                </span>
+                <div className="h-0.5 w-1/2 rounded-full bg-gradient-to-l from-sky-400 to-transparent" />
+              </div>
+              <div className="group relative flex h-11 w-11 items-center justify-center">
+                <div className="absolute inset-0 animate-pulse rounded-full bg-sky-500/20 blur-[8px]" />
+                <div className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-slate-900 shadow-2xl transition-transform group-hover:scale-110">
+                  <div className="h-4 w-4 rounded-full bg-gradient-to-br from-sky-300 via-blue-500 to-emerald-400" />
+                  <div className="absolute inset-0 animate-spin-slow rounded-full border-2 border-transparent border-t-sky-400/30" />
+                </div>
               </div>
             </div>
           </div>
         </header>
 
-        <div className="mx-auto max-w-7xl space-y-10 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-          <section className="overflow-hidden rounded-[36px] bg-[linear-gradient(135deg,_#10324B,_#1A5276_45%,_#2E86C1_80%,_#dceffe_130%)] text-white shadow-[0_30px_80px_rgba(26,82,118,0.25)]">
-            <div className="grid gap-8 px-5 py-8 sm:px-6 sm:py-10 lg:grid-cols-[1.15fr_0.85fr] lg:px-12 lg:py-16">
-              <div className="order-2 lg:order-1">
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold">
-                  <Sparkles className="h-4 w-4" />
-                  منصة متخصصة لإدارة السناتر في مصر
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 space-y-20 lg:space-y-32">
+          <section className="relative overflow-hidden rounded-[60px] border border-slate-200 bg-white shadow-2xl backdrop-blur-3xl dark:border-white/[0.05] dark:bg-[#0F172A]/40 sm:px-12 sm:py-16 lg:px-20 lg:py-24">
+            {/* Refined Grid Pattern */}
+            <div className="absolute inset-0 opacity-[0.15] [mask-image:radial-gradient(ellipse_at_center,black,transparent)]">
+              <div className="h-full w-full bg-[size:32px_32px] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)]" />
+            </div>
+
+            <div className="relative grid gap-20 lg:grid-cols-[1fr_1fr]">
+              {/* Right Side (Visual Right in RTL): Hero Content */}
+              <div className="flex flex-col justify-center">
+                <div className="group inline-flex w-fit items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-bold text-sky-400 backdrop-blur-md transition-all hover:bg-white/10">
+                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-500/20 text-[10px]">
+                    <Sparkles className="h-3 w-3" />
+                  </div>
+                  منصة متخصصة للمعلمين المستقلين في مصر
                 </div>
-                <h1 className="mt-6 text-start text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
-                  حوّل إدارة سنترك إلى تجربة أنيقة وسريعة وواضحة.
+
+                <h1 className="mt-10 text-5xl font-black leading-[1.1] tracking-tight text-slate-900 sm:text-6xl lg:text-7xl dark:text-white">
+                  حوّل إدارة دروسك <br />
+                  إلى تجربة <span className="relative">
+                    <span className="relative z-10 bg-gradient-to-l from-sky-300 via-emerald-300 to-sky-300 bg-clip-text text-transparent">أنيقة</span>
+                    <span className="absolute -bottom-2 left-0 h-3 w-full bg-emerald-500/20 blur-sm" />
+                  </span> وسريعة.
                 </h1>
-                <p className="mt-5 max-w-2xl text-start text-base leading-8 text-white/88">
-                  متابعة الحضور، تحصيل المصاريف، تنظيم الجداول، وتجربة احترافية للمعلم في مكان واحد.
+
+                <p className="mt-10 max-w-2xl text-xl leading-relaxed text-slate-600 dark:text-slate-400">
+                  منصة التعليم المتكاملة لتحصيل المصاريف، تنظيم الجداول، وإدارة شؤون الطلاب بضغطة واحدة من أي مكان.
                 </p>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+
+                <div className="mt-14 flex flex-col gap-6 sm:flex-row sm:items-center">
                   <Link
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-primary transition hover:bg-slate-100"
+                    className="relative flex h-16 items-center justify-center gap-3 overflow-hidden rounded-[20px] bg-emerald-500 px-10 text-lg font-black text-white shadow-[0_20px_40px_rgba(16,185,129,0.25)] transition-all hover:bg-emerald-600 hover:shadow-[0_25px_50px_rgba(16,185,129,0.35)] hover:-translate-y-1 active:translate-y-0"
                     href="/signup"
                   >
                     ابدأ مجاناً — سجّل الآن
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="h-5 w-5" />
                   </Link>
-                  <button
-                    className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/30 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/15"
-                    onClick={() => scrollToSection("how-it-works")}
-                    type="button"
+                  <Link
+                    className="group relative flex h-16 items-center justify-center gap-3 overflow-hidden rounded-[20px] border border-slate-200 bg-slate-50 px-10 text-lg font-bold text-slate-900 backdrop-blur-md transition-all hover:bg-slate-100 hover:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:border-white/20"
+                    href="#how-it-works"
                   >
-                    شاهد كيف يعمل
-                  </button>
+                    <span>شاهد كيف يعمل</span>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 transition-transform group-hover:scale-110">
+                      <div className="h-2 w-2 rounded-full bg-sky-400" />
+                    </div>
+                  </Link>
                 </div>
               </div>
 
-              <div className="order-1 grid gap-4 sm:grid-cols-2 lg:order-2">
-                <div className="rounded-[28px] border border-white/15 bg-white/12 p-5 backdrop-blur sm:col-span-2">
-                  <p className="text-start text-sm text-white/75">نظرة سريعة</p>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                    {heroStats.map((stat) => (
-                      <div key={stat.label}>
-                        <p className="text-start text-3xl font-extrabold">{stat.value}</p>
-                        <p className="mt-2 text-start text-sm text-white/75">{stat.label}</p>
+              {/* Left Side (Visual Left in RTL): Dashboard Mockup & Statistics */}
+              <div className="flex flex-col justify-center">
+                {/* Horizontal Statistics with Dividers */}
+                <div className="mb-12 flex items-center justify-between rounded-3xl border border-slate-200 bg-slate-50 p-8 backdrop-blur-md dark:border-white/[0.03] dark:bg-white/[0.02]">
+                  {heroStats.map((stat, i) => (
+                    <React.Fragment key={stat.label}>
+                      <div className="flex-1 text-center">
+                        <p className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">{stat.value}</p>
+                        <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">{stat.label}</p>
                       </div>
-                    ))}
-                  </div>
+                      {i < heroStats.length - 1 && <div className="h-10 w-px bg-slate-200 dark:bg-white/5" />}
+                    </React.Fragment>
+                  ))}
                 </div>
 
-                {features.slice(0, 2).map((feature) => {
-                  const Icon = feature.icon;
+                {/* Highly Detailed Dashboard Mockup */}
+                <div className="group relative rounded-[40px] border border-slate-200 bg-white p-6 shadow-2xl backdrop-blur-2xl transition-all duration-700 hover:border-sky-500/20 dark:border-white/10 dark:bg-slate-900/40 dark:hover:bg-slate-900/60">
+                  <div className="absolute -inset-0.5 rounded-[40px] bg-gradient-to-br from-sky-500/20 to-emerald-500/20 opacity-0 blur-xl transition-opacity duration-700 group-hover:opacity-100" />
 
-                  return (
-                    <div key={feature.title} className="rounded-[24px] border border-white/15 bg-white/10 p-5 backdrop-blur">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15">
-                        <Icon className="h-6 w-6" />
+                  <div className="relative">
+                    {/* Mockup Header */}
+                    <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4 dark:border-white/5">
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 w-3 rounded-full bg-red-500/30" />
+                        <div className="h-3 w-3 rounded-full bg-amber-500/30" />
+                        <div className="h-3 w-3 rounded-full bg-emerald-500/30" />
                       </div>
-                      <p className="mt-4 text-start text-lg font-bold">{feature.title}</p>
-                      <p className="mt-2 text-start text-sm leading-7 text-white/80">{feature.description}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="h-2 w-16 rounded-full bg-slate-100 dark:bg-white/5" />
+                        <div className="h-6 w-6 rounded-full bg-slate-100 dark:bg-white/10" />
+                      </div>
                     </div>
-                  );
-                })}
+
+                    <div className="grid grid-cols-12 gap-6">
+                      {/* Sidebar Mockup */}
+                      <div className="col-span-3 space-y-4">
+                        {[...Array(4)].map((_, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <div className="h-6 w-6 rounded-lg bg-slate-100 dark:bg-white/5" />
+                            <div className={`h-2 rounded-full bg-slate-100 dark:bg-white/5 ${i === 0 ? "w-full" : "w-2/3"}`} />
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Main Chart Area */}
+                      <div className="col-span-9">
+                        <div className="relative h-48 w-full overflow-hidden rounded-3xl bg-slate-50 p-5 dark:bg-white/[0.03]">
+                          <div className="flex h-full items-end gap-1.5">
+                            {[30, 60, 40, 80, 55, 90, 45, 100, 70, 85, 60, 75].map((h, i) => (
+                              <div
+                                key={i}
+                                className="flex-1 rounded-t-lg bg-gradient-to-t from-sky-500/10 via-sky-400/40 to-sky-300 shadow-[0_0_15px_rgba(14,165,233,0.1)] transition-all duration-500 group-hover:via-sky-400/60 group-hover:to-sky-400"
+                                style={{ height: `${h}%`, transitionDelay: `${i * 30}ms` }}
+                              />
+                            ))}
+                          </div>
+                          {/* Interactive Wave SVG */}
+                          <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                            <svg className="w-full" height="80" viewBox="0 0 400 80">
+                              <path
+                                d="M0 40 C 50 10, 100 70, 150 40 S 250 10, 300 40 S 400 70, 400 40"
+                                fill="none"
+                                stroke="url(#mockup-gradient)"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                className="animate-pulse"
+                              />
+                              <defs>
+                                <linearGradient id="mockup-gradient" x1="0%" x2="100%" y1="0%" y2="0%">
+                                  <stop offset="0%" stopColor="#38bdf8" />
+                                  <stop offset="50%" stopColor="#10b981" />
+                                  <stop offset="100%" stopColor="#fbbf24" />
+                                </linearGradient>
+                              </defs>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
 
-          <section className="scroll-mt-20 rounded-[32px] border border-slate-200 bg-white/90 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm [&_.text-white]:text-slate-900 [&_.text-slate-300]:text-slate-600 dark:border-white/10 dark:bg-white/[0.03] dark:[&_.text-slate-300]:text-slate-300 dark:[&_.text-white]:text-white dark:shadow-[0_30px_80px_rgba(15,23,42,0.18)] sm:p-6 lg:p-8" id="features">
+          <section className="mt-12 scroll-mt-20 rounded-[40px] border border-slate-200 bg-white p-8 shadow-xl backdrop-blur-sm sm:p-10 lg:p-12 dark:border-white/10 dark:bg-white/[0.03]" id="features">
+
             <div className="max-w-2xl">
               <p className="text-start text-sm font-semibold text-sky-300">المميزات</p>
-              <h2 className="mt-3 text-start text-3xl font-extrabold text-white sm:text-4xl">كل ما تحتاجه في مكان واحد</h2>
-              <p className="mt-3 text-start text-sm leading-7 text-slate-300 sm:text-base">
-                منصة متكاملة تحل كل مشاكل إدارة السنتر
+              <h2 className="mt-3 text-start text-3xl font-extrabold text-slate-900 sm:text-4xl dark:text-white">كل ما تحتاجه في مكان واحد</h2>
+              <p className="mt-3 text-start text-sm leading-7 text-slate-600 sm:text-base dark:text-slate-300">
+                منصة متكاملة تحل كل مشاكل تنظيم عملك التعليمي
               </p>
             </div>
 
-            <div className="mt-6 grid gap-4 lg:grid-cols-3">
-              {features.map((feature) => {
-                const Icon = feature.icon;
-
-                return (
-                  <Card key={feature.title} className="border-slate-200 bg-white shadow-[0_16px_35px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900/80 dark:shadow-[0_20px_50px_rgba(2,6,23,0.28)]">
-                    <CardContent className="space-y-4">
-                      <div className={`flex h-14 w-14 items-center justify-center rounded-full ${feature.color}`}>
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <h3 className="text-start text-xl font-bold text-white">{feature.title}</h3>
-                      <p className="text-start text-sm leading-7 text-slate-300">{feature.description}</p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
-
-          <section
-            className="scroll-mt-20 overflow-hidden rounded-[32px] border border-slate-200 bg-[linear-gradient(180deg,_rgba(255,255,255,0.96),_rgba(241,245,249,0.92))] p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] [&_.text-white]:text-slate-900 [&_.text-slate-300]:text-slate-600 dark:border-white/10 dark:bg-[linear-gradient(180deg,_rgba(15,23,42,0.92),_rgba(15,23,42,0.78))] dark:[&_.text-slate-300]:text-slate-300 dark:[&_.text-white]:text-white dark:shadow-[0_30px_80px_rgba(15,23,42,0.25)] sm:p-6 lg:p-8"
-            id="how-it-works"
-          >
-            <div className="max-w-2xl">
-              <p className="text-start text-sm font-semibold text-sky-300">كيف يعمل</p>
-              <h2 className="mt-3 text-start text-3xl font-extrabold text-white sm:text-4xl">ابدأ في 3 خطوات بسيطة</h2>
-            </div>
-
-            <div className="relative mt-8 grid gap-5 lg:grid-cols-3">
-              <div className="absolute inset-x-12 top-16 hidden h-px bg-gradient-to-l from-white/0 via-sky-400/40 to-white/0 lg:block" />
-              {steps.map((step) => (
-                <div key={step.number} className="relative rounded-[28px] border border-white/10 bg-white/[0.04] p-6 backdrop-blur">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-sky-400/12 text-3xl font-extrabold text-sky-300">
-                    {step.number}
+            <div className="mt-12 grid gap-8 lg:grid-cols-3">
+              {features.map((feature) => (
+                <div key={feature.title} className="group relative flex flex-col items-center rounded-[40px] border border-slate-100 bg-slate-50 p-6 text-center backdrop-blur-xl transition-all hover:bg-slate-100 dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
+                  <div className="relative mb-4 flex h-[220px] w-full items-center justify-center overflow-hidden rounded-2xl">
+                    <img
+                      src={feature.image}
+                      alt={feature.title}
+                      className="h-[200px] w-[200px] object-contain transition-transform duration-500 group-hover:scale-110"
+                    />
                   </div>
-                  <h3 className="mt-5 text-start text-xl font-bold text-white">{step.title}</h3>
-                  <p className="mt-3 text-start text-sm leading-7 text-slate-300">{step.description}</p>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{feature.title}</h3>
+                  <p className="mt-2 text-lg leading-relaxed text-slate-600 dark:text-slate-400">{feature.description}</p>
                 </div>
               ))}
             </div>
+          </section>
 
-            <div className="mt-8 flex justify-center lg:justify-start">
+          <section className="scroll-mt-20 overflow-hidden rounded-[50px] border border-slate-200 bg-white p-8 shadow-2xl backdrop-blur-3xl lg:p-16 dark:border-white/5 dark:bg-[#0F172A]/40" id="how-it-works">
+            <div className="max-w-2xl">
+              <span className="rounded-full bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400">كيف يعمل</span>
+              <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">ابدأ في 3 خطوات بسيطة</h2>
+            </div>
+
+            <div className="relative mt-12 grid gap-8 lg:grid-cols-3">
+              <div className="absolute inset-x-32 top-20 hidden h-[2px] lg:block">
+                {/* Background Glow */}
+                <div className="absolute inset-0 bg-sky-500/30 blur-[4px]" />
+
+                {/* Solid Connected Line */}
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-sky-500 to-transparent" />
+
+                {/* Animated Shine/Motion Effect */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-l from-transparent via-white/30 to-transparent animate-pulse" />
+                </div>
+
+                {/* Highly Visible Directional Arrows */}
+                <div className="absolute inset-0 flex items-center justify-around px-24">
+                  {[...Array(3)].map((_, i) => (
+                    <ArrowLeft
+                      key={i}
+                      className="h-6 w-6 text-sky-500/60 drop-shadow-[0_0_8px_rgba(14,165,233,0.5)] animate-pulse"
+                      style={{ animationDelay: `${i * 400}ms` }}
+                    />
+                  ))}
+                </div>
+              </div>
+              {steps.map((step) => (
+                <div key={step.number} className="group relative rounded-[40px] border border-white/5 bg-white/[0.02] p-10 backdrop-blur-xl transition-all hover:bg-white/[0.04]">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-sky-500/10 text-4xl font-black text-sky-400 shadow-[0_0_30px_rgba(14,165,233,0.1)] transition-transform group-hover:scale-110">
+                    {step.number}
+                  </div>
+                  <h3 className="mt-8 text-2xl font-bold text-slate-900 dark:text-white">{step.title}</h3>
+                  <p className="mt-4 text-lg leading-relaxed text-slate-600 dark:text-slate-400">{step.description}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-12 flex justify-center lg:justify-start">
               <Link
-                className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-bold !text-slate-50 shadow-[0_16px_35px_rgba(46,134,193,0.35)] transition hover:bg-secondary hover:!text-white"
+                className="relative flex h-16 items-center justify-center gap-3 overflow-hidden rounded-[20px] bg-sky-500 px-10 text-lg font-black text-white shadow-xl transition-all hover:bg-sky-600 hover:-translate-y-1 active:translate-y-0"
                 href="/signup"
               >
                 ابدأ الآن مجاناً
+                <ArrowLeft className="h-5 w-5" />
               </Link>
             </div>
           </section>
 
-          <section className="rounded-[32px] border border-slate-200 bg-white/90 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm [&_.text-white]:text-slate-900 [&_.text-slate-200]:text-slate-700 [&_.text-slate-300]:text-slate-600 dark:border-white/10 dark:bg-white/[0.03] dark:[&_.text-slate-200]:text-slate-200 dark:[&_.text-slate-300]:text-slate-300 dark:[&_.text-white]:text-white dark:shadow-[0_30px_80px_rgba(15,23,42,0.18)] sm:p-6 lg:p-8">
+          <section className="scroll-mt-20 overflow-hidden rounded-[50px] border border-slate-200 bg-white p-8 shadow-2xl backdrop-blur-3xl lg:p-16 dark:border-white/5 dark:bg-[#0F172A]/40" id="smart-tools">
             <div className="max-w-2xl">
-              <p className="text-start text-sm font-semibold text-sky-300">أدوات ذكية للمعلم</p>
-              <h2 className="mt-3 text-start text-3xl font-extrabold text-white sm:text-4xl">منصة مصممة لخدمة المعلم</h2>
-              <p className="mt-3 text-start text-sm leading-7 text-slate-300 sm:text-base">كل ما تحتاجه لإدارة مجموعاتك بتركيز</p>
+              <span className="rounded-full bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400">أدوات ذكية للمعلم</span>
+              <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">منصة مصممة لخدمة المعلم</h2>
+              <p className="mt-6 text-lg leading-relaxed text-slate-600 dark:text-slate-400">كل ما تحتاجه لإدارة مجموعاتك بتركيز فائق وهدوء تام.</p>
             </div>
 
-            <div className="mt-6 grid gap-4 lg:grid-cols-3">
-              {audienceCards.map((card) => {
-                const Icon = card.icon;
-
-                return (
-                  <Card
-                    key={card.title}
-                    className={`group relative overflow-hidden rounded-[30px] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.96)_100%)] shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(15,23,42,0.12)] dark:bg-[linear-gradient(180deg,rgba(20,30,49,0.98)_0%,rgba(18,27,44,0.98)_100%)] dark:shadow-[0_22px_60px_rgba(2,6,23,0.30)] dark:hover:shadow-[0_28px_70px_rgba(2,8,20,0.38)] ${card.borderClassName}`}
-                  >
-                    <div className={`pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${card.accentClassName}`} />
-                    <CardContent className="relative space-y-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className={`flex h-16 w-16 items-center justify-center rounded-[22px] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] ${card.iconClassName}`}>
-                          <Icon className="h-7 w-7" />
-                        </div>
-                        <span className="rounded-full border border-slate-200/80 bg-white/70 px-3 py-1 text-xs font-bold text-slate-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300">
-                          {card.badge}
-                        </span>
-                      </div>
-                      <div>
-                        <h3 className="text-start text-2xl font-extrabold tracking-tight text-white">{card.title}</h3>
-                        <p className="mt-2 text-start text-sm leading-7 text-slate-300">واجهة أكثر وضوحًا وتركيزًا لما يهم هذه الفئة داخل المنصة.</p>
-                      </div>
-                      <div className="space-y-3 border-t border-slate-200/70 pt-5 dark:border-white/8">
-                        {card.points.map((point) => (
-                          <p key={point} className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/70 px-4 py-3 text-start text-sm text-slate-200 shadow-[0_10px_24px_rgba(15,23,42,0.04)] dark:border-white/8 dark:bg-white/[0.03] dark:shadow-none">
-                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-400/10 text-sky-300">
-                              <Check className="h-4 w-4" />
-                            </span>
-                            <span>{point}</span>
-                          </p>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className="scroll-mt-20 rounded-[32px] border border-slate-200 bg-white/90 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm [&_.text-white]:text-slate-900 [&_.text-slate-200]:text-slate-700 [&_.text-slate-300]:text-slate-600 [&_.text-slate-400]:text-slate-500 dark:border-white/10 dark:bg-white/[0.03] dark:[&_.text-slate-200]:text-slate-200 dark:[&_.text-slate-300]:text-slate-300 dark:[&_.text-slate-400]:text-slate-400 dark:[&_.text-white]:text-white dark:shadow-[0_30px_80px_rgba(15,23,42,0.18)] sm:p-6 lg:p-8" id="pricing">
-            <div className="max-w-2xl">
-              <p className="text-start text-sm font-semibold text-sky-300">الأسعار</p>
-              <h2 className="mt-3 text-start text-3xl font-extrabold text-white sm:text-4xl">خطط مرنة تناسب حجم سنترك</h2>
-              <p className="mt-3 text-start text-sm leading-7 text-slate-300 sm:text-base">
-                اختر الخطة المناسبة الآن وابدأ بدون تعقيد.
-              </p>
-            </div>
-
-            <div className="mt-6 grid gap-4 lg:grid-cols-3">
-              {PLAN_LIMITS.map((plan, index) => (
-                <Card
-                  key={plan.name}
-                  className={
-                    index === 1
-                      ? "border-primary bg-white ring-2 ring-primary/20 shadow-[0_20px_45px_rgba(46,134,193,0.12)] dark:bg-slate-900/90 dark:shadow-[0_26px_60px_rgba(46,134,193,0.18)]"
-                      : "border-slate-200 bg-white shadow-[0_16px_35px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900/80 dark:shadow-[0_20px_50px_rgba(2,6,23,0.28)]"
-                  }
+            <div className="mt-12 grid gap-8 lg:grid-cols-3">
+              {audienceCards.map((card) => (
+                <div
+                  key={card.title}
+                  className="group relative flex flex-col items-center overflow-hidden rounded-[40px] border border-slate-200 bg-white p-8 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-white/5 dark:bg-[#0F172A]/40 dark:hover:bg-[#0F172A]/60"
                 >
-                  <CardContent className="space-y-5">
-                    {index === 1 ? (
-                      <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-sky-300">
-                        الأكثر شيوعاً
-                      </span>
-                    ) : null}
+                  {/* Badge */}
+                  <div className="absolute left-6 top-6">
+                    <span className="rounded-full bg-sky-500/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-sky-400 backdrop-blur-md">
+                      {card.badge}
+                    </span>
+                  </div>
+
+                  {/* Image with Background Glow */}
+                  <div className="relative mb-6 mt-4 flex h-[180px] w-full items-center justify-center">
+                    <div className="absolute h-32 w-32 rounded-full bg-sky-500/20 blur-[50px] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    <img
+                      src={card.illustration}
+                      alt={card.title}
+                      className="relative z-10 h-48 w-48 object-contain transition-transform duration-500 group-hover:scale-110"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="space-y-3">
+                    <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                      {card.title}
+                    </h3>
+                    <p className="mx-auto max-w-[240px] text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                      {card.description}
+                    </p>
+                  </div>
+
+                  {/* Points List */}
+                  <div className="mt-8 w-full space-y-3 border-t border-slate-100 pt-8 dark:border-white/5">
+                    {card.points.map((point) => (
+                      <div key={point} className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">
+                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
+                          <Check className="h-3 w-3" />
+                        </div>
+                        {point}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Simplified Pricing Section */}
+          <section className="scroll-mt-20" id="pricing">
+            <div className="mb-12 text-center">
+              <span className="rounded-full bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400">الأسعار</span>
+              <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">خطط مرنة تناسب عدد طلابك</h2>
+              <p className="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-400">اختر الخطة المناسبة وابدأ في تنظيم عملك اليوم</p>
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-3">
+              {PLAN_LIMITS.map((plan, index) => (
+                <div
+                  key={plan.name}
+                  className={`relative flex flex-col rounded-[40px] border p-10 transition-all duration-500 hover:-translate-y-2 ${index === 1
+                    ? "border-sky-500 bg-sky-50 shadow-[0_20px_50px_rgba(14,165,233,0.1)] dark:border-sky-500/50 dark:bg-sky-500/5 dark:shadow-[0_20px_50px_rgba(14,165,233,0.15)]"
+                    : "border-slate-100 bg-slate-50 hover:bg-slate-100 dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]"
+                    }`}
+                >
+                  {index === 1 && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-sky-400 to-emerald-400 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-slate-950">
+                      الأكثر اختياراً
+                    </div>
+                  )}
+                  <div className="mb-8">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">{plan.name}</h3>
+                    <div className="mt-4 flex items-baseline gap-1">
+                      <span className="text-4xl font-black text-slate-900 dark:text-white">{plan.price}</span>
+                      <span className="text-sm text-slate-400 dark:text-slate-500">/شهرياً</span>
+                    </div>
+                  </div>
+                  <div className="mb-10 flex-1 space-y-4">
+                    {plan.features.map((feature) => (
+                      <div key={feature} className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
+                          <Check className="h-3 w-3" />
+                        </div>
+                        {feature}
+                      </div>
+                    ))}
+                  </div>
+                  <Link
+                    className={`flex h-14 items-center justify-center rounded-2xl text-sm font-black transition-all ${index === 1
+                      ? "bg-sky-500 text-white shadow-lg shadow-sky-500/25 hover:bg-sky-600"
+                      : "bg-white/5 text-white hover:bg-white/10"
+                      }`}
+                    href="/signup"
+                  >
+                    {index === 0 ? "ابدأ مجاناً" : "اشترك الآن"}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Simplified Testimonials */}
+          <section className="scroll-mt-20">
+            <div className="mb-12 text-center">
+              <span className="rounded-full bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400">قالوا عنا</span>
+              <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">ماذا يقول معلمونا؟</h2>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-3">
+              {testimonials.map((item, i) => (
+                <div key={item.name} className="group relative rounded-[40px] border border-slate-100 bg-slate-50 p-8 transition-all hover:bg-slate-100 dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
+                  <div className="mb-6 flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="h-4 w-4 text-amber-400">★</div>
+                    ))}
+                  </div>
+                  <p className="mb-8 text-lg leading-relaxed text-slate-600 italic dark:text-slate-300">"{item.text}"</p>
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-800 text-lg font-bold text-white">
+                      {item.name[2]}
+                    </div>
                     <div>
-                      <h3 className="text-start text-2xl font-extrabold text-white">{plan.name}</h3>
-                      <p className="mt-2 text-start text-3xl font-extrabold text-sky-300">{plan.price}</p>
+                      <h4 className="font-bold text-slate-900 dark:text-white">{item.name}</h4>
+                      <p className="text-xs text-slate-500">{item.role}</p>
                     </div>
-                    <p className="text-start text-sm leading-7 text-slate-300">{plan.description}</p>
-                    <div className="space-y-3">
-                      {plan.features.map((feature) => (
-                        <p key={feature} className="flex items-center gap-2 text-start text-sm text-slate-200">
-                          <Check className="h-4 w-4 shrink-0 text-emerald-400" />
-                          <span>{feature}</span>
-                        </p>
-                      ))}
-                    </div>
-                    <Link
-                      className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold !text-slate-50 transition hover:bg-secondary hover:!text-white"
-                      href="/signup"
-                    >
-                      {index === 0 ? "ابدأ مجاناً" : "اشترك الآن"}
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <p className="mt-5 text-start text-sm text-slate-400">لا يوجد عقود — يمكنك الإلغاء في أي وقت</p>
-          </section>
-
-          <section className="rounded-[32px] border border-slate-200 bg-white/90 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm [&_.text-white]:text-slate-900 [&_.text-slate-200]:text-slate-700 [&_.text-slate-400]:text-slate-500 dark:border-white/10 dark:bg-white/[0.03] dark:[&_.text-slate-200]:text-slate-200 dark:[&_.text-slate-400]:text-slate-400 dark:[&_.text-white]:text-white dark:shadow-[0_30px_80px_rgba(15,23,42,0.18)] sm:p-6 lg:p-8">
-            <div className="max-w-2xl">
-              <p className="text-start text-sm font-semibold text-sky-300">شهادات المستخدمين</p>
-              <h2 className="mt-3 text-start text-3xl font-extrabold text-white sm:text-4xl">ماذا يقول معلمونا؟</h2>
-            </div>
-
-            <div className="mt-6 grid gap-4 lg:grid-cols-3">
-              {testimonials.map((item) => (
-                <Card key={item.name} className="border-slate-200 bg-white shadow-[0_16px_35px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900/80 dark:shadow-[0_20px_50px_rgba(2,6,23,0.28)]">
-                  <CardContent className="space-y-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-sky-300">
-                      <MessageSquareQuote className="h-6 w-6" />
-                    </div>
-                    <p className="text-start text-lg tracking-[0.2em] text-amber-300">⭐⭐⭐⭐⭐</p>
-                    <p className="text-start text-sm leading-8 text-slate-200">{item.text}</p>
-                    <div className="border-t border-slate-200 pt-4 dark:border-white/10">
-                      <p className="text-start text-base font-bold text-white">{item.name}</p>
-                      <p className="mt-1 text-start text-sm text-slate-400">{item.role}</p>
-                    </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           </section>
 
-          <section className="scroll-mt-20 rounded-[32px] border border-slate-200 bg-white/90 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm [&_.text-white]:text-slate-900 [&_.text-slate-300]:text-slate-600 dark:border-white/10 dark:bg-white/[0.03] dark:[&_.text-slate-300]:text-slate-300 dark:[&_.text-white]:text-white dark:shadow-[0_30px_80px_rgba(15,23,42,0.18)] sm:p-6 lg:p-8" id="about">
-            <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-              <div className="rounded-[28px] border border-slate-200 bg-[linear-gradient(180deg,_rgba(46,134,193,0.10),_rgba(248,250,252,0.9))] p-6 dark:border-white/10 dark:bg-[linear-gradient(180deg,_rgba(46,134,193,0.16),_rgba(15,23,42,0.35))]">
-                <p className="text-start text-sm font-semibold text-sky-300">من نحن</p>
-                <h2 className="mt-3 text-start text-3xl font-extrabold text-white">نبني أدوات تعليمية تناسب واقع المعلم المصري</h2>
-                <p className="mt-4 text-start text-sm leading-8 text-slate-300">
-                  EduPlatform منصة تساعد المعلمين وأصحاب السناتر على تنظيم التشغيل اليومي من مكان واحد، بدون تعقيد وبدون خطوات كثيرة.
-                </p>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-[24px] border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-slate-900/80">
-                  <p className="text-start text-3xl font-extrabold text-white">١٠٠٪</p>
-                  <p className="mt-2 text-start text-sm leading-7 text-slate-300">واجهة عربية مصممة لتناسب إدارة السنتر من أول يوم.</p>
+          {/* Simplified About & Impact */}
+          <section className="scroll-mt-20" id="about">
+            <div className="overflow-hidden rounded-[50px] border border-slate-200 bg-white p-10 lg:p-16 dark:border-white/5 dark:bg-white/[0.02]">
+              <div className="grid gap-16 lg:grid-cols-2">
+                <div>
+                  <span className="rounded-full bg-indigo-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-indigo-400">من نحن</span>
+                  <h2 className="mt-6 text-4xl font-black leading-tight text-slate-900 sm:text-5xl dark:text-white">نبني أدوات تعليمية تناسب واقع المعلم المصري</h2>
+                  <p className="mt-6 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+                    EduPlatform منصة تساعد المعلمين على تنظيم دروسهم اليومية من مكان واحد، بدون تعقيد وبدون خطوات كثيرة. هدفنا هو توفير وقتك لتركز على ما تبدع فيه: التدريس.
+                  </p>
                 </div>
-                <div className="rounded-[24px] border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-slate-900/80">
-                  <p className="text-start text-3xl font-extrabold text-white">٣</p>
-                  <p className="mt-2 text-start text-sm leading-7 text-slate-300">مسارات واضحة للمعلم والطالب وولي الأمر داخل نفس المنصة.</p>
-                </div>
-                <div className="rounded-[24px] border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-slate-900/80">
-                  <p className="text-start text-3xl font-extrabold text-white">٢٤/٧</p>
-                  <p className="mt-2 text-start text-sm leading-7 text-slate-300">وصول مستمر من الموبايل والتابلت والكمبيوتر بدون تعقيد.</p>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
+                  {[
+                    { label: "واجهة عربية بالكامل", value: "١٠٠٪", desc: "مصممة لتناسب احتياجاتك كمعلم من أول يوم." },
+                    { label: "دعم مستمر", value: "٢٤/٧", desc: "وصول من كل الأجهزة في أي وقت." },
+                    { label: "مسارات واضحة", value: "٣", desc: "للمعلم والطالب وولي الأمر في منصة واحدة." }
+                  ].map((stat) => (
+                    <div key={stat.label} className="flex items-start gap-6 rounded-3xl bg-slate-50 p-6 dark:bg-white/[0.03]">
+                      <div className="text-4xl font-black text-sky-400">{stat.value}</div>
+                      <div>
+                        <h4 className="font-bold text-slate-900 dark:text-white">{stat.label}</h4>
+                        <p className="text-xs text-slate-500">{stat.desc}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -473,59 +646,58 @@ export default function MarketingPage() {
 
           <MarketingFaq />
 
-          <section className="overflow-hidden rounded-[32px] bg-[linear-gradient(135deg,_rgba(16,50,75,0.95),_rgba(26,82,118,0.92)_45%,_rgba(46,134,193,0.88)_100%)] p-6 shadow-[0_30px_80px_rgba(26,82,118,0.22)] sm:p-8 lg:p-10">
-            <div className="max-w-3xl">
-              <p className="text-start text-sm font-semibold text-white/75">ابدأ الآن</p>
-              <h2 className="mt-3 text-start text-3xl font-extrabold text-white sm:text-4xl">جاهز تنظّم سنترك؟</h2>
-              <p className="mt-3 text-start text-sm leading-8 text-white/85 sm:text-base">
-                انضم لآلاف المعلمين اللي وثقوا في EduPlatform
-              </p>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Premium Footer CTA */}
+          <section className="relative overflow-hidden rounded-[50px] bg-gradient-to-br from-sky-600 to-indigo-700 p-12 text-center sm:p-20">
+            <div className="absolute inset-0 opacity-20 [mask-image:radial-gradient(circle_at_center,black,transparent)] bg-[size:20px_20px] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)]" />
+            <div className="relative z-10 mx-auto max-w-3xl">
+              <h2 className="text-4xl font-black text-white sm:text-6xl">جاهز تنظّم دروسك؟</h2>
+              <p className="mt-6 text-lg text-sky-100 opacity-80">انضم لآلاف المعلمين الذين وثقوا في EduPlatform وارتقِ بمستوى إدارتك اليوم.</p>
+              <div className="mt-12 flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
                 <Link
-                  className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-bold text-primary transition hover:bg-slate-100"
+                  className="flex h-16 items-center justify-center rounded-2xl bg-white px-10 text-lg font-black text-sky-600 shadow-2xl transition-all hover:bg-sky-50 hover:scale-105 active:scale-95"
                   href="/signup"
                 >
                   ابدأ مجاناً الآن
                 </Link>
-                <p className="text-start text-sm text-white/80">لا يلزم بطاقة ائتمان — مجاني تماماً للبداية</p>
+                <div className="flex items-center gap-2 text-sm text-sky-100/60">
+                  <Check className="h-4 w-4" />
+                  بدون بطاقة ائتمان — مجاني للبداية
+                </div>
               </div>
             </div>
           </section>
 
-          <footer className="rounded-[32px] border border-slate-200 bg-white px-5 py-8 shadow-[0_16px_35px_rgba(15,23,42,0.08)] [&_.text-white]:text-slate-900 [&_.text-slate-400]:text-slate-600 dark:border-white/10 dark:bg-slate-950/90 dark:[&_.text-slate-400]:text-slate-400 dark:[&_.text-white]:text-white dark:shadow-[0_20px_50px_rgba(2,6,23,0.32)] sm:px-6 lg:px-8" id="footer">
-            <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr]">
+          {/* Clean Modern Footer */}
+          <footer className="mt-10 rounded-[40px] border border-slate-200 bg-white p-12 backdrop-blur-xl dark:border-white/5 dark:bg-slate-950/50" id="footer">
+            <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr]">
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-sm font-extrabold text-slate-900 dark:bg-white/10 dark:text-white">
-                    E
-                  </span>
-                  <span className="text-base font-extrabold text-white">EduPlatform</span>
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-indigo-500 font-black text-white">E</div>
+                  <span className="text-xl font-black text-slate-900 dark:text-white">EduPlatform</span>
                 </div>
-                <p className="mt-4 text-start text-sm leading-8 text-slate-400">نظّم سنترك بذكاء</p>
+                <p className="mt-6 max-w-sm text-sm leading-relaxed text-slate-500">
+                  نحن نؤمن بأن التكنولوجيا يجب أن تخدم التعليم، لا أن تعقده. هدفنا هو جعل عملك كمعلم أسهل وأكثر كفاءة.
+                </p>
               </div>
-
-              <div className="grid gap-6 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
                 {footerGroups.map((group) => (
                   <div key={group.title}>
-                    <h3 className="text-start text-sm font-bold text-white">{group.title}</h3>
-                    <div className="mt-4 flex flex-col gap-3">
+                    <h4 className="mb-6 text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{group.title}</h4>
+                    <ul className="space-y-4">
                       {group.links.map((link) => (
-                        <Link
-                          key={`${group.title}-${link.label}`}
-                          className="text-start text-sm text-slate-400 transition hover:text-white"
-                          href={link.href}
-                        >
-                          {link.label}
-                        </Link>
+                        <li key={link.label}>
+                          <Link className="text-sm text-slate-500 transition-colors hover:text-white" href={link.href}>
+                            {link.label}
+                          </Link>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
                 ))}
               </div>
             </div>
-
-            <div className="mt-8 border-t border-slate-200 pt-5 dark:border-white/10">
-              <p className="text-start text-sm text-slate-500">© 2026 EduPlatform — جميع الحقوق محفوظة</p>
+            <div className="mt-16 border-t border-white/5 pt-8 text-center text-xs text-slate-600">
+              © 2026 EduPlatform — جميع الحقوق محفوظة. صُمم بكل حب لدعم المعلم المصري.
             </div>
           </footer>
         </div>
