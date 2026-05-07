@@ -19,10 +19,10 @@ import {
 } from './validations'
 import { creditBalance, debitBalance } from './providers/balance'
 import { createKashierCheckoutUrl } from './providers/kashier'
-import { createTeacherSubscription } from './providers/subscription'
+import { activateOrRenewSubscriptionForTenant, cancelSubscription, createTeacherSubscription } from './providers/subscription'
 import { getSubscriptionPlanConfig } from './providers/plan-config'
 import { requestTeacherKashierWithdrawal, settleTeacherPaymentToWallet } from './providers/transfer'
-import { getOrCreateWallet, resolveTenantPayeeUserId } from '@/modules/wallet/provider'
+import { debitUserWallet, getOrCreateWallet, resolveTenantPayeeUserId } from '@/modules/wallet/provider'
 
 const SUBSCRIPTION_PAYMENT_LINKS: Record<string, string | undefined> = {
   STARTER_MONTHLY: env.KASHIER_SUBSCRIPTION_LINK_STARTER_MONTHLY,
@@ -103,6 +103,23 @@ function buildSubscriptionPaymentLinkUrl(
   checkoutUrl.searchParams.set('merchantOrderId', orderId)
 
   return checkoutUrl.toString()
+}
+
+function buildSubscriptionPaymentNotes(input: {
+  plan: string
+  cycle: 'MONTHLY' | 'YEARLY'
+  walletContribution: number
+  kashierAmount: number
+  totalAmount: number
+  applied?: boolean
+}) {
+  return [
+    `SUBSCRIPTION:${input.plan}:${input.cycle}`,
+    `WALLET_CONTRIBUTION:${input.walletContribution}`,
+    `KASHIER_AMOUNT:${input.kashierAmount}`,
+    `SUBSCRIPTION_TOTAL:${input.totalAmount}`,
+    input.applied ? `SUBSCRIPTION_APPLIED:${new Date().toISOString()}` : null,
+  ].filter(Boolean).join('\n')
 }
 
 function mapPaymentToClientItem(payment: {
@@ -750,8 +767,108 @@ export async function initiateTeacherSubscriptionCheckout(input: {
     throw new Error('هذه الباقة تتطلب التواصل مع الإدارة مباشرة')
   }
 
+  const payeeUserId = await resolveTenantPayeeUserId(tenant.id)
+  const wallet = await getOrCreateWallet(tenant.id, payeeUserId)
+  const walletContribution = Math.min(wallet.balance, amount)
+  const kashierAmount = amount - walletContribution
   const count = await db.payment.count({ where: { tenantId: tenant.id } })
-  const orderId = makeOrderId('SUBK', tenant.slug, count)
+  const orderId = makeOrderId(kashierAmount > 0 ? 'SUBK' : 'SUBW', tenant.slug, count)
+  const month = new Date().toISOString().slice(0, 7)
+
+  if (kashierAmount === 0) {
+    const payment = await db.payment.create({
+      data: {
+        tenantId: tenant.id,
+        studentId: user.id,
+        amount,
+        month,
+        status: 'PENDING',
+        method: 'CARD',
+        receiptNumber: orderId,
+        recordedById: user.id,
+        notes: buildSubscriptionPaymentNotes({
+          plan: validated.subscriptionPlan,
+          cycle: validated.billingCycle,
+          walletContribution,
+          kashierAmount,
+          totalAmount: amount,
+        }),
+        paymentGateway: 'INTERNAL_BALANCE',
+      },
+    })
+
+    const walletDebit = await debitUserWallet({
+      tenantId: tenant.id,
+      userId: payeeUserId,
+      amount: walletContribution,
+      reason: `Subscription payment - ${planConfig.name}`,
+      relatedPaymentId: payment.id,
+      createdById: user.id,
+      metadata: {
+        source: 'TEACHER_SUBSCRIPTION',
+        plan: validated.subscriptionPlan,
+        cycle: validated.billingCycle,
+        totalAmount: amount,
+        walletContribution,
+        kashierAmount,
+      },
+    })
+
+    const subscription = await activateOrRenewSubscriptionForTenant(
+      tenant.id,
+      validated.subscriptionPlan,
+      validated.billingCycle,
+      user.id,
+    )
+
+    await db.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: 'PAID',
+        paidAt: new Date(),
+        transactionId: walletDebit.transaction.id,
+        notes: buildSubscriptionPaymentNotes({
+          plan: validated.subscriptionPlan,
+          cycle: validated.billingCycle,
+          walletContribution,
+          kashierAmount,
+          totalAmount: amount,
+          applied: true,
+        }),
+      },
+    })
+
+    await logFinancialEvent({
+      tenantId: tenant.id,
+      actorId: user.id,
+      eventType: 'PAYMENT_CONFIRMED',
+      entityType: 'PAYMENT',
+      entityId: payment.id,
+      message: 'Teacher subscription paid from wallet',
+      metadata: {
+        orderId,
+        walletTransactionId: walletDebit.transaction.id,
+        walletContribution,
+        totalAmount: amount,
+      },
+    })
+
+    revalidatePath('/payments')
+    revalidatePath('/payments/subscription')
+    revalidatePath('/dashboard')
+
+    return {
+      success: true,
+      checkoutUrl: null,
+      orderId,
+      activated: true,
+      paidFromWallet: true,
+      walletContribution,
+      kashierAmount,
+      totalAmount: amount,
+      subscription,
+    }
+  }
 
   await db.payment.create({
     data: {
@@ -763,7 +880,13 @@ export async function initiateTeacherSubscriptionCheckout(input: {
       method: 'CARD',
       receiptNumber: orderId,
       recordedById: user.id,
-      notes: `SUBSCRIPTION:${validated.subscriptionPlan}:${validated.billingCycle}`,
+      notes: buildSubscriptionPaymentNotes({
+        plan: validated.subscriptionPlan,
+        cycle: validated.billingCycle,
+        walletContribution,
+        kashierAmount,
+        totalAmount: amount,
+      }),
       paymentGateway: 'KASHIER',
     },
   })
@@ -774,11 +897,11 @@ export async function initiateTeacherSubscriptionCheckout(input: {
 
   const checkoutMode = env.KASHIER_SUBSCRIPTION_CHECKOUT_MODE ?? 'hosted'
   const checkoutUrl =
-    checkoutMode === 'payment_link'
+    checkoutMode === 'payment_link' && walletContribution === 0
       ? buildSubscriptionPaymentLinkUrl(validated.subscriptionPlan, validated.billingCycle, orderId)
       : createKashierCheckoutUrl({
           orderId,
-          amount,
+          amount: kashierAmount,
           studentName: user.name ?? 'Teacher',
           customerPhone: user.phone,
           metadata: {
@@ -787,11 +910,40 @@ export async function initiateTeacherSubscriptionCheckout(input: {
             teacherId: user.id,
             plan: validated.subscriptionPlan,
             cycle: validated.billingCycle,
+            walletContribution,
+            kashierAmount,
+            totalAmount: amount,
           },
           callbackUrl,
           webhookUrl,
         })
 
-  return { success: true, checkoutUrl, orderId }
+  return {
+    success: true,
+    checkoutUrl,
+    orderId,
+    activated: false,
+    paidFromWallet: false,
+    walletContribution,
+    kashierAmount,
+    totalAmount: amount,
+  }
+}
+
+export async function cancelTeacherSubscriptionAction() {
+  try {
+    const result = await cancelSubscription()
+
+    revalidatePath('/payments')
+    revalidatePath('/payments/subscription')
+    revalidatePath('/dashboard')
+
+    return result
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'تعذر إلغاء الاشتراك',
+    }
+  }
 }
 

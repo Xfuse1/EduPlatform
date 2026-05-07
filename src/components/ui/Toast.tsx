@@ -10,7 +10,7 @@ export const Toaster = () => {
       dir="rtl"
       richColors
       closeButton
-      duration={4000}
+      duration={10000}
       className="font-sans"
     />
   )

@@ -129,12 +129,6 @@ function mapRow(row: {
 }
 
 export async function getSubscriptionPlanConfigs(options: { includeDeleted?: boolean } = {}): Promise<Record<string, PlanConfig>> {
-  const merged: Record<string, PlanConfig> = {
-    STARTER: { ...DEFAULT_SUBSCRIPTION_PLANS.STARTER },
-    PROFESSIONAL: { ...DEFAULT_SUBSCRIPTION_PLANS.PROFESSIONAL },
-    ENTERPRISE: { ...DEFAULT_SUBSCRIPTION_PLANS.ENTERPRISE },
-  };
-
   try {
     const rows = await db.subscriptionPlanConfig.findMany({
       where: options.includeDeleted ? undefined : { deletedAt: null },
@@ -154,18 +148,35 @@ export async function getSubscriptionPlanConfigs(options: { includeDeleted?: boo
       orderBy: { createdAt: "asc" },
     });
 
+    if (rows.length === 0) return DEFAULT_SUBSCRIPTION_PLANS;
+
+    const plans: Record<string, PlanConfig> = {};
+
     for (const row of rows) {
       const plan = mapRow(row);
-      merged[plan.key] = plan;
+      plans[plan.key] = plan;
     }
 
     return options.includeDeleted
-      ? merged
-      : Object.fromEntries(Object.entries(merged).filter(([, plan]) => !plan.deletedAt));
+      ? plans
+      : Object.fromEntries(Object.entries(plans).filter(([, plan]) => !plan.deletedAt));
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") return merged;
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") return DEFAULT_SUBSCRIPTION_PLANS;
     throw error;
   }
+}
+
+export function getPlanConfigFromMap(
+  plans: Record<string, PlanConfig>,
+  planKey?: string | null,
+  legacyPlan?: SubscriptionPlan | null,
+) {
+  return (
+    (planKey ? plans[planKey] : undefined) ??
+    (legacyPlan ? plans[legacyPlan] : undefined) ??
+    plans.STARTER ??
+    Object.values(plans)[0]
+  );
 }
 
 export async function getSubscriptionPlanConfig(planKey: SubscriptionPlanType): Promise<PlanConfig> {
@@ -248,6 +259,16 @@ export async function updateSubscriptionPlanConfig(input: {
 
   try {
     return db.$transaction(async (tx) => {
+      // Check if the original record exists before attempting update
+      const originalRecord = await tx.subscriptionPlanConfig.findUnique({
+        where: { key: originalKey },
+        select: { key: true },
+      });
+
+      if (!originalRecord) {
+        throw new Error(`الباقة بمفتاح "${originalKey}" غير موجودة في قاعدة البيانات.`);
+      }
+
       if (originalKey !== nextKey) {
         const existing = await tx.subscriptionPlanConfig.findUnique({
           where: { key: nextKey },
