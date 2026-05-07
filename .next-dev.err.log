@@ -1,1 +1,67 @@
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[UPLOAD_AVATAR] Error: supabaseKey is required.
+    at getSupabase (src\app\api\upload\avatar\route.ts:9:22)
+    at POST (src\app\api\upload\avatar\route.ts:45:22)
+   7 | // Supabase client بصلاحيات الـ service role — lazy init to avoid build-time crash
+   8 | function getSupabase() {
+>  9 |   return createClient(
+     |                      ^
+  10 |     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  11 |     process.env.SUPABASE_SERVICE_ROLE_KEY!
+  12 |   );
+[UPLOAD_AVATAR] Error: supabaseKey is required.
+    at getSupabase (src\app\api\upload\avatar\route.ts:9:22)
+    at POST (src\app\api\upload\avatar\route.ts:45:22)
+   7 | // Supabase client بصلاحيات الـ service role — lazy init to avoid build-time crash
+   8 | function getSupabase() {
+>  9 |   return createClient(
+     |                      ^
+  10 |     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  11 |     process.env.SUPABASE_SERVICE_ROLE_KEY!
+  12 |   );
+The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[UPLOAD_AVATAR] Error: supabaseKey is required.
+    at getSupabase (src\app\api\upload\avatar\route.ts:9:22)
+    at POST (src\app\api\upload\avatar\route.ts:45:22)
+   7 | // Supabase client بصلاحيات الـ service role — lazy init to avoid build-time crash
+   8 | function getSupabase() {
+>  9 |   return createClient(
+     |                      ^
+  10 |     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  11 |     process.env.SUPABASE_SERVICE_ROLE_KEY!
+  12 |   );

@@ -8,7 +8,15 @@
       "Bash(npm install:*)",
       "Bash(npm uninstall:*)",
       "Bash(npx next:*)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(xargs wc *)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(npx dotenv *)",
+      "PowerShell($dbUrl = \\(Get-Content .env.local | Where-Object { $_ -match \"^DATABASE_URL=\" } | Select-Object -First 1\\) -replace \"^DATABASE_URL=\", \"\"; $env:DATABASE_URL = $dbUrl; npx prisma db push --skip-generate 2>&1)",
+      "WebSearch",
+      "WebFetch(domain:developers.kashier.io)",
+      "WebFetch(domain:www.kashier.io)",
+      "WebFetch(domain:www.postman.com)"
     ]
   }
 }
