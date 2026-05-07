@@ -155,48 +155,92 @@ export default function MarketingPage() {
       dir="rtl"
       id="home"
     >
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: rotateX(8deg) rotateY(-6deg) translateY(0px);
+          }
+          50% {
+            transform: rotateX(12deg) rotateY(8deg) translateY(-18px);
+          }
+        }
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.5; }
+        }
+        @keyframes float-slow {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(30px, -30px) scale(1.05); }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 10s ease-in-out infinite;
+        }
+        .animate-float-slow {
+          animation: float-slow 20s ease-in-out infinite;
+        }
+      `}</style>
       <div className="relative overflow-hidden bg-white dark:bg-[#050814]">
-        {/* Background SVG Wisps - Chic, Intertwined, and Flowy */}
-        <div className="absolute inset-0 z-0 opacity-20 dark:opacity-70">
-          <svg className="h-full w-full opacity-70" preserveAspectRatio="none" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+        {/* Background SVG Wisps - Ultra-Premium, Flowy, and Luxe */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <svg className="h-full w-full" preserveAspectRatio="none" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <filter id="wisp-blur-soft">
-                <feGaussianBlur stdDeviation="8" />
+              <filter id="luxe-blur-1">
+                <feGaussianBlur stdDeviation="30" />
               </filter>
-              <filter id="wisp-blur-medium">
-                <feGaussianBlur stdDeviation="15" />
+              <filter id="luxe-blur-2">
+                <feGaussianBlur stdDeviation="60" />
               </filter>
-              <linearGradient id="chic-spectral" x1="0%" x2="100%" y1="0%" y2="0%">
+              <linearGradient id="luxe-gradient-1" x1="0%" x2="100%" y1="0%" y2="0%">
                 <stop offset="0%" stopColor="#38bdf8" stopOpacity="0" />
-                <stop offset="20%" stopColor="#38bdf8" stopOpacity="0.6" />
-                <stop offset="40%" stopColor="#818cf8" stopOpacity="0.5" />
-                <stop offset="60%" stopColor="#c084fc" stopOpacity="0.4" />
-                <stop offset="80%" stopColor="#34d399" stopOpacity="0.5" />
+                <stop offset="30%" stopColor="#38bdf8" stopOpacity="0.4" />
+                <stop offset="70%" stopColor="#818cf8" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#c084fc" stopOpacity="0" />
+              </linearGradient>
+              <linearGradient id="luxe-gradient-2" x1="0%" x2="100%" y1="0%" y2="0%">
+                <stop offset="0%" stopColor="#10b981" stopOpacity="0" />
+                <stop offset="40%" stopColor="#10b981" stopOpacity="0.2" />
+                <stop offset="80%" stopColor="#38bdf8" stopOpacity="0.3" />
                 <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
               </linearGradient>
             </defs>
 
-            {/* Background Base Glow - Deep & Calm */}
-            <circle cx="200" cy="300" fill="#1e3a8a" r="500" className="opacity-[0.05] dark:opacity-15" style={{ filter: "blur(200px)" }} />
-
-            {/* Intertwined Flowy Paths */}
-            <g filter="url(#wisp-blur-soft)" style={{ mixBlendMode: "screen" }}>
-              {/* Complex web of light */}
-              <path d="M-100,200 C300,100 400,600 600,400 S800,800 1100,700" fill="none" stroke="url(#chic-spectral)" strokeWidth="18" />
-              <path d="M1100,100 C800,300 600,100 400,500 S100,800 -100,900" fill="none" stroke="url(#chic-spectral)" strokeWidth="14" style={{ opacity: 0.7 }} />
-              <path d="M500,-100 C600,300 300,500 700,700 S900,1000 1100,1100" fill="none" stroke="url(#chic-spectral)" strokeWidth="22" style={{ opacity: 0.5 }} />
-              <path d="M-100,600 C200,400 500,800 800,500 S1000,100 1200,200" fill="none" stroke="url(#chic-spectral)" strokeWidth="12" style={{ opacity: 0.8 }} />
-
-              {/* Intersecting Wisps for depth */}
-              <path d="M200,1100 C400,800 100,400 500,200 S900,-100 1000,0" fill="none" stroke="url(#chic-spectral)" strokeWidth="10" style={{ opacity: 0.6 }} />
-              <path d="M1000,1000 C700,700 800,400 500,300 S100,100 -100,0" fill="none" stroke="url(#chic-spectral)" strokeWidth="28" style={{ opacity: 0.4 }} />
-              <path d="M0,800 C300,700 200,300 600,200 S1100,400 1200,600" fill="none" stroke="url(#chic-spectral)" strokeWidth="14" style={{ opacity: 0.5 }} />
-            </g>
-
-            {/* Additional Heavy Blur Layer for Atmosphere */}
-            <g filter="url(#wisp-blur-medium)" style={{ mixBlendMode: "screen", opacity: 0.5 }}>
-              <path d="M-200,500 C200,300 800,700 1200,500" fill="none" stroke="#38bdf8" strokeWidth="60" />
-              <path d="M500,-200 C700,400 300,800 500,1200" fill="none" stroke="#818cf8" strokeWidth="50" />
+            <g className="animate-pulse-slow opacity-30 dark:opacity-60" style={{ mixBlendMode: "screen" }}>
+              {/* Main Liquid Streams */}
+              <path 
+                d="M-100,300 C200,100 400,700 700,400 S900,900 1200,600" 
+                fill="none" 
+                stroke="url(#luxe-gradient-1)" 
+                strokeWidth="80" 
+                filter="url(#luxe-blur-2)" 
+                className="animate-float-slow"
+              />
+              <path 
+                d="M-200,600 C100,400 500,900 800,500 S1100,100 1300,300" 
+                fill="none" 
+                stroke="url(#luxe-gradient-2)" 
+                strokeWidth="100" 
+                filter="url(#luxe-blur-1)" 
+                className="animate-float-slow" 
+                style={{ animationDelay: "-2s" }}
+              />
+              
+              {/* Secondary Accents */}
+              <path 
+                d="M500,-100 C600,400 200,600 500,1100" 
+                fill="none" 
+                stroke="url(#luxe-gradient-1)" 
+                strokeWidth="40" 
+                filter="url(#luxe-blur-2)" 
+                className="opacity-50"
+              />
+              <path 
+                d="M1100,200 C800,400 600,100 200,800" 
+                fill="none" 
+                stroke="url(#luxe-gradient-2)" 
+                strokeWidth="60" 
+                filter="url(#luxe-blur-1)" 
+                className="opacity-40"
+              />
             </g>
           </svg>
         </div>
@@ -329,7 +373,13 @@ export default function MarketingPage() {
                 </div>
 
                 {/* Highly Detailed Dashboard Mockup */}
-                <div className="group relative rounded-[40px] border border-slate-200 bg-white p-6 shadow-2xl backdrop-blur-2xl transition-all duration-700 hover:border-sky-500/20 dark:border-white/10 dark:bg-slate-900/40 dark:hover:bg-slate-900/60">
+                <div 
+                  className="group relative rounded-[40px] border border-slate-200 bg-white p-6 shadow-2xl backdrop-blur-2xl transition-all duration-700 hover:border-sky-500/20 dark:border-white/10 dark:bg-slate-900/40 dark:hover:bg-slate-900/60"
+                  style={{ 
+                    animation: "float 3.5s ease-in-out infinite",
+                    transformStyle: "preserve-3d"
+                  }}
+                >
                   <div className="absolute -inset-0.5 rounded-[40px] bg-gradient-to-br from-sky-500/20 to-emerald-500/20 opacity-0 blur-xl transition-opacity duration-700 group-hover:opacity-100" />
 
                   <div className="relative">
@@ -431,17 +481,17 @@ export default function MarketingPage() {
               <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">ابدأ في 3 خطوات بسيطة</h2>
             </div>
 
-            <div className="relative mt-12 grid gap-8 lg:grid-cols-3">
-              <div className="absolute inset-x-32 top-20 hidden h-[2px] lg:block">
+            <div className="relative mt-12 grid gap-8 md:grid-cols-3">
+              <div className="absolute inset-x-32 top-20 hidden h-[1px] md:block">
                 {/* Background Glow */}
-                <div className="absolute inset-0 bg-sky-500/30 blur-[4px]" />
+                <div className="absolute inset-0 bg-sky-400/20 blur-[4px] dark:bg-sky-500/30" />
 
                 {/* Solid Connected Line */}
-                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-sky-500 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-sky-400/50 to-transparent dark:via-sky-500" />
 
                 {/* Animated Shine/Motion Effect */}
                 <div className="absolute inset-0 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-l from-transparent via-white/30 to-transparent animate-pulse" />
+                  <div className="absolute inset-0 bg-gradient-to-l from-transparent via-white/30 to-transparent animate-pulse dark:via-sky-300/20" />
                 </div>
 
                 {/* Highly Visible Directional Arrows */}
@@ -449,20 +499,29 @@ export default function MarketingPage() {
                   {[...Array(3)].map((_, i) => (
                     <ArrowLeft
                       key={i}
-                      className="h-6 w-6 text-sky-500/60 drop-shadow-[0_0_8px_rgba(14,165,233,0.5)] animate-pulse"
+                      className="h-5 w-5 text-sky-400/60 drop-shadow-[0_0_8px_rgba(56,189,248,0.3)] animate-pulse dark:text-sky-500/60 dark:drop-shadow-[0_0_8px_rgba(14,165,233,0.5)]"
                       style={{ animationDelay: `${i * 400}ms` }}
                     />
                   ))}
                 </div>
               </div>
-              {steps.map((step) => (
-                <div key={step.number} className="group relative rounded-[40px] border border-white/5 bg-white/[0.02] p-10 backdrop-blur-xl transition-all hover:bg-white/[0.04]">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-sky-500/10 text-4xl font-black text-sky-400 shadow-[0_0_30px_rgba(14,165,233,0.1)] transition-transform group-hover:scale-110">
-                    {step.number}
+              {steps.map((step, index) => (
+                <React.Fragment key={step.number}>
+                  <div className="group relative rounded-[40px] border border-white/5 bg-white/[0.02] p-10 backdrop-blur-xl transition-all hover:bg-white/[0.04]">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-sky-500/10 text-4xl font-black text-sky-400 shadow-[0_0_30px_rgba(14,165,233,0.1)] transition-transform group-hover:scale-110">
+                      {step.number}
+                    </div>
+                    <h3 className="mt-8 text-2xl font-bold text-slate-900 dark:text-white">{step.title}</h3>
+                    <p className="mt-4 text-lg leading-relaxed text-slate-600 dark:text-slate-400">{step.description}</p>
                   </div>
-                  <h3 className="mt-8 text-2xl font-bold text-slate-900 dark:text-white">{step.title}</h3>
-                  <p className="mt-4 text-lg leading-relaxed text-slate-600 dark:text-slate-400">{step.description}</p>
-                </div>
+                  {index < steps.length - 1 && (
+                    <div className="flex w-full justify-center py-4 md:hidden">
+                      <div 
+                        className="w-[2px] h-[50px] rounded-full bg-gradient-to-b from-sky-400/40 to-indigo-400/40 shadow-[0_0_10px_rgba(56,189,248,0.15)] dark:from-[#00B8A0] dark:to-[#1A2B6D] dark:shadow-[0_0_12px_3px_rgba(0,184,160,0.3)]"
+                      />
+                    </div>
+                  )}
+                </React.Fragment>
               ))}
             </div>
             <div className="mt-12 flex justify-center lg:justify-start">
