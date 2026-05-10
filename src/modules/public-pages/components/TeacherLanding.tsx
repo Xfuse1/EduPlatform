@@ -130,10 +130,10 @@ export function TeacherLanding({
 
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white" suppressHydrationWarning>المجموعات المتاحة</h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">اطلع على السعة المتبقية والرسوم والجدول لكل مجموعة.</p>
+            <h2 className="text-3xl font-black text-white" suppressHydrationWarning>المجموعات المتاحة</h2>
+            <p className="mt-2 text-sm text-white/50">اطلع على السعة المتبقية والرسوم والجدول لكل مجموعة.</p>
           </div>
-          <Link className="hidden rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white sm:inline-flex" href="/register">
+          <Link className="hidden rounded-xl bg-[#00B8A0] px-5 py-3 text-sm font-bold text-white shadow-[0_0_15px_rgba(0,184,160,0.3)] transition hover:bg-[#00B8A0]/90 sm:inline-flex" href="/register">
             ابدأ التسجيل
           </Link>
         </div>
@@ -198,7 +198,7 @@ export function TeacherLanding({
                       className={`inline-flex min-h-12 w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-bold transition ${
                         group.isFull || enrolledIds.has(group.id)
                           ? "cursor-not-allowed bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
-                          : "bg-gradient-to-l from-primary to-secondary text-white hover:opacity-90"
+                          : "bg-gradient-to-l from-[#1A2B6D] to-[#00B8A0] text-white hover:opacity-90 shadow-lg shadow-[#00B8A0]/10"
                       }`}
                     >
                       {loadingId === group.id ? "جاري الانضمام..." :
@@ -210,7 +210,7 @@ export function TeacherLanding({
                       className={`inline-flex min-h-12 w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-bold transition ${
                         group.isFull
                           ? "cursor-not-allowed bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
-                          : "bg-gradient-to-l from-primary to-secondary text-white"
+                          : "bg-gradient-to-l from-[#1A2B6D] to-[#00B8A0] text-white shadow-lg shadow-[#00B8A0]/10"
                       }`}
                       href={group.isFull ? "#" : "/register"}
                     >
