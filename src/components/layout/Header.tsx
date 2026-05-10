@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { TeacherShareButton } from "@/components/layout/TeacherShareButton";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { useFontSize } from "@/hooks/useFontSize";
 
 function getInitials(name: string) {
   return name
@@ -40,6 +41,20 @@ export function Header({
   useEffect(() => {
     setAvatarFailed(false);
   }, [avatarUrl]);
+
+  const { fontSize, setFontSize } = useFontSize();
+
+  const handleToggleFontSize = () => {
+    if (fontSize === 'normal') setFontSize('large');
+    else if (fontSize === 'large') setFontSize('xlarge');
+    else setFontSize('normal');
+  };
+
+  const getFontSizeLabel = () => {
+    if (fontSize === 'normal') return 'أ';
+    if (fontSize === 'large') return 'أ+';
+    return 'أ++';
+  };
 
   const shouldRenderAvatar = useMemo(() => {
     if (!avatarUrl || avatarFailed) {
@@ -93,6 +108,18 @@ export function Header({
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleToggleFontSize}
+            className={`touch-target inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border transition-all duration-300 font-bold text-lg ${
+              fontSize !== 'normal'
+                ? 'border-[#00B8A0]/50 bg-[#00B8A0]/10 text-[#00B8A0] shadow-[0_0_15px_rgba(0,184,160,0.15)]'
+                : 'border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:border-secondary/40 hover:text-primary'
+            }`}
+            title="تغيير حجم الخط"
+          >
+            <span className="mt-[-2px]">{getFontSizeLabel()}</span>
+          </button>
           <ThemeToggle />
           <NotificationBell />
           {role === "teacher" && tenantSlug ? (
