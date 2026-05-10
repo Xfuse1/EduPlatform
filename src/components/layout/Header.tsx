@@ -77,11 +77,13 @@ export function Header({
     <header className="sticky top-0 z-30 h-16 border-b border-slate-200 bg-white/80 backdrop-blur-[20px] shadow-sm dark:border-white/10 dark:bg-[#0D1B2A]/85">
       <div className="flex h-full items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex items-center gap-2">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-sm font-extrabold text-white shadow-lg shadow-primary/20 overflow-hidden">
+          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/90 p-1 text-sm font-extrabold text-primary shadow-lg shadow-primary/20 dark:bg-slate-900">
             {shouldRenderAvatar ? (
-              <img src={avatarUrl} alt={userName} className="h-full w-full object-cover" onError={() => setAvatarFailed(true)} />
+              <img src={avatarUrl} alt={userName} className="h-full w-full rounded-xl object-contain" onError={() => setAvatarFailed(true)} />
             ) : (
-              getInitials(userName)
+              <span className="grid h-full w-full place-items-center rounded-xl bg-gradient-to-br from-primary to-secondary text-white">
+                {getInitials(userName)}
+              </span>
             )}
           </div>
 

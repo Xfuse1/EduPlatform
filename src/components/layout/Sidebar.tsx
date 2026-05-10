@@ -113,27 +113,22 @@ export function Sidebar({
           </button>
         )}
 
-        <div className="relative overflow-hidden rounded-[30px] border border-white/[0.08] bg-[rgba(255,255,255,0.03)] px-7 py-6 shadow-[0_14px_32px_rgba(3,10,25,0.18)] backdrop-blur-xl">
-          <div className="absolute inset-0 opacity-20 [mask-image:radial-gradient(circle_at_top,black,transparent)] bg-[size:20px_20px] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)]" />
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-3">
-              <img src="/images/logo.svg" alt="EduPlatform" className="h-8 w-8" />
-              <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-white/70">
-                <span>EduPlatform</span>
-              </div>
+        <div className="relative flex min-h-[14.25rem] flex-col justify-center overflow-hidden rounded-[24px] border border-secondary/20 bg-[#081426] px-5 py-12 shadow-[0_14px_32px_rgba(3,10,25,0.22)]">
+          <div className="flex items-center gap-3">
+            <div className="grid h-16 w-16 shrink-0 place-items-center rounded-[22px] bg-[linear-gradient(135deg,#00B8A0,#5EEAD4)] text-slate-950 shadow-[0_12px_30px_rgba(0,184,160,0.24)]">
+              <span className="text-xl font-black leading-none tracking-normal">EP</span>
             </div>
-            <h2 className="mt-6 text-start text-[2rem] font-black leading-[1.08] tracking-tight text-white">
-              منصة
-              <br />
-              التعليم الذكية
-            </h2>
-            <p className="mt-4 max-w-[16rem] text-start text-sm leading-7 text-white/50">
-              إدارة الحضور والمجموعات والتحصيل داخل تجربة أوضح وأهدأ.
-            </p>
+            <div className="min-w-0 text-start">
+              <p className="truncate text-xl font-black leading-tight text-secondary">EduPlatform</p>
+              <p className="mt-1 truncate text-xs font-bold text-slate-400">منصة التعليم الذكية</p>
+            </div>
           </div>
+          <p className="mt-5 text-start text-xs font-semibold leading-6 text-slate-400">
+            إدارة الحضور والمجموعات والتحصيل في مساحة واحدة.
+          </p>
         </div>
 
-        <div className="relative mt-10">
+        <div className="relative mt-8">
           <div className="mb-4 px-2">
             <p className="text-xs font-bold tracking-wide text-white/38">التنقل الرئيسي</p>
           </div>

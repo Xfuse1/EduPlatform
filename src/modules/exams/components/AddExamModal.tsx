@@ -1,9 +1,10 @@
 'use client';
 
-import { Calendar, Save, Trash2, PlusCircle, HelpCircle } from "lucide-react";
+import { Save, Trash2, PlusCircle, HelpCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -187,18 +188,13 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
 
             <div className="space-y-2">
               <Label htmlFor="examDate" className="text-sm font-bold text-slate-700 dark:text-slate-200">تاريخ ووقت الامتحان</Label>
-              <div className="relative">
-                  <Calendar className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <Input
-                    id="examDate"
-                    type="datetime-local"
-                    required
-                    className="block min-h-12 w-full cursor-pointer rounded-xl bg-white ps-10 text-sm font-medium dark:bg-slate-950"
-                    value={formData.examDate}
-                    onChange={(e) => setFormData({ ...formData, examDate: e.target.value })}
-                    onClick={(e) => e.currentTarget.showPicker?.()}
-                  />
-              </div>
+              <DateTimePicker
+                id="examDate"
+                mode="datetime"
+                required
+                value={formData.examDate}
+                onChange={(examDate) => setFormData({ ...formData, examDate })}
+              />
             </div>
 
             <div className="space-y-2">

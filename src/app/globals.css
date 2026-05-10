@@ -76,6 +76,15 @@ body {
   @apply border-white/[0.08] dark:border-white/[0.08];
 }
 
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
 a,
 button,
 input,
@@ -87,6 +96,15 @@ textarea {
 .touch-target {
   min-width: 44px;
   min-height: 44px;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 
 .page-enter {
