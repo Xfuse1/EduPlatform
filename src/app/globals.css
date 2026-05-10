@@ -25,6 +25,12 @@
   --color-border: rgba(255, 255, 255, 0.08);
   --glow-teal: 0 0 20px rgba(0, 184, 160, 0.3);
   --glow-gold: 0 0 20px rgba(245, 166, 35, 0.3);
+
+  --chart-1: #00B8A0;
+  --chart-2: #F5A623;
+  --chart-3: #1A2B6D;
+  --chart-4: #E8604C;
+  --chart-5: rgba(0,184,160,0.3);
 }
 
 html {

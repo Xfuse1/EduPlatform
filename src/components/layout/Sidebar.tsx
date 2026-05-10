@@ -87,7 +87,7 @@ export function Sidebar({
     <aside
       className={cn(
         // Base styles shared between desktop and mobile
-        "h-screen w-[300px] shrink-0 border-s border-white/5 bg-[#0D1B2A] text-white",
+        "h-screen w-[300px] shrink-0 border-e border-[rgba(255,255,255,0.06)] bg-[#0F1D3A] text-white",
         // Desktop: always visible, part of the flow
         "hidden xl:block",
         // Mobile: overlay drawer, visible only when isOpen
@@ -116,9 +116,11 @@ export function Sidebar({
         <div className="relative overflow-hidden rounded-[30px] border border-white/[0.08] bg-[rgba(255,255,255,0.03)] px-7 py-6 shadow-[0_14px_32px_rgba(3,10,25,0.18)] backdrop-blur-xl">
           <div className="absolute inset-0 opacity-20 [mask-image:radial-gradient(circle_at_top,black,transparent)] bg-[size:20px_20px] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)]" />
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-white/70">
-              <span className="h-2 w-2 rounded-full bg-[#00B8A0] shadow-[0_0_8px_#00B8A0]" />
-              <span>EduPlatform</span>
+            <div className="inline-flex items-center gap-3">
+              <img src="/images/logo.svg" alt="EduPlatform" className="h-8 w-8" />
+              <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-white/70">
+                <span>EduPlatform</span>
+              </div>
             </div>
             <h2 className="mt-6 text-start text-[2rem] font-black leading-[1.08] tracking-tight text-white">
               منصة
@@ -147,10 +149,10 @@ export function Sidebar({
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    "group relative flex min-h-[58px] items-center gap-4 overflow-hidden rounded-[22px] px-5 py-3 transition duration-300",
+                    "group relative flex min-h-[58px] items-center gap-4 overflow-hidden px-5 py-3 transition duration-300",
                     isActive
-                      ? "bg-[rgba(0,184,160,0.15)] text-white border-s-4 border-[#00B8A0] shadow-[0_0_15px_rgba(0,184,160,0.1)]"
-                      : "text-white/40 hover:bg-white/[0.04] hover:text-white",
+                      ? "bg-[rgba(0,184,160,0.1)] text-[#00B8A0] border-s-[3px] border-[#00B8A0] rounded-[8px]"
+                      : "text-[#94A3B8] hover:text-[#ffffff]",
                   )}
                 >
                   <span
