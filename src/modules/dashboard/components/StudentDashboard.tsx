@@ -52,7 +52,7 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
         emptyMessage="لا توجد واجبات غير مسلمة حالياً"
       />
 
-      <Card className="overflow-hidden border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] rounded-[16px] text-white shadow-[0_0_20px_rgba(0,184,160,0.1)]">
+      <Card className="overflow-hidden border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(26,43,109,0.6),rgba(0,184,160,0.1))] backdrop-blur-[16px] rounded-[16px] text-white shadow-2xl">
         <CardContent className="p-6">
           <p className="text-sm font-semibold text-[#94A3B8]">الحصة القادمة</p>
           {data.nextSession ? (
@@ -114,7 +114,7 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
         </Card>
       </div>
 
-      <Card>
+      <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
         <CardHeader>
           <CardTitle>مجموعاتي</CardTitle>
         </CardHeader>
@@ -152,7 +152,7 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
 
       {/* المجموعات المتاحة للانضمام */}
       {availableGroups && availableGroups.length > 0 && (
-        <Card>
+        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
           <CardHeader>
             <CardTitle>المجموعات المتاحة للانضمام</CardTitle>
           </CardHeader>

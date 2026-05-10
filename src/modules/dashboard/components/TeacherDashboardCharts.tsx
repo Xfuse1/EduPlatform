@@ -64,8 +64,7 @@ function ChartTooltip({
 function ChartCard({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div
-      className="rounded-[16px] p-5 shadow-[0_8px_30px_rgba(15,23,42,0.08)]"
-      style={{ backgroundColor: "var(--chart-card-bg)" }}
+      className="rounded-[16px] p-5 border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]"
     >
       <h2 className="text-start text-lg font-bold text-slate-900 dark:text-slate-100">{title}</h2>
       <div className="mt-4 h-[200px] w-full">{children}</div>

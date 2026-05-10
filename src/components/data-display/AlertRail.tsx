@@ -16,17 +16,17 @@ type AlertItem = {
 
 const severityStyles = {
   low: {
-    card: "border-sky-200 bg-sky-50/80 dark:border-sky-900/50 dark:bg-sky-950/20",
+    card: "border-[rgba(255,255,255,0.08)] bg-white/5",
     icon: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
     Icon: BellRing,
   },
   medium: {
-    card: "border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/20",
+    card: "border-[rgba(255,255,255,0.08)] bg-white/5",
     icon: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
     Icon: CircleAlert,
   },
   high: {
-    card: "border-rose-200 bg-rose-50/80 dark:border-rose-900/50 dark:bg-rose-950/20",
+    card: "border-[rgba(255,255,255,0.08)] bg-white/5",
     icon: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
     Icon: AlertTriangle,
   },
@@ -34,7 +34,7 @@ const severityStyles = {
 
 export function AlertRail({ title = "ما يحتاج تدخل", items }: { title?: string; items: AlertItem[] }) {
   return (
-    <Card>
+    <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
       <CardHeader>
         <CardTitle className="text-start">{title}</CardTitle>
       </CardHeader>

@@ -16,7 +16,7 @@ export function CenterDashboard({
 }) {
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[30px] bg-[linear-gradient(135deg,_#132238,_#1A5276_45%,_#2E86C1)] px-6 py-7 text-white shadow-soft">
+      <section className="overflow-hidden rounded-[30px] px-6 py-7 text-white shadow-2xl border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(26,43,109,0.6),rgba(0,184,160,0.1))] backdrop-blur-[16px]">
         <p className="text-start text-sm font-semibold text-white/75">مركز قيادة السنتر</p>
         <h1 className="mt-3 text-start text-3xl font-extrabold">{centerName}</h1>
         <p className="mt-3 max-w-2xl text-start text-sm leading-7 text-white/85">

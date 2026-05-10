@@ -39,7 +39,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
     <div className="space-y-6" dir="rtl">
       {/* Subscription Expiry Banner */}
       {showBanner && (
-        <Card className="bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900 shadow-sm overflow-hidden animate-in fade-in slide-in-from-top duration-500">
+        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] shadow-sm overflow-hidden animate-in fade-in slide-in-from-top duration-500">
           <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900 flex items-center justify-center text-amber-600">
@@ -72,7 +72,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
 
       {/* Notifications Section */}
       {data.notifications && data.notifications.length > 0 && (
-        <Card className="border-emerald-100 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
           <CardContent className="p-4 space-y-3">
             <h3 className="flex items-center gap-2 text-sm font-bold text-emerald-800 dark:text-emerald-300">
               <Bell className="h-4 w-4" />
@@ -121,7 +121,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
       {/* Main Grid for Schedule and Performance */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Today's Schedule Section */}
-        <Card className="border-none shadow-md bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm">
+        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
               <CardTitle className="text-xl font-bold">جدول الحصص اليوم</CardTitle>
@@ -160,7 +160,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
         </Card>
 
         {/* Performance and Attendance Chart Section */}
-        <Card className="border-none shadow-md bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm overflow-hidden">
+        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
               <CardTitle className="text-xl font-bold">الأداء والتقدم</CardTitle>
@@ -229,13 +229,13 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
           تفاصيل الأبناء
         </h3>
         {data.children.length === 0 ? (
-          <Card>
+          <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
             <CardContent className="p-6 text-sm text-slate-500 dark:text-slate-300">لا توجد بيانات أبناء مرتبطة بهذا الحساب</CardContent>
           </Card>
         ) : (
           data.children.map((child) => (
-            <Card key={child.id} className="overflow-hidden border-none shadow-md">
-              <div className="bg-[linear-gradient(135deg,_rgba(26,82,118,0.12),_rgba(46,134,193,0.18))] px-6 py-5">
+            <Card key={child.id} className="overflow-hidden border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
+              <div className="bg-[linear-gradient(135deg,rgba(26,43,109,0.6),rgba(0,184,160,0.1))] px-6 py-5 border-b border-[rgba(255,255,255,0.08)]">
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <h2 className="text-2xl font-extrabold text-primary dark:text-sky-300">{child.name}</h2>

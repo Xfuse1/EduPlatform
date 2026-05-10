@@ -465,7 +465,7 @@ function AssignmentCard({ assignment, onSubmit, onViewFeedback }: { assignment: 
   const dueInfo = getDueStatus(assignment.dueDate)
 
   return (
-    <Card className="group relative overflow-hidden border-none bg-white dark:bg-slate-900 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <Card className="group relative overflow-hidden border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
       {/* Visual Accent */}
       <div className={cn(
         "absolute top-0 right-0 w-1.5 h-full",
