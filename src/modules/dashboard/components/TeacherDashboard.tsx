@@ -63,7 +63,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[24px] bg-[linear-gradient(135deg,_#2471A3,_#2E86C1_45%,_#5DADE2)] px-6 py-7 text-white shadow-[0_20px_60px_rgba(46,134,193,0.25)] dark:bg-[linear-gradient(135deg,_#163b54,_#1A5276_45%,_#2E86C1)] dark:shadow-[0_20px_60px_rgba(26,82,118,0.25)]">
+      <section className="overflow-hidden rounded-[24px] px-6 py-7 text-white shadow-2xl border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(26,43,109,0.6),rgba(0,184,160,0.1))] backdrop-blur-[16px]">
         <p className="text-start text-sm font-semibold text-white/75">لوحة المعلم</p>
         <h1 className="mt-3 text-start text-3xl font-extrabold">مرحبًا، {displayTeacherName}</h1>
         <p className="mt-3 max-w-2xl text-start text-sm leading-7 text-white/85">
@@ -72,7 +72,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
       </section>
 
       {!data.kashierApiConfigured ? (
-        <section className="rounded-[22px] border border-amber-200 bg-amber-50 px-5 py-4 text-amber-950 shadow-sm dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">
+        <section className="rounded-[22px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] px-5 py-4 text-amber-100 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-200">
@@ -96,7 +96,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
       ) : null}
 
       <section className="grid gap-4 md:grid-cols-4">
-        <Card className="md:col-span-2">
+        <Card className="md:col-span-2 border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
           <CardContent className="p-5">
             <p className="text-start text-sm font-semibold text-slate-500 dark:text-slate-400">رصيد محفظة المعلم</p>
             <p className="mt-3 text-start text-3xl font-extrabold text-slate-950 dark:text-white">{formatCurrency(data.wallet.balance)}</p>
@@ -111,14 +111,14 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
             </Link>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
           <CardContent className="p-5">
             <p className="text-start text-sm font-semibold text-slate-500 dark:text-slate-400">سحوبات ناجحة</p>
             <p className="mt-3 text-start text-2xl font-extrabold text-emerald-600 dark:text-emerald-300">{formatCurrency(data.wallet.transfers.SUCCESS.amount)}</p>
             <p className="mt-2 text-start text-xs text-slate-500 dark:text-slate-400">{toArabicDigits(data.wallet.transfers.SUCCESS.count)} عملية</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
           <CardContent className="p-5">
             <p className="text-start text-sm font-semibold text-slate-500 dark:text-slate-400">سحوبات معلقة</p>
             <p className="mt-3 text-start text-2xl font-extrabold text-amber-600 dark:text-amber-300">{formatCurrency(data.wallet.transfers.PENDING.amount + data.wallet.transfers.RETRY.amount)}</p>
@@ -158,7 +158,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
       <TeacherDashboardCharts revenueData={data.revenueSeries} attendanceData={data.attendanceSeries} />
 
       <section>
-        <Card>
+        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
           <CardHeader>
             <CardTitle className="text-start">حصص اليوم</CardTitle>
           </CardHeader>

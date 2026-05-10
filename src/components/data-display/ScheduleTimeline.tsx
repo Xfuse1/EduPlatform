@@ -21,7 +21,7 @@ export function ScheduleTimeline({
   items: ScheduleTimelineItem[];
 }) {
   return (
-    <Card>
+    <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
       <CardHeader>
         <CardTitle className="text-start">{title}</CardTitle>
       </CardHeader>
@@ -35,7 +35,7 @@ export function ScheduleTimeline({
             <div key={item.id} className="relative ps-8">
               {index < items.length - 1 ? <div className="absolute bottom-0 start-[13px] top-10 w-px bg-slate-200 dark:bg-slate-800" /> : null}
               <div className="absolute start-0 top-1 flex h-7 w-7 items-center justify-center rounded-full border-4 border-white shadow-sm dark:border-slate-950" style={{ backgroundColor: item.accentColor ?? "#1A5276" }} />
-              <div className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+              <div className="rounded-[20px] border border-[rgba(255,255,255,0.08)] bg-white/5 p-4 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-start text-base font-bold text-slate-900 dark:text-white">{item.title}</p>
