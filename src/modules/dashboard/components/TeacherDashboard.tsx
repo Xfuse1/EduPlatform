@@ -11,10 +11,17 @@ type TeacherDashboardProps = {
 };
 
 const statCardStyles = [
-  "from-[#2E86C1] to-[#5DADE2] dark:from-[#1A5276] dark:to-[#2E86C1]",
-  "from-[#E67E22] to-[#E74C3C] dark:from-[#F39C12] dark:to-[#E74C3C]",
-  "from-[#229954] to-[#52BE80] dark:from-[#1E8449] dark:to-[#27AE60]",
-  "from-[#16A085] to-[#45B39D] dark:from-[#117A65] dark:to-[#48C9B0]",
+  "shadow-[0_0_20px_rgba(245,166,35,0.1)]", // Revenue (Gold)
+  "shadow-[0_0_20px_rgba(0,184,160,0.1)]", // Students (Teal)
+  "shadow-[0_0_20px_rgba(0,184,160,0.1)]", // Attendance (Teal)
+  "shadow-[0_0_20px_rgba(232,96,76,0.1)]", // Outstanding (Danger)
+] as const;
+
+const iconColors = [
+  "text-[#F5A623]",
+  "text-[#00B8A0]",
+  "text-[#00B8A0]",
+  "text-[#E8604C]",
 ] as const;
 
 const statIcons = [DollarSign, Users, CheckCircle2, AlertTriangle] as const;
@@ -127,18 +134,18 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
           const Icon = statIcons[index];
 
           return (
-            <Card key={stat.title} className={`overflow-hidden border-0 bg-gradient-to-l ${statCardStyles[index]} text-white`}>
+            <Card key={stat.title} className={`overflow-hidden border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] rounded-[16px] text-white ${statCardStyles[index]}`}>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-start text-sm font-semibold text-white/80">{stat.title}</p>
+                    <p className="text-start text-sm font-semibold text-[#94A3B8]">{stat.title}</p>
                     <div className="mt-3 text-start text-3xl font-extrabold">{stat.value}</div>
-                    <div className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold">
-                      <ArrowUpLeft className="h-4 w-4" />
+                    <div className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/80">
+                      <ArrowUpLeft className={`h-4 w-4 ${iconColors[index]}`} />
                       {stat.hint}
                     </div>
                   </div>
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
+                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ${iconColors[index]}`}>
                     <Icon className="h-7 w-7" />
                   </div>
                 </div>

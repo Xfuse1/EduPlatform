@@ -52,7 +52,9 @@ export function AppShell({
   } as const;
 
   return (
-    <div className="h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.14),_transparent_28%),linear-gradient(180deg,_#f8fafc_0%,_#eef4f8_100%)] dark:bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.10),_transparent_22%),radial-gradient(circle_at_85%_18%,_rgba(15,118,110,0.12),_transparent_18%),linear-gradient(180deg,_#081120_0%,_#0b1628_42%,_#111827_100%)]">
+    <div className="h-screen overflow-hidden bg-[#0D1B2A]" style={{
+      background: "radial-gradient(circle at 20% 10%, #1A2B6D, transparent 60%), radial-gradient(circle at 80% 90%, #0D1B2A, transparent 70%), #0D1B2A"
+    }}>
       <div className="flex h-screen overflow-hidden">
         {/* Mobile sidebar overlay backdrop */}
         {sidebarOpen && (

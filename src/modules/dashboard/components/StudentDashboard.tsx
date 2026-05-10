@@ -52,9 +52,9 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
         emptyMessage="لا توجد واجبات غير مسلمة حالياً"
       />
 
-      <Card className="overflow-hidden bg-[linear-gradient(135deg,_#163b54,_#1A5276_45%,_#2E86C1)] text-white">
+      <Card className="overflow-hidden border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] rounded-[16px] text-white shadow-[0_0_20px_rgba(0,184,160,0.1)]">
         <CardContent className="p-6">
-          <p className="text-sm font-semibold text-white/75">الحصة القادمة</p>
+          <p className="text-sm font-semibold text-[#94A3B8]">الحصة القادمة</p>
           {data.nextSession ? (
             <div className="mt-4 space-y-3">
               <p className="text-2xl font-extrabold">{data.nextSession.group.name}</p>
@@ -65,7 +65,7 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
                   {formatTimeRange12Hour(data.nextSession.timeStart, data.nextSession.timeEnd)}
                 </span>
               </p>
-              <div className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-bold">متبقي يومان على الحصة</div>
+              <div className="inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-[#00B8A0]">متبقي يومان على الحصة</div>
             </div>
           ) : (
             <p className="mt-4 text-sm text-white/80">لا توجد حصة قادمة مسجلة الآن</p>
@@ -74,39 +74,39 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+        <Card className="border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] rounded-[16px] text-white shadow-[0_0_20px_rgba(0,184,160,0.1)]">
           <CardHeader>
-            <CardTitle>نسبة الحضور هذا الشهر</CardTitle>
+            <CardTitle className="text-[#94A3B8]">نسبة الحضور هذا الشهر</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between text-sm font-bold text-slate-700 dark:text-slate-200">
+            <div className="flex items-center justify-between text-sm font-bold text-white">
               <span>الالتزام</span>
-              <span>{toArabicDigits(data.attendance.rate)}%</span>
+              <span className="text-[#00B8A0]">{toArabicDigits(data.attendance.rate)}%</span>
             </div>
             <Progress className="h-3" value={data.attendance.rate} />
-            <p className="text-sm text-slate-500 dark:text-slate-400">معدل الحضور ممتاز هذا الشهر واستمرارك بنفس المستوى مهم.</p>
+            <p className="text-sm text-[#94A3B8]">معدل الحضور ممتاز هذا الشهر واستمرارك بنفس المستوى مهم.</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] rounded-[16px] text-white shadow-[0_0_20px_rgba(245,166,35,0.1)]">
           <CardHeader>
-            <CardTitle>حالة المصروفات</CardTitle>
+            <CardTitle className="text-[#94A3B8]">حالة المصروفات</CardTitle>
           </CardHeader>
           <CardContent>
             {data.payment.status === "PAID" ? (
-              <div className="flex items-center gap-3 rounded-[18px] bg-emerald-50 p-4 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">
+              <div className="flex items-center gap-3 rounded-[18px] bg-white/5 p-4 text-[#00B8A0] border border-[#00B8A0]/20">
                 <span className="text-2xl">✅</span>
                 <div>
                   <p className="font-bold">تم السداد بالكامل</p>
-                  <p className="text-sm">لا توجد مبالغ مستحقة حالياً</p>
+                  <p className="text-sm text-[#94A3B8]">لا توجد مبالغ مستحقة حالياً</p>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-3 rounded-[18px] bg-rose-50 p-4 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300">
+              <div className="flex items-center gap-3 rounded-[18px] bg-white/5 p-4 text-[#F5A623] border border-[#F5A623]/20">
                 <Wallet className="h-8 w-8" />
                 <div>
                   <p className="font-bold">{formatCurrency(data.payment.amount)}</p>
-                  <p className="text-sm">مبلغ مستحق يحتاج إلى متابعة</p>
+                  <p className="text-sm text-[#94A3B8]">مبلغ مستحق يحتاج إلى متابعة</p>
                 </div>
               </div>
             )}

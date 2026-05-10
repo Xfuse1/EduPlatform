@@ -14,6 +14,17 @@
   --chart-primary: #1a5276;
   --chart-primary-fill: rgba(26, 82, 118, 0.18);
   --chart-success: #27ae60;
+
+  /* Official Platform Colors */
+  --color-primary: #1A2B6D;
+  --color-teal: #00B8A0;
+  --color-gold: #F5A623;
+  --color-danger: #E8604C;
+  --color-bg: #0D1B2A;
+  --color-surface: rgba(255, 255, 255, 0.05);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --glow-teal: 0 0 20px rgba(0, 184, 160, 0.3);
+  --glow-gold: 0 0 20px rgba(245, 166, 35, 0.3);
 }
 
 html {
