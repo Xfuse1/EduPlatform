@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { Check, ChevronDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { FormEvent } from 'react'
-import { useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 
 import { EDUCATION_STAGE_OPTIONS, formatGradeLevel, getEducationYears, parseGradeLevel, type EducationStage } from '@/lib/grade-levels'
 
@@ -35,16 +36,22 @@ type FieldErrorState = Partial<Record<Exclude<keyof GroupCreateInput, 'schedule'
 
 const SESSION_LABELS = ['الأولى', 'الثانية', 'الثالثة', 'الرابعة'] as const
 
-const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
-  const totalMinutes = i * 30
-  const hours24 = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60 === 0 ? '00' : '30'
-  const value = `${hours24.toString().padStart(2, '0')}:${minutes}`
-  const period = hours24 < 12 ? 'ص' : 'م'
-  const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12
-  const label = `${hours12}:${minutes} ${period}`
-  return { value, label }
+const HOUR_OPTIONS = Array.from({ length: 12 }, (_, index) => {
+  const hour = String(index + 1)
+  return { value: hour, label: hour.padStart(2, '0') }
 })
+
+const MINUTE_OPTIONS = ['00', '15', '30', '45'].map((minute) => ({ value: minute, label: minute }))
+
+const PERIOD_OPTIONS: SelectOption[] = [
+  { value: 'AM', label: 'AM' },
+  { value: 'PM', label: 'PM' },
+]
+
+const DAY_OPTIONS = GROUP_DAY_VALUES.map((day) => ({
+  value: day,
+  label: getArabicDayLabel(day),
+}))
 
 const defaultValues: GroupCreateInput = {
   name: '',
@@ -146,6 +153,215 @@ function getTimeHint(value: string) {
 
 const inputClassName =
   'h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900/60'
+
+type SelectOption = {
+  value: string
+  label: string
+}
+
+function ThemedDropdown({
+  id,
+  value,
+  onChange,
+  options,
+  placeholder,
+  disabled,
+  ariaInvalid,
+  compact = false,
+}: {
+  id: string
+  value: string
+  onChange: (value: string) => void
+  options: SelectOption[]
+  placeholder: string
+  disabled?: boolean
+  ariaInvalid?: boolean
+  compact?: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const selectedOption = options.find((option) => option.value === value)
+
+  useEffect(() => {
+    if (!open) {
+      return undefined
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!wrapperRef.current?.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false)
+      }
+    }
+
+    window.addEventListener('pointerdown', handlePointerDown)
+    window.addEventListener('keydown', handleEscape)
+
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown)
+      window.removeEventListener('keydown', handleEscape)
+    }
+  }, [open])
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <button
+        id={id}
+        type="button"
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-invalid={ariaInvalid}
+        onClick={() => setOpen((current) => !current)}
+        className={joinClasses(
+          inputClassName,
+          'flex items-center justify-between gap-2 text-start font-bold disabled:cursor-not-allowed disabled:opacity-60',
+          compact && 'px-3 text-center',
+        )}
+      >
+        <span className={joinClasses('min-w-0 truncate', selectedOption ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500')}>
+          {selectedOption?.label ?? placeholder}
+        </span>
+        <ChevronDown className={joinClasses('h-4 w-4 shrink-0 text-slate-400 transition', open && 'rotate-180 text-secondary')} />
+      </button>
+
+      {open && !disabled ? (
+        <div
+          role="listbox"
+          className="absolute right-0 top-full z-[80] mt-2 max-h-60 w-full overflow-y-auto rounded-2xl border border-secondary/25 bg-white p-2 shadow-[0_22px_60px_rgba(2,8,23,0.28)] ring-1 ring-secondary/10 dark:bg-slate-950"
+        >
+          {options.map((option) => {
+            const active = option.value === value
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={active}
+                onClick={() => {
+                  onChange(option.value)
+                  setOpen(false)
+                }}
+                className={joinClasses(
+                  'flex min-h-10 w-full items-center justify-between gap-2 rounded-xl px-3 text-sm font-bold transition',
+                  active
+                    ? 'bg-secondary text-slate-950'
+                    : 'text-slate-700 hover:bg-secondary/10 hover:text-secondary dark:text-slate-200',
+                )}
+              >
+                <span>{option.label}</span>
+                {active ? <Check className="h-4 w-4" /> : null}
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function parseTimeParts(value: string) {
+  const match = value.match(/^([01]\d|2[0-3]):([0-5]\d)$/)
+
+  if (!match) {
+    return null
+  }
+
+  const hours24 = Number(match[1])
+  const period = hours24 >= 12 ? 'PM' : 'AM'
+  const hour12 = hours24 % 12 || 12
+
+  return {
+    hour: String(hour12),
+    minute: match[2],
+    period,
+  }
+}
+
+function buildTimeValue(hourValue: string, minuteValue: string, periodValue: string) {
+  if (!hourValue || !minuteValue || !periodValue) {
+    return ''
+  }
+
+  const hour12 = Number(hourValue)
+
+  if (!Number.isFinite(hour12) || hour12 < 1 || hour12 > 12) {
+    return ''
+  }
+
+  const baseHour = hour12 % 12
+  const hours24 = periodValue === 'PM' ? baseHour + 12 : baseHour
+
+  return `${String(hours24).padStart(2, '0')}:${minuteValue}`
+}
+
+function Time12Picker({
+  id,
+  value,
+  onChange,
+  disabled,
+  ariaInvalid,
+}: {
+  id: string
+  value: string
+  onChange: (value: string) => void
+  disabled?: boolean
+  ariaInvalid?: boolean
+}) {
+  const parsedTime = useMemo(() => parseTimeParts(value), [value])
+  const hour = parsedTime?.hour ?? ''
+  const minute = parsedTime?.minute ?? ''
+  const period = parsedTime?.period ?? ''
+
+  function updatePart(nextPart: Partial<{ hour: string; minute: string; period: string }>) {
+    const nextHour = (nextPart.hour ?? hour) || '12'
+    const nextMinute = (nextPart.minute ?? minute) || '00'
+    const nextPeriod = (nextPart.period ?? period) || 'PM'
+
+    onChange(buildTimeValue(nextHour, nextMinute, nextPeriod))
+  }
+
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2" dir="ltr">
+      <ThemedDropdown
+        id={`${id}-hour`}
+        value={hour}
+        onChange={(nextHour) => updatePart({ hour: nextHour })}
+        options={HOUR_OPTIONS}
+        placeholder="HH"
+        disabled={disabled}
+        ariaInvalid={ariaInvalid}
+        compact
+      />
+      <ThemedDropdown
+        id={`${id}-minute`}
+        value={minute}
+        onChange={(nextMinute) => updatePart({ minute: nextMinute })}
+        options={MINUTE_OPTIONS}
+        placeholder="MM"
+        disabled={disabled}
+        ariaInvalid={ariaInvalid}
+        compact
+      />
+      <ThemedDropdown
+        id={`${id}-period`}
+        value={period}
+        onChange={(nextPeriod) => updatePart({ period: nextPeriod })}
+        options={PERIOD_OPTIONS}
+        placeholder="PM"
+        disabled={disabled}
+        ariaInvalid={ariaInvalid}
+        compact
+      />
+    </div>
+  )
+}
 
 function getInitialGradeLevelState(gradeLevel: string) {
   const parsedGradeLevel = parseGradeLevel(gradeLevel)
@@ -604,19 +820,14 @@ export default function GroupForm({
                     required
                     error={entryErrors.day}
                   >
-                    <select
+                    <ThemedDropdown
                       id={`schedule-day-${index}`}
                       value={entry.day}
-                      onChange={(event) => updateScheduleEntry(index, 'day', event.target.value)}
-                      className={inputClassName}
-                      aria-invalid={Boolean(entryErrors.day)}
-                    >
-                      {GROUP_DAY_VALUES.map((day) => (
-                        <option key={day} value={day}>
-                          {getArabicDayLabel(day)}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(value) => updateScheduleEntry(index, 'day', value)}
+                      options={DAY_OPTIONS}
+                      placeholder="اختر اليوم"
+                      ariaInvalid={Boolean(entryErrors.day)}
+                    />
                   </FormField>
 
                   <FormField
@@ -626,21 +837,13 @@ export default function GroupForm({
                     error={entryErrors.timeStart}
                     hint={isTimeLocked ? 'يتم تعبئة هذا الحقل تلقائيًا من الحصة الأولى' : getTimeHint(entry.timeStart)}
                   >
-                    <select
+                    <Time12Picker
                       id={`schedule-start-${index}`}
                       value={entry.timeStart}
-                      onChange={(event) => updateScheduleEntry(index, 'timeStart', event.target.value)}
-                      className={inputClassName}
+                      onChange={(value) => updateScheduleEntry(index, 'timeStart', value)}
                       disabled={isTimeLocked}
-                      aria-invalid={Boolean(entryErrors.timeStart)}
-                    >
-                      <option value="">-- اختر وقت البدء --</option>
-                      {TIME_OPTIONS.map(({ value, label }) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
+                      ariaInvalid={Boolean(entryErrors.timeStart)}
+                    />
                   </FormField>
 
                   <FormField
@@ -650,21 +853,13 @@ export default function GroupForm({
                     error={entryErrors.timeEnd}
                     hint={isTimeLocked ? 'يتم تعبئة هذا الحقل تلقائيًا من الحصة الأولى' : getTimeHint(entry.timeEnd)}
                   >
-                    <select
+                    <Time12Picker
                       id={`schedule-end-${index}`}
                       value={entry.timeEnd}
-                      onChange={(event) => updateScheduleEntry(index, 'timeEnd', event.target.value)}
-                      className={inputClassName}
+                      onChange={(value) => updateScheduleEntry(index, 'timeEnd', value)}
                       disabled={isTimeLocked}
-                      aria-invalid={Boolean(entryErrors.timeEnd)}
-                    >
-                      <option value="">-- اختر وقت الانتهاء --</option>
-                      {TIME_OPTIONS.map(({ value, label }) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
+                      ariaInvalid={Boolean(entryErrors.timeEnd)}
+                    />
                   </FormField>
                 </div>
               </div>

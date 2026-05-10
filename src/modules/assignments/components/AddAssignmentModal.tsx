@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Save, X, Plus, Clock, Link as LinkIcon, Lock, FileText } from "lucide-react";
+import { Save, Link as LinkIcon, Lock, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -8,6 +8,7 @@ const supabase = createClient();
 import { showToast } from "@/components/ui/Toast";
 
 import { Button } from "@/components/ui/button";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -194,14 +195,12 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
               <Label htmlFor="dueDate" className="text-sm font-bold text-slate-700 dark:text-slate-200">
                 تاريخ التسليم <span className="text-rose-500">*</span>
               </Label>
-              <input
+              <DateTimePicker
                 id="dueDate"
-                type="date"
+                mode="date"
                 required
-                className="w-full min-h-12 cursor-pointer rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition focus:border-secondary focus:ring-4 focus:ring-secondary/15 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
                 value={formData.dueDate}
-                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                onClick={(e) => (e.target as HTMLInputElement).showPicker()}
+                onChange={(dueDate) => setFormData({ ...formData, dueDate })}
               />
             </div>
           {/* الدرجة النهائية */}
