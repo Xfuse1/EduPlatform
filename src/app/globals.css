@@ -54,6 +54,15 @@
 
 html {
   font-family: "Cairo", "Tajawal", sans-serif;
+  font-size: 16px;
+}
+
+html[data-font="large"] {
+  font-size: 18px;
+}
+
+html[data-font="xlarge"] {
+  font-size: 20px;
 }
 
 body {

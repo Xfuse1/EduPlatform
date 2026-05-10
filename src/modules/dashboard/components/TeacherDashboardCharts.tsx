@@ -87,7 +87,7 @@ export function TeacherDashboardCharts({
   revenueData?: ChartDataPoint[];
   attendanceData?: ChartDataPoint[];
 } = {}) {
-  const axisStyle = { fill: "var(--chart-text)", fontSize: 12 };
+  const axisStyle = { fill: "var(--chart-text)", fontSize: "0.75rem" };
 
   const hasRevenue = revenueData.length > 0 && revenueData.some((d) => (d.revenue ?? 0) > 0);
   const hasAttendance = attendanceData.length > 0 && attendanceData.some((d) => (d.rate ?? 0) > 0);
