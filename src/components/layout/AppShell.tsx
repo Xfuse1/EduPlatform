@@ -52,9 +52,7 @@ export function AppShell({
   } as const;
 
   return (
-    <div className="h-screen overflow-hidden bg-[#0D1B2A]" style={{
-      background: "radial-gradient(circle at 20% 10%, #1A2B6D, transparent 60%), radial-gradient(circle at 80% 90%, #0D1B2A, transparent 70%), #0D1B2A"
-    }}>
+    <div className="h-screen overflow-hidden bg-[#0D1B2A]">
       <div className="flex h-screen overflow-hidden">
         {/* Mobile sidebar overlay backdrop */}
         {sidebarOpen && (
