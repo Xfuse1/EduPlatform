@@ -70,12 +70,11 @@ export function Header({
             )}
           </div>
 
-          {onMenuToggle && (
             <button
               type="button"
               aria-label="فتح القائمة الجانبية"
               onClick={onMenuToggle}
-              className="touch-target inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition hover:border-secondary/40 hover:text-primary xl:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              className="touch-target inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:border-[#00B8A0]/50 hover:bg-white/10 xl:hidden"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -85,7 +84,7 @@ export function Header({
             type="button"
             aria-label="تسجيل خروج"
             onClick={handleLogout}
-            className="touch-target inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200 dark:hover:bg-rose-950/60"
+            className="touch-target inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 text-sm font-bold text-rose-400 transition hover:bg-rose-500/20 hover:border-rose-500/50"
           >
             <LogOut className="h-5 w-5" />
             <span className="hidden sm:inline">تسجيل خروج</span>

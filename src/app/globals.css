@@ -33,12 +33,12 @@ html {
 
 body {
   background-color: #0D1B2A;
-  @apply min-h-screen text-slate-900 antialiased transition-colors duration-300 dark:text-slate-100;
+  @apply min-h-screen text-white antialiased transition-colors duration-300;
   font-family: "Cairo", "Tajawal", sans-serif;
 }
 
 * {
-  @apply border-slate-200 dark:border-slate-800;
+  @apply border-white/[0.08];
 }
 
 .dark {

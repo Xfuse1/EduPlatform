@@ -30,8 +30,8 @@ function SessionBadge({ status }: { status: string }) {
   const label = getSessionStatusLabel(status);
   const styles =
     status === "IN_PROGRESS"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300"
-      : "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300";
+      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+      : "border-sky-500/30 bg-sky-500/10 text-sky-400";
 
   return <span className={`rounded-full border px-3 py-2 text-xs font-bold ${styles}`}>{label}</span>;
 }
@@ -171,8 +171,8 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
               data.todaySessions.map((session) => (
                 <div
                   key={session.id}
-                  className={`rounded-[18px] border bg-white p-4 dark:bg-slate-900 ${
-                    session.status === "IN_PROGRESS" ? "border-s-4 border-s-emerald-500" : "border-s-4 border-s-sky-500"
+                  className={`rounded-[18px] border border-white/10 bg-white/5 p-4 ${
+                    session.status === "IN_PROGRESS" ? "border-s-4 border-s-[#00B8A0]" : "border-s-4 border-s-[#1A2B6D]"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">

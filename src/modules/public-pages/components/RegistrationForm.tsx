@@ -55,7 +55,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
 
   if (success) {
     return (
-      <Card className="overflow-hidden rounded-[32px] border-white/10 bg-white/90 shadow-[0_30px_80px_rgba(7,15,30,0.22)] backdrop-blur dark:border-white/5 dark:bg-slate-900/85">
+      <Card className="overflow-hidden rounded-[32px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] shadow-[0_30px_80px_rgba(7,15,30,0.22)] backdrop-blur-[16px]">
         <CardContent className="p-8 text-center sm:p-10">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-lg shadow-emerald-500/10 dark:bg-emerald-950/40 dark:text-emerald-300">
             <CheckCircle2 className="h-10 w-10" />
@@ -71,16 +71,17 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
   }
 
   return (
-    <Card className="overflow-hidden rounded-[32px] border-white/10 bg-white/92 shadow-[0_35px_90px_rgba(8,15,30,0.28)] backdrop-blur dark:border-white/5 dark:bg-slate-900/86">
-      <CardHeader className="border-b border-slate-200/70 bg-[linear-gradient(180deg,rgba(18,37,59,0.96)_0%,rgba(28,51,78,0.94)_55%,rgba(37,68,102,0.9)_100%)] px-6 py-7 text-white dark:border-slate-800/70 sm:px-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white/80">
-          <Sparkles className="h-3.5 w-3.5" />
+    <Card className="overflow-hidden rounded-[32px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] shadow-[0_35px_90px_rgba(8,15,30,0.28)] backdrop-blur-[16px]">
+      <CardHeader className="border-b border-white/[0.08] bg-[linear-gradient(180deg,rgba(13,27,42,0.95)_0%,rgba(26,43,109,0.9)_100%)] px-6 py-7 text-white sm:px-8">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-white/70">
+          <Sparkles className="h-3.5 w-3.5 text-[#00B8A0]" />
           <span>رحلة تسجيل سريعة ومنظمة</span>
         </div>
-        <CardTitle className="mt-4 text-3xl font-extrabold tracking-tight text-white">استمارة التسجيل</CardTitle>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-200/90">
+        <CardTitle className="mt-4 text-3xl font-black tracking-tight text-white">استمارة التسجيل</CardTitle>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-white/50">
           خطوتان فقط لإرسال طلب التسجيل واختيار المجموعة الأنسب بشكل واضح ومريح.
         </p>
+
 
         <div className="mt-7 grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
           <div
@@ -109,11 +110,11 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6 bg-[linear-gradient(180deg,rgba(244,248,252,0.95)_0%,rgba(236,243,249,0.9)_100%)] p-6 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.75)_0%,rgba(15,23,42,0.88)_100%)] sm:p-8">
+      <CardContent className="space-y-6 bg-transparent p-6 sm:p-8">
         <form className="space-y-5" onSubmit={handleSubmit}>
           {step === 1 ? (
             <>
-              <div className="rounded-[28px] border border-slate-200/70 bg-white/80 p-5 shadow-[0_20px_45px_rgba(15,23,42,0.06)] backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/35">
+              <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-xl backdrop-blur">
                 <div className="mb-5">
                   <p className="text-lg font-bold text-slate-900 dark:text-white">البيانات الأساسية</p>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">أدخل بيانات الطالب وولي الأمر بصياغة واضحة ومرتبة.</p>
@@ -127,7 +128,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
                     <div className="relative">
                       <UserRound className="pointer-events-none absolute inset-y-0 start-4 my-auto h-4 w-4 text-slate-400" />
                       <Input
-                        className="rounded-2xl border-slate-200/80 bg-slate-50/90 ps-10 dark:border-slate-700/80 dark:bg-slate-900/80"
+                        className="rounded-2xl border-white/10 bg-white/5 ps-10 text-white placeholder:text-white/20"
                         id="studentName"
                         name="studentName"
                         placeholder="اكتب اسم الطالب"
@@ -139,7 +140,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
                       الصف الدراسي
                     </Label>
                     <Input
-                      className="rounded-2xl border-slate-200/80 bg-slate-50/90 dark:border-slate-700/80 dark:bg-slate-900/80"
+                      className="rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-white/20"
                       id="grade"
                       name="grade"
                       placeholder="مثال: الصف الثالث الثانوي"
@@ -153,7 +154,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
                       اسم ولي الأمر
                     </Label>
                     <Input
-                      className="rounded-2xl border-slate-200/80 bg-slate-50/90 dark:border-slate-700/80 dark:bg-slate-900/80"
+                      className="rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-white/20"
                       id="parentName"
                       name="parentName"
                       placeholder="اكتب اسم ولي الأمر"
@@ -164,7 +165,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
                       رقم ولي الأمر
                     </Label>
                     <Input
-                      className="rounded-2xl border-slate-200/80 bg-slate-50/90 dark:border-slate-700/80 dark:bg-slate-900/80"
+                      className="rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-white/20"
                       dir="ltr"
                       id="parentPhone"
                       inputMode="numeric"

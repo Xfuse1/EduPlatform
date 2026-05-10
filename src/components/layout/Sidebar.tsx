@@ -87,7 +87,7 @@ export function Sidebar({
     <aside
       className={cn(
         // Base styles shared between desktop and mobile
-        "h-screen w-[300px] shrink-0 border-s border-white/5 bg-[#1A2B6D] text-white",
+        "h-screen w-[300px] shrink-0 border-s border-white/5 bg-[#0D1B2A] text-white",
         // Desktop: always visible, part of the flow
         "hidden xl:block",
         // Mobile: overlay drawer, visible only when isOpen
@@ -113,19 +113,22 @@ export function Sidebar({
           </button>
         )}
 
-        <div className="relative rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] px-7 py-6 shadow-[0_14px_32px_rgba(3,10,25,0.18)] backdrop-blur-xl dark:border-white/6 dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.015)_100%)]">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white/72">
-            <span className="h-2 w-2 rounded-full bg-sky-300 shadow-[0_0_0_4px_rgba(125,211,252,0.12)]" />
-            <span>EduPlatform</span>
+        <div className="relative overflow-hidden rounded-[30px] border border-white/[0.08] bg-[rgba(255,255,255,0.03)] px-7 py-6 shadow-[0_14px_32px_rgba(3,10,25,0.18)] backdrop-blur-xl">
+          <div className="absolute inset-0 opacity-20 [mask-image:radial-gradient(circle_at_top,black,transparent)] bg-[size:20px_20px] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)]" />
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-white/70">
+              <span className="h-2 w-2 rounded-full bg-[#00B8A0] shadow-[0_0_8px_#00B8A0]" />
+              <span>EduPlatform</span>
+            </div>
+            <h2 className="mt-6 text-start text-[2rem] font-black leading-[1.08] tracking-tight text-white">
+              منصة
+              <br />
+              التعليم الذكية
+            </h2>
+            <p className="mt-4 max-w-[16rem] text-start text-sm leading-7 text-white/50">
+              إدارة الحضور والمجموعات والتحصيل داخل تجربة أوضح وأهدأ.
+            </p>
           </div>
-          <h2 className="mt-6 text-start text-[2rem] font-extrabold leading-[1.08] tracking-tight text-white">
-            منصة
-            <br />
-            التعليم الذكية
-          </h2>
-          <p className="mt-4 max-w-[16rem] text-start text-sm leading-7 text-white/62">
-            إدارة الحضور والمجموعات والتحصيل داخل تجربة أوضح وأهدأ.
-          </p>
         </div>
 
         <div className="relative mt-10">
@@ -146,8 +149,8 @@ export function Sidebar({
                   className={cn(
                     "group relative flex min-h-[58px] items-center gap-4 overflow-hidden rounded-[22px] px-5 py-3 transition duration-300",
                     isActive
-                      ? "bg-[rgba(0,184,160,0.1)] text-white border-s-4 border-[#00B8A0]"
-                      : "text-[#94A3B8] hover:bg-white/[0.045] hover:text-white",
+                      ? "bg-[rgba(0,184,160,0.15)] text-white border-s-4 border-[#00B8A0] shadow-[0_0_15px_rgba(0,184,160,0.1)]"
+                      : "text-white/40 hover:bg-white/[0.04] hover:text-white",
                   )}
                 >
                   <span

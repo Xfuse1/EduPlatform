@@ -59,8 +59,8 @@ export default function GroupCard({ group }: GroupCardProps) {
 
   return (
     <article
-      className="overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-sm transition-transform hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-950"
-      style={{ borderTopWidth: '5px', borderTopColor: group.color }}
+      className="overflow-hidden rounded-[30px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] shadow-sm transition-all hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(0,184,160,0.15)]"
+      style={{ borderTop: `4px solid ${group.color || '#00B8A0'}` }}
     >
       <div className="space-y-5 p-5">
         <div className="flex items-start justify-between gap-3">
@@ -84,7 +84,7 @@ export default function GroupCard({ group }: GroupCardProps) {
         </div>
 
         <div className="grid gap-3 text-sm text-slate-600 dark:text-slate-300">
-          <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-900">
+            <div className="rounded-2xl bg-white/[0.03] px-4 py-3">
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400">الأيام</p>
             <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
               {formatDays(group.days)}
@@ -92,14 +92,14 @@ export default function GroupCard({ group }: GroupCardProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-900">
+              <div className="rounded-2xl bg-white/[0.03] px-4 py-3">
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400">الوقت</p>
               <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
                 {timeText}
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-900">
+              <div className="rounded-2xl bg-white/[0.03] px-4 py-3">
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                 السعة
               </p>
@@ -110,7 +110,7 @@ export default function GroupCard({ group }: GroupCardProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-900">
+              <div className="rounded-2xl bg-white/[0.03] px-4 py-3">
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                 المصاريف الشهرية
               </p>
@@ -119,7 +119,7 @@ export default function GroupCard({ group }: GroupCardProps) {
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-900">
+              <div className="rounded-2xl bg-white/[0.03] px-4 py-3">
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                 القاعة
               </p>
@@ -132,7 +132,7 @@ export default function GroupCard({ group }: GroupCardProps) {
 
         <Link
           href={`/teacher/groups/${group.id}`}
-          className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-sky-300 hover:bg-sky-50 hover:text-sky-800 dark:border-slate-700 dark:text-slate-200 dark:hover:border-sky-700 dark:hover:bg-sky-950/40 dark:hover:text-sky-100"
+          className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-white/10 hover:border-[#00B8A0]/50"
         >
           عرض المجموعة
         </Link>
