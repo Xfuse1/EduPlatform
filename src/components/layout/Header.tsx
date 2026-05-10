@@ -70,6 +70,7 @@ export function Header({
             )}
           </div>
 
+          {onMenuToggle && (
             <button
               type="button"
               aria-label="فتح القائمة الجانبية"
