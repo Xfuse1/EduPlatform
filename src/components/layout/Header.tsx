@@ -59,7 +59,7 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-30 h-16 border-b border-[rgba(255,255,255,0.06)] bg-[rgba(13,27,42,0.85)] backdrop-blur-[20px] shadow-sm shadow-black/20">
+    <header className="sticky top-0 z-30 h-16 border-b border-slate-200 bg-white/80 backdrop-blur-[20px] shadow-sm dark:border-white/10 dark:bg-[#0D1B2A]/85">
       <div className="flex h-full items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex items-center gap-2">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-sm font-extrabold text-white shadow-lg shadow-primary/20 overflow-hidden">

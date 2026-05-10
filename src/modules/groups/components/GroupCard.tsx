@@ -59,7 +59,7 @@ export default function GroupCard({ group }: GroupCardProps) {
 
   return (
     <article
-      className="overflow-hidden rounded-[16px] border border-[rgba(0,184,160,0.2)] bg-[rgba(255,255,255,0.03)] backdrop-blur-[12px] transition-all duration-300 hover:-translate-y-[3px] hover:border-[rgba(0,184,160,0.4)] hover:shadow-[0_8px_32px_rgba(0,184,160,0.1)]"
+      className="overflow-hidden rounded-[16px] border border-slate-200 bg-white dark:border-[rgba(0,184,160,0.2)] dark:bg-[rgba(255,255,255,0.03)] backdrop-blur-[12px] transition-all duration-300 hover:-translate-y-[3px] hover:border-[rgba(0,184,160,0.4)] hover:shadow-[0_8px_32px_rgba(0,184,160,0.1)]"
     >
       <div className="space-y-5 p-5">
         <div className="flex items-start justify-between gap-3">
@@ -77,7 +77,7 @@ export default function GroupCard({ group }: GroupCardProps) {
             </p>
           </div>
 
-          <span className="shrink-0 rounded-full bg-[rgba(0,184,160,0.12)] border border-[rgba(0,184,160,0.2)] px-3 py-1 text-xs font-semibold text-[#00B8A0]">
+          <span className="shrink-0 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-600 border border-sky-100 dark:bg-[rgba(0,184,160,0.12)] dark:border-[rgba(0,184,160,0.2)] dark:text-[#00B8A0]">
             {group.subject}
           </span>
         </div>
