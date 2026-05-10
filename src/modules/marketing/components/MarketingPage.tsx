@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Check,
-  Sparkles,
+  Sparkles
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -142,6 +142,27 @@ const footerGroups = [
       { href: "#footer", label: "الشروط والأحكام" },
     ],
   },
+] as const;
+
+const aboutStats = [
+  { 
+    label: "واجهة عربية بالكامل", 
+    value: "١٠٠٪", 
+    desc: "مصممة خصيصاً لتناسب احتياجاتك كمعلم من أول يوم بدون أي تعقيد لغوي.",
+    image: "/images/arabic-ui.png" 
+  },
+  { 
+    label: "دعم مستمر ٢٤/٧", 
+    value: "دائماً", 
+    desc: "فريقنا معك في كل خطوة، نضمن لك استمرارية عملك وسرعة الاستجابة لاستفساراتك.",
+    image: "/images/support-247.png"
+  },
+  { 
+    label: "مسارات متكاملة", 
+    value: "٣", 
+    desc: "تجربة موحدة تربط المعلم، الطالب، وولي الأمر في منظومة تعليمية واحدة متناغمة.",
+    image: "/images/three-paths.png"
+  }
 ] as const;
 
 export default function MarketingPage() {
@@ -693,29 +714,67 @@ export default function MarketingPage() {
 
           {/* Simplified About & Impact */}
           <section className="scroll-mt-20" id="about">
-            <div className="overflow-hidden rounded-[50px] border border-slate-200 bg-white p-10 lg:p-16 dark:border-white/5 dark:bg-white/[0.02]">
-              <div className="grid gap-16 lg:grid-cols-2">
-                <div>
-                  <span className="rounded-full bg-indigo-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-indigo-400">من نحن</span>
-                  <h2 className="mt-6 text-4xl font-black leading-tight text-slate-900 sm:text-5xl dark:text-white">نبني أدوات تعليمية تناسب واقع المعلم المصري</h2>
-                  <p className="mt-6 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-                    EduPlatform منصة تساعد المعلمين على تنظيم دروسهم اليومية من مكان واحد، بدون تعقيد وبدون خطوات كثيرة. هدفنا هو توفير وقتك لتركز على ما تبدع فيه: التدريس.
-                  </p>
-                </div>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
-                  {[
-                    { label: "واجهة عربية بالكامل", value: "١٠٠٪", desc: "مصممة لتناسب احتياجاتك كمعلم من أول يوم." },
-                    { label: "دعم مستمر", value: "٢٤/٧", desc: "وصول من كل الأجهزة في أي وقت." },
-                    { label: "مسارات واضحة", value: "٣", desc: "للمعلم والطالب وولي الأمر في منصة واحدة." }
-                  ].map((stat) => (
-                    <div key={stat.label} className="flex items-start gap-6 rounded-3xl bg-slate-50 p-6 dark:bg-white/[0.03]">
-                      <div className="text-4xl font-black text-sky-400">{stat.value}</div>
-                      <div>
-                        <h4 className="font-bold text-slate-900 dark:text-white">{stat.label}</h4>
-                        <p className="text-xs text-slate-500">{stat.desc}</p>
-                      </div>
+            <div className="overflow-hidden rounded-[60px] border border-slate-200 bg-white p-10 lg:p-20 dark:border-white/5 dark:bg-[#0F172A]/40 backdrop-blur-3xl">
+              <div className="grid gap-20 lg:grid-cols-[1.2fr_1fr]">
+                {/* Content Side */}
+                <div className="flex flex-col justify-center order-2 lg:order-1">
+                  <div className="group inline-flex w-fit items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-bold text-indigo-400 backdrop-blur-md transition-all hover:bg-white/10">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-[10px]">
+                      <Sparkles className="h-3 w-3" />
                     </div>
-                  ))}
+                    من نحن
+                  </div>
+                  
+                  <h2 className="mt-10 text-4xl font-black leading-tight text-slate-900 sm:text-6xl dark:text-white">
+                    نبني أدوات تعليمية <br />
+                    <span className="bg-gradient-to-l from-indigo-400 via-sky-400 to-indigo-400 bg-clip-text text-transparent">تناسب واقع المعلم المصري</span>
+                  </h2>
+                  
+                  <p className="mt-10 text-xl leading-relaxed text-slate-600 dark:text-slate-400 max-w-xl">
+                    وداعاً للدفاتر الورقية وإرهاق تتبع المصاريف. EduPlatform منصة صُممت خصيصاً لتناسب تفاصيل يومك المعقدة كمعلم مصري، لنوفّر وقتك لتركّز على ما تبدع فيه: التدريس.
+                  </p>
+                  
+                  <div className="mt-12 p-8 rounded-[30px] border border-dashed border-indigo-500/30 bg-indigo-500/5 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 transition-transform group-hover:scale-110">
+                      <Sparkles className="h-12 w-12 text-indigo-400" />
+                    </div>
+                    <p className="relative z-10 text-lg italic text-indigo-400/90 leading-relaxed font-medium">
+                      "هدفنا ليس مجرد أتمتة العمليات، بل تمكين المعلم المصري بأدوات تكنولوجية تليق بمكانته وتسهل عليه رحلة العطاء المستمرة."
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stats/Cards Side (Dynamic Layout) */}
+                <div className="relative order-1 lg:order-2 flex flex-col justify-center">
+                  {/* Decorative Glow */}
+                  <div className="absolute -top-20 -right-20 h-80 w-80 rounded-full bg-indigo-600/10 blur-[100px] pointer-events-none" />
+                  
+                  <div className="grid gap-8">
+                    {aboutStats.map((stat, i) => (
+                      <div 
+                        key={stat.label} 
+                        className={`group relative flex items-center gap-6 rounded-[40px] border border-slate-100 bg-slate-50 p-8 transition-all duration-500 hover:-translate-x-3 hover:shadow-2xl dark:border-white/5 dark:bg-white/[0.03] dark:hover:bg-white/[0.05] ${i === 1 ? 'lg:mr-16' : ''}`}
+                      >
+                        <div className="relative flex h-36 w-36 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-white shadow-inner dark:bg-slate-900/50">
+                          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-sky-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <img 
+                            src={stat.image} 
+                            alt={stat.label} 
+                            className="relative z-10 h-32 w-32 object-contain transition-transform duration-500 group-hover:scale-110" 
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-black text-indigo-400">{stat.value}</span>
+                          </div>
+                          <h4 className="text-xl font-black text-slate-900 dark:text-white mt-1">{stat.label}</h4>
+                          <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                            {stat.desc}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -786,6 +845,3 @@ export default function MarketingPage() {
     </main>
   );
 }
-
-
-
