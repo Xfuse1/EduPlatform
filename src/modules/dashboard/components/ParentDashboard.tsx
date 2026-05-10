@@ -94,24 +94,24 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
 
       {/* Stats Section */}
       <section className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-[linear-gradient(135deg,_#1A5276,_#2E86C1)] text-white">
+        <Card className="border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] rounded-[16px] text-white shadow-[0_0_20px_rgba(0,184,160,0.1)]">
           <CardContent className="p-6">
-            <p className="text-sm text-white/75 font-medium">إجمالي الأبناء</p>
+            <p className="text-sm text-[#94A3B8] font-medium">إجمالي الأبناء</p>
             <p className="mt-3 text-3xl font-extrabold">{toArabicDigits(data.children.length)}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] rounded-[16px] text-white shadow-[0_0_20px_rgba(0,184,160,0.1)]">
           <CardContent className="p-6">
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">متوسط الحضور</p>
-            <p className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-white">
+            <p className="text-sm text-[#94A3B8] font-medium">متوسط الحضور</p>
+            <p className="mt-3 text-3xl font-extrabold text-[#00B8A0]">
               {data.children.length ? `${toArabicDigits(data.children[0].attendanceRate)}%` : "٠٪"}
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] rounded-[16px] text-white shadow-[0_0_20px_rgba(245,166,35,0.1)]">
           <CardContent className="p-6">
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">حالة المصروفات</p>
-            <p className="mt-3 text-lg font-extrabold text-emerald-600 dark:text-emerald-300">
+            <p className="text-sm text-[#94A3B8] font-medium">حالة المصروفات</p>
+            <p className="mt-3 text-lg font-extrabold text-[#F5A623]">
               {data.children[0]?.payment.status === "PAID" ? "منتظمة بالكامل" : "تحتاج مراجعة"}
             </p>
           </CardContent>

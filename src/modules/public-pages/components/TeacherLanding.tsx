@@ -63,9 +63,9 @@ export function TeacherLanding({
     });
   }
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.18),_transparent_28%),linear-gradient(180deg,_#f8fafc_0%,_#eef4f8_100%)] px-4 py-6 sm:px-6 lg:px-8 dark:bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.12),_transparent_20%),linear-gradient(180deg,_#0f172a_0%,_#111827_100%)]">
+    <main className="min-h-screen bg-[#0D1B2A] px-4 py-6 sm:px-6 lg:px-8" style={{ background: "var(--color-bg, #0D1B2A)" }}>
       <section className="mx-auto max-w-6xl space-y-8">
-        <div className="overflow-hidden rounded-[32px] border border-white/30 bg-[linear-gradient(135deg,_#1A5276,_#2E86C1_55%,_#8ecae6)] text-white shadow-[0_24px_60px_rgba(26,82,118,0.2)]">
+        <div className="overflow-hidden rounded-[16px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] text-white shadow-xl">
           <div className="grid gap-8 px-6 py-10 lg:grid-cols-[1.2fr_0.8fr] lg:px-10">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold">
@@ -143,8 +143,7 @@ export function TeacherLanding({
             const progress = Math.round((group.enrolledCount / group.maxCapacity) * 100);
 
             return (
-              <Card key={group.id} className="overflow-hidden">
-                <div className="h-1.5" style={{ backgroundColor: group.color ?? teacher.themeColor }} />
+              <Card key={group.id} className="overflow-hidden border border-[rgba(0,184,160,0.3)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] shadow-[0_0_20px_rgba(0,184,160,0.1)]">
                 <CardContent className="space-y-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -164,7 +163,7 @@ export function TeacherLanding({
                       className={`rounded-full px-3 py-2 text-xs font-bold ${
                         group.isFull
                           ? "bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
-                          : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                          : "bg-[#00B8A0] text-white"
                       }`}
                     >
                       {group.isFull ? "ممتلئة" : "متاحة"}

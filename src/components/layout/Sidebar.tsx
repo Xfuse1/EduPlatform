@@ -87,7 +87,7 @@ export function Sidebar({
     <aside
       className={cn(
         // Base styles shared between desktop and mobile
-        "h-screen w-[300px] shrink-0 border-s border-slate-200/40 bg-[linear-gradient(180deg,#142138_0%,#12203a_42%,#10203a_100%)] text-white dark:border-white/8 dark:bg-[linear-gradient(180deg,#0b1327_0%,#0e1b32_38%,#10243f_100%)]",
+        "h-screen w-[300px] shrink-0 border-s border-white/5 bg-[#1A2B6D] text-white",
         // Desktop: always visible, part of the flow
         "hidden xl:block",
         // Mobile: overlay drawer, visible only when isOpen
@@ -146,16 +146,16 @@ export function Sidebar({
                   className={cn(
                     "group relative flex min-h-[58px] items-center gap-4 overflow-hidden rounded-[22px] px-5 py-3 transition duration-300",
                     isActive
-                      ? "bg-[linear-gradient(90deg,rgba(255,255,255,0.96)_0%,rgba(241,245,249,0.92)_100%)] text-primary shadow-[0_8px_20px_rgba(2,8,20,0.15)]"
-                      : "text-white/84 hover:bg-white/[0.045] hover:text-white",
+                      ? "bg-[rgba(0,184,160,0.1)] text-white border-s-4 border-[#00B8A0]"
+                      : "text-[#94A3B8] hover:bg-white/[0.045] hover:text-white",
                   )}
                 >
                   <span
                     className={cn(
                       "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[15px] transition duration-300",
                       isActive
-                        ? "bg-primary/10 text-primary"
-                        : "bg-white/[0.045] text-white/88 group-hover:bg-white/[0.06]",
+                        ? "bg-[#00B8A0]/20 text-[#00B8A0]"
+                        : "bg-white/[0.045] text-[#94A3B8] group-hover:bg-white/[0.06] group-hover:text-white",
                     )}
                   >
                     <Icon className={cn("h-5 w-5 transition duration-300", isActive ? "scale-110" : "group-hover:scale-110")} />
