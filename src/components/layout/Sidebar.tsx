@@ -87,7 +87,7 @@ export function Sidebar({
     <aside
       className={cn(
         // Base styles shared between desktop and mobile
-        "h-screen w-[300px] shrink-0 border-e border-[rgba(255,255,255,0.06)] bg-[#0F1D3A] text-white",
+        "h-screen w-[300px] shrink-0 border-e border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-[#0F1D3A] dark:text-white",
         // Desktop: always visible, part of the flow
         "hidden xl:block",
         // Mobile: overlay drawer, visible only when isOpen
@@ -151,8 +151,8 @@ export function Sidebar({
                   className={cn(
                     "group relative flex min-h-[58px] items-center gap-4 overflow-hidden px-5 py-3 transition duration-300",
                     isActive
-                      ? "bg-[rgba(0,184,160,0.1)] text-[#00B8A0] border-s-[3px] border-[#00B8A0] rounded-[8px]"
-                      : "text-[#94A3B8] hover:text-[#ffffff]",
+                      ? "bg-[#00B8A0]/10 text-[#00B8A0] border-s-[3px] border-[#00B8A0] rounded-[8px]"
+                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-[#94A3B8] dark:hover:text-[#ffffff] dark:hover:bg-white/[0.04]",
                   )}
                 >
                   <span

@@ -5,7 +5,18 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --color-primary: #1A2B6D;
+  --color-teal: #00B8A0;
+  --color-gold: #F5A623;
+  --color-danger: #E8604C;
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+  --glow-teal: 0 0 20px rgba(0, 184, 160, 0.1);
+  --glow-gold: 0 0 20px rgba(245, 166, 35, 0.1);
+  
   --chart-card-bg: #ffffff;
   --chart-grid: #cbd5e1;
   --chart-text: #334155;
@@ -14,18 +25,6 @@
   --chart-primary: #1a5276;
   --chart-primary-fill: rgba(26, 82, 118, 0.18);
   --chart-success: #27ae60;
-
-  /* Official Platform Colors */
-  --color-primary: #1A2B6D;
-  --color-teal: #00B8A0;
-  --color-gold: #F5A623;
-  --color-danger: #E8604C;
-  --color-bg: #0D1B2A;
-  --color-surface: rgba(255, 255, 255, 0.05);
-  --color-border: rgba(255, 255, 255, 0.08);
-  --glow-teal: 0 0 20px rgba(0, 184, 160, 0.3);
-  --glow-gold: 0 0 20px rgba(245, 166, 35, 0.3);
-
   --chart-1: #00B8A0;
   --chart-2: #F5A623;
   --chart-3: #1A2B6D;
@@ -33,21 +32,15 @@
   --chart-5: rgba(0,184,160,0.3);
 }
 
-html {
-  font-family: "Cairo", "Tajawal", sans-serif;
-}
-
-body {
-  background-color: #0D1B2A;
-  @apply min-h-screen text-white antialiased transition-colors duration-300;
-  font-family: "Cairo", "Tajawal", sans-serif;
-}
-
-* {
-  @apply border-white/[0.08];
-}
-
 .dark {
+  --background: #0D1B2A;
+  --foreground: #ffffff;
+  --color-bg: #0D1B2A;
+  --color-surface: rgba(255, 255, 255, 0.05);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --glow-teal: 0 0 20px rgba(0, 184, 160, 0.3);
+  --glow-gold: 0 0 20px rgba(245, 166, 35, 0.3);
+
   color-scheme: dark;
   --chart-card-bg: #1e293b;
   --chart-grid: #334155;
@@ -57,6 +50,21 @@ body {
   --chart-primary: #5dade2;
   --chart-primary-fill: rgba(93, 173, 226, 0.18);
   --chart-success: #58d68d;
+}
+
+html {
+  font-family: "Cairo", "Tajawal", sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  @apply min-h-screen antialiased transition-colors duration-300;
+  font-family: "Cairo", "Tajawal", sans-serif;
+}
+
+* {
+  @apply border-white/[0.08] dark:border-white/[0.08];
 }
 
 a,

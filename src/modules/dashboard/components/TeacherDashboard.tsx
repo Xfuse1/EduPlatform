@@ -63,7 +63,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[16px] px-6 py-7 text-white border border-[rgba(0,184,160,0.15)] bg-[linear-gradient(135deg,rgba(26,43,109,0.5)_0%,rgba(0,184,160,0.08)_100%)] backdrop-blur-[16px] shadow-[0_0_40px_rgba(0,184,160,0.05)]">
+      <section className="overflow-hidden rounded-[16px] px-6 py-7 text-slate-900 border border-sky-100 bg-white shadow-sm dark:text-white dark:border-[rgba(0,184,160,0.15)] dark:bg-[linear-gradient(135deg,rgba(26,43,109,0.5)_0%,rgba(0,184,160,0.08)_100%)] dark:backdrop-blur-[16px] dark:shadow-[0_0_40px_rgba(0,184,160,0.05)]">
         <p className="text-start text-sm font-semibold text-white/75">لوحة المعلم</p>
         <h1 className="mt-3 text-start text-3xl font-extrabold">مرحبًا، {displayTeacherName}</h1>
         <p className="mt-3 max-w-2xl text-start text-sm leading-7 text-white/85">
@@ -134,11 +134,11 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
           const Icon = statIcons[index];
 
           return (
-            <Card key={stat.title} className={`overflow-hidden border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.03)] backdrop-blur-[12px] rounded-[16px] text-white transition-all duration-200 hover:-translate-y-[2px] hover:border-[rgba(0,184,160,0.3)] ${statCardStyles[index]}`}>
+            <Card key={stat.title} className={`overflow-hidden border border-slate-200 bg-white dark:border-[rgba(255,255,255,0.07)] dark:bg-[rgba(255,255,255,0.03)] backdrop-blur-[12px] rounded-[16px] text-slate-900 dark:text-white transition-all duration-200 hover:-translate-y-[2px] hover:border-[rgba(0,184,160,0.3)] ${statCardStyles[index]}`}>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-start text-sm font-semibold text-[#94A3B8]">{stat.title}</p>
+                    <p className="text-start text-sm font-semibold text-slate-500 dark:text-[#94A3B8]">{stat.title}</p>
                     <div className={`mt-3 text-start text-3xl font-extrabold ${iconColors[index]}`}>{stat.value}</div>
                     <div className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/80">
                       <ArrowUpLeft className={`h-4 w-4 ${iconColors[index]}`} />

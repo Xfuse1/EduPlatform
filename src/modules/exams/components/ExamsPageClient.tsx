@@ -142,7 +142,7 @@ export function ExamsPageClient({ initialExams = [], groups }: ExamsPageClientPr
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {filtered.map((exam) => (
-          <Card key={exam.id} className="group relative overflow-hidden transition hover:-translate-y-1">
+          <Card key={exam.id} className="group relative overflow-hidden border border-slate-200 bg-white transition hover:-translate-y-1 dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md">
             <div className={`absolute right-0 top-0 h-full w-2 ${exam.status === "active" ? "bg-amber-400" : exam.status === "completed" ? "bg-emerald-400" : "bg-slate-300"}`} />
 
             <CardContent className="space-y-5 pt-6">
