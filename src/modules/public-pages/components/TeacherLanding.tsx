@@ -63,9 +63,79 @@ export function TeacherLanding({
     });
   }
   return (
-    <main className="min-h-screen bg-[#0D1B2A] px-4 py-6 sm:px-6 lg:px-8" style={{ background: "var(--color-bg, #0D1B2A)" }}>
-      <section className="mx-auto max-w-6xl space-y-8">
-        <div className="overflow-hidden rounded-[16px] border border-slate-200 bg-white/80 backdrop-blur-[16px] text-slate-900 shadow-xl dark:border-white/10 dark:bg-white/5 dark:text-white">
+    <main className="relative min-h-screen overflow-hidden bg-transparent font-[Cairo] text-slate-900 dark:text-white" dir="rtl">
+      <style>{`
+        @keyframes float-slow {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(30px, -30px) scale(1.05); }
+        }
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 10s ease-in-out infinite;
+        }
+        .animate-float-slow {
+          animation: float-slow 20s ease-in-out infinite;
+        }
+      `}</style>
+
+      {/* Background SVG Wisps - Ultra-Premium, Flowy, and Luxe */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <svg className="h-full w-full" preserveAspectRatio="none" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="luxe-blur-1">
+              <feGaussianBlur stdDeviation="30" />
+            </filter>
+            <filter id="luxe-blur-2">
+              <feGaussianBlur stdDeviation="60" />
+            </filter>
+            <linearGradient id="luxe-gradient-1" x1="0%" x2="100%" y1="0%" y2="0%">
+              <stop offset="0%" stopColor="#38bdf8" stopOpacity="0" />
+              <stop offset="30%" stopColor="#38bdf8" stopOpacity="0.4" />
+              <stop offset="70%" stopColor="#818cf8" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#c084fc" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="luxe-gradient-2" x1="0%" x2="100%" y1="0%" y2="0%">
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0" />
+              <stop offset="40%" stopColor="#10b981" stopOpacity="0.2" />
+              <stop offset="80%" stopColor="#38bdf8" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+
+          <g className="animate-pulse-slow opacity-30 dark:opacity-60" style={{ mixBlendMode: "screen" }}>
+            <path 
+              d="M-100,300 C200,100 400,700 700,400 S900,900 1200,600" 
+              fill="none" 
+              stroke="url(#luxe-gradient-1)" 
+              strokeWidth="80" 
+              filter="url(#luxe-blur-2)" 
+              className="animate-float-slow"
+            />
+            <path 
+              d="M-200,600 C100,400 500,900 800,500 S1100,100 1300,300" 
+              fill="none" 
+              stroke="url(#luxe-gradient-2)" 
+              strokeWidth="100" 
+              filter="url(#luxe-blur-1)" 
+              className="animate-float-slow" 
+              style={{ animationDelay: "-2s" }}
+            />
+          </g>
+        </svg>
+      </div>
+
+      {/* Texture Overlay */}
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10" />
+
+      {/* Floating blurred blobs */}
+      <div className="absolute left-[5%] top-[15%] h-[500px] w-[500px] rounded-full bg-blue-600/15 blur-[150px]" />
+      <div className="absolute bottom-[-15%] right-[0%] h-[600px] w-[600px] rounded-full bg-indigo-900/10 blur-[180px]" />
+
+      <section className="relative z-10 mx-auto max-w-6xl space-y-8 px-4 py-12 sm:px-6 lg:px-8">
+        <div className="overflow-hidden rounded-[32px] border border-slate-200/60 bg-white/70 shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-3xl dark:border-white/[0.05] dark:bg-white/[0.02] text-slate-900 dark:text-white">
           <div className="grid gap-8 px-6 py-10 lg:grid-cols-[1.2fr_0.8fr] lg:px-10">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold dark:bg-white/15">
@@ -131,7 +201,7 @@ export function TeacherLanding({
         <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="text-3xl font-black text-slate-900 dark:text-white" suppressHydrationWarning>المجموعات المتاحة</h2>
-            <p className="mt-2 text-sm text-slate-500 dark:text-white/50">اطلع على السعة المتبقية والرسوم والجدول لكل مجموعة.</p>
+            <p className="mt-2 text-sm text-slate-600 dark:text-white/50">اطلع على السعة المتبقية والرسوم والجدول لكل مجموعة.</p>
           </div>
           <Link className="hidden rounded-xl bg-[#00B8A0] px-5 py-3 text-sm font-bold text-white shadow-[0_0_15px_rgba(0,184,160,0.3)] transition hover:bg-[#00B8A0]/90 sm:inline-flex" href="/register">
             ابدأ التسجيل
@@ -143,7 +213,7 @@ export function TeacherLanding({
             const progress = Math.round((group.enrolledCount / group.maxCapacity) * 100);
 
             return (
-              <Card key={group.id} className="overflow-hidden border border-slate-200 bg-white shadow-lg dark:border-[rgba(0,184,160,0.3)] dark:bg-[rgba(255,255,255,0.05)] dark:backdrop-blur-[16px] dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">
+              <Card key={group.id} className="overflow-hidden border border-slate-200 bg-white/70 shadow-lg backdrop-blur-3xl dark:border-white/[0.05] dark:bg-white/[0.02] dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">
                 <CardContent className="space-y-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
