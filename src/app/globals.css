@@ -36,7 +36,7 @@
   --chart-5: rgba(0,184,160,0.3);
 }
 
-.dark {
+.dark, [data-theme='dark'] {
   --background: #0D1B2A;
   --foreground: #ffffff;
   --color-bg: #0D1B2A;
@@ -79,7 +79,7 @@ body {
 }
 
 * {
-  @apply border-white/[0.08] dark:border-white/[0.08];
+  @apply border-slate-200 dark:border-white/[0.08];
 }
 
 * {

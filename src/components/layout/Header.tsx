@@ -92,7 +92,7 @@ export function Header({
               type="button"
               aria-label="فتح القائمة الجانبية"
               onClick={onMenuToggle}
-              className="touch-target inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:border-[#00B8A0]/50 hover:bg-white/10 xl:hidden"
+              className="touch-target inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-[#00B8A0]/50 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 xl:hidden"
             >
               <Menu className="h-5 w-5" />
             </button>
