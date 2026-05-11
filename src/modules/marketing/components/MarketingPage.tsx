@@ -11,7 +11,16 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { PLAN_LIMITS } from "@/config/plans";
+import { toWhatsAppUrl } from "@/lib/phone";
 import { MarketingFaq } from "@/modules/public-pages/components/MarketingFaq";
+
+export type MarketingPlan = {
+  key: string;
+  name: string;
+  price: string;
+  isContactPlan?: boolean;
+  features: string[];
+};
 
 const features = [
   {
@@ -165,7 +174,17 @@ const aboutStats = [
   }
 ] as const;
 
-export default function MarketingPage() {
+type MarketingPageProps = {
+  plans?: MarketingPlan[];
+  adminContact?: string | null;
+};
+
+export default function MarketingPage({ plans, adminContact }: MarketingPageProps) {
+  const pricingPlans = plans?.length
+    ? plans
+    : PLAN_LIMITS.map((plan) => ({ ...plan, key: plan.name, isContactPlan: false }));
+  const adminContactUrl = adminContact ? toWhatsAppUrl(adminContact) : null;
+
   const scrollToSection = (sectionId: string) => {
     const section = document.getElementById(sectionId);
 
@@ -289,7 +308,7 @@ export default function MarketingPage() {
         <div className="absolute left-[5%] top-[15%] h-[500px] w-[500px] rounded-full bg-blue-600/15 blur-[150px]" />
         <div className="absolute bottom-[-15%] right-[0%] h-[600px] w-[600px] rounded-full bg-indigo-900/10 blur-[180px]" />
 
-        <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl dark:border-white/[0.03] dark:bg-slate-950/40">
+        <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl dark:border-white/[0.03] dark:bg-slate-950/40">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             {/* Action Buttons */}
             <div className="flex items-center gap-4">
@@ -345,7 +364,7 @@ export default function MarketingPage() {
           </div>
         </header>
 
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-16 lg:space-y-24">
+        <div className="mx-auto max-w-7xl px-4 pb-12 pt-40 sm:px-6 lg:px-8 space-y-16 lg:space-y-24">
           <section className="relative overflow-hidden rounded-[48px] border border-slate-300/60 bg-white shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-3xl dark:border-white/[0.05] dark:bg-[#0F172A]/40 sm:px-12 sm:py-16 lg:px-20 lg:py-20">
             {/* Refined Grid Pattern */}
             <div className="absolute inset-0 opacity-[0.15] [mask-image:radial-gradient(ellipse_at_center,black,transparent)]">
@@ -638,9 +657,9 @@ export default function MarketingPage() {
             </div>
 
             <div className="grid gap-8 lg:grid-cols-3">
-              {PLAN_LIMITS.map((plan, index) => (
+              {pricingPlans.map((plan, index) => (
                 <div
-                  key={plan.name}
+                  key={plan.key}
                   className={`relative flex flex-col rounded-[32px] border p-10 transition-all duration-300 hover:-translate-y-2 ${index === 1
                     ? "border-sky-500 bg-sky-50 shadow-[0_20px_50px_rgba(14,165,233,0.15)] dark:border-sky-500/50 dark:bg-sky-500/5"
                     : "border-slate-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] dark:border-white/5 dark:bg-white/[0.02]"
@@ -655,7 +674,9 @@ export default function MarketingPage() {
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white">{plan.name}</h3>
                     <div className="mt-4 flex items-baseline gap-1">
                       <span className="text-4xl font-black text-slate-900 dark:text-white">{plan.price}</span>
-                      <span className="text-sm text-slate-400 dark:text-slate-500">/شهرياً</span>
+                      {!plan.isContactPlan && (
+                        <span className="text-sm text-slate-400 dark:text-slate-500">/شهرياً</span>
+                      )}
                     </div>
                   </div>
                   <div className="mb-10 flex-1 space-y-4">
@@ -673,9 +694,11 @@ export default function MarketingPage() {
                       ? "bg-sky-500 text-white shadow-lg shadow-sky-500/25 hover:bg-sky-600"
                       : "bg-white/5 text-white hover:bg-white/10"
                       }`}
-                    href="/signup"
+                    href={plan.isContactPlan ? adminContactUrl ?? "#footer" : "/signup"}
+                    target={plan.isContactPlan && adminContactUrl ? "_blank" : undefined}
+                    rel={plan.isContactPlan && adminContactUrl ? "noopener noreferrer" : undefined}
                   >
-                    {index === 0 ? "ابدأ مجاناً" : "اشترك الآن"}
+                    {plan.isContactPlan ? "تواصل مع الإدارة" : index === 0 ? "ابدأ مجاناً" : "اشترك الآن"}
                   </Link>
                 </div>
               ))}

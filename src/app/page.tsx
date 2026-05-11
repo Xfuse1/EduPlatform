@@ -2,7 +2,9 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { getTenantBySlug } from "@/lib/tenant";
-import MarketingPage from "@/modules/marketing/components/MarketingPage";
+import MarketingPage, { type MarketingPlan } from "@/modules/marketing/components/MarketingPage";
+import { getPlatformConfigValue } from "@/modules/admin/actions";
+import { getSubscriptionPlanConfigs, type PlanConfig } from "@/modules/payments/providers/plan-config";
 import TenantPublicPage from "@/modules/public-pages/components/TenantPublicPage";
 import { getPublicGroups, getPublicTenantProfile } from "@/modules/public-pages/queries";
 
@@ -25,6 +27,38 @@ function extractSubdomain(host: string): string {
   return parts.length > 2 ? (parts[0] ?? "") : "";
 }
 
+const priceFormatter = new Intl.NumberFormat("ar-EG");
+
+function formatLimit(value: number, label: string) {
+  return value === Number.MAX_SAFE_INTEGER ? `${label} غير محدود` : `حتى ${priceFormatter.format(value)} ${label}`;
+}
+
+function formatMarketingPlan(plan: PlanConfig): MarketingPlan {
+  const isContactPlan = plan.monthlyPrice === 0;
+  const price = isContactPlan ? "تواصل معنا" : `${priceFormatter.format(plan.monthlyPrice)} جنيه`;
+
+  return {
+    key: plan.key,
+    name: plan.name,
+    price,
+    isContactPlan,
+    features: [
+      formatLimit(plan.limits.students, "طالب"),
+      formatLimit(plan.limits.groups, "مجموعة"),
+      formatLimit(plan.limits.sessions, "حصة"),
+      formatLimit(plan.limits.storage, "ميجابايت تخزين"),
+    ],
+  };
+}
+
+async function getMarketingPlans() {
+  const plans = await getSubscriptionPlanConfigs();
+
+  return Object.values(plans)
+    .filter((plan) => plan.isActive && !plan.deletedAt)
+    .map(formatMarketingPlan);
+}
+
 export default async function HomePage() {
   const headerStore = await headers();
   const host = headerStore.get("host") ?? "localhost:3000";
@@ -32,7 +66,12 @@ export default async function HomePage() {
   const subdomain = middlewareSlug || extractSubdomain(host);
 
   if (IGNORED_SUBDOMAINS.has(subdomain)) {
-    return <MarketingPage />;
+    const [plans, adminContact] = await Promise.all([
+      getMarketingPlans(),
+      getPlatformConfigValue("admin_contact"),
+    ]);
+
+    return <MarketingPage plans={plans} adminContact={adminContact} />;
   }
 
   const tenant = await getTenantBySlug(subdomain);
