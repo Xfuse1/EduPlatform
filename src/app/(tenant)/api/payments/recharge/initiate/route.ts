@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
       studentId: targetStudentId,
       amount,
       description,
+      appUrl: req.nextUrl.origin,
     })
 
     return successResponse(result)

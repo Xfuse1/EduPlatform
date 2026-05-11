@@ -1,7 +1,9 @@
 ﻿import { NextRequest } from 'next/server'
 
+import { EnrollmentStatus, UserRole } from '@/generated/client'
 import { requireAuth } from '@/lib/auth'
 import { errorResponse, successResponse } from '@/lib/api-response'
+import { db } from '@/lib/db'
 import { requireTenant } from '@/lib/tenant'
 import { debitStudentBalance } from '@/modules/payments/actions'
 import { getStudentBalance } from '@/modules/payments/providers/balance'
@@ -12,8 +14,43 @@ export async function GET(req: NextRequest) {
     const user = await requireAuth(req)
     const { searchParams } = new URL(req.url)
     const studentId = searchParams.get('studentId') ?? user.id
+    let walletTenantId = tenant.id
 
-    const data = await getStudentBalance(studentId, tenant.id)
+    if (user.role === UserRole.PARENT && studentId !== user.id) {
+      const linkedChild = await db.parentStudent.findFirst({
+        where: {
+          parentId: user.id,
+          studentId,
+        },
+        select: {
+          student: {
+            select: {
+              tenantId: true,
+              groupStudents: {
+                where: {
+                  status: {
+                    in: [EnrollmentStatus.ACTIVE, EnrollmentStatus.WAITLIST, EnrollmentStatus.PENDING],
+                  },
+                },
+                select: {
+                  group: {
+                    select: {
+                      tenantId: true,
+                    },
+                  },
+                },
+                take: 1,
+              },
+            },
+          },
+        },
+      })
+
+      if (!linkedChild) throw new Error('الابن غير مرتبط بحساب ولي الأمر')
+      walletTenantId = linkedChild.student.groupStudents[0]?.group.tenantId ?? linkedChild.student.tenantId
+    }
+
+    const data = await getStudentBalance(studentId, walletTenantId)
 
     return successResponse({
       owner: data.owner,

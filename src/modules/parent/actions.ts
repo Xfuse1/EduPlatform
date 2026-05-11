@@ -177,6 +177,7 @@ export async function linkChildToParent(input: {
 
       revalidatePath(ROUTES.parent.dashboard);
       revalidatePath(ROUTES.parent.children);
+      revalidatePath(ROUTES.parent.settings);
       revalidatePath(`/parent/${student.id}`);
 
       return {
@@ -274,6 +275,7 @@ export async function linkChildToParent(input: {
 
     revalidatePath(ROUTES.parent.dashboard);
     revalidatePath(ROUTES.parent.children);
+    revalidatePath(ROUTES.parent.settings);
     revalidatePath(`/parent/${createdStudent.id}`);
 
     return {
@@ -367,6 +369,7 @@ export async function removeChildFromParent(input: { studentId: string }) {
     revalidatePath(ROUTES.teacher.students);
     revalidatePath(ROUTES.parent.dashboard);
     revalidatePath(ROUTES.parent.children);
+    revalidatePath(ROUTES.parent.settings);
     revalidatePath(`/parent/${parsed.data.studentId}`);
 
     return {
@@ -709,6 +712,7 @@ export async function enrollChildInGroup(input: { studentId: string; groupId: st
 
     revalidatePath(ROUTES.parent.dashboard);
     revalidatePath(ROUTES.parent.children);
+    revalidatePath(ROUTES.parent.settings);
     revalidatePath(`/parent/${relation.student.id}`);
     revalidatePath(ROUTES.student.dashboard);
     revalidatePath(ROUTES.student.schedule);

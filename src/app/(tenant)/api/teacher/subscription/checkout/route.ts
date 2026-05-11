@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
     const result = await initiateTeacherSubscriptionCheckout({
       subscriptionPlan: body.subscriptionPlan,
       billingCycle: body.billingCycle,
+      appUrl: req.nextUrl.origin,
     })
 
     return successResponse(result)

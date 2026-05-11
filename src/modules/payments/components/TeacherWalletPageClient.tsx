@@ -1,6 +1,6 @@
 'use client'
 
-import { FileText } from 'lucide-react'
+import { FileText, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState, useTransition } from 'react'
 
@@ -284,20 +284,33 @@ export function TeacherWalletPageClient({ data }: { data: TeacherWalletData }) {
           <h1 className="text-2xl font-bold">محفظة المعلم</h1>
           <p className="text-sm text-slate-500">رصيد المدفوعات التي تم تحصيلها لحسابك بعد خصم رسوم المنصة.</p>
         </div>
-        <Link
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-primary to-secondary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:from-[#164766] hover:to-[#2777ad]"
-          href="/payments/subscription"
-        >
-          <FileText className="h-4 w-4" />
-          الاشتراك
-        </Link>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {adminContactUrl ? (
+            <a
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-cyan-300/30 bg-cyan-300/10 px-6 py-3 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300/20"
+              href={adminContactUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <MessageCircle className="h-4 w-4" />
+              تواصل مع الإدارة
+            </a>
+          ) : null}
+          <Link
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-primary to-secondary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:from-[#164766] hover:to-[#2777ad]"
+            href="/payments/subscription"
+          >
+            <FileText className="h-4 w-4" />
+            الاشتراك
+          </Link>
+        </div>
       </div>
 
       <section className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="space-y-2 p-4">
             <p className="text-sm text-slate-500">الرصيد الحالي</p>
-            <p className="text-3xl font-extrabold text-primary">{formatCurrency(data.wallet.balance)}</p>
+            <p className="text-4xl font-extrabold text-cyan-300 drop-shadow-[0_0_14px_rgba(34,211,238,0.28)]">{formatCurrency(data.wallet.balance)}</p>
             <p className="text-xs text-slate-500">آخر تحديث: {formatDate(data.wallet.updatedAt)}</p>
           </CardContent>
         </Card>

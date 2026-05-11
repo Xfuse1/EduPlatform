@@ -8,11 +8,8 @@ import {
   Loader2, 
   Mail, 
   Bell, 
-  Palette, 
   Users, 
   Camera,
-  Check,
-  Languages
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -53,8 +50,6 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
     exams: initialData.settings?.notifications?.exams ?? true,
     assignments: initialData.settings?.notifications?.assignments ?? true,
   });
-
-  const [language, setLanguage] = useState(initialData.settings?.language || "ar");
 
   async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -106,7 +101,6 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
           settings: {
             ...initialData.settings,
             notifications,
-            language,
           }
         }),
       });
@@ -131,8 +125,7 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
   const isChanged = 
     name !== initialData.name || 
     email !== (initialData.email || "") ||
-    JSON.stringify(notifications) !== JSON.stringify(initialData.settings?.notifications ?? { attendance: true, exams: true, assignments: true }) ||
-    language !== (initialData.settings?.language || "ar");
+    JSON.stringify(notifications) !== JSON.stringify(initialData.settings?.notifications ?? { attendance: true, exams: true, assignments: true });
 
   return (
     <div className="space-y-8 pb-12">
@@ -327,48 +320,6 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
                   لا يوجد أبناء مرتبطون حالياً.
                 </div>
               )}
-              <Button variant="outline" className="w-full rounded-xl text-xs border-dashed">
-                طلب ربط ابن جديد
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Appearance & Language */}
-          <Card className="rounded-[24px] border-slate-200 shadow-sm dark:border-slate-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-bold">
-                <div className="h-10 w-10 rounded-xl bg-violet-50 dark:bg-violet-900/30 flex items-center justify-center">
-                  <Palette className="h-5 w-5 text-violet-600" />
-                </div>
-                التفضيلات
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 flex items-center gap-2">
-                  <Languages className="h-3 w-3" /> لغة الواجهة
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button 
-                    onClick={() => setLanguage("ar")}
-                    className={cn(
-                      "h-10 rounded-xl text-xs font-bold transition-all border",
-                      language === "ar" ? "bg-sky-50 border-sky-200 text-sky-700 dark:bg-sky-900/30 dark:border-sky-800" : "bg-transparent border-slate-100 dark:border-slate-800"
-                    )}
-                  >
-                    العربية
-                  </button>
-                  <button 
-                    onClick={() => setLanguage("en")}
-                    className={cn(
-                      "h-10 rounded-xl text-xs font-bold transition-all border",
-                      language === "en" ? "bg-sky-50 border-sky-200 text-sky-700 dark:bg-sky-900/30 dark:border-sky-800" : "bg-transparent border-slate-100 dark:border-slate-800"
-                    )}
-                  >
-                    English
-                  </button>
-                </div>
-              </div>
             </CardContent>
           </Card>
 

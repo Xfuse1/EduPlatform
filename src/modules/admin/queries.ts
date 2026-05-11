@@ -324,7 +324,6 @@ export async function getPlatformWallets(input?: {
   const limit = Math.min(Math.max(input?.limit ?? 30, 1), 100);
   const offset = Math.max(input?.offset ?? 0, 0);
   const validRoles: UserRole[] = [
-    "SUPER_ADMIN",
     "CENTER_ADMIN",
     "ADMIN",
     "MANAGER",
@@ -338,8 +337,13 @@ export async function getPlatformWallets(input?: {
       ? (input.role as UserRole)
       : undefined;
 
+  if (input?.role === "SUPER_ADMIN") {
+    return { items: [], total: 0, limit, offset };
+  }
+
   const where = {
     AND: [
+      { role: { not: "SUPER_ADMIN" as const } },
       ...(roleFilter ? [{ role: roleFilter }] : []),
       ...(search
         ? [

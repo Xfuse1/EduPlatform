@@ -1,12 +1,16 @@
 import { env } from '@/config/env'
-import { UserRole, type Prisma, type WalletTransactionType } from '@/generated/client'
+import { EnrollmentStatus, UserRole, type Prisma, type WalletTransactionType } from '@/generated/client'
 import { db } from '@/lib/db'
 import { logFinancialEvent } from '@/lib/financial-audit'
 
 type TxClient = Prisma.TransactionClient
 type DbClient = typeof db | TxClient
 
-const TENANT_STUDENT_ACCESS_STATUSES = ['ACTIVE', 'WAITLIST', 'PENDING'] as const
+const TENANT_STUDENT_ACCESS_STATUSES: EnrollmentStatus[] = [
+  EnrollmentStatus.ACTIVE,
+  EnrollmentStatus.WAITLIST,
+  EnrollmentStatus.PENDING,
+]
 const TENANT_PAYEE_PRIORITY: UserRole[] = [
   UserRole.CENTER_ADMIN,
   UserRole.TEACHER,
@@ -67,9 +71,19 @@ export async function resolveStudentWalletPayer(studentId: string, tenantId: str
   const student = await tx.user.findFirst({
     where: {
       id: studentId,
-      tenantId,
       role: UserRole.STUDENT,
       isActive: true,
+      OR: [
+        { tenantId },
+        {
+          groupStudents: {
+            some: {
+              status: { in: TENANT_STUDENT_ACCESS_STATUSES },
+              group: { tenantId },
+            },
+          },
+        },
+      ],
     },
     select: {
       id: true,

@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import type { UserRole } from '@/generated/client'
 import { getPaymentByKashierOrderId } from '@/modules/payments/queries'
 
 // ── API: GET /api/payments/kashier/callback ──────────────────────────────────
@@ -6,9 +7,42 @@ import { getPaymentByKashierOrderId } from '@/modules/payments/queries'
 // ⚠️ لا تحدّث DB هنا — استخدم الـ webhook للتأكيد الموثوق
 // الـ callback للـ UX فقط (إظهار رسالة نجاح/فشل للمستخدم)
 
+const ALLOWED_RETURN_PATHS = new Set([
+  '/parent',
+  '/student',
+  '/center',
+  '/teacher',
+  '/payments',
+  '/payments/subscription',
+])
+
+function getPaymentReturnPath(role?: UserRole | null) {
+  switch (role) {
+    case 'PARENT':
+      return '/parent'
+    case 'STUDENT':
+      return '/student'
+    case 'CENTER_ADMIN':
+    case 'ADMIN':
+    case 'MANAGER':
+      return '/center'
+    case 'TEACHER':
+    case 'ASSISTANT':
+      return '/teacher'
+    default:
+      return null
+  }
+}
+
+function sanitizeReturnPath(value: string | null) {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return null
+  return ALLOWED_RETURN_PATHS.has(value) ? value : null
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams, origin } = new URL(req.url)
   const orderId = searchParams.get('orderId') ?? ''
+  const returnTo = sanitizeReturnPath(searchParams.get('returnTo'))
   // paymentStatus بيجي من Kashier في الـ redirect URL
   const paymentStatus = (searchParams.get('paymentStatus') ?? '').toUpperCase()
 
@@ -25,16 +59,13 @@ export async function GET(req: NextRequest) {
     result = 'pending'
   }
 
-  // وجهة UX تعتمد على نوع الطلب وليس صفحة ثابتة:
-  // SUBK-* => الاشتراكات
-  // RCH-*  => المحفظة
-  // غير ذلك => صفحة المدفوعات
-  let destinationPath = '/payments'
+  // وجهة UX تعتمد على دور المستخدم الذي بدأ العملية، حتى لا يعود الطالب/ولي الأمر
+  // إلى صفحة مالية المعلم عند إلغاء دفع Kashier من واجهة الدفع.
+  let destinationPath = returnTo ?? getPaymentReturnPath(payment?.recordedBy?.role) ?? '/payments'
   const notes = payment?.notes ?? ''
-  if (orderId.startsWith('SUBK-') || notes.startsWith('SUBSCRIPTION:')) {
+
+  if (!returnTo && (orderId.startsWith('SUBK-') || notes.startsWith('SUBSCRIPTION:'))) {
     destinationPath = '/payments/subscription'
-  } else if (orderId.startsWith('RCH-') || notes.startsWith('RECHARGE:')) {
-    destinationPath = '/payments'
   }
 
   // بناء redirect URL — نحافظ على الـ subdomain الحالي

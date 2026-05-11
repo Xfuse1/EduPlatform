@@ -1,6 +1,7 @@
 ﻿'use server'
 
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 
 import { env } from '@/config/env'
 import { EnrollmentStatus, UserRole, type Prisma } from '@/generated/client'
@@ -36,6 +37,63 @@ const SUBSCRIPTION_PAYMENT_LINKS: Record<string, string | undefined> = {
 function makeOrderId(prefix: string, tenantSlug: string, count: number) {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
   return `${prefix}-${tenantSlug}-${date}-${String(count + 1).padStart(4, '0')}`
+}
+
+function getKashierReturnPathForRole(role: UserRole) {
+  switch (role) {
+    case UserRole.PARENT:
+      return '/parent'
+    case UserRole.STUDENT:
+      return '/student'
+    case UserRole.CENTER_ADMIN:
+    case UserRole.ADMIN:
+    case UserRole.MANAGER:
+      return '/center'
+    case UserRole.TEACHER:
+    case UserRole.ASSISTANT:
+      return '/teacher'
+    default:
+      return '/payments'
+  }
+}
+
+function buildKashierCallbackUrl(appUrl: string, orderId: string, returnTo: string) {
+  const callbackUrl = new URL('/api/payments/kashier/callback', appUrl)
+  callbackUrl.searchParams.set('orderId', orderId)
+  callbackUrl.searchParams.set('returnTo', returnTo)
+
+  return callbackUrl.toString()
+}
+
+function normalizeAppUrl(value?: string) {
+  if (!value) return null
+
+  try {
+    return new URL(value).origin
+  } catch {
+    return null
+  }
+}
+
+async function resolveKashierAppUrl(overrideAppUrl?: string) {
+  const override = normalizeAppUrl(overrideAppUrl)
+  if (override) return override
+
+  try {
+    const headerStore = await headers()
+    const forwardedHost = headerStore.get('x-forwarded-host')?.split(',')[0]?.trim()
+    const host = forwardedHost || headerStore.get('host')?.split(',')[0]?.trim()
+
+    if (host) {
+      const forwardedProto = headerStore.get('x-forwarded-proto')?.split(',')[0]?.trim()
+      const protocol = forwardedProto || (host.startsWith('localhost') || host.startsWith('127.0.0.1') ? 'http' : 'https')
+      return `${protocol}://${host}`
+    }
+  } catch {
+    // Server actions may run without request headers in some background contexts.
+  }
+
+  return normalizeAppUrl(env.NEXT_PUBLIC_APP_URL) ?? 'http://localhost:3000'
 }
 
 const TENANT_STUDENT_ACCESS_STATUSES = [
@@ -318,8 +376,8 @@ export async function initiateOnlinePayment(formData: FormData) {
     },
   })
 
-  const appUrl = env.NEXT_PUBLIC_APP_URL
-  const callbackUrl = `${appUrl}/api/payments/kashier/callback?orderId=${orderId}`
+  const appUrl = await resolveKashierAppUrl()
+  const callbackUrl = buildKashierCallbackUrl(appUrl, orderId, getKashierReturnPathForRole(user.role))
   const webhookUrl = `${appUrl}/api/payments/kashier/webhook`
 
   const checkoutUrl = createKashierCheckoutUrl({
@@ -343,21 +401,76 @@ export async function initiateBalanceRecharge(input: {
   studentId: string
   amount: number
   description?: string
+  appUrl?: string
 }) {
   const tenant = await requireTenant()
   const user = await requireAuth()
+  let rechargeTenantContext = {
+    id: tenant.id,
+    slug: tenant.slug,
+  }
+  let walletTargetUserId = input.studentId
 
   const data = rechargeBalanceSchema.parse({
     amount: input.amount,
     description: input.description,
   })
 
+  if (user.role === UserRole.PARENT && input.studentId !== user.id) {
+    const linkedChild = await db.parentStudent.findFirst({
+      where: {
+        parentId: user.id,
+        studentId: input.studentId,
+      },
+      select: {
+        student: {
+          select: {
+            id: true,
+            tenant: {
+              select: {
+                id: true,
+                slug: true,
+              },
+            },
+            groupStudents: {
+              where: {
+                status: { in: TENANT_STUDENT_ACCESS_STATUSES },
+              },
+              select: {
+                group: {
+                  select: {
+                    tenant: {
+                      select: {
+                        id: true,
+                        slug: true,
+                      },
+                    },
+                  },
+                },
+              },
+              take: 1,
+            },
+          },
+        },
+      },
+    })
+
+    if (!linkedChild) throw new Error('الابن غير مرتبط بحساب ولي الأمر')
+    rechargeTenantContext = linkedChild.student.groupStudents[0]?.group.tenant ?? linkedChild.student.tenant
+    walletTargetUserId = linkedChild.student.id
+  }
+
   const walletOwner = await db.user.findFirst({
     where: {
-      id: input.studentId,
+      id: walletTargetUserId,
       isActive: true,
       OR: [
-        tenantStudentAccessWhere(tenant.id, input.studentId),
+        tenantStudentAccessWhere(rechargeTenantContext.id, walletTargetUserId),
+        {
+          id: walletTargetUserId,
+          role: UserRole.STUDENT,
+          tenantId: rechargeTenantContext.id,
+        },
         {
           role: UserRole.PARENT,
           parentStudents: {
@@ -366,7 +479,7 @@ export async function initiateBalanceRecharge(input: {
                 groupStudents: {
                   some: {
                     status: { in: TENANT_STUDENT_ACCESS_STATUSES },
-                    group: { tenantId: tenant.id },
+                    group: { tenantId: rechargeTenantContext.id },
                   },
                 },
               },
@@ -380,13 +493,13 @@ export async function initiateBalanceRecharge(input: {
 
   if (!walletOwner) throw new Error('المحفظة المطلوبة غير متاحة')
 
-  const count = await db.payment.count({ where: { tenantId: tenant.id } })
-  const orderId = makeOrderId('RCH', tenant.slug, count)
+  const count = await db.payment.count({ where: { tenantId: rechargeTenantContext.id } })
+  const orderId = makeOrderId('RCH', rechargeTenantContext.slug, count)
   const month = new Date().toISOString().slice(0, 7)
 
   await db.payment.create({
     data: {
-      tenantId: tenant.id,
+      tenantId: rechargeTenantContext.id,
       studentId: walletOwner.id,
       amount: data.amount,
       month,
@@ -399,18 +512,18 @@ export async function initiateBalanceRecharge(input: {
     },
   })
 
-  const appUrl = env.NEXT_PUBLIC_APP_URL
-  const callbackUrl = `${appUrl}/api/payments/kashier/callback?orderId=${orderId}`
+  const appUrl = await resolveKashierAppUrl(input.appUrl)
+  const callbackUrl = buildKashierCallbackUrl(appUrl, orderId, getKashierReturnPathForRole(user.role))
   const webhookUrl = `${appUrl}/api/payments/kashier/webhook`
 
   const checkoutUrl = createKashierCheckoutUrl({
     orderId,
     amount: data.amount,
     studentName: walletOwner.name ?? 'User',
-    customerPhone: walletOwner.phone,
+    customerPhone: user.role === UserRole.PARENT ? user.phone : walletOwner.phone,
     metadata: {
       paymentType: 'wallet_recharge',
-      tenantId: tenant.id,
+      tenantId: rechargeTenantContext.id,
       studentId: walletOwner.id,
     },
     callbackUrl,
@@ -752,6 +865,7 @@ export async function createTeacherSubscriptionPayment(input: {
 export async function initiateTeacherSubscriptionCheckout(input: {
   subscriptionPlan: string
   billingCycle: 'MONTHLY' | 'YEARLY'
+  appUrl?: string
 }) {
   const tenant = await requireTenant()
   const user = await requireAuth()
@@ -891,8 +1005,8 @@ export async function initiateTeacherSubscriptionCheckout(input: {
     },
   })
 
-  const appUrl = env.NEXT_PUBLIC_APP_URL
-  const callbackUrl = `${appUrl}/api/payments/kashier/callback?orderId=${orderId}`
+  const appUrl = await resolveKashierAppUrl(input.appUrl)
+  const callbackUrl = buildKashierCallbackUrl(appUrl, orderId, '/payments/subscription')
   const webhookUrl = `${appUrl}/api/payments/kashier/webhook`
 
   const checkoutMode = env.KASHIER_SUBSCRIPTION_CHECKOUT_MODE ?? 'hosted'
