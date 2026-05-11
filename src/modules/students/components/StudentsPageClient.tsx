@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from "react";
-import { MessageSquare, Search } from "lucide-react";
+import { Download, MessageSquare, Search } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -57,6 +57,39 @@ const filters: Array<{ label: string; value: FilterValue }> = [
   { label: "مدفوع", value: "PAID" },
   { label: "متأخر", value: "OVERDUE" },
 ];
+
+function enrollmentStatusLabel(status?: string) {
+  if (status === "ACTIVE") return "نشط";
+  if (status === "WAITLIST") return "قائمة انتظار";
+  if (status === "PENDING") return "معلق";
+  if (status === "ARCHIVED") return "مؤرشف";
+  if (status === "DROPPED") return "منسحب";
+  if (status === "NONE") return "بدون مجموعة";
+  return status ?? "";
+}
+
+function csvCell(value: string | number | undefined) {
+  const text = String(value ?? "");
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function downloadCsv(filename: string, rows: Array<Array<string | number | undefined>>) {
+  const csvContent = "\uFEFF" + rows.map((row) => row.map(csvCell).join(",")).join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function uniqueValues(values: Array<string | undefined>) {
+  return Array.from(new Set(values.map((value) => value?.trim()).filter(Boolean) as string[]));
+}
 
 export function StudentsPageClient({ students, groups, canAddStudents = true }: { students: StudentItem[]; groups: GroupOption[]; canAddStudents?: boolean }) {
   const [query, setQuery] = useState("");
@@ -126,6 +159,63 @@ export function StudentsPageClient({ students, groups, canAddStudents = true }: 
     return "bg-emerald-100 text-emerald-700";
   }
 
+  function exportStudents() {
+    const studentsById = students.reduce((acc, student) => {
+      const list = acc.get(student.id) ?? [];
+      list.push(student);
+      acc.set(student.id, list);
+      return acc;
+    }, new Map<string, StudentItem[]>());
+
+    const headers = [
+      "كود الطالب",
+      "اسم الطالب",
+      "رقم الطالب",
+      "اسم ولي الأمر",
+      "رقم ولي الأمر",
+      "كود ولي الأمر",
+      "الصف",
+      "المستوى",
+      "المجموعات",
+      "أكواد المجموعات",
+      "حالات الانضمام",
+      "حالة الطالب",
+      "حالة السداد",
+      "نسبة الحضور",
+      "الغياب المتتالي",
+      "المبلغ المستحق",
+    ];
+    const rows = Array.from(studentsById.values()).map((studentRows) => {
+      const student = studentRows[0];
+      const groups = uniqueValues(studentRows.map((item) => item.group));
+      const groupIds = uniqueValues(studentRows.map((item) => item.groupId));
+      const enrollmentStatuses = uniqueValues(studentRows.map((item) => enrollmentStatusLabel(item.enrollmentStatus)));
+      const amountDue = studentRows.reduce((total, item) => total + item.amountDue, 0);
+      const maxConsecutiveAbsences = Math.max(...studentRows.map((item) => item.consecutiveAbsences));
+
+      return [
+        student.id,
+        student.name,
+        student.studentPhone,
+        student.parentName,
+        student.parentPhone,
+        student.parentId,
+        student.grade,
+        student.gradeLevel,
+        groups.join(" | "),
+        groupIds.join(" | "),
+        enrollmentStatuses.join(" | "),
+        statusLabel(student.studentStatus),
+        paymentLabel(student.paymentStatus),
+        `${student.attendance}%`,
+        maxConsecutiveAbsences,
+        amountDue,
+      ];
+    });
+
+    downloadCsv(`students_${new Date().toISOString().slice(0, 10)}.csv`, [headers, ...rows]);
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -133,11 +223,19 @@ export function StudentsPageClient({ students, groups, canAddStudents = true }: 
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">الطلاب</h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">بحث سريع ومؤشرات واضحة للحضور والسداد لكل طالب.</p>
         </div>
-        {canAddStudents && (
-          <div className="w-full sm:w-auto">
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+          <button
+            type="button"
+            onClick={exportStudents}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-bold text-slate-800 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+          >
+            <Download className="h-4 w-4" />
+            تنزيل ملف الطلاب
+          </button>
+          {canAddStudents && (
             <AddStudentForm groups={groups} />
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <Card>
