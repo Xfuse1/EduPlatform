@@ -79,7 +79,7 @@ export function Header({
         <div className="flex items-center gap-2">
           <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/90 p-1 text-sm font-extrabold text-primary shadow-lg shadow-primary/20 dark:bg-slate-900">
             {shouldRenderAvatar ? (
-              <img src={avatarUrl} alt={userName} className="h-full w-full rounded-xl object-contain" onError={() => setAvatarFailed(true)} />
+              <img src={avatarUrl as string} alt={userName} className="h-full w-full rounded-xl object-contain" onError={() => setAvatarFailed(true)} />
             ) : (
               <span className="grid h-full w-full place-items-center rounded-xl bg-gradient-to-br from-primary to-secondary text-white">
                 {getInitials(userName)}
