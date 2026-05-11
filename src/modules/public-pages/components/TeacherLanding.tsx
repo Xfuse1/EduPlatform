@@ -65,23 +65,23 @@ export function TeacherLanding({
   return (
     <main className="min-h-screen bg-[#0D1B2A] px-4 py-6 sm:px-6 lg:px-8" style={{ background: "var(--color-bg, #0D1B2A)" }}>
       <section className="mx-auto max-w-6xl space-y-8">
-        <div className="overflow-hidden rounded-[16px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] text-white shadow-xl">
+        <div className="overflow-hidden rounded-[16px] border border-slate-200 bg-white/80 backdrop-blur-[16px] text-slate-900 shadow-xl dark:border-white/10 dark:bg-white/5 dark:text-white">
           <div className="grid gap-8 px-6 py-10 lg:grid-cols-[1.2fr_0.8fr] lg:px-10">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold">
+              <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold dark:bg-white/15">
                 <Sparkles className="h-4 w-4" />
                 صفحة تعريف احترافية للطلاب وأولياء الأمور
               </div>
               <h1 className="mt-5 text-4xl font-extrabold leading-tight sm:text-5xl">{teacher.name}</h1>
-              <p className="mt-4 max-w-2xl text-base leading-8 text-white/90">
+              <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600 dark:text-white/90">
                 {teacher.bio ?? "خبرة عملية في تأسيس ومتابعة الطلاب مع نظام واضح للحضور والتحصيل والمتابعة المنتظمة."}
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold">
+                <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold dark:bg-white/15">
                   <MapPin className="h-4 w-4" />
                   {teacher.region ?? "غير محدد"}
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold">
+                <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold dark:bg-white/15">
                   <GraduationCap className="h-4 w-4" />
                   متابعة وحضور وتقارير
                 </span>
@@ -95,7 +95,7 @@ export function TeacherLanding({
               </div>
             </div>
 
-            <div className="rounded-[28px] bg-white/12 p-6 backdrop-blur">
+            <div className="rounded-[28px] bg-slate-100/50 p-6 backdrop-blur dark:bg-white/12">
               <div
                 className="mx-auto flex h-28 w-28 items-center justify-center rounded-full border border-white/25 bg-white/20 text-3xl font-extrabold"
                 style={{ backgroundColor: `${teacher.themeColor}55` }}
@@ -107,7 +107,7 @@ export function TeacherLanding({
                   teacher.name.slice(0, 1)
                 )}
               </div>
-              <p className="mt-6 text-center text-sm leading-7 text-white/85" suppressHydrationWarning>استعرض المجموعات المفتوحة وحدد أفضل موعد للانضمام مباشرة.</p>
+              <p className="mt-6 text-center text-sm leading-7 text-slate-500 dark:text-white/85" suppressHydrationWarning>استعرض المجموعات المفتوحة وحدد أفضل موعد للانضمام مباشرة.</p>
               <div className="mt-6 flex flex-col gap-3">
                 <Link
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-primary transition hover:bg-slate-100"
@@ -117,7 +117,7 @@ export function TeacherLanding({
                   <ArrowLeft className="h-4 w-4" />
                 </Link>
                 <Link
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/20 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/30"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white/20 px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-100 dark:border-white/30 dark:text-white dark:hover:bg-white/30"
                   href="/parent-register"
                 >
                   أنا ولي أمر — سجّل ابنك
@@ -130,8 +130,8 @@ export function TeacherLanding({
 
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-black text-white" suppressHydrationWarning>المجموعات المتاحة</h2>
-            <p className="mt-2 text-sm text-white/50">اطلع على السعة المتبقية والرسوم والجدول لكل مجموعة.</p>
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white" suppressHydrationWarning>المجموعات المتاحة</h2>
+            <p className="mt-2 text-sm text-slate-500 dark:text-white/50">اطلع على السعة المتبقية والرسوم والجدول لكل مجموعة.</p>
           </div>
           <Link className="hidden rounded-xl bg-[#00B8A0] px-5 py-3 text-sm font-bold text-white shadow-[0_0_15px_rgba(0,184,160,0.3)] transition hover:bg-[#00B8A0]/90 sm:inline-flex" href="/register">
             ابدأ التسجيل
@@ -143,7 +143,7 @@ export function TeacherLanding({
             const progress = Math.round((group.enrolledCount / group.maxCapacity) * 100);
 
             return (
-              <Card key={group.id} className="overflow-hidden border border-[rgba(0,184,160,0.3)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] shadow-[0_0_20px_rgba(0,184,160,0.1)]">
+              <Card key={group.id} className="overflow-hidden border border-slate-200 bg-white shadow-lg dark:border-[rgba(0,184,160,0.3)] dark:bg-[rgba(255,255,255,0.05)] dark:backdrop-blur-[16px] dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">
                 <CardContent className="space-y-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>

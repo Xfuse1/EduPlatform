@@ -188,7 +188,7 @@ export default function MarketingPage() {
 
   return (
     <main
-      className="min-h-screen scroll-smooth bg-white font-[Cairo] text-slate-900 dark:bg-[#0F172A] dark:text-white"
+      className="min-h-screen scroll-smooth bg-slate-50 font-[Cairo] text-slate-900 dark:bg-[#0F172A] dark:text-white"
       dir="rtl"
       id="home"
     >
@@ -216,7 +216,7 @@ export default function MarketingPage() {
           animation: float-slow 20s ease-in-out infinite;
         }
       `}</style>
-      <div className="relative overflow-hidden bg-white dark:bg-[#050814]">
+      <div className="relative overflow-hidden bg-slate-50 dark:bg-[#050814]">
         {/* Background SVG Wisps - Ultra-Premium, Flowy, and Luxe */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <svg className="h-full w-full" preserveAspectRatio="none" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
@@ -345,8 +345,8 @@ export default function MarketingPage() {
           </div>
         </header>
 
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 space-y-20 lg:space-y-32">
-          <section className="relative overflow-hidden rounded-[60px] border border-slate-200 bg-white shadow-2xl backdrop-blur-3xl dark:border-white/[0.05] dark:bg-[#0F172A]/40 sm:px-12 sm:py-16 lg:px-20 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-16 lg:space-y-24">
+          <section className="relative overflow-hidden rounded-[48px] border border-slate-300/60 bg-white shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-3xl dark:border-white/[0.05] dark:bg-[#0F172A]/40 sm:px-12 sm:py-16 lg:px-20 lg:py-20">
             {/* Refined Grid Pattern */}
             <div className="absolute inset-0 opacity-[0.15] [mask-image:radial-gradient(ellipse_at_center,black,transparent)]">
               <div className="h-full w-full bg-[size:32px_32px] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)]" />
@@ -486,7 +486,7 @@ export default function MarketingPage() {
             </div>
           </section>
 
-          <section className="mt-12 scroll-mt-20 rounded-[40px] border border-slate-200 bg-white p-8 shadow-xl backdrop-blur-sm sm:p-10 lg:p-12 dark:border-white/10 dark:bg-white/[0.03]" id="features">
+          <section className="mt-8 scroll-mt-20 rounded-[40px] border border-slate-300/60 bg-white p-8 shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-sm sm:p-10 lg:p-12 dark:border-white/10 dark:bg-white/[0.03]" id="features">
 
             <div className="max-w-2xl">
               <p className="text-start text-sm font-semibold text-sky-300">المميزات</p>
@@ -498,7 +498,7 @@ export default function MarketingPage() {
 
             <div className="mt-12 grid gap-8 lg:grid-cols-3">
               {features.map((feature) => (
-                <div key={feature.title} className="group relative flex flex-col items-center rounded-[40px] border border-slate-100 bg-slate-50 p-6 text-center backdrop-blur-xl transition-all hover:bg-slate-100 dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
+                <div key={feature.title} className="group relative flex flex-col items-center rounded-[32px] border-2 border-slate-200 bg-white p-8 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
                   <div className="relative mb-4 flex h-[220px] w-full items-center justify-center overflow-hidden rounded-2xl">
                     <img
                       src={feature.image}
@@ -513,7 +513,7 @@ export default function MarketingPage() {
             </div>
           </section>
 
-          <section className="scroll-mt-20 overflow-hidden rounded-[50px] border border-slate-200 bg-white p-8 shadow-2xl backdrop-blur-3xl lg:p-16 dark:border-white/5 dark:bg-[#0F172A]/40" id="how-it-works">
+          <section className="scroll-mt-20 overflow-hidden rounded-[48px] border border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl lg:p-16 dark:border-white/5 dark:bg-[#0F172A]/40" id="how-it-works">
             <div className="max-w-2xl">
               <span className="rounded-full bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400">كيف يعمل</span>
               <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">ابدأ في 3 خطوات بسيطة</h2>
@@ -545,7 +545,7 @@ export default function MarketingPage() {
               </div>
               {steps.map((step, index) => (
                 <React.Fragment key={step.number}>
-                  <div className="group relative rounded-[40px] border border-white/5 bg-white/[0.02] p-10 backdrop-blur-xl transition-all hover:bg-white/[0.04]">
+                  <div className="group relative rounded-[32px] border-2 border-slate-200 bg-white p-10 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
                     <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-sky-500/10 text-4xl font-black text-sky-400 shadow-[0_0_30px_rgba(14,165,233,0.1)] transition-transform group-hover:scale-110">
                       {step.number}
                     </div>
@@ -573,7 +573,7 @@ export default function MarketingPage() {
             </div>
           </section>
 
-          <section className="scroll-mt-20 overflow-hidden rounded-[50px] border border-slate-200 bg-white p-8 shadow-2xl backdrop-blur-3xl lg:p-16 dark:border-white/5 dark:bg-[#0F172A]/40" id="smart-tools">
+          <section className="scroll-mt-20 overflow-hidden rounded-[48px] border border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl lg:p-16 dark:border-white/5 dark:bg-[#0F172A]/40" id="smart-tools">
             <div className="max-w-2xl">
               <span className="rounded-full bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400">أدوات ذكية للمعلم</span>
               <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">منصة مصممة لخدمة المعلم</h2>
@@ -584,7 +584,7 @@ export default function MarketingPage() {
               {audienceCards.map((card) => (
                 <div
                   key={card.title}
-                  className="group relative flex flex-col items-center overflow-hidden rounded-[40px] border border-slate-200 bg-white p-8 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-white/5 dark:bg-[#0F172A]/40 dark:hover:bg-[#0F172A]/60"
+                  className="group relative flex flex-col items-center overflow-hidden rounded-[32px] border-2 border-slate-200 bg-white p-8 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-[#0F172A]/40 dark:hover:bg-[#0F172A]/60"
                 >
                   {/* Badge */}
                   <div className="absolute left-6 top-6">
@@ -614,7 +614,7 @@ export default function MarketingPage() {
                   </div>
 
                   {/* Points List */}
-                  <div className="mt-8 w-full space-y-3 border-t border-slate-100 pt-8 dark:border-white/5">
+                  <div className="mt-8 w-full space-y-3 border-t-2 border-slate-200 pt-8 dark:border-white/5">
                     {card.points.map((point) => (
                       <div key={point} className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">
                         <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
@@ -641,9 +641,9 @@ export default function MarketingPage() {
               {PLAN_LIMITS.map((plan, index) => (
                 <div
                   key={plan.name}
-                  className={`relative flex flex-col rounded-[40px] border p-10 transition-all duration-500 hover:-translate-y-2 ${index === 1
-                    ? "border-sky-500 bg-sky-50 shadow-[0_20px_50px_rgba(14,165,233,0.1)] dark:border-sky-500/50 dark:bg-sky-500/5 dark:shadow-[0_20px_50px_rgba(14,165,233,0.15)]"
-                    : "border-slate-100 bg-slate-50 hover:bg-slate-100 dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]"
+                  className={`relative flex flex-col rounded-[32px] border p-10 transition-all duration-300 hover:-translate-y-2 ${index === 1
+                    ? "border-sky-500 bg-sky-50 shadow-[0_20px_50px_rgba(14,165,233,0.15)] dark:border-sky-500/50 dark:bg-sky-500/5"
+                    : "border-slate-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] dark:border-white/5 dark:bg-white/[0.02]"
                     }`}
                 >
                   {index === 1 && (
@@ -689,9 +689,9 @@ export default function MarketingPage() {
               <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">ماذا يقول معلمونا؟</h2>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="mt-12 grid gap-8 lg:grid-cols-3">
               {testimonials.map((item, i) => (
-                <div key={item.name} className="group relative rounded-[40px] border border-slate-100 bg-slate-50 p-8 transition-all hover:bg-slate-100 dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
+                <div key={item.name} className="group relative rounded-[32px] border-2 border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
                   <div className="mb-6 flex gap-1">
                     {[...Array(5)].map((_, i) => (
                       <div key={i} className="h-4 w-4 text-amber-400">★</div>
@@ -714,7 +714,7 @@ export default function MarketingPage() {
 
           {/* Simplified About & Impact */}
           <section className="scroll-mt-20" id="about">
-            <div className="overflow-hidden rounded-[60px] border border-slate-200 bg-white p-10 lg:p-20 dark:border-white/5 dark:bg-[#0F172A]/40 backdrop-blur-3xl">
+            <div className="overflow-hidden rounded-[48px] border border-slate-300/60 bg-white p-10 lg:p-20 shadow-[0_8px_40px_rgb(0,0,0,0.06)] dark:border-white/5 dark:bg-[#0F172A]/40 backdrop-blur-3xl">
               <div className="grid gap-20 lg:grid-cols-[1.2fr_1fr]">
                 {/* Content Side */}
                 <div className="flex flex-col justify-center order-2 lg:order-1">
@@ -753,7 +753,7 @@ export default function MarketingPage() {
                     {aboutStats.map((stat, i) => (
                       <div 
                         key={stat.label} 
-                        className={`group relative flex items-center gap-6 rounded-[40px] border border-slate-100 bg-slate-50 p-8 transition-all duration-500 hover:-translate-x-3 hover:shadow-2xl dark:border-white/5 dark:bg-white/[0.03] dark:hover:bg-white/[0.05] ${i === 1 ? 'lg:mr-16' : ''}`}
+                        className={`group relative flex items-center gap-6 rounded-[32px] border-2 border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.03] dark:hover:bg-white/[0.05] ${i === 1 ? 'lg:mr-16' : ''}`}
                       >
                         <div className="relative flex h-36 w-36 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-white shadow-inner dark:bg-slate-900/50">
                           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-sky-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -783,21 +783,48 @@ export default function MarketingPage() {
           <MarketingFaq />
 
           {/* Premium Footer CTA */}
-          <section className="relative overflow-hidden rounded-[50px] bg-gradient-to-br from-sky-600 to-indigo-700 p-12 text-center sm:p-20">
-            <div className="absolute inset-0 opacity-20 [mask-image:radial-gradient(circle_at_center,black,transparent)] bg-[size:20px_20px] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)]" />
+          <section className="relative overflow-hidden rounded-[48px] bg-[#050814] p-12 text-center sm:p-20 shadow-2xl border border-white/5">
+            {/* Elegant Background Accents */}
+            <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-indigo-600/20 blur-[100px]" />
+            <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-emerald-600/10 blur-[100px]" />
+            
+            {/* Subtle Grid - very faint */}
+            <div className="absolute inset-0 opacity-[0.03] [mask-image:radial-gradient(circle_at_center,black,transparent)] bg-[size:40px_40px] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)]" />
+
             <div className="relative z-10 mx-auto max-w-3xl">
-              <h2 className="text-4xl font-black text-white sm:text-6xl">جاهز تنظّم دروسك؟</h2>
-              <p className="mt-6 text-lg text-sky-100 opacity-80">انضم لآلاف المعلمين الذين وثقوا في EduPlatform وارتقِ بمستوى إدارتك اليوم.</p>
-              <div className="mt-12 flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
+              <span className="inline-block rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400 backdrop-blur-sm mb-6">
+                ابدأ اليوم
+              </span>
+              <h2 className="text-4xl font-black text-white sm:text-6xl leading-[1.1]">
+                جاهز تنظّم <span className="text-transparent bg-clip-text bg-gradient-to-l from-sky-400 via-emerald-400 to-indigo-400">دروسك؟</span>
+              </h2>
+              <p className="mt-8 text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                انضم لآلاف المعلمين الذين وثقوا في EduPlatform وارتقِ بمستوى إدارتك اليوم. تجربة سلسة، ذكية، ومصممة خصيصاً لك.
+              </p>
+              
+              <div className="mt-12 flex flex-col items-center gap-8">
                 <Link
-                  className="flex h-16 items-center justify-center rounded-2xl bg-white px-10 text-lg font-black text-sky-600 shadow-2xl transition-all hover:bg-sky-50 hover:scale-105 active:scale-95"
+                  className="group relative flex h-16 items-center justify-center gap-3 overflow-hidden rounded-2xl bg-white px-12 text-lg font-black text-slate-950 transition-all hover:scale-105 active:scale-95 shadow-[0_20px_50px_rgba(255,255,255,0.1)]"
                   href="/signup"
                 >
-                  ابدأ مجاناً الآن
+                  <span className="relative z-10">ابدأ مجاناً الآن</span>
+                  <ArrowLeft className="relative z-10 h-5 w-5 transition-transform group-hover:-translate-x-1" />
+                  <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-slate-100 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                 </Link>
-                <div className="flex items-center gap-2 text-sm text-sky-100/60">
-                  <Check className="h-4 w-4" />
-                  بدون بطاقة ائتمان — مجاني للبداية
+                
+                <div className="flex flex-wrap justify-center gap-x-8 gap-y-4">
+                  {[
+                    "بدون بطاقة ائتمان",
+                    "تجربة مجانية بالكامل",
+                    "دعم فني مخصص"
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-2 text-sm font-medium text-slate-300">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
+                        <Check className="h-3 w-3" />
+                      </div>
+                      {item}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
