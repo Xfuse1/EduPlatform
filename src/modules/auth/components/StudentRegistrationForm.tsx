@@ -12,7 +12,7 @@ import { EDUCATION_STAGE_OPTIONS, formatGradeLevel, getEducationYears } from "@/
 const selectClassName =
   "touch-target flex min-h-12 w-full rounded-[10px] border border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 px-4 py-3 text-sm text-slate-900 dark:text-white outline-none transition focus:border-[#00B8A0] focus:ring-4 focus:ring-[#00B8A0]/15 disabled:cursor-not-allowed disabled:opacity-60";
 
-export function StudentRegistrationForm({ tenantName, initialPhone }: { tenantName: string; initialPhone?: string }) {
+export function StudentRegistrationForm({ tenantName, tenantSlug, initialPhone }: { tenantName: string; tenantSlug?: string; initialPhone?: string }) {
   const router = useRouter();
   const [studentName, setStudentName] = useState("");
   const [phone, setPhone] = useState(initialPhone ?? "");
@@ -66,7 +66,8 @@ export function StudentRegistrationForm({ tenantName, initialPhone }: { tenantNa
           gradeLevel: gradeLevelValue,
         });
 
-        router.push(`/verify?${params.toString()}`);
+        const verifyPath = tenantSlug ? `/${tenantSlug}/verify` : "/verify";
+        router.push(`${verifyPath}?${params.toString()}`);
       } catch (err) {
         console.error("[StudentRegistrationForm] sendOTP failed:", err);
         setError("تعذر إرسال كود التحقق. تأكد من رقم الهاتف وحاول مرة أخرى.");
@@ -82,7 +83,9 @@ export function StudentRegistrationForm({ tenantName, initialPhone }: { tenantNa
         <div className="mx-auto mb-4 flex h-[48px] w-[48px] items-center justify-center">
           <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
         </div>
-        <CardTitle className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white text-center">حساب طالب جديد</CardTitle>
+        <CardTitle className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white text-center">
+          حساب طالب جديد لدى {tenantName}
+        </CardTitle>
         <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-[#94A3B8] text-center">
           أنشئ حساب الطالب في {tenantName} باستخدام رقم الهاتف.
         </p>
@@ -178,7 +181,7 @@ export function StudentRegistrationForm({ tenantName, initialPhone }: { tenantNa
 
           <div className="text-center text-sm text-[#94A3B8]">
             لديك حساب بالفعل؟
-            <Link href="/login" className="font-semibold text-[#00B8A0] transition hover:text-[#00c4ab] ms-1">
+            <Link href={tenantSlug ? `/${tenantSlug}/login` : "/login"} className="font-semibold text-[#00B8A0] transition hover:text-[#00c4ab] ms-1">
               تسجيل الدخول
             </Link>
           </div>

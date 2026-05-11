@@ -40,7 +40,7 @@ function validateForm(form: FormState): FormErrors {
   return errors;
 }
 
-export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string }) {
+export function ParentRegisterLauncher({ initialPhone, tenantSlug, tenantName }: { initialPhone?: string; tenantSlug?: string; tenantName?: string }) {
   const [form, setForm] = useState<FormState>({ parentName: "", phone: initialPhone ?? "" });
   const [errors, setErrors] = useState<FormErrors>({});
   const [pageError, setPageError] = useState("");
@@ -193,7 +193,9 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
         <div className="mx-auto mb-4 flex h-[48px] w-[48px] items-center justify-center">
           <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
         </div>
-        <h1 className="text-2xl font-extrabold sm:text-3xl text-slate-900 dark:text-white">أنشئ حساب ولي الأمر</h1>
+        <h1 className="text-2xl font-extrabold sm:text-3xl text-slate-900 dark:text-white">
+          أنشئ حساب ولي الأمر {tenantName ? ` لدى ${tenantName}` : ""}
+        </h1>
         <p className="mt-2 text-sm leading-7 text-slate-500 dark:text-[#94A3B8]">
           سجّل برقم هاتفك وتابع أبناءك بكل سهولة
         </p>
@@ -330,7 +332,7 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
         <div className="border-t border-slate-100 dark:border-white/10 pt-4 text-center">
           <p className="text-sm text-slate-500 dark:text-[#94A3B8]">
             لديك حساب بالفعل؟{" "}
-            <Link href="/login" className="font-bold text-[#00B8A0] transition hover:text-[#00c4ab] hover:underline">
+            <Link href={tenantSlug ? `/${tenantSlug}/login` : "/login"} className="font-bold text-[#00B8A0] transition hover:text-[#00c4ab] hover:underline">
               سجّل الدخول
               <ArrowLeft className="inline-block ms-1 h-3.5 w-3.5" />
             </Link>
