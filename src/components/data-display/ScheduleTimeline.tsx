@@ -21,9 +21,9 @@ export function ScheduleTimeline({
   items: ScheduleTimelineItem[];
 }) {
   return (
-    <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
+    <Card className="border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
       <CardHeader>
-        <CardTitle className="text-start">{title}</CardTitle>
+        <CardTitle className="text-start text-slate-900 dark:text-white">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
         {items.length === 0 ? (
@@ -33,24 +33,24 @@ export function ScheduleTimeline({
         ) : (
           items.map((item, index) => (
             <div key={item.id} className="relative ps-8">
-              {index < items.length - 1 ? <div className="absolute bottom-0 start-[13px] top-10 w-px bg-slate-200 dark:bg-slate-800" /> : null}
+              {index < items.length - 1 ? <div className="absolute bottom-0 start-[13px] top-10 w-px bg-slate-300 dark:bg-slate-800" /> : null}
               <div className="absolute start-0 top-1 flex h-7 w-7 items-center justify-center rounded-full border-4 border-white shadow-sm dark:border-slate-950" style={{ backgroundColor: item.accentColor ?? "#1A5276" }} />
-              <div className="rounded-[20px] border border-[rgba(255,255,255,0.08)] bg-white/5 p-4 shadow-sm">
+              <div className="rounded-[20px] border border-slate-200 bg-slate-50 dark:border-[rgba(255,255,255,0.08)] dark:bg-white/5 p-4 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-start text-base font-bold text-slate-900 dark:text-white">{item.title}</p>
-                    {item.subtitle ? <p className="mt-1 text-start text-sm text-slate-500 dark:text-slate-400">{item.subtitle}</p> : null}
+                    {item.subtitle ? <p className="mt-1 text-start text-sm text-slate-600 dark:text-slate-400">{item.subtitle}</p> : null}
                   </div>
-                  {item.statusLabel ? <span className="rounded-full bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 dark:bg-slate-900 dark:text-slate-200">{item.statusLabel}</span> : null}
+                  {item.statusLabel ? <span className="rounded-full bg-slate-200 px-3 py-2 text-xs font-bold text-slate-800 dark:bg-slate-900 dark:text-slate-200">{item.statusLabel}</span> : null}
                 </div>
-                <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-600 dark:text-slate-300">
-                  {item.dayLabel ? <span className="rounded-full bg-slate-100 px-3 py-2 font-semibold dark:bg-slate-900">{item.dayLabel}</span> : null}
-                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 font-semibold dark:bg-slate-900">
+                <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-700 dark:text-slate-300">
+                  {item.dayLabel ? <span className="rounded-full bg-slate-200 px-3 py-2 font-bold dark:bg-slate-900">{item.dayLabel}</span> : null}
+                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-200 px-3 py-2 font-bold dark:bg-slate-900">
                     <Clock3 className="h-4 w-4" />
                     <span dir="ltr">{item.timeLabel}</span>
                   </span>
                   {item.location ? (
-                    <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 font-semibold dark:bg-slate-900">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-slate-200 px-3 py-2 font-bold dark:bg-slate-900">
                       <MapPin className="h-4 w-4" />
                       <span>{item.location}</span>
                     </span>

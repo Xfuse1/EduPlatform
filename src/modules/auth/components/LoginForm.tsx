@@ -57,8 +57,8 @@ function PinPad({ value, onChange, disabled = false }: { value: string; onChange
             key={i}
             className={`h-3 w-3 rounded-full border-2 transition-all duration-150 ${
               i < value.length
-                ? "scale-110 border-sky-400 bg-sky-400"
-                : "border-slate-500 bg-transparent"
+                ? "scale-110 border-sky-500 bg-sky-500"
+                : "border-slate-300 dark:border-slate-500 bg-transparent"
             }`}
           />
         ))}
@@ -77,7 +77,7 @@ function PinPad({ value, onChange, disabled = false }: { value: string; onChange
                 aria-label="حذف آخر رقم"
                 disabled={disabled}
                 onClick={() => onChange(value.slice(0, -1))}
-                className="flex h-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:bg-white/10 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-14 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5 text-slate-900 dark:text-white transition hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Delete className="h-5 w-5" />
               </button>
@@ -90,7 +90,7 @@ function PinPad({ value, onChange, disabled = false }: { value: string; onChange
               type="button"
               disabled={disabled}
               onClick={() => value.length < PIN_MAX_LENGTH && onChange(value + key)}
-              className="flex h-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-lg font-bold text-white transition hover:bg-white/10 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-14 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5 text-lg font-bold text-slate-900 dark:text-white transition hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {key}
             </button>
@@ -256,7 +256,7 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
                   onChange={(event) => { setPhone(event.target.value.replace(/\D/g, "")); setError(""); setShowRegisterPrompt(false); }}
                   placeholder="01XXXXXXXXX"
                   value={phone}
-                  className="ps-24 text-base font-semibold bg-white/5 border-white/10 rounded-[10px] text-white focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]"
+                  className="ps-24 text-base font-semibold bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[10px] text-slate-900 dark:text-white focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]"
                 />
               </div>
               <p className="mt-2 text-sm text-slate-500 dark:text-[#94A3B8]">
@@ -325,7 +325,7 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
           </Dialog>
         </CardContent>
 
-        <div className="border-t border-slate-100 dark:border-white/5 px-6 py-4 text-center text-sm font-semibold text-slate-400 dark:text-[#94A3B8]">
+        <div className="border-t border-slate-100 dark:border-white/5 px-6 py-4 text-center text-sm font-semibold text-slate-500 dark:text-[#94A3B8]">
           منصة EduPlatform
         </div>
 
@@ -381,7 +381,7 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
           type="button"
           onClick={async () => { setPin(""); setError(""); setSendingOtp(true); await sendOtp(actualTenantId); setSendingOtp(false); }}
           disabled={sendingOtp}
-          className="w-full text-center text-sm text-sky-300 transition hover:text-sky-200 hover:underline disabled:cursor-wait disabled:opacity-50"
+          className="w-full text-center text-sm text-sky-600 dark:text-sky-300 transition hover:text-sky-700 dark:hover:text-sky-200 hover:underline disabled:cursor-wait disabled:opacity-50"
         >
           {sendingOtp ? "جارٍ إرسال كود التحقق..." : "نسيت الـ PIN؟ — ادخل برمز OTP بدلاً منه"}
         </button>

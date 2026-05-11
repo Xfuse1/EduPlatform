@@ -94,23 +94,23 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
 
       {/* Stats Section */}
       <section className="grid gap-4 md:grid-cols-3">
-        <Card className="border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] rounded-[16px] text-white shadow-[0_0_20px_rgba(0,184,160,0.1)]">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">
           <CardContent className="p-6">
-            <p className="text-sm text-[#94A3B8] font-medium">إجمالي الأبناء</p>
+            <p className="text-sm text-slate-500 dark:text-[#94A3B8] font-bold">إجمالي الأبناء</p>
             <p className="mt-3 text-3xl font-extrabold">{toArabicDigits(data.children.length)}</p>
           </CardContent>
         </Card>
-        <Card className="border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] rounded-[16px] text-white shadow-[0_0_20px_rgba(0,184,160,0.1)]">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">
           <CardContent className="p-6">
-            <p className="text-sm text-[#94A3B8] font-medium">متوسط الحضور</p>
+            <p className="text-sm text-slate-500 dark:text-[#94A3B8] font-bold">متوسط الحضور</p>
             <p className="mt-3 text-3xl font-extrabold text-[#00B8A0]">
               {data.children.length ? `${toArabicDigits(data.children[0].attendanceRate)}%` : "٠٪"}
             </p>
           </CardContent>
         </Card>
-        <Card className="border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] rounded-[16px] text-white shadow-[0_0_20px_rgba(245,166,35,0.1)]">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(245,166,35,0.1)]">
           <CardContent className="p-6">
-            <p className="text-sm text-[#94A3B8] font-medium">حالة المصروفات</p>
+            <p className="text-sm text-slate-500 dark:text-[#94A3B8] font-bold">حالة المصروفات</p>
             <p className="mt-3 text-lg font-extrabold text-[#F5A623]">
               {data.children[0]?.payment.status === "PAID" ? "منتظمة بالكامل" : "تحتاج مراجعة"}
             </p>
@@ -124,8 +124,8 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
         <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
-              <CardTitle className="text-xl font-bold">جدول الحصص اليوم</CardTitle>
-              <p className="text-xs text-slate-400 mt-1">حصص أبنائك المسجلة لهذا اليوم</p>
+              <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">جدول الحصص اليوم</CardTitle>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">حصص أبنائك المسجلة لهذا اليوم</p>
             </div>
             <Clock className="h-5 w-5 text-primary opacity-50" />
           </CardHeader>
@@ -163,8 +163,8 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
         <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
-              <CardTitle className="text-xl font-bold">الأداء والتقدم</CardTitle>
-              <p className="text-xs text-slate-400 mt-1">مؤشرات الحضور والدرجات خلال الفترة الأخيرة</p>
+              <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">الأداء والتقدم</CardTitle>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">مؤشرات الحضور والدرجات خلال الفترة الأخيرة</p>
             </div>
 
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -176,8 +176,8 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
             {/* Chart Area */}
             <div className="px-6 pt-4 pb-2 border-b border-dashed border-slate-100 dark:border-slate-800">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs font-bold text-slate-500 px-2">معدل الحضور العام</p>
-                <span className="text-lg font-black text-primary">
+                <p className="text-xs font-bold text-slate-600 dark:text-slate-400 px-2">معدل الحضور العام</p>
+                <span className="text-lg font-black text-primary dark:text-sky-400">
                   {toArabicDigits(
                     data.children.length > 0 
                       ? Math.round(data.children.reduce((acc, c) => acc + (c.attendanceRate || 0), 0) / data.children.length)
@@ -206,9 +206,9 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                     </div>
                     <div className="flex items-center gap-2">
                       {assignment.gradedByAi && <Sparkles className="h-3 w-3 text-purple-500 animate-pulse" />}
-                      <span className="text-[11px] font-extrabold text-primary">{toArabicDigits(assignment.grade)}/{toArabicDigits(assignment.maxGrade)}</span>
-                      <div className="h-1.5 w-16 bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden">
-                        <div className="h-full bg-primary" style={{ width: `${(assignment.grade/assignment.maxGrade)*100}%` }} />
+                      <span className="text-[11px] font-extrabold text-primary dark:text-sky-400">{toArabicDigits(assignment.grade)}/{toArabicDigits(assignment.maxGrade)}</span>
+                      <div className="h-1.5 w-16 bg-slate-200 dark:bg-slate-900 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary dark:bg-sky-400" style={{ width: `${(assignment.grade/assignment.maxGrade)*100}%` }} />
                       </div>
                     </div>
                   </div>
@@ -250,16 +250,16 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
               <CardContent className="space-y-5 p-6">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="flex items-start gap-4 rounded-[20px] bg-slate-50 p-4 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                    <CheckCircle2 className="mt-1 h-5 w-5 text-emerald-500" />
+                    <CheckCircle2 className="mt-1 h-5 w-5 text-emerald-600 dark:text-emerald-500" />
                     <div>
-                      <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">حالة اليوم</p>
+                      <p className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">حالة اليوم</p>
                       <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">{todayStatusLabel(child.todayStatus)}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4 rounded-[20px] bg-slate-50 p-4 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                     <CreditCard className="mt-1 h-5 w-5 text-primary dark:text-sky-300" />
                     <div>
-                      <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">المصروفات</p>
+                      <p className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">المصروفات</p>
                       <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
                         {child.payment.status === "PAID" ? "تم السداد بالكامل" : `${formatCurrency(child.payment.amount)} متبقي`}
                       </p>

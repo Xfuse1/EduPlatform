@@ -16,17 +16,17 @@ type AlertItem = {
 
 const severityStyles = {
   low: {
-    card: "border-[rgba(255,255,255,0.08)] bg-white/5",
+    card: "border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5",
     icon: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
     Icon: BellRing,
   },
   medium: {
-    card: "border-[rgba(255,255,255,0.08)] bg-white/5",
+    card: "border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5",
     icon: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
     Icon: CircleAlert,
   },
   high: {
-    card: "border-[rgba(255,255,255,0.08)] bg-white/5",
+    card: "border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5",
     icon: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
     Icon: AlertTriangle,
   },
@@ -34,9 +34,9 @@ const severityStyles = {
 
 export function AlertRail({ title = "ما يحتاج تدخل", items }: { title?: string; items: AlertItem[] }) {
   return (
-    <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
+    <Card className="border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
       <CardHeader>
-        <CardTitle className="text-start">{title}</CardTitle>
+        <CardTitle className="text-start text-slate-900 dark:text-white">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {items.length === 0 ? (
@@ -57,9 +57,9 @@ export function AlertRail({ title = "ما يحتاج تدخل", items }: { title
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-start text-base font-bold text-slate-900 dark:text-white">{item.title}</p>
-                      {item.meta ? <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{item.meta}</span> : null}
+                      {item.meta ? <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{item.meta}</span> : null}
                     </div>
-                    {item.description ? <p className="mt-2 text-start text-sm leading-7 text-slate-600 dark:text-slate-300">{item.description}</p> : null}
+                    {item.description ? <p className="mt-2 text-start text-sm leading-7 text-slate-700 dark:text-slate-300">{item.description}</p> : null}
                     {item.actionHref && item.actionLabel ? (
                       <Link className="mt-4 inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900" href={item.actionHref}>
                         {item.actionLabel}
