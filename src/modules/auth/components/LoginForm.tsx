@@ -225,34 +225,26 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
 
   if (step === "phone") {
     return (
-      <Card className="overflow-hidden rounded-[24px] border-white/30 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
-        <div
-          className="relative overflow-hidden px-6 pb-7 pt-8 sm:px-8"
-          // eslint-disable-next-line react/forbid-component-props
-          style={{ background: `linear-gradient(135deg, ${tenant.themeColor}, #2E86C1 55%, #6FB3D2)` }}
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.22),_transparent_32%)]" />
-          <div className="relative text-center text-white">
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-white/30 bg-white/15 text-3xl font-extrabold shadow-lg backdrop-blur">
-              {tenant.logoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img alt={tenant.name} className="h-full w-full rounded-full object-cover" src={tenant.logoUrl} />
-              ) : (
-                getInitials(tenant.name)
-              )}
+      <Card 
+        className="overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
+      >
+        <div className="relative px-6 pb-2 pt-8 sm:px-8">
+          <div className="relative text-center">
+            <div className="mx-auto flex h-[48px] w-[48px] items-center justify-center">
+              <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
             </div>
-            <h1 className="mt-5 text-3xl font-extrabold">منصة EduPlatform</h1>
-            <p className="mt-3 text-sm leading-7 text-white/90">سجّل الدخول برقم الهاتف.</p>
+            <h1 className="mt-5 text-3xl font-extrabold text-slate-900 dark:text-white">منصة EduPlatform</h1>
+            <p className="mt-3 text-sm leading-7 text-[#94A3B8]">سجّل الدخول برقم الهاتف.</p>
           </div>
         </div>
 
         <CardContent className="p-6 sm:p-8">
           <form className="space-y-5" onSubmit={handlePhoneSubmit}>
             <div>
-              <Label htmlFor="phone">رقم الهاتف</Label>
+              <Label className="text-slate-700 dark:text-white" htmlFor="phone">رقم الهاتف</Label>
               <div className="relative">
                 <span className="pointer-events-none absolute inset-y-0 start-4 flex items-center text-lg">🇪🇬</span>
-                <span className="pointer-events-none absolute inset-y-0 start-14 flex items-center text-slate-400 dark:text-slate-500">
+                <span className="pointer-events-none absolute inset-y-0 start-14 flex items-center text-[#94A3B8]">
                   <Phone className="h-4 w-4" />
                 </span>
                 <Input
@@ -264,10 +256,10 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
                   onChange={(event) => { setPhone(event.target.value.replace(/\D/g, "")); setError(""); setShowRegisterPrompt(false); }}
                   placeholder="01XXXXXXXXX"
                   value={phone}
-                  className="ps-24 text-base font-semibold"
+                  className="ps-24 text-base font-semibold bg-white/5 border-white/10 rounded-[10px] text-white focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]"
                 />
               </div>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              <p className="mt-2 text-sm text-slate-500 dark:text-[#94A3B8]">
                 يجب أن يبدأ الرقم بـ <span dir="ltr">01</span> ويتكون من <span dir="ltr">11</span> رقماً.
               </p>
             </div>
@@ -278,7 +270,11 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
               </p>
             ) : null}
 
-            <Button className="w-full gap-2 text-base" disabled={isPending} type="submit">
+            <Button 
+              className="w-full gap-2 text-base rounded-[10px] bg-[linear-gradient(135deg,#00B8A0,#1A2B6D)] hover:bg-[linear-gradient(135deg,#00c4ab,#1e3480)] hover:-translate-y-[1px] transition-all text-white border-0" 
+              disabled={isPending} 
+              type="submit"
+            >
               <span>{isPending ? "جارٍ التحقق..." : "متابعة"}</span>
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -329,7 +325,7 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
           </Dialog>
         </CardContent>
 
-        <div className="border-t border-slate-100 px-6 py-4 text-center text-sm font-semibold text-slate-500 dark:border-slate-800 dark:text-slate-400">
+        <div className="border-t border-slate-100 dark:border-white/5 px-6 py-4 text-center text-sm font-semibold text-slate-400 dark:text-[#94A3B8]">
           منصة EduPlatform
         </div>
 
@@ -340,23 +336,16 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
 
   // ─── PIN Step ────────────────────────────────────────────────────────────────
   return (
-    <Card className="overflow-hidden rounded-[24px] border-white/10 bg-slate-950/85 text-white backdrop-blur">
-      <div
-        className="relative overflow-hidden px-6 pb-6 pt-7 sm:px-8"
-        style={{ background: `linear-gradient(135deg, ${tenant.themeColor}, #2E86C1 55%, #6FB3D2)` }}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.22),_transparent_32%)]" />
-        <div className="relative text-center text-white">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-white/30 bg-white/15 text-2xl font-extrabold shadow-lg backdrop-blur">
-            {tenant.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img alt={tenant.name} className="h-full w-full rounded-full object-cover" src={tenant.logoUrl} />
-            ) : (
-              getInitials(tenant.name)
-            )}
+    <Card 
+      className="overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
+    >
+      <div className="relative px-6 pb-2 pt-8 sm:px-8">
+        <div className="relative text-center">
+          <div className="mx-auto flex h-[48px] w-[48px] items-center justify-center">
+            <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
           </div>
-          <h1 className="mt-4 text-2xl font-extrabold">منصة EduPlatform</h1>
-          <p className="mt-2 text-sm text-white/80">
+          <h1 className="mt-4 text-2xl font-extrabold text-slate-900 dark:text-white">منصة EduPlatform</h1>
+          <p className="mt-2 text-sm text-slate-500 dark:text-[#94A3B8]">
             أدخل الـ PIN لـ <span dir="ltr">{phone}</span>
           </p>
         </div>
@@ -375,7 +364,12 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
           disabled={isPending}
         />
 
-        <Button className="w-full text-base" disabled={isPending || pin.length < PIN_MIN_LENGTH} onClick={() => handlePinSubmit(pin)} type="button">
+        <Button 
+          className="w-full text-base rounded-[10px] bg-[linear-gradient(135deg,#00B8A0,#1A2B6D)] hover:bg-[linear-gradient(135deg,#00c4ab,#1e3480)] hover:-translate-y-[1px] transition-all text-white border-0" 
+          disabled={isPending || pin.length < PIN_MIN_LENGTH} 
+          onClick={() => handlePinSubmit(pin)} 
+          type="button"
+        >
           متابعة
         </Button>
 
@@ -395,7 +389,7 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
         <button
           type="button"
           onClick={() => { setStep("phone"); setPin(""); setError(""); }}
-          className="w-full text-center text-sm text-slate-400 transition hover:text-slate-300"
+          className="w-full text-center text-sm text-slate-400 dark:text-[#94A3B8] transition hover:text-slate-600 dark:hover:text-white"
         >
           ← تغيير رقم الهاتف
         </button>

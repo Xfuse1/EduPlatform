@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { EDUCATION_STAGE_OPTIONS, formatGradeLevel, getEducationYears } from "@/lib/grade-levels";
 
 const selectClassName =
-  "touch-target flex min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none ring-0 transition focus:border-secondary focus:ring-4 focus:ring-secondary/15 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100";
+  "touch-target flex min-h-12 w-full rounded-[10px] border border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 px-4 py-3 text-sm text-slate-900 dark:text-white outline-none transition focus:border-[#00B8A0] focus:ring-4 focus:ring-[#00B8A0]/15 disabled:cursor-not-allowed disabled:opacity-60";
 
 export function StudentRegistrationForm({ tenantName, initialPhone }: { tenantName: string; initialPhone?: string }) {
   const router = useRouter();
@@ -75,33 +75,36 @@ export function StudentRegistrationForm({ tenantName, initialPhone }: { tenantNa
   };
 
   return (
-    <Card className="overflow-hidden rounded-[32px] border-white/10 bg-white/90 shadow-[0_35px_90px_rgba(8,15,30,0.28)] backdrop-blur dark:border-white/5 dark:bg-slate-950/85">
-      <CardHeader className="border-b border-slate-200/70 bg-[linear-gradient(180deg,rgba(18,37,59,0.96)_0%,rgba(28,51,78,0.94)_55%,rgba(37,68,102,0.9)_100%)] px-6 py-7 text-white dark:border-slate-800/70 sm:px-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white/80">
-          إنشاء حساب طالب
+    <Card 
+      className="overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
+    >
+      <CardHeader className="border-b border-slate-100 dark:border-white/5 px-6 py-7 text-slate-900 dark:text-white sm:px-8">
+        <div className="mx-auto mb-4 flex h-[48px] w-[48px] items-center justify-center">
+          <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
         </div>
-        <CardTitle className="mt-4 text-3xl font-extrabold tracking-tight text-white">حساب طالب جديد</CardTitle>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-200/90">
-          أنشئ حساب الطالب في {tenantName} باستخدام رقم الهاتف، وسيُطلب منك إدخال كود التحقق عبر SMS.
+        <CardTitle className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white text-center">حساب طالب جديد</CardTitle>
+        <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-[#94A3B8] text-center">
+          أنشئ حساب الطالب في {tenantName} باستخدام رقم الهاتف.
         </p>
       </CardHeader>
 
-      <CardContent className="space-y-6 bg-[linear-gradient(180deg,rgba(244,248,252,0.95)_0%,rgba(236,243,249,0.9)_100%)] p-6 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.75)_0%,rgba(15,23,42,0.88)_100%)] sm:p-8">
+      <CardContent className="space-y-6 bg-transparent p-6 sm:p-8">
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="studentName">اسم الطالب</Label>
+              <Label className="text-slate-700 dark:text-white" htmlFor="studentName">اسم الطالب</Label>
               <Input
                 id="studentName"
                 name="studentName"
                 value={studentName}
                 onChange={(event) => { setStudentName(event.target.value); setError(""); }}
                 placeholder="اكتب اسم الطالب"
+                className="bg-white border-slate-200 dark:bg-white/5 dark:border-white/10 rounded-[10px] text-slate-900 dark:text-white focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">رقم الهاتف</Label>
+              <Label className="text-slate-700 dark:text-white" htmlFor="phone">رقم الهاتف</Label>
               <Input
                 id="phone"
                 name="phone"
@@ -111,13 +114,14 @@ export function StudentRegistrationForm({ tenantName, initialPhone }: { tenantNa
                 value={phone}
                 onChange={(event) => { setPhone(event.target.value.replace(/\D/g, "")); setError(""); }}
                 placeholder="01XXXXXXXXX"
+                className="bg-white border-slate-200 dark:bg-white/5 dark:border-white/10 rounded-[10px] text-slate-900 dark:text-white focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]"
               />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="educationStage">المرحلة الدراسية</Label>
+              <Label className="text-slate-700 dark:text-white" htmlFor="educationStage">المرحلة الدراسية</Label>
               <select
                 aria-label="المرحلة الدراسية"
                 id="educationStage"
@@ -139,7 +143,7 @@ export function StudentRegistrationForm({ tenantName, initialPhone }: { tenantNa
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="gradeYear">سنة المرحلة الدراسية</Label>
+              <Label className="text-slate-700 dark:text-white" htmlFor="gradeYear">سنة المرحلة الدراسية</Label>
               <select
                 aria-label="سنة المرحلة الدراسية"
                 id="gradeYear"
@@ -164,13 +168,17 @@ export function StudentRegistrationForm({ tenantName, initialPhone }: { tenantNa
             </p>
           ) : null}
 
-          <Button className="w-full rounded-2xl py-3.5 text-base" disabled={isPending} type="submit">
+          <Button 
+            className="w-full rounded-[10px] py-3.5 text-base bg-[linear-gradient(135deg,#00B8A0,#1A2B6D)] hover:bg-[linear-gradient(135deg,#00c4ab,#1e3480)] hover:-translate-y-[1px] transition-all text-white border-0" 
+            disabled={isPending} 
+            type="submit"
+          >
             {isPending ? "جارٍ إرسال كود التحقق..." : "إرسال كود التحقق"}
           </Button>
 
-          <div className="text-center text-sm text-slate-500 dark:text-slate-400">
+          <div className="text-center text-sm text-[#94A3B8]">
             لديك حساب بالفعل؟
-            <Link href="/login" className="font-semibold text-sky-600 transition hover:text-sky-400">
+            <Link href="/login" className="font-semibold text-[#00B8A0] transition hover:text-[#00c4ab] ms-1">
               تسجيل الدخول
             </Link>
           </div>

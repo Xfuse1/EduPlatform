@@ -153,7 +153,9 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
   // ─── Success screen ───────────────────────────────────────────────────────
   if (resolvedAccount) {
     return (
-      <Card className="overflow-hidden rounded-[28px] border-white/10 bg-slate-950/85 text-white shadow-[0_24px_80px_rgba(15,23,42,0.4)] backdrop-blur">
+    <Card 
+      className="overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
+    >
         <CardContent className="flex flex-col items-center gap-6 p-8 text-center sm:p-10">
           <div className="flex h-20 w-20 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/15 text-emerald-300">
             <CheckCircle2 className="h-10 w-10" />
@@ -173,7 +175,7 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
           <p className="text-sm text-slate-400">جارٍ تحويلك تلقائيًا...</p>
           <a
             href={resolvedAccount.redirectTo}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-base font-bold text-white transition hover:bg-secondary"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-[10px] bg-[linear-gradient(135deg,#00B8A0,#1A2B6D)] px-4 py-3 text-base font-bold text-white transition hover:bg-[linear-gradient(135deg,#00c4ab,#1e3480)]"
           >
             ادخل إلى حسابك ←
           </a>
@@ -184,11 +186,15 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
 
   // ─── Main form ────────────────────────────────────────────────────────────
   return (
-    <Card className="w-full overflow-hidden rounded-[28px] border-white/10 bg-slate-950/85 font-[Cairo] text-white shadow-[0_24px_80px_rgba(15,23,42,0.4)] backdrop-blur">
-      {/* Header */}
-      <div className="border-b border-white/10 bg-[linear-gradient(135deg,_rgba(22,59,84,0.96),_rgba(26,82,118,0.98)_45%,_rgba(46,134,193,0.92))] px-6 py-7 sm:px-8">
-        <h1 className="text-2xl font-extrabold sm:text-3xl">أنشئ حساب ولي الأمر</h1>
-        <p className="mt-2 text-sm leading-7 text-white/80">
+    <Card 
+      className="w-full overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
+    >
+      <div className="border-b border-slate-100 dark:border-white/5 px-6 py-7 sm:px-8 text-center">
+        <div className="mx-auto mb-4 flex h-[48px] w-[48px] items-center justify-center">
+          <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
+        </div>
+        <h1 className="text-2xl font-extrabold sm:text-3xl text-slate-900 dark:text-white">أنشئ حساب ولي الأمر</h1>
+        <p className="mt-2 text-sm leading-7 text-slate-500 dark:text-[#94A3B8]">
           سجّل برقم هاتفك وتابع أبناءك بكل سهولة
         </p>
       </div>
@@ -203,20 +209,20 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
 
         {/* Name */}
         <div className="space-y-2">
-          <Label htmlFor="parentName">اسم ولي الأمر</Label>
+          <Label className="text-slate-900 dark:text-white" htmlFor="parentName">اسم ولي الأمر</Label>
           <Input
             id="parentName"
             placeholder="مثال: أحمد محمد علي"
             value={form.parentName}
             onChange={(e) => updateField("parentName", e.target.value)}
-            className="min-h-11 border-white/10 bg-slate-900/80 text-base text-white placeholder:text-slate-500"
+            className="min-h-11 bg-slate-100/50 border-slate-200 dark:bg-white/5 dark:border-white/10 rounded-[10px] text-slate-900 dark:text-white focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]"
           />
           {errors.parentName ? <p className="text-sm text-rose-300">{errors.parentName}</p> : null}
         </div>
 
         {/* Phone */}
         <div className="space-y-2">
-          <Label htmlFor="phone">رقم الهاتف</Label>
+          <Label className="text-slate-900 dark:text-white" htmlFor="phone">رقم الهاتف</Label>
           <Input
             id="phone"
             dir="ltr"
@@ -225,25 +231,25 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
             placeholder="01XXXXXXXXX"
             value={form.phone}
             onChange={(e) => updateField("phone", e.target.value.replace(/\D/g, ""))}
-            className="min-h-11 border-white/10 bg-slate-900/80 text-base font-semibold text-white placeholder:text-slate-500"
+            className="min-h-11 bg-slate-100/50 border-slate-200 dark:bg-white/5 dark:border-white/10 rounded-[10px] text-slate-900 dark:text-white focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0] font-semibold"
           />
-          <p className="text-sm text-slate-400">سيكون هذا الرقم هو وسيلة الدخول إلى حسابك.</p>
+          <p className="text-sm text-slate-500 dark:text-[#94A3B8]">سيكون هذا الرقم هو وسيلة الدخول إلى حسابك.</p>
           {errors.phone ? <p className="text-sm text-rose-300">{errors.phone}</p> : null}
         </div>
 
         {/* OTP section */}
-        <div className="rounded-[22px] border border-white/10 bg-slate-900/60 p-5 space-y-4">
+        <div className="rounded-[22px] border border-slate-200 bg-slate-100/30 dark:border-white/10 dark:bg-slate-900/60 p-5 space-y-4">
           <div id={RECAPTCHA_CONTAINER_ID} />
 
           <div className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${phoneVerified ? "bg-emerald-500/20 text-emerald-300" : "bg-sky-500/15 text-sky-300"}`}>
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${phoneVerified ? "bg-emerald-500/20 text-emerald-300" : "bg-[#00B8A0]/15 text-[#00B8A0]"}`}>
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-bold">
+              <p className="text-sm font-bold text-slate-900 dark:text-white">
                 {phoneVerified ? "✅ تم التحقق من رقم الهاتف" : "التحقق من رقم الهاتف"}
               </p>
-              <p className="text-xs leading-6 text-slate-400">
+              <p className="text-xs leading-6 text-slate-500 dark:text-[#94A3B8]">
                 {phoneVerified ? "يمكنك الآن إنشاء الحساب." : "سيتم إرسال كود التحقق تلقائيًا بعد إدخال رقمك."}
               </p>
             </div>
@@ -252,14 +258,14 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
           {!phoneVerified ? (
             <>
               {/* Resend / status */}
-              <div className="rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm">
+              <div className="rounded-xl border border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-slate-950/40 px-4 py-3 text-sm">
                 {isSendingOtp && !otpSent ? (
-                  <span className="inline-flex items-center gap-2 font-semibold text-sky-300">
+                  <span className="inline-flex items-center gap-2 font-semibold text-sky-500 dark:text-sky-300">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     جارٍ إرسال كود التحقق...
                   </span>
                 ) : otpSent && secondsLeft > 0 ? (
-                  <span className="font-semibold text-slate-300">
+                  <span className="font-semibold text-slate-600 dark:text-slate-300">
                     يمكنك إعادة الإرسال بعد <span dir="ltr">{secondsLeft}</span> ثانية
                   </span>
                 ) : (
@@ -267,7 +273,7 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
                     type="button"
                     disabled={isSendingOtp}
                     onClick={() => handleSendOtp(true)}
-                    className="inline-flex items-center gap-2 font-bold text-sky-300 transition hover:text-sky-200 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 font-bold text-[#00B8A0] transition hover:text-[#00c4ab] disabled:opacity-50"
                   >
                     <RefreshCw className="h-4 w-4" />
                     {otpSent ? "إعادة إرسال الكود" : "إرسال الكود يدويًا"}
@@ -275,12 +281,12 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
                 )}
               </div>
 
-              {otpError ? <p className="text-sm text-rose-300">{otpError}</p> : null}
+              {otpError ? <p className="text-sm text-rose-600 dark:text-rose-300">{otpError}</p> : null}
 
               {otpSent ? (
                 <div className="space-y-3">
                   <div className="space-y-2">
-                    <Label htmlFor="otp-code">كود التحقق</Label>
+                    <Label className="text-slate-900 dark:text-white" htmlFor="otp-code">كود التحقق</Label>
                     <Input
                       id="otp-code"
                       dir="ltr"
@@ -289,12 +295,12 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
                       placeholder="123456"
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, OTP_LENGTH))}
-                      className="min-h-11 border-white/10 bg-slate-900/80 text-base font-semibold text-white placeholder:text-slate-500"
+                      className="min-h-11 bg-slate-100/50 border-slate-200 dark:bg-white/5 dark:border-white/10 rounded-[10px] text-slate-900 dark:text-white focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0] font-semibold"
                     />
                   </div>
                   <Button
                     type="button"
-                    className="w-full min-h-11"
+                    className="w-full min-h-11 rounded-[10px] bg-[linear-gradient(135deg,#00B8A0,#1A2B6D)] hover:bg-[linear-gradient(135deg,#00c4ab,#1e3480)] hover:-translate-y-[1px] transition-all text-white border-0"
                     disabled={isVerifyingOtp}
                     onClick={handleVerifyOtp}
                   >
@@ -304,7 +310,7 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
               ) : null}
             </>
           ) : (
-            <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+            <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-200">
               تم ربط هذا الطلب برقم <span className="font-bold" dir="ltr">{form.phone}</span>
             </div>
           )}
@@ -313,7 +319,7 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
         {/* Submit */}
         <Button
           type="button"
-          className="min-h-11 w-full text-base font-bold"
+          className="min-h-11 w-full text-base font-bold rounded-[10px] bg-[linear-gradient(135deg,#00B8A0,#1A2B6D)] hover:bg-[linear-gradient(135deg,#00c4ab,#1e3480)] hover:-translate-y-[1px] transition-all text-white border-0"
           disabled={isCreating || !phoneVerified}
           onClick={handleCreateAccount}
         >
@@ -321,10 +327,10 @@ export function ParentRegisterLauncher({ initialPhone }: { initialPhone?: string
         </Button>
 
         {/* Login link */}
-        <div className="border-t border-white/10 pt-4 text-center">
-          <p className="text-sm text-slate-400">
+        <div className="border-t border-slate-100 dark:border-white/10 pt-4 text-center">
+          <p className="text-sm text-slate-500 dark:text-[#94A3B8]">
             لديك حساب بالفعل؟{" "}
-            <Link href="/login" className="font-bold text-sky-300 transition hover:text-sky-200 hover:underline">
+            <Link href="/login" className="font-bold text-[#00B8A0] transition hover:text-[#00c4ab] hover:underline">
               سجّل الدخول
               <ArrowLeft className="inline-block ms-1 h-3.5 w-3.5" />
             </Link>
