@@ -107,20 +107,20 @@ export function Sidebar({
             type="button"
             aria-label="إغلاق القائمة"
             onClick={onClose}
-            className="relative mb-4 ms-auto flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 transition hover:bg-white/20 hover:text-white xl:hidden"
+            className="relative mb-4 ms-auto flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-900 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20 dark:hover:text-white xl:hidden"
           >
             <X className="h-5 w-5" />
           </button>
         )}
 
-        <div className="relative flex min-h-[14.25rem] flex-col justify-center overflow-hidden rounded-[24px] border border-secondary/20 bg-[#081426] px-5 py-12 shadow-[0_14px_32px_rgba(3,10,25,0.22)]">
+        <div className="relative flex min-h-[14.25rem] flex-col justify-center overflow-hidden rounded-[24px] border border-slate-200 bg-slate-50 dark:border-secondary/20 dark:bg-[#081426] px-5 py-12 shadow-[0_14px_32px_rgba(3,10,25,0.05)] dark:shadow-[0_14px_32px_rgba(3,10,25,0.22)]">
           <div className="flex items-center gap-3">
             <div className="grid h-16 w-16 shrink-0 place-items-center rounded-[22px] bg-[linear-gradient(135deg,#00B8A0,#5EEAD4)] text-slate-950 shadow-[0_12px_30px_rgba(0,184,160,0.24)]">
               <span className="text-xl font-black leading-none tracking-normal">EP</span>
             </div>
             <div className="min-w-0 text-start">
-              <p className="truncate text-xl font-black leading-tight text-secondary">EduPlatform</p>
-              <p className="mt-1 truncate text-xs font-bold text-slate-400">منصة التعليم الذكية</p>
+              <p className="truncate text-xl font-black leading-tight text-slate-900 dark:text-secondary">EduPlatform</p>
+              <p className="mt-1 truncate text-xs font-bold text-slate-500 dark:text-slate-400">منصة التعليم الذكية</p>
             </div>
           </div>
           <p className="mt-5 text-start text-xs font-semibold leading-6 text-slate-400">
@@ -130,7 +130,7 @@ export function Sidebar({
 
         <div className="relative mt-8">
           <div className="mb-4 px-2">
-            <p className="text-xs font-bold tracking-wide text-white/38">التنقل الرئيسي</p>
+            <p className="text-xs font-bold tracking-wide text-slate-400 dark:text-white/40">التنقل الرئيسي</p>
           </div>
 
           <nav className="space-y-3.5">
@@ -155,7 +155,7 @@ export function Sidebar({
                       "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[15px] transition duration-300",
                       isActive
                         ? "bg-[#00B8A0]/20 text-[#00B8A0]"
-                        : "bg-white/[0.045] text-[#94A3B8] group-hover:bg-white/[0.06] group-hover:text-white",
+                        : "bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-900 dark:bg-white/[0.045] dark:text-[#94A3B8] dark:group-hover:bg-white/[0.06] dark:group-hover:text-white",
                     )}
                   >
                     <Icon className={cn("h-5 w-5 transition duration-300", isActive ? "scale-110" : "group-hover:scale-110")} />
