@@ -207,7 +207,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
 
   return (
     <main
-      className="min-h-screen scroll-smooth bg-slate-50 font-[Cairo] text-slate-900 dark:bg-[#0F172A] dark:text-white"
+      className="min-h-screen scroll-smooth bg-transparent font-[Cairo] text-slate-900 dark:text-white"
       dir="rtl"
       id="home"
     >
@@ -235,7 +235,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
           animation: float-slow 20s ease-in-out infinite;
         }
       `}</style>
-      <div className="relative overflow-hidden bg-slate-50 dark:bg-[#050814]">
+      <div className="relative overflow-hidden bg-transparent">
         {/* Background SVG Wisps - Ultra-Premium, Flowy, and Luxe */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <svg className="h-full w-full" preserveAspectRatio="none" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
@@ -365,7 +365,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
         </header>
 
         <div className="mx-auto max-w-7xl px-4 pb-12 pt-40 sm:px-6 lg:px-8 space-y-16 lg:space-y-24">
-          <section className="relative overflow-hidden rounded-[48px] border border-slate-300/60 bg-white shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-3xl dark:border-white/[0.05] dark:bg-[#0F172A]/40 sm:px-12 sm:py-16 lg:px-20 lg:py-20">
+          <section className="relative overflow-hidden rounded-[48px] border border-slate-300/60 bg-white/40 shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-3xl dark:border-white/[0.05] dark:bg-white/[0.02] sm:px-12 sm:py-16 lg:px-20 lg:py-20">
             {/* Refined Grid Pattern */}
             <div className="absolute inset-0 opacity-[0.15] [mask-image:radial-gradient(ellipse_at_center,black,transparent)]">
               <div className="h-full w-full bg-[size:32px_32px] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)]" />
@@ -806,7 +806,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
           <MarketingFaq />
 
           {/* Premium Footer CTA */}
-          <section className="relative overflow-hidden rounded-[48px] bg-[#050814] p-12 text-center sm:p-20 shadow-2xl border border-white/5">
+          <section className="relative overflow-hidden rounded-[48px] bg-transparent p-12 text-center sm:p-20 shadow-2xl border border-white/5">
             {/* Elegant Background Accents */}
             <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-indigo-600/20 blur-[100px]" />
             <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-emerald-600/10 blur-[100px]" />

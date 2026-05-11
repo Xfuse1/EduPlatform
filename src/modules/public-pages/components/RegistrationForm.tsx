@@ -71,28 +71,35 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
   }
 
   return (
-    <Card className="overflow-hidden rounded-[32px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] shadow-[0_35px_90px_rgba(8,15,30,0.28)] backdrop-blur-[16px]">
-      <CardHeader className="border-b border-white/[0.08] bg-[linear-gradient(180deg,rgba(13,27,42,0.95)_0%,rgba(26,43,109,0.9)_100%)] px-6 py-7 text-white sm:px-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-white/70">
-          <Sparkles className="h-3.5 w-3.5 text-[#00B8A0]" />
-          <span>رحلة تسجيل سريعة ومنظمة</span>
+    <Card 
+      className="overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
+    >
+      <CardHeader className="border-b border-slate-100 dark:border-white/[0.08] px-6 py-7 text-slate-900 dark:text-white sm:px-8">
+        <div className="mx-auto mb-6 flex h-[48px] w-[48px] items-center justify-center">
+          <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
         </div>
-        <CardTitle className="mt-4 text-3xl font-black tracking-tight text-white">استمارة التسجيل</CardTitle>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-white/50">
-          خطوتان فقط لإرسال طلب التسجيل واختيار المجموعة الأنسب بشكل واضح ومريح.
-        </p>
+        <div className="flex flex-col items-center text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-white/70">
+            <Sparkles className="h-3.5 w-3.5 text-[#00B8A0]" />
+            <span>رحلة تسجيل سريعة ومنظمة</span>
+          </div>
+          <CardTitle className="mt-4 text-3xl font-black tracking-tight text-slate-900 dark:text-white">استمارة التسجيل</CardTitle>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#94A3B8]">
+            خطوتان فقط لإرسال طلب التسجيل واختيار المجموعة الأنسب بشكل واضح ومريح.
+          </p>
+        </div>
 
 
         <div className="mt-7 grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
           <div
             className={`rounded-[22px] border px-5 py-4 transition ${
               step === 1
-                ? "border-secondary/40 bg-[linear-gradient(135deg,rgba(46,134,193,0.28),rgba(26,82,118,0.18))] shadow-[0_18px_40px_rgba(46,134,193,0.16)]"
+                ? "border-[#00B8A0]/40 bg-[#00B8A0]/10 shadow-[0_18px_40px_rgba(0,184,160,0.12)]"
                 : "border-white/10 bg-white/[0.04] text-white/70"
             }`}
           >
             <p className="text-sm font-bold">١. البيانات الشخصية</p>
-            <p className={`mt-2 text-sm ${step === 1 ? "text-white/88" : "text-slate-300/70"}`}>معلومات الطالب وولي الأمر</p>
+            <p className={`mt-2 text-sm ${step === 1 ? "text-white" : "text-[#94A3B8]"}`}>معلومات الطالب وولي الأمر</p>
           </div>
 
           <div className="hidden h-px min-w-14 bg-gradient-to-l from-transparent via-white/35 to-transparent sm:block" />
@@ -100,12 +107,12 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
           <div
             className={`rounded-[22px] border px-5 py-4 transition ${
               step === 2
-                ? "border-secondary/40 bg-[linear-gradient(135deg,rgba(46,134,193,0.28),rgba(26,82,118,0.18))] shadow-[0_18px_40px_rgba(46,134,193,0.16)]"
+                ? "border-[#00B8A0]/40 bg-[#00B8A0]/10 shadow-[0_18px_40px_rgba(0,184,160,0.12)]"
                 : "border-white/10 bg-white/[0.04] text-white/70"
             }`}
           >
             <p className="text-sm font-bold">٢. اختيار المجموعة</p>
-            <p className={`mt-2 text-sm ${step === 2 ? "text-white/88" : "text-slate-300/70"}`}>مراجعة السعة والموعد والرسوم</p>
+            <p className={`mt-2 text-sm ${step === 2 ? "text-white" : "text-[#94A3B8]"}`}>مراجعة السعة والموعد والرسوم</p>
           </div>
         </div>
       </CardHeader>
@@ -117,18 +124,18 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
               <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-xl backdrop-blur">
                 <div className="mb-5">
                   <p className="text-lg font-bold text-slate-900 dark:text-white">البيانات الأساسية</p>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">أدخل بيانات الطالب وولي الأمر بصياغة واضحة ومرتبة.</p>
+                  <p className="mt-1 text-sm text-[#94A3B8]">أدخل بيانات الطالب وولي الأمر بصياغة واضحة ومرتبة.</p>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <Label className="mb-3 text-slate-700 dark:text-slate-100" htmlFor="studentName">
+                    <Label className="mb-3 text-slate-700 dark:text-white" htmlFor="studentName">
                       اسم الطالب
                     </Label>
                     <div className="relative">
-                      <UserRound className="pointer-events-none absolute inset-y-0 start-4 my-auto h-4 w-4 text-slate-400" />
+                      <UserRound className="pointer-events-none absolute inset-y-0 start-4 my-auto h-4 w-4 text-[#94A3B8]" />
                       <Input
-                        className="rounded-2xl border-white/10 bg-white/5 ps-10 text-white placeholder:text-white/20"
+                        className="rounded-[10px] border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 ps-10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]"
                         id="studentName"
                         name="studentName"
                         placeholder="اكتب اسم الطالب"
@@ -136,11 +143,11 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
                     </div>
                   </div>
                   <div>
-                    <Label className="mb-3 text-slate-700 dark:text-slate-100" htmlFor="grade">
+                    <Label className="mb-3 text-slate-700 dark:text-white" htmlFor="grade">
                       الصف الدراسي
                     </Label>
                     <Input
-                      className="rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-white/20"
+                      className="rounded-[10px] border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]"
                       id="grade"
                       name="grade"
                       placeholder="مثال: الصف الثالث الثانوي"
@@ -150,22 +157,22 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
 
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                   <div>
-                    <Label className="mb-3 text-slate-700 dark:text-slate-100" htmlFor="parentName">
+                    <Label className="mb-3 text-slate-700 dark:text-white" htmlFor="parentName">
                       اسم ولي الأمر
                     </Label>
                     <Input
-                      className="rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-white/20"
+                      className="rounded-[10px] border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]"
                       id="parentName"
                       name="parentName"
                       placeholder="اكتب اسم ولي الأمر"
                     />
                   </div>
                   <div>
-                    <Label className="mb-3 text-slate-700 dark:text-slate-100" htmlFor="parentPhone">
+                    <Label className="mb-3 text-slate-700 dark:text-white" htmlFor="parentPhone">
                       رقم ولي الأمر
                     </Label>
                     <Input
-                      className="rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-white/20"
+                      className="rounded-[10px] border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]"
                       dir="ltr"
                       id="parentPhone"
                       inputMode="numeric"
@@ -176,17 +183,21 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
                 </div>
               </div>
 
-              <Button className="w-full gap-2 rounded-2xl py-3.5 text-base shadow-[0_18px_45px_rgba(26,82,118,0.24)]" onClick={() => setStep(2)} type="button">
+              <Button 
+                className="w-full gap-2 rounded-[10px] py-3.5 text-base bg-[linear-gradient(135deg,#00B8A0,#1A2B6D)] hover:bg-[linear-gradient(135deg,#00c4ab,#1e3480)] hover:-translate-y-[1px] transition-all text-white border-0" 
+                onClick={() => setStep(2)} 
+                type="button"
+              >
                 التالي
                 <ChevronLeft className="h-4 w-4" />
               </Button>
             </>
           ) : (
             <>
-              <div className="rounded-[28px] border border-slate-200/70 bg-white/75 p-5 shadow-[0_20px_45px_rgba(15,23,42,0.06)] backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/35">
+              <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-xl backdrop-blur">
                 <div className="mb-5">
                   <Label className="mb-0 text-base font-bold text-slate-900 dark:text-white">اختر المجموعة</Label>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">اختر الموعد الأنسب لك من حيث الوقت والسعة والرسوم.</p>
+                  <p className="mt-1 text-sm text-[#94A3B8]">اختر الموعد الأنسب لك من حيث الوقت والسعة والرسوم.</p>
                 </div>
                 <input name="groupId" type="hidden" value={selectedGroupId} />
                 <GroupSelector groups={groups} onChange={setSelectedGroupId} selectedGroupId={selectedGroupId} />
@@ -200,14 +211,18 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <Button
-                  className="w-full rounded-2xl border-slate-300/80 bg-white/80 py-3.5 text-base dark:bg-slate-950/20"
+                  className="w-full rounded-[10px] border-white/10 bg-white/5 py-3.5 text-base text-[#94A3B8] hover:text-white hover:bg-white/10 transition-all"
                   onClick={() => setStep(1)}
                   type="button"
                   variant="outline"
                 >
                   العودة للبيانات
                 </Button>
-                <Button className="w-full rounded-2xl py-3.5 text-base shadow-[0_18px_45px_rgba(26,82,118,0.24)]" disabled={isPending || !selectedGroupId} type="submit">
+                <Button 
+                  className="w-full rounded-[10px] py-3.5 text-base bg-[linear-gradient(135deg,#00B8A0,#1A2B6D)] hover:bg-[linear-gradient(135deg,#00c4ab,#1e3480)] hover:-translate-y-[1px] transition-all text-white border-0" 
+                  disabled={isPending || !selectedGroupId} 
+                  type="submit"
+                >
                   {isPending ? "جارٍ إرسال التسجيل..." : "تأكيد التسجيل"}
                 </Button>
               </div>

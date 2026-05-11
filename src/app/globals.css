@@ -14,6 +14,10 @@
   --color-bg: #f8fafc;
   --color-surface: #ffffff;
   --color-border: #e2e8f0;
+  --app-bg: radial-gradient(circle at 10% 20%, rgba(0,184,160,0.18) 0%, transparent 50%), 
+              radial-gradient(circle at 90% 80%, rgba(26,43,109,0.15) 0%, transparent 50%), 
+              radial-gradient(circle at 50% 50%, rgba(0,184,160,0.05) 0%, transparent 70%), 
+              #eff3f8;
   --glow-teal: 0 0 20px rgba(0, 184, 160, 0.1);
   --glow-gold: 0 0 20px rgba(245, 166, 35, 0.1);
   
@@ -38,6 +42,7 @@
   --color-bg: #0D1B2A;
   --color-surface: rgba(255, 255, 255, 0.05);
   --color-border: rgba(255, 255, 255, 0.08);
+  --app-bg: radial-gradient(ellipse at 15% 50%, rgba(0,184,160,0.12) 0%, transparent 50%), radial-gradient(ellipse at 85% 20%, rgba(26,43,109,0.4) 0%, transparent 50%), #0D1B2A;
   --glow-teal: 0 0 20px rgba(0, 184, 160, 0.3);
   --glow-gold: 0 0 20px rgba(245, 166, 35, 0.3);
 
@@ -66,7 +71,8 @@ html[data-font="xlarge"] {
 }
 
 body {
-  background-color: var(--background);
+  background: var(--app-bg);
+  background-attachment: fixed;
   color: var(--foreground);
   @apply min-h-screen antialiased transition-colors duration-300;
   font-family: "Cairo", "Tajawal", sans-serif;

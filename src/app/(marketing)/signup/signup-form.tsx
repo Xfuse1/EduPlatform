@@ -211,10 +211,15 @@ export function SignupForm({ initialPhone }: { initialPhone?: string }) {
   };
 
   return (
-    <Card className="w-full overflow-hidden rounded-[28px] border-white/10 bg-slate-950/85 font-[Cairo] text-white shadow-[0_24px_80px_rgba(15,23,42,0.4)] backdrop-blur">
-      <div className="border-b border-white/10 bg-[linear-gradient(135deg,_rgba(22,59,84,0.96),_rgba(26,82,118,0.98)_45%,_rgba(46,134,193,0.92))] px-6 py-7 sm:px-8">
-        <h1 className="text-2xl font-extrabold sm:text-3xl">إنشاء حساب معلم</h1>
-        <p className="mt-2 text-sm leading-7 text-white/80">ابدأ حسابك وفعّل منصتك برابط خاص بك.</p>
+    <Card 
+      className="w-full overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
+    >
+      <div className="border-b border-white/5 px-6 py-7 sm:px-8 text-center">
+        <div className="mx-auto mb-4 flex h-[48px] w-[48px] items-center justify-center">
+          <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
+        </div>
+        <h1 className="mt-5 text-3xl font-extrabold text-slate-900 dark:text-white">منصة EduPlatform</h1>
+        <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-[#94A3B8]">سجّل كمعلم أو صاحب مركز وانطلق في رحلتك التعليمية.</p>
       </div>
 
       <CardContent className="space-y-5 p-6 sm:p-8">
@@ -231,27 +236,27 @@ export function SignupForm({ initialPhone }: { initialPhone?: string }) {
         ) : null}
 
         <div className="space-y-2">
-          <Label htmlFor="teacherName">اسم المدرس</Label>
-          <Input id="teacherName" value={form.teacherName} onChange={(e) => updateField("teacherName", e.target.value)} placeholder="مثال: أحمد محمد علي" className="min-h-11 border-white/10 bg-slate-900/80 text-base text-white placeholder:text-slate-500" />
+          <Label className="text-slate-900 dark:text-white" htmlFor="teacherName">اسم المدرس</Label>
+          <Input id="teacherName" value={form.teacherName} onChange={(e) => updateField("teacherName", e.target.value)} placeholder="مثال: أحمد محمد علي" className="min-h-11 rounded-[10px] border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]" />
           {errors.teacherName ? <p className="text-sm text-rose-300">{errors.teacherName}</p> : null}
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="subject">المادة</Label>
-            <Input id="subject" value={form.subject} onChange={(e) => updateField("subject", e.target.value)} placeholder="رياضيات" className="min-h-11 border-white/10 bg-slate-900/80 text-base text-white placeholder:text-slate-500" />
+            <Label className="text-slate-900 dark:text-white" htmlFor="subject">المادة</Label>
+            <Input id="subject" value={form.subject} onChange={(e) => updateField("subject", e.target.value)} placeholder="رياضيات" className="min-h-11 rounded-[10px] border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]" />
             {errors.subject ? <p className="text-sm text-rose-300">{errors.subject}</p> : null}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="governorate">المحافظة</Label>
-            <Input id="governorate" value={form.governorate} onChange={(e) => updateField("governorate", e.target.value)} placeholder="القاهرة" className="min-h-11 border-white/10 bg-slate-900/80 text-base text-white placeholder:text-slate-500" />
+            <Label className="text-slate-900 dark:text-white" htmlFor="governorate">المحافظة</Label>
+            <Input id="governorate" value={form.governorate} onChange={(e) => updateField("governorate", e.target.value)} placeholder="القاهرة" className="min-h-11 rounded-[10px] border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]" />
             {errors.governorate ? <p className="text-sm text-rose-300">{errors.governorate}</p> : null}
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="subdomain">رابط الحساب (Subdomain)</Label>
-          <Input id="subdomain" dir="ltr" value={form.subdomain} onChange={(e) => updateField("subdomain", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} onBlur={handleSubdomainCheck} placeholder="ahmed-math" className="min-h-11 border-white/10 bg-slate-900/80 text-base font-semibold text-white placeholder:text-slate-500" />
+          <Label className="text-slate-900 dark:text-white" htmlFor="subdomain">رابط الحساب (Subdomain)</Label>
+          <Input id="subdomain" dir="ltr" value={form.subdomain} onChange={(e) => updateField("subdomain", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} onBlur={handleSubdomainCheck} placeholder="ahmed-math" className="min-h-11 rounded-[10px] border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0] font-semibold" />
           {errors.subdomain ? <p className="text-sm text-rose-300">{errors.subdomain}</p> : null}
           {subdomainState === "checking" ? <p className="text-sm text-sky-300">جارٍ التحقق من الرابط...</p> : null}
           {subdomainState === "available" ? <p className="text-sm text-emerald-300">{subdomainMessage}</p> : null}
@@ -259,18 +264,18 @@ export function SignupForm({ initialPhone }: { initialPhone?: string }) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">رقم الهاتف</Label>
-          <Input id="phone" dir="ltr" inputMode="numeric" maxLength={11} value={form.phone} onChange={(e) => updateField("phone", e.target.value.replace(/\D/g, ""))} placeholder="01XXXXXXXXX" className="min-h-11 border-white/10 bg-slate-900/80 text-base font-semibold text-white placeholder:text-slate-500" />
+          <Label className="text-slate-900 dark:text-white" htmlFor="phone">رقم الهاتف</Label>
+          <Input id="phone" dir="ltr" inputMode="numeric" maxLength={11} value={form.phone} onChange={(e) => updateField("phone", e.target.value.replace(/\D/g, ""))} placeholder="01XXXXXXXXX" className="min-h-11 rounded-[10px] border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0] font-semibold" />
           {errors.phone ? <p className="text-sm text-rose-300">{errors.phone}</p> : null}
         </div>
 
         <div className="rounded-[22px] border border-white/10 bg-slate-900/60 p-5 space-y-4">
           <div id={RECAPTCHA_CONTAINER_ID} />
           <div className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${phoneVerified ? "bg-emerald-500/20 text-emerald-300" : "bg-sky-500/15 text-sky-300"}`}>
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${phoneVerified ? "bg-emerald-500/20 text-emerald-300" : "bg-[#00B8A0]/15 text-[#00B8A0]"}`}>
               <ShieldCheck className="h-5 w-5" />
             </div>
-            <p className="text-sm">{phoneVerified ? "تم التحقق من رقم الهاتف" : "التحقق من رقم الهاتف"}</p>
+            <p className="text-sm text-slate-900 dark:text-white">{phoneVerified ? "تم التحقق من رقم الهاتف" : "التحقق من رقم الهاتف"}</p>
           </div>
 
           {!phoneVerified ? (
@@ -281,7 +286,7 @@ export function SignupForm({ initialPhone }: { initialPhone?: string }) {
                 ) : otpSent && secondsLeft > 0 ? (
                   <span className="font-semibold text-slate-300">يمكنك إعادة الإرسال بعد <span dir="ltr">{secondsLeft}</span> ثانية</span>
                 ) : (
-                  <button type="button" disabled={isSendingOtp} onClick={() => handleSendOtp(true)} className="inline-flex items-center gap-2 font-bold text-sky-300 transition hover:text-sky-200 disabled:opacity-50">
+                  <button type="button" disabled={isSendingOtp} onClick={() => handleSendOtp(true)} className="inline-flex items-center gap-2 font-bold text-[#00B8A0] transition hover:text-[#00c4ab] disabled:opacity-50">
                     <RefreshCw className="h-4 w-4" />
                     {otpSent ? "إعادة إرسال الكود" : "إرسال الكود"}
                   </button>
@@ -292,8 +297,8 @@ export function SignupForm({ initialPhone }: { initialPhone?: string }) {
 
               {otpSent ? (
                 <div className="space-y-3">
-                  <Input dir="ltr" inputMode="numeric" maxLength={OTP_LENGTH} value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, OTP_LENGTH))} placeholder="123456" className="min-h-11 border-white/10 bg-slate-900/80 text-base font-semibold text-white placeholder:text-slate-500" />
-                  <Button type="button" className="w-full min-h-11" disabled={isVerifyingOtp} onClick={handleVerifyOtp}>
+                  <Input dir="ltr" inputMode="numeric" maxLength={OTP_LENGTH} value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, OTP_LENGTH))} placeholder="123456" className="min-h-11 rounded-[10px] border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0] font-semibold" />
+                  <Button type="button" className="w-full min-h-11 rounded-[10px] bg-[linear-gradient(135deg,#00B8A0,#1A2B6D)] hover:bg-[linear-gradient(135deg,#00c4ab,#1e3480)] hover:-translate-y-[1px] transition-all text-white border-0" disabled={isVerifyingOtp} onClick={handleVerifyOtp}>
                     {isVerifyingOtp ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />جارٍ التحقق...</> : "تأكيد الكود"}
                   </Button>
                 </div>
@@ -302,14 +307,19 @@ export function SignupForm({ initialPhone }: { initialPhone?: string }) {
           ) : null}
         </div>
 
-        <Button type="button" className="min-h-11 w-full text-base font-bold" disabled={isCreating || !phoneVerified} onClick={handleCreateAccount}>
+        <Button 
+          type="button" 
+          className="min-h-11 w-full text-base font-bold rounded-[10px] bg-[linear-gradient(135deg,#00B8A0,#1A2B6D)] hover:bg-[linear-gradient(135deg,#00c4ab,#1e3480)] hover:-translate-y-[1px] transition-all text-white border-0" 
+          disabled={isCreating || !phoneVerified} 
+          onClick={handleCreateAccount}
+        >
           {isCreating ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />جارٍ إنشاء الحساب...</> : "إنشاء حساب معلم ←"}
         </Button>
 
         <div className="border-t border-white/10 pt-4 text-center">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-[#94A3B8]">
             لديك حساب بالفعل؟{" "}
-            <Link href="/login" className="font-bold text-sky-300 transition hover:text-sky-200 hover:underline">
+            <Link href="/login" className="font-bold text-[#00B8A0] transition hover:text-[#00c4ab] hover:underline">
               سجل الدخول
               <ArrowLeft className="inline-block ms-1 h-3.5 w-3.5" />
             </Link>
