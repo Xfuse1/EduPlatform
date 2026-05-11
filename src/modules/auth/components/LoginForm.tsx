@@ -231,9 +231,15 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
         <div className="relative px-6 pb-2 pt-8 sm:px-8">
           <div className="relative text-center">
             <div className="mx-auto flex h-[48px] w-[48px] items-center justify-center">
-              <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
+              <img 
+                alt="Logo" 
+                className="h-full w-full object-contain" 
+                src={tenant.logoUrl || "/images/logo.svg"} 
+              />
             </div>
-            <h1 className="mt-5 text-3xl font-extrabold text-slate-900 dark:text-white">منصة EduPlatform</h1>
+            <h1 className="mt-5 text-3xl font-extrabold text-slate-900 dark:text-white">
+              {tenant.name}
+            </h1>
             <p className="mt-3 text-sm leading-7 text-[#94A3B8]">سجّل الدخول برقم الهاتف.</p>
           </div>
         </div>
@@ -326,7 +332,7 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
         </CardContent>
 
         <div className="border-t border-slate-100 dark:border-white/5 px-6 py-4 text-center text-sm font-semibold text-slate-500 dark:text-[#94A3B8]">
-          منصة EduPlatform
+          {tenant.name}
         </div>
 
         <div id="recaptcha-container-login" ref={recaptchaContainerRef} />
@@ -342,9 +348,15 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
       <div className="relative px-6 pb-2 pt-8 sm:px-8">
         <div className="relative text-center">
           <div className="mx-auto flex h-[48px] w-[48px] items-center justify-center">
-            <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
+            <img 
+              alt="Logo" 
+              className="h-full w-full object-contain" 
+              src={tenant.logoUrl || "/images/logo.svg"} 
+            />
           </div>
-          <h1 className="mt-4 text-2xl font-extrabold text-slate-900 dark:text-white">منصة EduPlatform</h1>
+          <h1 className="mt-4 text-2xl font-extrabold text-slate-900 dark:text-white">
+            {tenant.name}
+          </h1>
           <p className="mt-2 text-sm text-slate-500 dark:text-[#94A3B8]">
             أدخل الـ PIN لـ <span dir="ltr">{phone}</span>
           </p>
