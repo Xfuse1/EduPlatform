@@ -171,11 +171,15 @@ export async function adjustUserWalletAction(formData: FormData) {
 
   const user = await db.user.findFirst({
     where: { id: userId, tenantId },
-    select: { id: true },
+    select: { id: true, role: true },
   });
 
   if (!user) {
     throw new Error("المستخدم غير موجود داخل هذا الحساب");
+  }
+
+  if (user.role === "SUPER_ADMIN") {
+    throw new Error("لا يمكن تعديل محفظة السوبر أدمن من هذه الصفحة");
   }
 
   if (operation === "CREDIT") {

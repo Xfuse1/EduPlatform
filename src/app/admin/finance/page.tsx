@@ -1,4 +1,5 @@
 import { adjustUserWalletAction } from "@/modules/admin/actions";
+import { AdminFinanceSelect } from "@/modules/admin/components/AdminFinanceSelect";
 import {
   getPlatformPayments,
   getPlatformSubscriptions,
@@ -18,6 +19,90 @@ type PageProps = {
     walletSearch?: string;
   }>;
 };
+
+const financeInputClass =
+  "h-11 w-full rounded-xl border border-sky-300/20 bg-slate-950/80 px-3 text-sm font-semibold text-slate-100 placeholder:text-slate-500 outline-none transition [color-scheme:dark] hover:border-sky-300/40 focus:border-cyan-300/70 focus:ring-2 focus:ring-cyan-300/15";
+
+const compactControlClass =
+  "h-10 min-w-0 rounded-xl border border-sky-300/20 bg-slate-950/85 px-3 text-sm font-semibold text-slate-100 placeholder:text-slate-500 outline-none transition [color-scheme:dark] hover:border-sky-300/40 focus:border-cyan-300/70 focus:ring-2 focus:ring-cyan-300/15 [&>option]:bg-slate-950 [&>option]:text-slate-100";
+
+const subscriptionStatusOptions = [
+  { value: "", label: "كل الاشتراكات" },
+  { value: "ACTIVE", label: "نشطة" },
+  { value: "INACTIVE", label: "غير نشطة" },
+];
+
+const paymentStatusOptions = [
+  { value: "", label: "كل المدفوعات" },
+  { value: "PAID", label: "مدفوع" },
+  { value: "PENDING", label: "معلّق" },
+  { value: "OVERDUE", label: "متأخر" },
+  { value: "PARTIAL", label: "جزئي" },
+];
+
+const transferStatusOptions = [
+  { value: "", label: "كل التحويلات" },
+  { value: "SUCCESS", label: "ناجحة" },
+  { value: "PENDING", label: "معلّقة" },
+  { value: "RETRY", label: "إعادة محاولة" },
+  { value: "FAILED", label: "فاشلة" },
+];
+
+const walletRoleOptions = [
+  { value: "", label: "كل الأدوار" },
+  { value: "TEACHER", label: "معلم" },
+  { value: "CENTER_ADMIN", label: "سنتر" },
+  { value: "STUDENT", label: "طالب" },
+  { value: "PARENT", label: "ولي أمر" },
+];
+
+const walletBalanceOptions = [
+  { value: "", label: "كل الأرصدة" },
+  { value: "POSITIVE", label: "رصيد موجب" },
+  { value: "ZERO", label: "رصيد صفر" },
+];
+
+const walletOperationOptions = [
+  { value: "CREDIT", label: "إضافة رصيد" },
+  { value: "DEBIT", label: "خصم رصيد" },
+  { value: "PAYOUT", label: "تسجيل سحب" },
+];
+
+const adminWithdrawalMethodOptions = [
+  { value: "CASH", label: "سحب كاش" },
+  { value: "ELECTRONIC_WALLET", label: "محفظة إلكترونية" },
+  { value: "INSTAPAY", label: "InstaPay" },
+  { value: "BANK_TRANSFER", label: "تحويل بنكي" },
+  { value: "OTHER", label: "طريقة أخرى" },
+];
+
+const withdrawalStatusOptions = [
+  { value: "", label: "كل طلبات السحب" },
+  { value: "PENDING", label: "معلقة" },
+  { value: "SUCCESS", label: "ناجحة" },
+  { value: "FAILED", label: "فاشلة" },
+];
+
+function getWalletRoleLabel(role: string) {
+  switch (role) {
+    case "TEACHER":
+      return "معلم";
+    case "CENTER_ADMIN":
+      return "سنتر";
+    case "ADMIN":
+      return "مدير";
+    case "MANAGER":
+      return "مشرف";
+    case "STUDENT":
+      return "طالب";
+    case "PARENT":
+      return "ولي أمر";
+    case "ASSISTANT":
+      return "مساعد";
+    default:
+      return role;
+  }
+}
 
 export default async function AdminFinancePage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
@@ -68,26 +153,10 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
 
       <section className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur">
         <form className="grid gap-3 md:grid-cols-3" method="GET">
-          <select className="rounded-xl border border-slate-600 bg-slate-950/50 px-3 py-2 text-sm text-white outline-none focus:border-sky-300/40" defaultValue={subscriptionStatus ?? ""} name="subscriptionStatus">
-            <option value="">كل الاشتراكات</option>
-            <option value="ACTIVE">نشطة</option>
-            <option value="INACTIVE">غير نشطة</option>
-          </select>
-          <select className="rounded-xl border border-slate-600 bg-slate-950/50 px-3 py-2 text-sm text-white outline-none focus:border-sky-300/40" defaultValue={paymentStatus ?? ""} name="paymentStatus">
-            <option value="">كل المدفوعات</option>
-            <option value="PAID">مدفوع</option>
-            <option value="PENDING">معلّق</option>
-            <option value="OVERDUE">متأخر</option>
-            <option value="PARTIAL">جزئي</option>
-          </select>
+          <AdminFinanceSelect defaultValue={subscriptionStatus ?? ""} name="subscriptionStatus" options={subscriptionStatusOptions} />
+          <AdminFinanceSelect defaultValue={paymentStatus ?? ""} name="paymentStatus" options={paymentStatusOptions} />
           <div className="flex gap-3">
-            <select className="w-full rounded-xl border border-slate-600 bg-slate-950/50 px-3 py-2 text-sm text-white outline-none focus:border-sky-300/40" defaultValue={transferStatus ?? ""} name="transferStatus">
-              <option value="">كل التحويلات</option>
-              <option value="SUCCESS">ناجحة</option>
-              <option value="PENDING">معلّقة</option>
-              <option value="RETRY">إعادة محاولة</option>
-              <option value="FAILED">فاشلة</option>
-            </select>
+            <AdminFinanceSelect defaultValue={transferStatus ?? ""} name="transferStatus" options={transferStatusOptions} />
             <button className="rounded-xl border border-sky-300/30 bg-sky-300/15 px-4 py-2 text-sm font-bold text-white transition hover:bg-sky-300/25" type="submit">
               تطبيق
             </button>
@@ -101,55 +170,43 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
             <h2 className="text-lg font-bold text-white">محافظ المستخدمين</h2>
             <p className="text-xs text-slate-400">آخر {wallets.items.length} من أصل {wallets.total}</p>
           </div>
-          <form className="grid gap-2 sm:grid-cols-4" method="GET">
-            <input className="rounded-xl border border-slate-600 bg-slate-950/50 px-3 py-2 text-sm text-white outline-none focus:border-sky-300/40" defaultValue={walletSearch} name="walletSearch" placeholder="بحث بالاسم أو الهاتف" />
-            <select className="rounded-xl border border-slate-600 bg-slate-950/50 px-3 py-2 text-sm text-white outline-none focus:border-sky-300/40" defaultValue={walletRole} name="walletRole">
-              <option value="">كل الأدوار</option>
-              <option value="TEACHER">معلم</option>
-              <option value="CENTER_ADMIN">سنتر</option>
-              <option value="STUDENT">طالب</option>
-              <option value="PARENT">ولي أمر</option>
-            </select>
-            <select className="rounded-xl border border-slate-600 bg-slate-950/50 px-3 py-2 text-sm text-white outline-none focus:border-sky-300/40" defaultValue={walletBalance ?? ""} name="walletBalance">
-              <option value="">كل الأرصدة</option>
-              <option value="POSITIVE">رصيد موجب</option>
-              <option value="ZERO">رصيد صفر</option>
-            </select>
+          <form className="grid w-full gap-2 sm:grid-cols-2 lg:w-auto lg:grid-cols-4" method="GET">
+            <input className={financeInputClass} defaultValue={walletSearch} name="walletSearch" placeholder="بحث بالاسم أو الهاتف" />
+            <AdminFinanceSelect defaultValue={walletRole} name="walletRole" options={walletRoleOptions} />
+            <AdminFinanceSelect defaultValue={walletBalance ?? ""} name="walletBalance" options={walletBalanceOptions} />
             <button className="rounded-xl border border-sky-300/30 bg-sky-300/15 px-4 py-2 text-sm font-bold text-white transition hover:bg-sky-300/25" type="submit">
               عرض المحافظ
             </button>
           </form>
         </div>
 
-        <div className="grid gap-3 xl:grid-cols-2">
+        <div className="grid gap-4 xl:grid-cols-2">
           {wallets.items.map((wallet) => (
-            <article key={wallet.id} className="rounded-xl border border-slate-700/60 bg-slate-950/50 p-3 text-sm">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-bold text-white">{wallet.user.name}</p>
-                  <p className="text-xs text-slate-400">{wallet.user.role} | {wallet.user.phone}</p>
-                  <p className="text-xs text-slate-400">{wallet.tenant.name} / {wallet.tenant.slug}</p>
+            <article key={wallet.id} className="overflow-visible rounded-2xl border border-sky-300/15 bg-slate-950/60 p-4 text-sm shadow-[0_16px_40px_rgba(2,8,23,0.24)]">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 space-y-1">
+                  <p className="truncate text-base font-extrabold text-white">{wallet.user.name}</p>
+                  <div className="flex max-w-full flex-wrap items-center gap-2 text-xs">
+                    <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 font-bold text-cyan-100">
+                      {getWalletRoleLabel(wallet.user.role)}
+                    </span>
+                    <span className="min-w-0 truncate text-slate-400">{wallet.user.phone}</span>
+                  </div>
+                  <p className="truncate text-xs text-slate-500">{wallet.tenant.name} / {wallet.tenant.slug}</p>
                 </div>
-                <p className="text-lg font-extrabold text-emerald-300">{wallet.balance.toLocaleString("en-US")} ج.م</p>
+                <div className="shrink-0 rounded-2xl border border-emerald-300/15 bg-emerald-300/10 px-3 py-2 text-start">
+                  <p className="text-[11px] font-bold text-emerald-100/80">رصيد المحفظة</p>
+                  <p className="text-xl font-extrabold text-emerald-300">{wallet.balance.toLocaleString("en-US")} ج.م</p>
+                </div>
               </div>
-              <form action={adjustUserWalletAction} className="mt-3 grid gap-2 md:grid-cols-[1fr_1fr_1fr_1fr_auto]">
+              <form action={adjustUserWalletAction} className="mt-4 grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2">
                 <input name="tenantId" type="hidden" value={wallet.tenantId} />
                 <input name="userId" type="hidden" value={wallet.userId} />
-                <select className="rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-xs text-white" name="operation" defaultValue="CREDIT">
-                  <option value="CREDIT">إضافة رصيد</option>
-                  <option value="DEBIT">خصم رصيد</option>
-                  <option value="PAYOUT">تسجيل سحب</option>
-                </select>
-                <select className="rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-xs text-white" name="adminWithdrawalMethod" defaultValue="CASH">
-                  <option value="CASH">سحب كاش</option>
-                  <option value="ELECTRONIC_WALLET">محفظة إلكترونية</option>
-                  <option value="INSTAPAY">InstaPay</option>
-                  <option value="BANK_TRANSFER">تحويل بنكي</option>
-                  <option value="OTHER">طريقة أخرى</option>
-                </select>
-                <input className="rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-xs text-white" name="amount" placeholder="المبلغ" inputMode="numeric" />
-                <input className="rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-xs text-white" name="reason" placeholder="السبب" />
-                <button className="rounded-lg bg-sky-500 px-3 py-2 text-xs font-bold text-white" type="submit">تنفيذ</button>
+                <AdminFinanceSelect defaultValue="CREDIT" name="operation" options={walletOperationOptions} />
+                <AdminFinanceSelect defaultValue="CASH" name="adminWithdrawalMethod" options={adminWithdrawalMethodOptions} />
+                <input className={compactControlClass} name="amount" placeholder="المبلغ" inputMode="numeric" />
+                <input className={compactControlClass} name="reason" placeholder="السبب" />
+                <button className="h-10 rounded-xl bg-gradient-to-l from-sky-500 to-cyan-400 px-4 text-sm font-extrabold text-white shadow-lg shadow-sky-950/25 transition hover:brightness-110 sm:col-span-2" type="submit">تنفيذ</button>
               </form>
             </article>
           ))}
@@ -163,12 +220,7 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
             <p className="text-xs text-slate-400">آخر {withdrawals.items.length} من أصل {withdrawals.total}</p>
           </div>
           <form className="flex gap-2" method="GET">
-            <select className="rounded-xl border border-slate-600 bg-slate-950/50 px-3 py-2 text-sm text-white outline-none focus:border-sky-300/40" defaultValue={withdrawalStatus ?? ""} name="withdrawalStatus">
-              <option value="">كل طلبات السحب</option>
-              <option value="PENDING">معلقة</option>
-              <option value="SUCCESS">ناجحة</option>
-              <option value="FAILED">فاشلة</option>
-            </select>
+            <AdminFinanceSelect defaultValue={withdrawalStatus ?? ""} name="withdrawalStatus" options={withdrawalStatusOptions} />
             <button className="rounded-xl border border-sky-300/30 bg-sky-300/15 px-4 py-2 text-sm font-bold text-white transition hover:bg-sky-300/25" type="submit">
               تطبيق
             </button>

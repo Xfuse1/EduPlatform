@@ -215,7 +215,7 @@ export function SignupForm({ initialPhone }: { initialPhone?: string }) {
       className="w-full overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
     >
       <div className="border-b border-white/5 px-6 py-7 sm:px-8 text-center">
-        <div className="mx-auto mb-4 flex h-[48px] w-[48px] items-center justify-center">
+        <div className="mx-auto mb-4 flex h-12 w-40 items-center justify-center sm:h-14 sm:w-48">
           <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
         </div>
         <h1 className="mt-5 text-3xl font-extrabold text-slate-900 dark:text-white">منصة EduPlatform</h1>

@@ -2,7 +2,7 @@
 
 import { Link2, Loader2, PlusCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { FormEvent } from "react";
+import type { ComponentProps, FormEvent } from "react";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,17 @@ import { linkChildToParent } from "@/modules/parent/actions";
 const selectClassName =
   "touch-target flex min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none ring-0 transition focus:border-secondary focus:ring-4 focus:ring-secondary/15 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100";
 
-export function LinkChildForm() {
+type LinkChildFormProps = {
+  triggerClassName?: string;
+  triggerLabel?: string;
+  triggerVariant?: ComponentProps<typeof Button>["variant"];
+};
+
+export function LinkChildForm({
+  triggerClassName,
+  triggerLabel = "إضافة ابن جديد",
+  triggerVariant = "default",
+}: LinkChildFormProps = {}) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [studentName, setStudentName] = useState("");
@@ -85,9 +95,9 @@ export function LinkChildForm() {
   return (
     <>
       <div className="flex justify-end">
-        <Button className="gap-2" onClick={() => setIsOpen(true)} type="button">
+        <Button className={triggerClassName ?? "gap-2"} onClick={() => setIsOpen(true)} type="button" variant={triggerVariant}>
           <PlusCircle className="h-4 w-4" />
-          إضافة ابن جديد
+          {triggerLabel}
         </Button>
       </div>
 

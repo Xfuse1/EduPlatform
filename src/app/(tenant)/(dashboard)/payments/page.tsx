@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
+import { getPlatformConfigValue } from "@/modules/admin/actions";
 import { PaymentsPageClient } from "@/modules/payments/components/PaymentsPageClient";
 import { TeacherWalletPageClient } from "@/modules/payments/components/TeacherWalletPageClient";
 import { WalletPageClient } from "@/modules/payments/components/WalletPageClient";
@@ -61,6 +62,42 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
     );
   }
 
+  if (user.role === "PARENT") {
+    const [parentChildren, adminContact] = await Promise.all([
+      db.parentStudent.findMany({
+        where: { parentId: user.id },
+        include: { student: { select: { id: true, name: true } } },
+        orderBy: { student: { name: "asc" } },
+      }),
+      getPlatformConfigValue("admin_contact"),
+    ]);
+
+    return (
+      <div className="space-y-8">
+        <section id="wallet" className="scroll-mt-24">
+          <WalletPageClient
+            role="PARENT"
+            userId={user.id}
+            children={parentChildren.map((link) => ({ id: link.student.id, name: link.student.name }))}
+            adminContact={adminContact}
+          />
+        </section>
+      </div>
+    );
+  }
+
+  if (user.role === "STUDENT") {
+    const adminContact = await getPlatformConfigValue("admin_contact");
+
+    return (
+      <div className="space-y-8">
+        <section id="wallet" className="scroll-mt-24">
+          <WalletPageClient role="STUDENT" userId={user.id} adminContact={adminContact} />
+        </section>
+      </div>
+    );
+  }
+
   const payments = await getPaymentsList(tenant.id);
   const clientPayments: Array<{
     id: string;
@@ -74,14 +111,6 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
     status: payment.status === "PAID" || payment.status === "OVERDUE" ? payment.status : "PENDING",
   }));
 
-  const parentChildren = user.role === "PARENT"
-    ? await db.parentStudent.findMany({
-        where: { parentId: user.id },
-        include: { student: { select: { id: true, name: true } } },
-        orderBy: { student: { name: "asc" } },
-      })
-    : [];
-
   return (
     <div className="space-y-8">
       <section id="expenses">
@@ -90,18 +119,6 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
           initialStatus={initialStatus}
           initialStudentQuery={initialStudentQuery}
         />
-      </section>
-
-      <section id="wallet" className="scroll-mt-24">
-        {user.role === "PARENT" ? (
-          <WalletPageClient
-            role="PARENT"
-            userId={user.id}
-            children={parentChildren.map((link) => ({ id: link.student.id, name: link.student.name }))}
-          />
-        ) : user.role === "STUDENT" ? (
-          <WalletPageClient role="STUDENT" userId={user.id} />
-        ) : null}
       </section>
     </div>
   );

@@ -19,7 +19,12 @@ export default async function VerifyPage({
 
   return (
     <main 
-      className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-6"
+      className="dark flex min-h-screen items-center justify-center bg-[#0D1B2A] px-4 py-8 text-white [color-scheme:dark] sm:px-6"
+      style={{
+        background:
+          "radial-gradient(ellipse at 15% 50%, rgba(0,184,160,0.12) 0%, transparent 50%), radial-gradient(ellipse at 85% 20%, rgba(26,43,109,0.4) 0%, transparent 50%), #0D1B2A",
+        colorScheme: "dark",
+      }}
     >
       <div className="w-full max-w-md">
         <OTPInput

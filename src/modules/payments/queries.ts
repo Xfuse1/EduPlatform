@@ -284,6 +284,13 @@ export const getPaymentByKashierOrderId = cache(async (orderId: string) => {
     where: {
       receiptNumber: orderId,
     },
+    include: {
+      recordedBy: {
+        select: {
+          role: true,
+        },
+      },
+    },
   });
 });
 

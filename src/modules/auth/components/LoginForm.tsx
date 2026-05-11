@@ -262,7 +262,7 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
                   onChange={(event) => { setPhone(event.target.value.replace(/\D/g, "")); setError(""); setShowRegisterPrompt(false); }}
                   placeholder="01XXXXXXXXX"
                   value={phone}
-                  className="ps-24 text-base font-semibold bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[10px] text-slate-900 dark:text-white focus-visible:ring-[#00B8A0]/15 focus-visible:border-[#00B8A0]"
+                  className="rounded-[10px] border-slate-200 bg-white ps-24 text-base font-semibold text-slate-950 placeholder:text-slate-400 focus-visible:border-[#00B8A0] focus-visible:ring-[#00B8A0]/15 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-500"
                 />
               </div>
               <p className="mt-2 text-sm text-slate-500 dark:text-[#94A3B8]">

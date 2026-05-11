@@ -88,7 +88,7 @@ function PinSetupPrompt({ redirectTo }: { redirectTo: string }) {
   return (
     <div className="space-y-5">
       <div className="text-center">
-        <p className="font-bold text-slate-900 dark:text-white">
+        <p className="font-bold text-white">
           {stage === "enter" ? "اختر PIN جديد (4-8 أرقام)" : "أكّد الـ PIN"}
         </p>
         <p className="mt-1 text-sm text-slate-400">
@@ -99,7 +99,7 @@ function PinSetupPrompt({ redirectTo }: { redirectTo: string }) {
       {/* Dots */}
       <div className="flex items-center justify-center gap-3" dir="ltr">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className={`h-3 w-3 rounded-full border-2 transition-all duration-150 ${i < current.length ? "scale-110 border-sky-500 bg-sky-500" : "border-slate-300 dark:border-slate-600 bg-transparent"}`} />
+          <div key={i} className={`h-3 w-3 rounded-full border-2 transition-all duration-150 ${i < current.length ? "scale-110 border-sky-400 bg-sky-400" : "border-slate-600 bg-transparent"}`} />
         ))}
       </div>
 
@@ -112,14 +112,14 @@ function PinSetupPrompt({ redirectTo }: { redirectTo: string }) {
           if (key === "del") {
             return (
               <button key={i} type="button" aria-label="حذف" onClick={() => handleKey("del")}
-                 className="flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100/50 dark:border-white/10 dark:bg-white/5 text-slate-900 dark:text-white transition hover:bg-slate-200 dark:hover:bg-white/10 active:scale-95">
+                 className="flex h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:bg-white/10 active:scale-95">
                 <Delete className="h-4 w-4" />
               </button>
             );
           }
           return (
-             <button key={i} type="button" onClick={() => handleKey(key)} disabled={isPending}
-              className="flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5 text-base font-bold text-slate-900 dark:text-white transition hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 disabled:opacity-50">
+            <button key={i} type="button" onClick={() => handleKey(key)} disabled={isPending}
+              className="flex h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-base font-bold text-white transition hover:bg-white/10 active:scale-95 disabled:opacity-50">
               {key}
             </button>
           );
@@ -149,7 +149,7 @@ function PinSetupPrompt({ redirectTo }: { redirectTo: string }) {
       {isPending ? <p className="text-center text-sm text-slate-400">جارٍ الحفظ...</p> : null}
 
       <button type="button" onClick={() => window.location.replace(redirectTo)}
-        className="w-full text-center text-sm text-slate-500 transition hover:text-slate-300">
+        className="w-full text-center text-sm text-[#94A3B8] transition hover:text-white">
         تخطّي — لا أريد PIN الآن
       </button>
     </div>
@@ -288,14 +288,14 @@ export function OTPInput({
   if (pinSetupRedirectTo) {
     return (
       <Card 
-        className="overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
+        className="overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0F1B2D]/90 shadow-[0_0_60px_rgba(0,184,160,0.08)] backdrop-blur-xl"
       >
-        <div className="px-6 py-7 text-center text-slate-900 dark:text-white sm:px-8">
+        <div className="px-6 py-7 text-center text-white sm:px-8">
           <div className="mx-auto mb-4 flex h-[48px] w-[48px] items-center justify-center">
             <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
           </div>
-          <h1 className="mt-4 text-2xl font-extrabold">فعّل الـ PIN</h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-[#94A3B8]">ادخل بسرعة في المرات الجاية بدون OTP</p>
+          <h1 className="mt-4 text-2xl font-extrabold text-white">فعّل الـ PIN</h1>
+          <p className="mt-2 text-sm text-[#94A3B8]">ادخل بسرعة في المرات الجاية بدون OTP</p>
         </div>
         <CardContent className="p-6 sm:p-8">
           <PinSetupPrompt redirectTo={pinSetupRedirectTo} />
@@ -306,26 +306,26 @@ export function OTPInput({
 
   return (
     <Card 
-      className="overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
+      className="overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0F1B2D]/90 shadow-[0_0_60px_rgba(0,184,160,0.08)] backdrop-blur-xl"
     >
-      <div className="px-6 py-8 text-center text-slate-900 dark:text-white sm:px-8">
+      <div className="px-6 py-8 text-center text-white sm:px-8">
         <div className="mx-auto mb-4 flex h-[48px] w-[48px] items-center justify-center">
           <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
         </div>
-        <p className="mt-4 text-sm font-bold text-slate-600 dark:text-[#94A3B8]">{tenantName}</p>
+        <p className="mt-4 text-sm font-medium text-[#94A3B8]">{tenantName}</p>
         <h1 className="mt-3 text-3xl font-extrabold">أدخل كود التحقق</h1>
-        <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-[#94A3B8]">
-          أدخل الكود المرسل إلى <span dir="ltr" className="font-bold text-slate-900 dark:text-white">{phone}</span>
+        <p className="mt-3 text-sm leading-7 text-[#94A3B8]">
+          أدخل الكود المرسل إلى <span dir="ltr">{phone}</span>
         </p>
       </div>
 
       <CardContent className="space-y-6 p-6 sm:p-8">
-        <div className="flex items-center justify-between rounded-[16px] bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-4 py-3">
+        <div className="flex items-center justify-between rounded-[16px] bg-white/5 border border-white/10 px-4 py-3">
           <div className="text-start">
-            <p className="text-sm font-bold text-slate-900 dark:text-white">مدة صلاحية الكود</p>
-            <p className="text-sm text-slate-600 dark:text-[#94A3B8]">يرجى إدخال الرمز قبل انتهاء العد التنازلي</p>
+            <p className="text-sm font-bold text-white">مدة صلاحية الكود</p>
+            <p className="text-sm text-[#94A3B8]">يرجى إدخال الرمز قبل انتهاء العد التنازلي</p>
           </div>
-          <div className="flex items-center gap-2 rounded-full bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 px-4 py-2 text-sm font-bold text-[#00B8A0] shadow-sm">
+          <div className="flex items-center gap-2 rounded-full bg-white/10 border border-white/10 px-4 py-2 text-sm font-bold text-[#00B8A0] shadow-sm">
             <TimerReset className="h-4 w-4" />
             <span dir="ltr">{secondsLeft}</span>
           </div>
@@ -339,7 +339,7 @@ export function OTPInput({
                 inputsRef.current[index] = element;
               }}
               aria-label={`الرقم ${index + 1} من كود التحقق`}
-              className="touch-target h-14 w-14 rounded-[10px] border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5 text-center text-2xl font-extrabold text-slate-900 dark:text-white outline-none transition focus-visible:border-[#00B8A0] focus-visible:ring-4 focus-visible:ring-[#00B8A0]/15 sm:h-14 sm:w-14"
+              className="touch-target h-14 w-14 rounded-[10px] border border-white/10 bg-white/5 text-center text-2xl font-extrabold text-white outline-none transition focus-visible:border-[#00B8A0] focus-visible:ring-4 focus-visible:ring-[#00B8A0]/15 sm:h-14 sm:w-14"
               inputMode="numeric"
               maxLength={1}
               onChange={(event) => handleChange(index, event.target.value)}
@@ -350,14 +350,14 @@ export function OTPInput({
         </div>
 
         {error ? (
-          <p className="rounded-[16px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200">
+          <p className="rounded-[16px] border border-rose-500/30 bg-rose-950/30 px-4 py-3 text-sm font-medium text-rose-200">
             {error}
           </p>
         ) : null}
 
-        <div className="rounded-[16px] border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 px-4 py-4 text-center">
+        <div className="rounded-[16px] border border-white/5 bg-white/5 px-4 py-4 text-center">
           {secondsLeft > 0 ? (
-            <p className="text-sm font-semibold text-slate-500 dark:text-[#94A3B8]">
+            <p className="text-sm font-semibold text-[#94A3B8]">
               يمكنك إعادة الإرسال بعد <span dir="ltr">{secondsLeft}</span> ثانية
             </p>
           ) : (
