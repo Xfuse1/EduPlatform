@@ -114,9 +114,9 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
         </Card>
       </div>
 
-      <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
+      <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
         <CardHeader>
-          <CardTitle>مجموعاتي</CardTitle>
+          <CardTitle className="text-slate-900 dark:text-white">مجموعاتي</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           {data.profile?.enrollments.length ? (
@@ -152,9 +152,9 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
 
       {/* المجموعات المتاحة للانضمام */}
       {availableGroups && availableGroups.length > 0 && (
-        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
           <CardHeader>
-            <CardTitle>المجموعات المتاحة للانضمام</CardTitle>
+            <CardTitle className="text-slate-900 dark:text-white">المجموعات المتاحة للانضمام</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             {availableGroups

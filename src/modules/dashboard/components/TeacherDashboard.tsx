@@ -99,7 +99,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
       ) : null}
 
       <section className="grid gap-4 md:grid-cols-4">
-        <Card className="md:col-span-2 border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
+        <Card className="md:col-span-2 border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
           <CardContent className="p-5">
             <p className="text-start text-sm font-semibold text-slate-500 dark:text-slate-400">رصيد محفظة المعلم</p>
             <p className="mt-3 text-start text-3xl font-extrabold text-slate-950 dark:text-white">{formatCurrency(data.wallet.balance)}</p>
@@ -114,14 +114,14 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
             </Link>
           </CardContent>
         </Card>
-        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
           <CardContent className="p-5">
             <p className="text-start text-sm font-semibold text-slate-500 dark:text-slate-400">سحوبات ناجحة</p>
             <p className="mt-3 text-start text-2xl font-extrabold text-emerald-600 dark:text-emerald-300">{formatCurrency(data.wallet.transfers.SUCCESS.amount)}</p>
             <p className="mt-2 text-start text-xs text-slate-500 dark:text-slate-400">{toArabicDigits(data.wallet.transfers.SUCCESS.count)} عملية</p>
           </CardContent>
         </Card>
-        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
           <CardContent className="p-5">
             <p className="text-start text-sm font-semibold text-slate-500 dark:text-slate-400">سحوبات معلقة</p>
             <p className="mt-3 text-start text-2xl font-extrabold text-amber-600 dark:text-amber-300">{formatCurrency(data.wallet.transfers.PENDING.amount + data.wallet.transfers.RETRY.amount)}</p>
@@ -143,12 +143,12 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
                   <div>
                     <p className="text-start text-sm font-semibold text-slate-500 dark:text-[#94A3B8]">{stat.title}</p>
                     <div className={`mt-3 text-start text-3xl font-extrabold ${iconColors[index]}`}>{stat.value}</div>
-                    <div className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/80">
+                    <div className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-slate-100 dark:bg-white/10 px-3 py-1 text-xs font-bold text-slate-700 dark:text-white/80">
                       <ArrowUpLeft className={`h-4 w-4 ${iconColors[index]}`} />
                       {stat.hint}
                     </div>
                   </div>
-                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ${iconColors[index]}`}>
+                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/10 ${iconColors[index]}`}>
                     <Icon className="h-7 w-7" />
                   </div>
                 </div>
@@ -161,9 +161,9 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
       <TeacherDashboardCharts revenueData={data.revenueSeries} attendanceData={data.attendanceSeries} />
 
       <section>
-        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
           <CardHeader>
-            <CardTitle className="text-start">حصص اليوم</CardTitle>
+            <CardTitle className="text-start text-slate-900 dark:text-white">حصص اليوم</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {data.todaySessions.length === 0 ? (
@@ -172,12 +172,12 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
               </div>
             ) : (
               data.todaySessions.map((session) => (
-                <div
-                  key={session.id}
-                  className={`rounded-[18px] border border-white/10 bg-white/5 p-4 ${
-                    session.status === "IN_PROGRESS" ? "border-s-4 border-s-[#00B8A0]" : "border-s-4 border-s-[#1A2B6D]"
-                  }`}
-                >
+                  <div
+                    key={session.id}
+                    className={`rounded-[18px] border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5 p-4 ${
+                      session.status === "IN_PROGRESS" ? "border-s-4 border-s-[#00B8A0] dark:border-s-[#00B8A0]" : "border-s-4 border-s-[#1A2B6D] dark:border-s-[#1A2B6D]"
+                    }`}
+                  >
                   <div className="flex items-center justify-between gap-3">
                     <div className="space-y-2">
                       <p className="text-start text-lg font-bold text-slate-900 dark:text-white">{session.group.name}</p>

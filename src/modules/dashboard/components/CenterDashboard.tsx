@@ -16,10 +16,10 @@ export function CenterDashboard({
 }) {
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[30px] px-6 py-7 text-white shadow-2xl border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(26,43,109,0.6),rgba(0,184,160,0.1))] backdrop-blur-[16px]">
-        <p className="text-start text-sm font-semibold text-white/75">مركز قيادة السنتر</p>
+      <section className="overflow-hidden rounded-[30px] border border-slate-200 bg-white/50 px-6 py-7 text-slate-900 shadow-sm backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[linear-gradient(135deg,rgba(26,43,109,0.6),rgba(0,184,160,0.1))] dark:text-white">
+        <p className="text-start text-sm font-bold text-slate-500 dark:text-white/75">مركز قيادة السنتر</p>
         <h1 className="mt-3 text-start text-3xl font-extrabold">{centerName}</h1>
-        <p className="mt-3 max-w-2xl text-start text-sm leading-7 text-white/85">
+        <p className="mt-3 max-w-2xl text-start text-sm font-medium leading-7 text-slate-600 dark:text-white/85">
           راقب التشغيل اليومي من شاشة واحدة: المدرسون، الحضور، التحصيل، والتنبيهات المباشرة.
         </p>
       </section>
