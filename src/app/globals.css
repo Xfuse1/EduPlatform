@@ -36,7 +36,7 @@
   --chart-5: rgba(0,184,160,0.3);
 }
 
-.dark, [data-theme='dark'] {
+.dark, [data-theme='dark'], html.dark {
   --background: #0D1B2A;
   --foreground: #ffffff;
   --color-bg: #0D1B2A;
@@ -55,6 +55,11 @@
   --chart-primary: #5dade2;
   --chart-primary-fill: rgba(93, 173, 226, 0.18);
   --chart-success: #58d68d;
+}
+
+html.dark body {
+  background: var(--app-bg);
+  color: var(--foreground);
 }
 
 html {

@@ -52,7 +52,7 @@ export function AppShell({
   } as const;
 
   return (
-    <div className="h-screen overflow-hidden bg-transparent">
+    <div className="h-screen overflow-hidden bg-background text-foreground transition-colors duration-300">
       <div className="flex h-screen overflow-hidden">
         {/* Mobile sidebar overlay backdrop */}
         {sidebarOpen && (
