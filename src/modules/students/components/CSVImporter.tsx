@@ -15,6 +15,7 @@ type AvailableGroup = {
 type CSVImporterProps = {
   tenantId: string
   groups: AvailableGroup[]
+  hideHeader?: boolean
 }
 
 type ImportField =
@@ -149,7 +150,7 @@ function guessFieldForHeader(header: string): ImportField | '' {
   return ''
 }
 
-export default function CSVImporter({ tenantId, groups }: CSVImporterProps) {
+export default function CSVImporter({ tenantId, groups, hideHeader = false }: CSVImporterProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [fileName, setFileName] = useState('')
@@ -254,17 +255,42 @@ export default function CSVImporter({ tenantId, groups }: CSVImporterProps) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-[28px] border border-dashed border-slate-300 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-950 md:p-8">
-        <div className="space-y-2">
-          <h2 className="text-xl font-bold text-slate-950 dark:text-white">
-            رفع ملف CSV
-          </h2>
-          <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
-            ارفع ملف الطلاب، راجع المعاينة، ثم حدّد الأعمدة المطابقة قبل بدء الاستيراد.
-          </p>
-        </div>
+      {!hideHeader && (
+        <div className="rounded-[22px] border border-dashed border-slate-300 bg-white/50 p-6 shadow-sm dark:border-white/10 dark:bg-white/5 md:p-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold text-slate-950 dark:text-white">
+                رفع ملف CSV
+              </h2>
+              <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
+                ارفع ملف الطلاب، راجع المعاينة، ثم حدّد الأعمدة المطابقة قبل بدء الاستيراد.
+              </p>
+            </div>
+            
+            <label className="flex cursor-pointer items-center gap-3 rounded-2xl bg-[#00B8A0] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#00a090]">
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                onChange={(event) => {
+                  void handleFileChange(event.target.files?.[0] ?? null)
+                }}
+              />
+              <span>اختر الملف</span>
+            </label>
+          </div>
 
-        <label className="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-[28px] border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center transition-colors hover:border-sky-400 hover:bg-sky-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-sky-700 dark:hover:bg-sky-950/40">
+          {fileName && (
+            <div className="mt-4 flex items-center gap-2 rounded-xl bg-slate-100/50 px-4 py-2 text-sm text-slate-600 dark:bg-white/5 dark:text-slate-300">
+              <span className="font-bold">الملف الحالي:</span>
+              <span>{fileName}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {hideHeader && !fileName && (
+        <label className="flex h-full min-h-[200px] cursor-pointer flex-col items-center justify-center rounded-[22px] border-2 border-dashed border-[#00B8A0]/30 bg-white/5 transition hover:border-[#00B8A0] hover:bg-[#00B8A0]/5">
           <input
             type="file"
             accept=".csv,text/csv"
@@ -273,18 +299,40 @@ export default function CSVImporter({ tenantId, groups }: CSVImporterProps) {
               void handleFileChange(event.target.files?.[0] ?? null)
             }}
           />
-
-          <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            اختر ملف CSV
-          </span>
-          <span className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            {fileName || 'لم يتم اختيار ملف بعد'}
-          </span>
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#00B8A0]/20 text-[#00B8A0]">
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </div>
+          <span className="mt-4 text-sm font-bold text-slate-900 dark:text-white">اضغط لرفع ملف الطلاب (CSV)</span>
+          <span className="mt-2 text-xs text-slate-500">سنتولى نحن عملية الربط الذكي</span>
         </label>
-      </div>
+      )}
+
+      {hideHeader && fileName && !headers.length && (
+         <div className="flex items-center justify-between rounded-[22px] border border-[#00B8A0]/30 bg-white/5 p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#00B8A0]/20 text-[#00B8A0]">
+                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-bold text-white">{fileName}</p>
+                <p className="text-xs text-slate-400">تم اختيار الملف بنجاح</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => handleFileChange(null)}
+              className="text-sm font-bold text-rose-400 hover:text-rose-300"
+            >
+              إلغاء
+            </button>
+         </div>
+      )}
 
       {headers.length > 0 ? (
-        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950 md:p-8">
+        <section className="rounded-[22px] border border-slate-200 bg-white/50 p-6 shadow-sm dark:border-white/10 dark:bg-white/5 md:p-8">
           <h3 className="text-lg font-bold text-slate-950 dark:text-white">
             ربط الأعمدة
           </h3>
@@ -320,7 +368,7 @@ export default function CSVImporter({ tenantId, groups }: CSVImporterProps) {
       ) : null}
 
       {rows.length > 0 ? (
-        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950 md:p-8">
+        <section className="rounded-[22px] border border-slate-200 bg-white/50 p-6 shadow-sm dark:border-white/10 dark:bg-white/5 md:p-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-bold text-slate-950 dark:text-white">
@@ -373,7 +421,8 @@ export default function CSVImporter({ tenantId, groups }: CSVImporterProps) {
             </table>
           </div>
         </section>
-      ) : (
+      ) : null}
+      {!hideHeader && !rows.length && (
         <EmptyState
           title="لا توجد معاينة بعد"
           message="ارفع ملف CSV لعرض الصفوف وربط الأعمدة قبل بدء الاستيراد."
@@ -387,7 +436,7 @@ export default function CSVImporter({ tenantId, groups }: CSVImporterProps) {
       ) : null}
 
       {result ? (
-        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950 md:p-8">
+        <section className="rounded-[22px] border border-slate-200 bg-white/50 p-6 shadow-sm dark:border-white/10 dark:bg-white/5 md:p-8">
           <div className="flex flex-wrap items-center gap-3">
             <Badge variant="success">
               تم إضافة {numberFormatter.format(result.created)} طالب بنجاح

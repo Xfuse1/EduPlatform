@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatTimeRange12Hour, getSessionStatusLabel, toArabicDigits } from "@/lib/utils";
 import { TeacherDashboardCharts } from "@/modules/dashboard/components/TeacherDashboardCharts";
+import CSVImporter from "@/modules/students/components/CSVImporter";
 
 type TeacherDashboardProps = {
   data: Awaited<ReturnType<typeof import("@/modules/dashboard/queries").getTeacherDashboardData>>;
@@ -74,15 +75,45 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
         </div>
       </section>
 
+      {data.students.total === 0 && (
+        <section className="rounded-[22px] border border-[rgba(0,184,160,0.2)] bg-[rgba(0,184,160,0.05)] backdrop-blur-[16px] p-8 md:p-12 shadow-sm">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <div className="flex-1 space-y-6">
+              <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white md:text-4xl">
+                ابدأ بإضافة طلابك في ثوانٍ
+              </h2>
+              <p className="text-lg leading-relaxed text-slate-600 dark:text-slate-300 max-w-xl">
+                لا داعي لإضافة الطلاب يدوياً. استورد بياناتك من أي ملف Excel وسنتولى نحن مطابقة الأعمدة وتنظيم البيانات لك بشكل ذكي ومؤتمت.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-8 pt-4">
+                <div className="space-y-1">
+                  <div className="text-2xl font-bold text-[#00B8A0]">١٠٠٪</div>
+                  <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">دقة في استيراد البيانات</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-2xl font-bold text-[#00B8A0]">١٠٠٠+</div>
+                  <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">طالب في ضغطة واحدة</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="w-full lg:w-[480px] shrink-0">
+               <CSVImporter groups={data.groups} tenantId={data.tenantId} hideHeader />
+            </div>
+          </div>
+        </section>
+      )}
+
       {!data.kashierApiConfigured ? (
-        <section className="rounded-[22px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] px-5 py-4 text-amber-100 shadow-sm">
+        <section className="rounded-[22px] border border-amber-200 bg-amber-50/50 backdrop-blur-[16px] px-5 py-4 dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-200">
                 <AlertTriangle className="h-5 w-5" />
               </span>
               <div>
-                <h2 className="text-start text-base font-extrabold">التحويل التلقائي غير مفعل</h2>
+                <h2 className="text-start text-base font-extrabold text-amber-900 dark:text-amber-50">التحويل التلقائي غير مفعل</h2>
                 <p className="mt-1 text-start text-sm leading-7 text-amber-800 dark:text-amber-100/85">
                   لم يتم إضافة متغيرات Kashier الخاصة بك بعد. أي فلوس يتم دفعها أونلاين لن تتحول تلقائيًا، وستحتاج للتواصل مع الإدارة لسحب الفلوس.
                 </p>
@@ -101,7 +132,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
       <section className="grid gap-4 md:grid-cols-4">
         <Card className="md:col-span-2 border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
           <CardContent className="p-5">
-            <p className="text-start text-sm font-semibold text-slate-500 dark:text-slate-400">رصيد محفظة المعلم</p>
+            <p className="text-start text-sm font-semibold text-slate-600 dark:text-slate-400">رصيد محفظة المعلم</p>
             <p className="mt-3 text-start text-3xl font-extrabold text-slate-950 dark:text-white">{formatCurrency(data.wallet.balance)}</p>
             <p className="mt-2 text-start text-xs leading-6 text-slate-500 dark:text-slate-400">
               الرصيد الداخلي المتاح للسحب. السحب يتم فقط من صفحة المحفظة عند طلبه صراحة.
@@ -116,16 +147,16 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
         </Card>
         <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
           <CardContent className="p-5">
-            <p className="text-start text-sm font-semibold text-slate-500 dark:text-slate-400">سحوبات ناجحة</p>
+            <p className="text-start text-sm font-semibold text-slate-600 dark:text-slate-400">سحوبات ناجحة</p>
             <p className="mt-3 text-start text-2xl font-extrabold text-emerald-600 dark:text-emerald-300">{formatCurrency(data.wallet.transfers.SUCCESS.amount)}</p>
             <p className="mt-2 text-start text-xs text-slate-500 dark:text-slate-400">{toArabicDigits(data.wallet.transfers.SUCCESS.count)} عملية</p>
           </CardContent>
         </Card>
         <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
           <CardContent className="p-5">
-            <p className="text-start text-sm font-semibold text-slate-500 dark:text-slate-400">سحوبات معلقة</p>
+            <p className="text-start text-sm font-semibold text-slate-600 dark:text-slate-400">سحوبات معلقة</p>
             <p className="mt-3 text-start text-2xl font-extrabold text-amber-600 dark:text-amber-300">{formatCurrency(data.wallet.transfers.PENDING.amount + data.wallet.transfers.RETRY.amount)}</p>
-            <p className="mt-2 text-start text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-2 text-start text-xs text-slate-600 dark:text-slate-400">
               {toArabicDigits(data.wallet.transfers.PENDING.count + data.wallet.transfers.RETRY.count)} عملية
             </p>
           </CardContent>
@@ -141,7 +172,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-start text-sm font-semibold text-slate-500 dark:text-[#94A3B8]">{stat.title}</p>
+                    <p className="text-start text-sm font-semibold text-slate-600 dark:text-slate-400">{stat.title}</p>
                     <div className={`mt-3 text-start text-3xl font-extrabold ${iconColors[index]}`}>{stat.value}</div>
                     <div className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-slate-100 dark:bg-white/10 px-3 py-1 text-xs font-bold text-slate-700 dark:text-white/80">
                       <ArrowUpLeft className={`h-4 w-4 ${iconColors[index]}`} />
@@ -171,7 +202,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
                 لا توجد حصص اليوم
               </div>
             ) : (
-              data.todaySessions.map((session) => (
+              data.todaySessions.map((session: any) => (
                   <div
                     key={session.id}
                     className={`rounded-[18px] border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5 p-4 ${
