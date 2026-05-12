@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
+import { CSSProperties, ReactNode, useEffect, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -67,7 +67,7 @@ function ChartCard({ title, children }: { title: string; children: ReactNode }) 
       className="rounded-[16px] p-5 border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]"
     >
       <h2 className="text-start text-lg font-bold text-slate-900 dark:text-slate-100">{title}</h2>
-      <div className="mt-4 h-[200px] w-full">{children}</div>
+      <div className="mt-4 h-[300px] w-full" style={{ width: '100%', height: 300 }}>{children}</div>
     </div>
   );
 }
@@ -87,10 +87,26 @@ export function TeacherDashboardCharts({
   revenueData?: ChartDataPoint[];
   attendanceData?: ChartDataPoint[];
 } = {}) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const axisStyle = { fill: "var(--chart-text)", fontSize: "0.75rem" };
 
   const hasRevenue = revenueData.length > 0 && revenueData.some((d) => (d.revenue ?? 0) > 0);
   const hasAttendance = attendanceData.length > 0 && attendanceData.some((d) => (d.rate ?? 0) > 0);
+
+  if (!mounted) {
+    return (
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <ChartCard title="إيرادات آخر 6 أشهر">
+          <div className="h-full w-full bg-slate-100/50 dark:bg-white/5 animate-pulse rounded-xl" />
+        </ChartCard>
+        <ChartCard title="نسبة الحضور الشهرية">
+          <div className="h-full w-full bg-slate-100/50 dark:bg-white/5 animate-pulse rounded-xl" />
+        </ChartCard>
+      </section>
+    );
+  }
 
   return (
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">

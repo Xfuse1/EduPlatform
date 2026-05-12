@@ -1,3 +1,4 @@
+import React, { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, ArrowUpLeft, CalendarClock, CheckCircle2, DollarSign, Users } from "lucide-react";
 import Link from "next/link";
 
@@ -37,6 +38,40 @@ function SessionBadge({ status }: { status: string }) {
   return <span className={`rounded-full border px-3 py-2 text-xs font-bold ${styles}`}>{label}</span>;
 }
 
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(_: Error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Dashboard Error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex min-h-[400px] flex-col items-center justify-center rounded-[22px] border border-rose-200 bg-rose-50 p-8 text-center dark:border-rose-900/30 dark:bg-rose-950/20">
+          <h2 className="text-xl font-bold text-rose-800 dark:text-rose-400">عذراً، حدث خطأ في عرض لوحة التحكم</h2>
+          <p className="mt-2 text-rose-700 dark:text-rose-300">يرجى تحديث الصفحة أو المحاولة مرة أخرى لاحقاً</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-6 rounded-xl bg-rose-600 px-6 py-2 text-sm font-bold text-white transition hover:bg-rose-700"
+          >
+            تحديث الصفحة
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
   const displayTeacherName = teacherName?.trim() || data.teacherName?.trim() || "المعلم";
   const stats = [
@@ -63,7 +98,8 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
   ];
 
   return (
-    <div className="space-y-6">
+    <ErrorBoundary>
+      <div className="space-y-6">
       <section className="relative overflow-hidden rounded-[16px] border border-secondary/25 bg-[linear-gradient(135deg,#081426_0%,#102A43_46%,#0B4D46_100%)] px-6 py-7 text-white shadow-[0_24px_70px_rgba(2,8,23,0.30)]">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(0,184,160,0.18),transparent_42%,rgba(245,166,35,0.10))]" />
         <div className="relative">
@@ -226,5 +262,6 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
         </Card>
       </section>
     </div>
+    </ErrorBoundary>
   );
 }
