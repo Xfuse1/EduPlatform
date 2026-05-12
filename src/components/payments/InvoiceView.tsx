@@ -56,14 +56,14 @@ export function InvoiceView({ invoice = MOCK_INVOICE }: { invoice?: InvoiceData 
   return (
     <div className="flex flex-col gap-6" dir="rtl">
       {/* Action Buttons (Hidden on Print) */}
-      <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900 border rounded-2xl p-4 print:hidden">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-3 rounded-2xl border bg-slate-50 p-3 dark:bg-slate-900 print:hidden sm:flex-row sm:items-center sm:justify-between sm:p-4">
+        <div className="flex min-w-0 items-center gap-2">
           <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
             <CheckCircle2 className="h-4 w-4" />
           </div>
           <span className="text-sm font-bold text-slate-800 dark:text-slate-200">فاتورة مدفوعة رقم {invoice.invoiceNumber}</span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 min-[420px]:flex-row">
           <Button variant="outline" className="gap-2 h-10 px-4 rounded-xl text-xs" onClick={handlePrint}>
             <Printer className="h-4 w-4" />
             طباعة الفاتورة
@@ -76,10 +76,10 @@ export function InvoiceView({ invoice = MOCK_INVOICE }: { invoice?: InvoiceData 
       </div>
 
       {/* Invoice Content (A4 Style) */}
-      <Card className="border shadow-xl rounded-[32px] overflow-hidden bg-white dark:bg-slate-950 p-8 sm:p-12 print:border-none print:shadow-none print:p-0">
-        <CardContent className="p-0 space-y-10">
+      <Card className="overflow-hidden rounded-[20px] border bg-white p-4 shadow-xl dark:bg-slate-950 sm:rounded-[32px] sm:p-12 print:border-none print:p-0 print:shadow-none">
+        <CardContent className="space-y-8 p-0 sm:space-y-10">
           {/* Invoice Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-8">
+          <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:gap-8">
             <div className="space-y-4">
               <div className="h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                 <div className="h-10 w-10 border-4 border-primary rounded-lg border-t-transparent animate-spin-slow rotate-45" />
@@ -92,7 +92,7 @@ export function InvoiceView({ invoice = MOCK_INVOICE }: { invoice?: InvoiceData 
             
             <div className="text-right space-y-2">
               <div className="inline-flex rounded-full bg-primary/5 px-4 py-1 text-primary text-xs font-black uppercase tracking-widest">فاتورة ضريبية مبسطة</div>
-              <h1 className="text-4xl font-black text-slate-900 dark:text-white mt-4">فاتورة</h1>
+              <h1 className="mt-4 text-2xl font-black text-slate-900 dark:text-white sm:text-4xl">فاتورة</h1>
               <p className="text-sm text-slate-500 font-bold flex items-center justify-end gap-2">
                 <Hash className="h-4 w-4" /> {invoice.invoiceNumber}
               </p>
@@ -100,7 +100,7 @@ export function InvoiceView({ invoice = MOCK_INVOICE }: { invoice?: InvoiceData 
           </div>
 
           {/* Info Section */}
-          <div className="grid sm:grid-cols-2 gap-8 border-y border-dashed py-8">
+          <div className="grid gap-6 border-y border-dashed py-6 sm:grid-cols-2 sm:gap-8 sm:py-8">
             <div className="space-y-4">
               <p className="text-xs font-black text-slate-400 uppercase tracking-widest">محررة إلى:</p>
               <div className="space-y-2">
@@ -126,8 +126,8 @@ export function InvoiceView({ invoice = MOCK_INVOICE }: { invoice?: InvoiceData 
           {/* Items Table */}
           <div className="space-y-4">
             <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">تفاصيل الحصص والجلسات:</p>
-            <div className="overflow-hidden rounded-2xl border">
-              <table className="w-full text-right">
+            <div className="overflow-x-auto rounded-2xl border">
+              <table className="min-w-[560px] w-full text-right">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-900">
                     <th className="p-4 text-xs font-black text-slate-500 uppercase tracking-widest border-b">الجلسة / المادة</th>
@@ -149,7 +149,7 @@ export function InvoiceView({ invoice = MOCK_INVOICE }: { invoice?: InvoiceData 
           </div>
 
           {/* Footer Totals */}
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-8 pt-6">
+          <div className="flex flex-col items-start justify-between gap-6 pt-6 sm:flex-row sm:gap-8">
             <div className="space-y-4 max-w-sm">
               <div className="flex items-start gap-3 p-4 rounded-2xl bg-primary/5 text-primary border border-primary/10">
                 <Info className="h-5 w-5 mt-0.5 shrink-0" />

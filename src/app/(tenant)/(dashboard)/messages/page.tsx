@@ -251,14 +251,14 @@ export default function MessagesPage() {
   )
 
   return (
-    <div className="flex h-[calc(100vh-140px)] bg-slate-50 dark:bg-slate-900 overflow-hidden rounded-[24px] border border-slate-200 dark:border-slate-800 shadow-sm" dir="rtl">
+    <div className="flex h-[calc(100dvh-7.5rem)] min-h-[520px] overflow-hidden rounded-[18px] border border-slate-200 bg-slate-50 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:h-[calc(100dvh-9rem)] sm:rounded-[24px]" dir="rtl">
       {/* Sidebar - Conversation List */}
       <div className={cn(
-        "w-full md:w-1/3 lg:w-1/4 border-l border-slate-200 dark:border-slate-800 flex flex-col bg-white dark:bg-slate-950 transition-all",
+        "flex w-full flex-col border-l border-slate-200 bg-white transition-all dark:border-slate-800 dark:bg-slate-950 md:w-1/3 lg:w-1/4",
         isMobileView && activeId ? "hidden" : "flex"
       )}>
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="space-y-4 border-b border-slate-100 p-3 dark:border-slate-800 sm:p-4">
+          <div className="flex items-center justify-between gap-3">
             <h1 className="text-xl font-bold text-slate-900 dark:text-white">الرسائل</h1>
             <Button variant="ghost" className="rounded-full h-8 w-8 p-0" onClick={() => setIsNewModalOpen(true)}>
               <Plus className="h-5 w-5 text-primary" />
@@ -283,7 +283,7 @@ export default function MessagesPage() {
                   key={c.id}
                   onClick={() => handleSelectConversation(c.id)}
                   className={cn(
-                    "p-4 flex gap-3 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/50 relative",
+                    "relative flex cursor-pointer gap-3 p-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/50 sm:p-4",
                     activeId === c.id && "bg-primary/5 dark:bg-sky-400/5"
                   )}
                 >
@@ -298,7 +298,7 @@ export default function MessagesPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className="flex justify-between items-center mb-0.5">
+                    <div className="mb-0.5 flex items-center justify-between gap-2">
                       <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{c.participant.name}</p>
                       <span className="text-[10px] text-slate-400 shrink-0">{formatMessageTime(c.lastMessageTime)}</span>
                     </div>
@@ -324,8 +324,8 @@ export default function MessagesPage() {
         {activeConversation ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-950 z-10">
-              <div className="flex items-center gap-3">
+            <div className="z-10 flex items-center justify-between border-b border-slate-100 bg-white p-3 dark:border-slate-800 dark:bg-slate-950 sm:p-4">
+              <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                 {isMobileView && (
                   <Button variant="ghost" className="p-0 h-8 w-8" onClick={() => handleSelectConversation(null)}>
                     <ArrowRight className="h-5 w-5" />
@@ -334,7 +334,7 @@ export default function MessagesPage() {
                 <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-500">
                   {getInitials(activeConversation.participant.name)}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <h2 className="font-bold text-slate-900 dark:text-white leading-tight">{activeConversation.participant.name}</h2>
                   <p className="text-[11px] text-slate-400 font-medium">{activeConversation.participant.role}</p>
                 </div>
@@ -345,7 +345,7 @@ export default function MessagesPage() {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30 dark:bg-slate-900/10">
+            <div className="flex-1 space-y-4 overflow-y-auto bg-slate-50/30 p-3 dark:bg-slate-900/10 sm:space-y-6 sm:p-6">
               {activeConversation.messages.map((m, idx) => {
                 const isMe = m.senderId === "me"
                 const showDate = idx === 0 || 
@@ -362,7 +362,7 @@ export default function MessagesPage() {
                     )}
                     <div className={cn("flex", isMe ? "justify-start" : "justify-end")}>
                       <div className={cn(
-                        "max-w-[75%] px-4 py-2.5 rounded-[18px] text-sm leading-relaxed relative",
+                        "relative max-w-[88%] rounded-[18px] px-3 py-2.5 text-sm leading-relaxed sm:max-w-[75%] sm:px-4",
                         isMe 
                           ? "bg-primary text-white rounded-br-none" 
                           : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-none shadow-sm"
@@ -383,8 +383,8 @@ export default function MessagesPage() {
             </div>
 
             {/* Message Footer */}
-            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950">
-              <div className="flex items-end gap-2 bg-slate-50 dark:bg-slate-900 p-2 rounded-2xl">
+            <div className="border-t border-slate-100 bg-white p-3 dark:border-slate-800 dark:bg-slate-950 sm:p-4">
+              <div className="flex items-end gap-2 rounded-2xl bg-slate-50 p-2 dark:bg-slate-900">
                 <Textarea 
                   placeholder="اكتب رسالة... (يُرد خلال 24 ساعة)" 
                   className="bg-transparent border-none focus-visible:ring-0 min-h-[44px] max-h-[120px] resize-none h-11 text-sm pt-2"
@@ -408,7 +408,7 @@ export default function MessagesPage() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-10 animate-in fade-in duration-500">
+          <div className="flex flex-1 flex-col items-center justify-center p-6 text-center duration-500 animate-in fade-in sm:p-10">
             <div className="h-24 w-24 bg-primary/10 flex items-center justify-center rounded-full mb-6">
               <MessageSquare className="h-12 w-12 text-primary opacity-50" />
             </div>

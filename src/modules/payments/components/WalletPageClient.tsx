@@ -201,9 +201,9 @@ export function WalletPageClient({
   }
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-5 pb-8 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">المحفظة</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">المحفظة</h1>
         <p className="text-sm text-slate-500">
           {role === 'PARENT'
             ? 'اختر أحد الأبناء لعرض الرصيد والعمليات المرتبطة به.'
@@ -233,7 +233,7 @@ export function WalletPageClient({
       <Card>
         <CardContent className="space-y-3 p-4">
           <p className="text-sm text-slate-500">الرصيد الحالي</p>
-          <p className="text-4xl font-extrabold text-sky-700 drop-shadow-[0_0_14px_rgba(14,165,233,0.18)] dark:text-cyan-300 dark:drop-shadow-[0_0_14px_rgba(34,211,238,0.28)]">
+          <p className="break-words text-3xl font-extrabold text-sky-700 drop-shadow-[0_0_14px_rgba(14,165,233,0.18)] dark:text-cyan-300 dark:drop-shadow-[0_0_14px_rgba(34,211,238,0.28)] sm:text-4xl">
             {isLoading ? 'جارٍ التحميل...' : formatCurrency(wallet?.balance ?? 0)}
           </p>
           {wallet?.updatedAt && (
@@ -254,7 +254,7 @@ export function WalletPageClient({
             <Button
               type="button"
               variant="outline"
-              className="gap-2"
+              className="w-full gap-2 sm:w-auto"
               disabled={!balanceQueryTarget}
               onClick={handleDownloadTransactions}
             >
@@ -284,7 +284,7 @@ export function WalletPageClient({
                   return (
                     <div
                       key={transaction.id}
-                      className="grid gap-3 bg-white px-4 py-3 sm:grid-cols-[1fr_auto] sm:items-center dark:bg-slate-900/50"
+                      className="grid gap-3 bg-white px-3 py-3 dark:bg-slate-900/50 sm:grid-cols-[1fr_auto] sm:items-center sm:px-4"
                     >
                       <div className="min-w-0 space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
@@ -299,7 +299,7 @@ export function WalletPageClient({
                           {transaction.payment?.receiptNumber ? ` · ${transaction.payment.receiptNumber}` : ''}
                         </p>
                       </div>
-                      <p className={isDebit ? 'text-left font-bold text-rose-300' : 'text-left font-bold text-emerald-300'}>
+                      <p className={isDebit ? 'text-start font-bold text-rose-300 sm:text-left' : 'text-start font-bold text-emerald-300 sm:text-left'}>
                         {isDebit ? '-' : '+'}
                         {formatCurrency(Math.abs(transaction.amount))}
                       </p>
@@ -336,7 +336,7 @@ export function WalletPageClient({
               />
             </div>
             {error && <p className="text-sm text-rose-600">{error}</p>}
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <Button type="submit" disabled={isPending}>
                 {isPending ? 'جارٍ التحويل...' : 'الدفع عبر كاشير'}
               </Button>

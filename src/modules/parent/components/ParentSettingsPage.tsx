@@ -128,16 +128,16 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
     JSON.stringify(notifications) !== JSON.stringify(initialData.settings?.notifications ?? { attendance: true, exams: true, assignments: true });
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-6 pb-8 sm:space-y-8 sm:pb-12">
       <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">الإعدادات</h1>
+        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">الإعدادات</h1>
         <p className="mt-2 text-slate-600 dark:text-slate-300">إدارة بيانات حسابك وتفضيلات التنبيهات.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
         
         {/* Left Column: Profile & Account */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="space-y-6 sm:space-y-8 lg:col-span-2">
           
           {/* Account Data Card */}
           <Card className="rounded-[24px] border-slate-200 shadow-sm dark:border-slate-800">
@@ -152,7 +152,7 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
             <CardContent className="space-y-6">
               
               {/* Avatar Section */}
-              <div className="flex flex-col sm:flex-row items-center gap-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex flex-col items-center gap-4 border-b border-slate-100 pb-4 dark:border-slate-800 sm:flex-row sm:gap-6">
                 <div className="relative group">
                   <div className="h-24 w-24 rounded-3xl bg-slate-100 dark:bg-slate-800 overflow-hidden border-2 border-white dark:border-slate-700 shadow-md">
                     {avatarUrl ? (
@@ -190,7 +190,7 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
                 {/* Name */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">
@@ -260,7 +260,7 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
               ].map((item) => (
                 <div 
                   key={item.key}
-                  className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors cursor-pointer"
+                  className="flex flex-col gap-3 rounded-2xl border border-slate-100 p-4 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900/50 sm:flex-row sm:items-center sm:justify-between"
                   onClick={() => toggleNotification(item.key as any)}
                 >
                   <div className="space-y-0.5">
@@ -283,7 +283,7 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
         </div>
 
         {/* Right Column: Linked Children & Prefs */}
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           <PinSettingsCard phone={initialData.phone} hasPin={initialData.hasPin} />
           
           {/* Linked Children Card */}
@@ -299,7 +299,7 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
             <CardContent className="space-y-4">
               {initialData.parentStudents && initialData.parentStudents.length > 0 ? (
                 initialData.parentStudents.map((rel) => (
-                  <div key={rel.student.id} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50">
+                  <div key={rel.student.id} className="flex min-w-0 items-center gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-slate-900/50">
                     <div className="h-11 w-11 rounded-xl bg-slate-200 overflow-hidden">
                       {rel.student.avatarUrl ? (
                         <img src={rel.student.avatarUrl} alt={rel.student.name} className="h-full w-full object-cover" />
@@ -309,8 +309,8 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
                         </div>
                       )}
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-900 dark:text-white">{rel.student.name}</p>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{rel.student.name}</p>
                       <p className="text-xs text-slate-500">{rel.student.gradeLevel || 'غير محدد'}</p>
                     </div>
                   </div>
@@ -324,7 +324,7 @@ export function ParentSettingsPage({ initialData }: ParentSettingsPageProps) {
           </Card>
 
           {/* Save Button Fixed for Desktop Side */}
-          <div className="sticky bottom-6">
+          <div className="sticky bottom-4 sm:bottom-6">
             <Button
               onClick={handleSave}
               disabled={isLoading || !isChanged}

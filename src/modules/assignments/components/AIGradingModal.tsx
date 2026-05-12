@@ -127,12 +127,12 @@ export function AIGradingModal({
             </div>
           ) : result ? (
             <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl border border-purple-100 dark:border-purple-800">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-3 rounded-2xl border border-purple-100 bg-purple-50 p-4 dark:border-purple-800 dark:bg-purple-900/20 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
+                <div className="flex min-w-0 items-center gap-3">
                   <div className="h-12 w-12 rounded-full bg-white dark:bg-purple-800 flex items-center justify-center border-2 border-purple-200 shadow-sm">
                     <span className="text-xl font-black text-purple-700 dark:text-purple-300">{result.grade}</span>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="font-bold text-purple-900 dark:text-purple-100">الدرجة النهائية المقترحة</h3>
                     <p className="text-xs text-purple-600 dark:text-purple-400">من {assignment.maxGrade || 100} درجة</p>
                   </div>

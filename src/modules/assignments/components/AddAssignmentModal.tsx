@@ -149,14 +149,14 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-[min(760px,calc(100vw-2rem))] max-h-[92vh] overflow-hidden border-slate-200 bg-white p-0 shadow-[0_30px_90px_rgba(2,8,23,0.38)] dark:border-slate-800 dark:bg-slate-950" dir="rtl">
-        <DialogHeader className="border-b border-slate-200 bg-slate-50/80 px-6 py-5 dark:border-slate-800 dark:bg-slate-900/35">
+        <DialogHeader className="border-b border-slate-200 bg-slate-50/80 px-4 py-4 dark:border-slate-800 dark:bg-slate-900/35 sm:px-6 sm:py-5">
           <DialogTitle className="text-center text-2xl font-extrabold text-slate-950 dark:text-white">
             {initialData ? "تعديل الواجب" : "إضافة واجب جديد"}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
 
           <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/30 md:grid-cols-2">
             {/* عنوان الواجب */}
@@ -240,7 +240,7 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
 
           {/* المرفقات */}
           <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/20">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
               <p className="text-base font-extrabold text-slate-800 dark:text-slate-100">
                 مرفقات الواجب
               </p>
@@ -301,7 +301,7 @@ export function AddAssignmentModal({ isOpen, onClose, groups, onAdd, onUpdate, i
 
             {/* ملف الإجابات */}
             <div className="space-y-2">
-              <Label htmlFor="answerKeyFile" className="text-xs text-slate-500 font-bold flex items-center justify-between">
+              <Label htmlFor="answerKeyFile" className="flex flex-col gap-1 text-xs font-bold text-slate-500 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
                 <span className="flex items-center gap-1">
                   <Lock className="h-3 w-3 text-amber-500" />
                   ملف الإجابات النموذجية

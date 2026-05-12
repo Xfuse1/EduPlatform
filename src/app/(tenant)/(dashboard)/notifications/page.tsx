@@ -122,11 +122,11 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter(n => !n.isRead).length
 
   return (
-    <div className="flex flex-col gap-6 p-6 pb-20 max-w-5xl mx-auto w-full" dir="rtl">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 pb-8 sm:gap-6" dir="rtl">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">مركز الإشعارات</h1>
+          <h1 className="text-2xl font-bold tracking-normal sm:text-3xl">مركز الإشعارات</h1>
           <p className="text-muted-foreground mt-1">
             {unreadCount > 0 ? `لديك ${unreadCount} إشعارات غير مقروءة` : "كل الإشعارات مقروءة"}
           </p>
@@ -146,7 +146,7 @@ export default function NotificationsPage() {
 
       <div className="flex flex-col gap-4">
         {/* Search and Filters */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col items-stretch justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-950 sm:p-4 md:flex-row md:items-center">
           <div className="relative w-full md:w-[350px]">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
@@ -158,7 +158,7 @@ export default function NotificationsPage() {
           </div>
 
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabModule)} className="w-full md:w-auto">
-            <TabsList className="bg-slate-50 dark:bg-slate-900 rounded-xl p-1 gap-1">
+            <TabsList className="w-full justify-start gap-1 rounded-xl bg-slate-50 p-1 dark:bg-slate-900 md:w-auto">
               <TabsTrigger value="all" className="rounded-lg px-4">الكل</TabsTrigger>
               <TabsTrigger value="attendance" className="rounded-lg px-4">الحضور</TabsTrigger>
               <TabsTrigger value="assignments" className="rounded-lg px-4">الواجبات</TabsTrigger>
@@ -182,20 +182,20 @@ export default function NotificationsPage() {
                 <Card
                   key={n.id}
                   className={cn(
-                    "group border-none shadow-sm transition-all hover:shadow-md cursor-pointer rounded-[24px] overflow-hidden relative",
+                    "group relative cursor-pointer overflow-hidden rounded-[18px] border-none shadow-sm transition-all hover:shadow-md sm:rounded-[24px]",
                     !n.isRead ? "bg-white dark:bg-slate-950 ring-1 ring-primary/20" : "bg-white/60 dark:bg-slate-950/60 opacity-80"
                   )}
                   onClick={() => !n.isRead && markAsRead(n.id)}
                 >
                   {!n.isRead && <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-primary" />}
-                  <CardContent className="p-5">
-                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                      <div className="flex gap-5 items-start">
+                  <CardContent className="p-4 sm:p-5">
+                    <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                      <div className="flex min-w-0 items-start gap-3 sm:gap-5">
                         <div className={cn("hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl", config.bgColor, config.color)}>
                           <config.icon className="h-6 w-6" />
                         </div>
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-2">
+                        <div className="min-w-0 space-y-1.5">
+                          <div className="flex flex-wrap items-center gap-2">
                             <div className={cn("flex sm:hidden h-6 w-6 shrink-0 items-center justify-center rounded-full", config.bgColor, config.color)}>
                               <config.icon className="h-3 w-3" />
                             </div>
@@ -238,13 +238,13 @@ export default function NotificationsPage() {
             })}
           </div>
         ) : (
-          <Card className="border-dashed flex flex-col items-center justify-center p-20 text-center bg-slate-50/50 dark:bg-slate-900/10 rounded-[40px]">
+          <Card className="flex flex-col items-center justify-center rounded-[24px] border-dashed bg-slate-50/50 p-8 text-center dark:bg-slate-900/10 sm:rounded-[40px] sm:p-20">
             <div className="h-20 w-20 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-300 mb-6">
               <Bell className="h-10 w-10" />
             </div>
             <CardHeader className="p-0">
-              <CardTitle className="text-2xl font-extrabold text-slate-400">لا توجد إشعارات</CardTitle>
-              <CardDescription className="text-lg mt-2">
+              <CardTitle className="text-xl font-extrabold text-slate-400 sm:text-2xl">لا توجد إشعارات</CardTitle>
+              <CardDescription className="mt-2 text-base sm:text-lg">
                 {searchQuery || activeTab !== "all" ? "لم نعثر على إشعارات تطابق الفلتر الحالي." : "لا توجد إشعارات حتى الآن."}
               </CardDescription>
             </CardHeader>

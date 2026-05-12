@@ -214,15 +214,15 @@ export function SignupForm({ initialPhone }: { initialPhone?: string }) {
     <Card 
       className="w-full overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
     >
-      <div className="border-b border-white/5 px-6 py-7 sm:px-8 text-center">
+      <div className="border-b border-white/5 px-4 py-6 text-center sm:px-8 sm:py-7">
         <div className="mx-auto mb-4 flex h-12 w-40 items-center justify-center sm:h-14 sm:w-48">
           <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
         </div>
-        <h1 className="mt-5 text-3xl font-extrabold text-slate-900 dark:text-white">منصة EduPlatform</h1>
+        <h1 className="mt-5 text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">منصة EduPlatform</h1>
         <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-[#94A3B8]">سجّل كمعلم أو صاحب مركز وانطلق في رحلتك التعليمية.</p>
       </div>
 
-      <CardContent className="space-y-5 p-6 sm:p-8">
+      <CardContent className="space-y-5 p-4 sm:p-8">
         {pageError ? (
           <div className="flex items-start gap-3 rounded-[18px] border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
             <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" />

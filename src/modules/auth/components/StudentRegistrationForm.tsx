@@ -79,11 +79,11 @@ export function StudentRegistrationForm({ tenantName, tenantSlug, initialPhone }
     <Card 
       className="overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
     >
-      <CardHeader className="border-b border-slate-100 dark:border-white/5 px-6 py-7 text-slate-900 dark:text-white sm:px-8">
+      <CardHeader className="border-b border-slate-100 px-4 py-6 text-slate-900 dark:border-white/5 dark:text-white sm:px-8 sm:py-7">
         <div className="mx-auto mb-4 flex h-[48px] w-[48px] items-center justify-center">
           <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
         </div>
-        <CardTitle className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white text-center">
+        <CardTitle className="mt-4 text-center text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
           حساب طالب جديد لدى {tenantName}
         </CardTitle>
         <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-[#94A3B8] text-center">
@@ -91,7 +91,7 @@ export function StudentRegistrationForm({ tenantName, tenantSlug, initialPhone }
         </p>
       </CardHeader>
 
-      <CardContent className="space-y-6 bg-transparent p-6 sm:p-8">
+      <CardContent className="space-y-5 bg-transparent p-4 sm:space-y-6 sm:p-8">
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">

@@ -210,8 +210,8 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
   };
 
   return (
-    <div className="space-y-8" dir="rtl">
-      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+    <div className="space-y-6 sm:space-y-8" dir="rtl">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-6">
         <div>
            <div className="flex items-center gap-2 text-slate-500 mb-2">
               <Button variant="ghost" onClick={() => window.location.href='/teacher/exams'} className="p-0 h-auto min-h-0 hover:bg-transparent hover:text-primary">
@@ -219,8 +219,8 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
                  العودة للامتحانات
               </Button>
            </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
-             <ClipboardCheck className="h-8 w-8 text-primary" />
+          <h1 className="flex items-center gap-3 break-words text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">
+             <ClipboardCheck className="h-7 w-7 text-primary sm:h-8 sm:w-8" />
              نتائج: {exam.title}
           </h1>
           <p className="mt-2 text-slate-600 dark:text-slate-300">عرض وتقييم إجابات الطلاب ورصد الدرجات النهائية.</p>
@@ -234,7 +234,7 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 sm:gap-6">
           <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-200">بحث عن طالب</label>
               <div className="relative">
@@ -251,7 +251,7 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
 
       <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden dark:border-slate-800">
         <div className="overflow-x-auto">
-          <table className="w-full text-right border-collapse">
+          <table className="min-w-[760px] w-full border-collapse text-right">
             <thead className="bg-slate-50 dark:bg-slate-900/50">
               <tr>
                 <th className="p-4 font-bold text-slate-700 dark:text-slate-200 border-b">اسم الطالب</th>
@@ -320,19 +320,19 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
 
       {/* Submission Detail Modal */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="max-w-4xl max-h-[95vh] p-0 overflow-hidden flex flex-col border-none shadow-2xl rounded-[32px] bg-slate-50 dark:bg-slate-950" dir="rtl">
-          <DialogHeader className="px-8 py-6 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-5">
+        <DialogContent className="flex max-h-[95dvh] max-w-4xl flex-col overflow-hidden rounded-[20px] border-none bg-slate-50 p-0 shadow-2xl dark:bg-slate-950 sm:rounded-[32px]" dir="rtl">
+          <DialogHeader className="border-b border-slate-100 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-900 sm:px-8 sm:py-6">
+            <div className="flex flex-col gap-4 min-[520px]:flex-row min-[520px]:items-center min-[520px]:justify-between">
+              <div className="flex min-w-0 items-center gap-3 sm:gap-5">
                  <div className="h-14 w-14 rounded-2xl bg-primary/5 flex items-center justify-center text-primary group transition-all hover:bg-primary/10">
                     <Users className="h-7 w-7 transition-transform group-hover:scale-110" />
                  </div>
                  <div>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white leading-none">{selectedSubmission?.student.name}</h2>
+                    <h2 className="truncate text-xl font-black leading-none text-slate-900 dark:text-white sm:text-2xl">{selectedSubmission?.student.name}</h2>
                     <p className="text-sm font-bold text-slate-400 mt-2">مراجعة الإجابات وتسجيل الدرجة</p>
                  </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center sm:gap-3">
                  <Button
                    onClick={handleApproveAutoGrade}
                    disabled={isAutoApproving || isAiGrading}
@@ -354,7 +354,7 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
             </div>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-8 space-y-10 scrollbar-none">
+          <div className="flex-1 space-y-6 overflow-y-auto overflow-x-hidden p-4 scrollbar-none sm:space-y-10 sm:p-8">
             {exam.questions.map((question, index) => {
               const studentAnswer = selectedSubmission?.answers[question.id];
               const normalizedStudentTf = normalizeTrueFalse(studentAnswer);
@@ -367,7 +367,7 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
                     <div className="absolute top-12 bottom-[-40px] right-6 w-0.5 bg-slate-100 dark:bg-slate-800 z-0" />
                   )}
 
-                  <div className="relative z-10 flex gap-6">
+                  <div className="relative z-10 flex gap-3 sm:gap-6">
                     {/* Number Circle */}
                     <div className="flex-shrink-0">
                       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border-2 border-slate-100 text-lg font-black text-slate-300 dark:bg-slate-900 dark:border-slate-800 transition-all group-hover:border-primary group-hover:text-primary">
@@ -377,8 +377,8 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
 
                     <div className="flex-1 min-w-0 space-y-5">
                       {/* Question Text and Grade */}
-                      <div className="flex items-start justify-between gap-4">
-                        <p className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-relaxed pt-1 break-all">
+                      <div className="flex flex-col gap-3 min-[520px]:flex-row min-[520px]:items-start min-[520px]:justify-between min-[520px]:gap-4">
+                        <p className="break-words pt-1 text-base font-bold leading-relaxed text-slate-800 dark:text-slate-100 sm:text-xl">
                           {question.questionText}
                         </p>
                         <Badge variant="outline" className="h-8 rounded-xl border-slate-100 bg-white px-3 font-bold text-slate-400 dark:bg-slate-900 dark:border-slate-800">
@@ -422,7 +422,7 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
 
                         {/* TRUE_FALSE */}
                         {question.type === 'TRUE_FALSE' && (
-                          <div className="flex gap-4">
+                          <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:gap-4">
                             {[
                               { value: "true", label: "صح" },
                               { value: "false", label: "خطأ" },
@@ -476,10 +476,10 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
             })}
           </div>
 
-          <DialogFooter className="px-8 py-8 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-6">
+          <DialogFooter className="flex flex-col gap-4 border-t border-slate-100 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-900 sm:gap-6 sm:px-8 sm:py-8">
               <div className="w-full space-y-6">
                  {selectedSubmission?.aiFeedback && (
-                    <div className="group relative p-6 bg-slate-50 border border-slate-100 rounded-[24px] dark:bg-slate-950 dark:border-slate-800 overflow-hidden">
+                    <div className="group relative overflow-hidden rounded-[20px] border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950 sm:rounded-[24px] sm:p-6">
                       <div className="absolute top-0 right-0 h-full w-1.5 bg-indigo-500 opacity-20" />
                       <div className="flex items-center gap-2 mb-3">
                          <div className="h-6 w-6 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center dark:bg-indigo-900/30 dark:text-indigo-400">
@@ -518,11 +518,11 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
                     </div>
                  </div>
 
-                 <div className="flex gap-4">
+                 <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:gap-4">
                     <Button 
                       onClick={handleSaveGrade} 
                       disabled={isSaving}
-                      className="flex-[2.5] h-16 rounded-[20px] bg-primary hover:bg-primary/90 text-white font-black text-lg shadow-2xl shadow-primary/20 transition-all active:scale-95 group"
+                      className="h-14 rounded-[18px] bg-primary text-base font-black text-white shadow-2xl shadow-primary/20 transition-all hover:bg-primary/90 active:scale-95 group min-[420px]:h-16 min-[420px]:flex-[2.5] sm:text-lg sm:rounded-[20px]"
                     >
                        {isSaving ? (
                          <Loader2 className="h-6 w-6 animate-spin" />
@@ -536,7 +536,7 @@ export function ExamResultsClient({ exam }: ExamResultsClientProps) {
                     <Button 
                       variant="ghost" 
                       onClick={() => setIsDetailOpen(false)} 
-                      className="flex-1 h-16 rounded-[20px] font-bold text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-all"
+                      className="h-14 rounded-[18px] font-bold text-slate-400 transition-all hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950 min-[420px]:h-16 min-[420px]:flex-1 sm:rounded-[20px]"
                     >
                       إلغاء
                     </Button>

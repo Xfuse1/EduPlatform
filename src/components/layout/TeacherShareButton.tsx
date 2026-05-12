@@ -123,9 +123,9 @@ export function TeacherShareButton({
           setOpen(true);
           setShowShareOptions(false);
         }}
-        className="touch-target inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-3 text-sm font-bold text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-200 dark:hover:bg-sky-950/60 sm:px-4"
+        className="touch-target inline-flex min-h-9 min-w-9 items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-2 text-xs font-bold text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-200 dark:hover:bg-sky-950/60 sm:min-h-11 sm:min-w-0 sm:rounded-2xl sm:px-4 sm:text-sm"
       >
-        <Share2 className="h-5 w-5" />
+        <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
         <span className="hidden sm:inline">مشاركة المنصة</span>
       </button>
 

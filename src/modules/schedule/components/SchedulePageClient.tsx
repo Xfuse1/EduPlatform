@@ -20,25 +20,25 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
   const today = new Date().toDateString();
 
   return (
-    <div className="space-y-8 pb-10" dir="rtl">
+    <div className="space-y-6 pb-8 sm:space-y-8 sm:pb-10" dir="rtl">
       {/* Header Section */}
-      <header className="rounded-[32px] bg-[linear-gradient(135deg,_#111827,_#1F2937_60%,_#374151)] px-8 py-10 text-white shadow-2xl relative overflow-hidden">
+      <header className="relative overflow-hidden rounded-[20px] bg-[linear-gradient(135deg,_#111827,_#1F2937_60%,_#374151)] px-4 py-6 text-white shadow-2xl sm:rounded-[32px] sm:px-8 sm:py-10">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full -mr-32 -mt-32 blur-3xl" />
         <div className="relative z-10 max-w-2xl">
           <p className="text-sm font-semibold text-primary/80 mb-2">لوحة التحكم</p>
-          <h1 className="text-4xl font-extrabold tracking-tight">نظرة عامة على اليوم</h1>
-          <p className="mt-4 text-slate-400 leading-relaxed text-lg">
+          <h1 className="text-2xl font-extrabold tracking-normal sm:text-4xl">نظرة عامة على اليوم</h1>
+          <p className="mt-4 text-base leading-8 text-slate-400 sm:text-lg sm:leading-relaxed">
             تابع حصص اليوم، الامتحانات القادمة، وطلبات التصحيح المعلقة في مكان واحد.
           </p>
         </div>
       </header>
 
       {/* Grid Layout */}
-      <div className="grid gap-10">
+      <div className="grid gap-6 sm:gap-10">
         
         {/* 1. Today's Sessions Section */}
         <section className="space-y-6">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="mb-4 flex flex-wrap items-center gap-3 sm:mb-6">
             <div className="p-2 bg-blue-500/10 rounded-xl">
               <CalendarDays className="h-6 w-6 text-blue-600" />
             </div>
@@ -53,7 +53,7 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
               <p className="text-slate-500 font-medium">لا توجد حصص مجدولة لليوم.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {todaySessions.map((session) => (
                 <Link
                   key={session.id}
@@ -63,7 +63,7 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
                     "bg-white border-slate-200 hover:border-primary/50 hover:shadow-xl hover:-translate-y-1 dark:bg-slate-900/50 dark:border-slate-800 dark:hover:border-primary/40",
                   )}
                 >
-                  <div className="flex items-start justify-between mb-4">
+                  <div className="mb-4 flex items-start justify-between gap-3">
                     <div 
                       className="w-1.5 h-8 rounded-full" 
                       style={{ backgroundColor: session.group.color || '#1A5276' }} 
@@ -94,10 +94,10 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
           )}
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
           {/* 2. Upcoming Exams Section */}
           <section className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="mb-4 flex flex-wrap items-center gap-3 sm:mb-6">
               <div className="p-2 bg-purple-500/10 rounded-xl">
                 <GraduationCap className="h-6 w-6 text-purple-600" />
               </div>
@@ -106,13 +106,13 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
             
             <div className="space-y-3">
               {upcomingExams.length === 0 ? (
-                <div className="rounded-[24px] border border-slate-100 bg-slate-50/50 p-6 text-center dark:bg-slate-900/30">
+                <div className="rounded-[18px] border border-slate-100 bg-slate-50/50 p-4 text-center dark:bg-slate-900/30 sm:rounded-[24px] sm:p-6">
                   <p className="text-slate-500">لا توجد امتحانات قادمة.</p>
                 </div>
               ) : (
                 upcomingExams.map((exam) => (
-                  <Link key={exam.id} href={`/teacher/exams/${exam.id}/results`} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-purple-200 transition-colors dark:bg-slate-900 dark:border-slate-800">
-                    <div className="flex items-center gap-4">
+                  <Link key={exam.id} href={`/teacher/exams/${exam.id}/results`} className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-colors hover:border-purple-200 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-4">
                       <div className="flex flex-col items-center justify-center h-12 w-12 rounded-xl bg-purple-50 text-purple-600 font-bold dark:bg-purple-900/20">
                         <span className="text-sm leading-none">{toArabicDigits(format(new Date(exam.startAt), 'd'))}</span>
                         <span className="text-[10px] uppercase">{format(new Date(exam.startAt), 'MMM', { locale: ar })}</span>
@@ -136,7 +136,7 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
 
           {/* 3. Pending Homework Section */}
           <section className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="mb-4 flex flex-wrap items-center gap-3 sm:mb-6">
               <div className="p-2 bg-orange-500/10 rounded-xl">
                 <ClipboardList className="h-6 w-6 text-orange-600" />
               </div>
@@ -150,7 +150,7 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
 
             <div className="space-y-3">
               {pendingHomework.length === 0 ? (
-                <div className="rounded-[24px] border border-slate-100 bg-slate-50/50 p-6 text-center dark:bg-slate-900/30">
+                <div className="rounded-[18px] border border-slate-100 bg-slate-50/50 p-4 text-center dark:bg-slate-900/30 sm:rounded-[24px] sm:p-6">
                   <p className="text-slate-500">لا توجد واجبات معلقة للتصحيح.</p>
                 </div>
               ) : (
@@ -158,9 +158,9 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
                   <Link 
                     key={sub.id} 
                     href={`/teacher/assignments`}
-                    className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-orange-200 cursor-pointer transition-colors dark:bg-slate-900 dark:border-slate-800"
+                    className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-colors hover:border-orange-200 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center dark:bg-slate-800">
                         <Users className="h-5 w-5 text-slate-500" />
                       </div>

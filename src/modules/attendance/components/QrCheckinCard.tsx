@@ -117,15 +117,15 @@ export function QrCheckinCard({ token, studentName }: { token: string; studentNa
   return (
     <Screen>
       <Card className="w-full max-w-lg overflow-hidden border-slate-200 dark:border-slate-800">
-        <CardContent className="space-y-6 p-6">
+        <CardContent className="space-y-5 p-4 sm:space-y-6 sm:p-6">
           <div className="space-y-2 text-center">
             <p className="text-sm font-semibold text-slate-500">تسجيل الحضور عبر QR</p>
-            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">مرحبًا {studentName}</h1>
+            <h1 className="break-words text-xl font-extrabold text-slate-900 dark:text-white sm:text-2xl">مرحبًا {studentName}</h1>
             <p className="text-sm text-slate-500">راجع بيانات الحصة ثم اضغط على زر تسجيل الحضور.</p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
-            <p className="text-lg font-bold text-slate-900 dark:text-white">{session.groupName}</p>
+            <p className="break-words text-base font-bold text-slate-900 dark:text-white sm:text-lg">{session.groupName}</p>
             <div className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
               <p className="flex items-center gap-2">
                 <CalendarDays className="h-4 w-4" />
@@ -163,5 +163,5 @@ export function QrCheckinCard({ token, studentName }: { token: string; studentNa
 }
 
 function Screen({ children }: { children: ReactNode }) {
-  return <div className="flex min-h-screen items-center justify-center p-4">{children}</div>;
+  return <div className="flex min-h-[100dvh] items-center justify-center p-3 sm:p-4">{children}</div>;
 }

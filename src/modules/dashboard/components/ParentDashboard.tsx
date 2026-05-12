@@ -40,8 +40,8 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
       {/* Subscription Expiry Banner */}
       {showBanner && (
         <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] shadow-sm overflow-hidden animate-in fade-in slide-in-from-top duration-500">
-          <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+          <CardContent className="flex flex-col items-stretch justify-between gap-4 p-4 sm:flex-row sm:items-center">
+            <div className="flex items-start gap-3 sm:items-center">
               <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900 flex items-center justify-center text-amber-600">
                 <AlertTriangle className="h-6 w-6" />
               </div>
@@ -50,7 +50,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                 <p className="text-xs text-amber-700/80 dark:text-amber-400">اشتراكك ينتهي خلال 5 أيام — يرجى التجديد لضمان استمرار الخدمة.</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex w-full items-center gap-2 sm:w-auto">
               <Button 
                 variant="default" 
                 className="bg-amber-600 hover:bg-amber-700 text-white min-h-10 px-6 rounded-xl text-xs font-bold shadow-none"
@@ -95,21 +95,21 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
       {/* Stats Section */}
       <section className="grid gap-4 md:grid-cols-3">
         <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <p className="text-sm text-slate-500 dark:text-[#94A3B8] font-bold">إجمالي الأبناء</p>
-            <p className="mt-3 text-3xl font-extrabold">{toArabicDigits(data.children.length)}</p>
+            <p className="mt-3 text-2xl font-extrabold sm:text-3xl">{toArabicDigits(data.children.length)}</p>
           </CardContent>
         </Card>
         <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <p className="text-sm text-slate-500 dark:text-[#94A3B8] font-bold">متوسط الحضور</p>
-            <p className="mt-3 text-3xl font-extrabold text-[#00B8A0]">
+            <p className="mt-3 text-2xl font-extrabold text-[#00B8A0] sm:text-3xl">
               {data.children.length ? `${toArabicDigits(data.children[0].attendanceRate)}%` : "٠٪"}
             </p>
           </CardContent>
         </Card>
         <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(245,166,35,0.1)]">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <p className="text-sm text-slate-500 dark:text-[#94A3B8] font-bold">حالة المصروفات</p>
             <p className="mt-3 text-lg font-extrabold text-[#F5A623]">
               {data.children[0]?.payment.status === "PAID" ? "منتظمة بالكامل" : "تحتاج مراجعة"}
@@ -137,12 +137,12 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                   <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{child.name}</span>
                 </div>
                 {child.nextSession ? (
-                  <div key={child.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-4">
+                  <div key={child.id} className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-4">
                       <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
                         {formatTime12Hour(child.nextSession.timeStart)}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm font-bold text-slate-900 dark:text-white">{child.nextSession.group.name}</p>
                         <p className="text-[10px] text-slate-400">{formatSessionDate(new Date(child.nextSession.date))}</p>
                       </div>
@@ -175,7 +175,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
           <CardContent className="p-0">
             {/* Chart Area */}
             <div className="px-6 pt-4 pb-2 border-b border-dashed border-slate-100 dark:border-slate-800">
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex items-center justify-between gap-3">
                 <p className="text-xs font-bold text-slate-600 dark:text-slate-400 px-2">معدل الحضور العام</p>
                 <span className="text-lg font-black text-primary dark:text-sky-400">
                   {toArabicDigits(
@@ -192,15 +192,15 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
             </div>
             
             {/* Recent Grades */}
-            <div className="p-6 space-y-4">
+            <div className="space-y-4 p-4 sm:p-6">
               <p className="text-xs font-bold text-slate-500 flex items-center gap-2">
                 <BookOpen className="h-3 w-3" />
                 آخر درجات الواجبات
               </p>
               <div className="space-y-2">
                 {(data.assignments as any[]).map(assignment => (
-                  <div key={assignment.id} className="flex items-center justify-between p-2 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                    <div className="flex flex-col">
+                  <div key={assignment.id} className="flex flex-col gap-3 rounded-xl border border-dashed border-slate-200 p-2 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 flex-col">
                       <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{assignment.title}</span>
                       <span className="text-[9px] text-slate-400">{assignment.childName}</span>
                     </div>
@@ -230,15 +230,15 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
         </h3>
         {data.children.length === 0 ? (
           <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
-            <CardContent className="p-6 text-sm text-slate-500 dark:text-slate-300">لا توجد بيانات أبناء مرتبطة بهذا الحساب</CardContent>
+            <CardContent className="p-4 text-sm text-slate-500 dark:text-slate-300 sm:p-6">لا توجد بيانات أبناء مرتبطة بهذا الحساب</CardContent>
           </Card>
         ) : (
           data.children.map((child) => (
             <Card key={child.id} className="overflow-hidden border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
               <div className="bg-[linear-gradient(135deg,rgba(26,43,109,0.6),rgba(0,184,160,0.1))] px-6 py-5 border-b border-[rgba(255,255,255,0.08)]">
                 <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-2xl font-extrabold text-primary dark:text-sky-300">{child.name}</h2>
+                  <div className="min-w-0">
+                    <h2 className="break-words text-xl font-extrabold text-primary dark:text-sky-300 sm:text-2xl">{child.name}</h2>
                     <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 font-bold">{child.grade}</p>
                   </div>
                   <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-primary shadow-sm dark:bg-slate-900 dark:text-sky-300">
@@ -247,7 +247,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                 </div>
               </div>
 
-              <CardContent className="space-y-5 p-6">
+              <CardContent className="space-y-5 p-4 sm:p-6">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="flex items-start gap-4 rounded-[20px] bg-slate-50 p-4 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                     <CheckCircle2 className="mt-1 h-5 w-5 text-emerald-600 dark:text-emerald-500" />
@@ -292,8 +292,8 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                 <div className="flex items-start gap-4 rounded-[20px] bg-slate-50 p-5 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                   <CalendarClock className="mt-1 h-6 w-6 text-primary dark:text-sky-300" />
                   <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <div>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
                         <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">الحصة القادمة</p>
                         <p className="mt-1 text-base font-bold text-slate-900 dark:text-white">
                           {child.nextSession ? `${child.nextSession.group.name}` : "لا توجد حصة قادمة"}
@@ -304,7 +304,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                       </div>
                       <Button 
                         variant="outline" 
-                        className="rounded-xl border-slate-200 text-[11px] font-bold h-8 px-3"
+                        className="h-9 w-full rounded-xl border-slate-200 px-3 text-[11px] font-bold sm:h-8 sm:w-auto"
                         onClick={() => window.location.href = '/parent/attendance'}
                       >
                         سجل الحضور
@@ -313,7 +313,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row">
                   <Button 
                     variant="outline" 
                     className="flex-1 gap-2 rounded-2xl text-sm font-bold border-primary/20 text-primary hover:bg-primary/5 min-h-[50px]"

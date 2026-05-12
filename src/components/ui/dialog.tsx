@@ -58,7 +58,7 @@ export function DialogContent({ children, className, ...props }: HTMLAttributes<
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 p-4 sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 p-3 sm:items-center sm:p-4">
       <button
         aria-label="إغلاق"
         className="absolute inset-0"
@@ -68,7 +68,7 @@ export function DialogContent({ children, className, ...props }: HTMLAttributes<
       <div
         aria-modal="true"
         className={cn(
-          "relative z-10 flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.25)] dark:border-slate-800 dark:bg-slate-950",
+          "relative z-10 flex max-h-[calc(100dvh-1.5rem)] w-full flex-col overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.25)] dark:border-slate-800 dark:bg-slate-950 sm:max-h-[calc(100dvh-2rem)] sm:rounded-[24px]",
           className,
         )}
         role="dialog"
@@ -82,11 +82,11 @@ export function DialogContent({ children, className, ...props }: HTMLAttributes<
 }
 
 export function DialogHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("border-b border-slate-200 px-5 py-4 dark:border-slate-800 sm:px-6", className)} {...props} />;
+  return <div className={cn("border-b border-slate-200 px-4 py-4 dark:border-slate-800 sm:px-6", className)} {...props} />;
 }
 
 export function DialogTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h2 className={cn("text-start text-xl font-extrabold text-slate-900 dark:text-white", className)} {...props} />;
+  return <h2 className={cn("text-start text-lg font-extrabold text-slate-900 dark:text-white sm:text-xl", className)} {...props} />;
 }
 
 export function DialogDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {

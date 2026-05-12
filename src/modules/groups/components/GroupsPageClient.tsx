@@ -22,7 +22,7 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-[24px] border border-slate-200 bg-white/70 p-5 backdrop-blur dark:border-slate-800 dark:bg-slate-900/50 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">المجموعات</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">المجموعات</h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
             اعرض المجموعات الحالية وأنشئ مجموعات جديدة بمواعيد أسبوعية متعددة.
           </p>
@@ -54,15 +54,15 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
               <div className="h-1.5" style={{ backgroundColor: group.color }} />
 
               <div className="space-y-4 p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">{group.name}</h2>
                     <p className="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold text-white" style={{ backgroundColor: group.color }}>
                       {group.subject}
                     </p>
                     <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{group.gradeLevel}</p>
                   </div>
-                  <p className="text-sm font-bold text-primary dark:text-sky-300">{formatCurrency(group.monthlyFee)}</p>
+                  <p className="shrink-0 text-start text-sm font-bold text-primary dark:text-sky-300 sm:text-end">{formatCurrency(group.monthlyFee)}</p>
                 </div>
 
                 <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-900">
@@ -99,7 +99,7 @@ export function GroupsPageClient({ initialGroups }: { initialGroups: GroupItem[]
                   </p>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-col gap-3 min-[420px]:flex-row">
                   <Link
                     href={`${ROUTES.teacher.groups}/${group.id}`}
                     className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"

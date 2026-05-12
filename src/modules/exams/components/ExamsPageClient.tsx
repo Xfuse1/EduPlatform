@@ -94,10 +94,10 @@ export function ExamsPageClient({ initialExams = [], groups }: ExamsPageClientPr
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">إدارة الامتحانات</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">إدارة الامتحانات</h1>
           <p className="mt-2 text-slate-600 dark:text-slate-300">قم بتنظيم وجدولة اختبارات المجموعات وتقييم أداء الطلاب.</p>
         </div>
         <Button onClick={openAdd} className="min-h-12 px-6">
@@ -106,7 +106,7 @@ export function ExamsPageClient({ initialExams = [], groups }: ExamsPageClientPr
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-2">
           <Label htmlFor="exam-search">البحث بالاسم</Label>
           <div className="relative">
@@ -140,15 +140,15 @@ export function ExamsPageClient({ initialExams = [], groups }: ExamsPageClientPr
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
         {filtered.map((exam) => (
           <Card key={exam.id} className="group relative overflow-hidden border border-slate-200 bg-white transition hover:-translate-y-1 dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md">
             <div className={`absolute right-0 top-0 h-full w-2 ${exam.status === "active" ? "bg-amber-400" : exam.status === "completed" ? "bg-emerald-400" : "bg-slate-300"}`} />
 
-            <CardContent className="space-y-5 pt-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
+            <CardContent className="space-y-5 pt-4 sm:pt-6">
+              <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
+                <div className="min-w-0 space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-xl font-bold text-slate-900 transition group-hover:text-primary dark:text-white">{exam.title}</h3>
                     {getStatusBadge(exam.status)}
                   </div>

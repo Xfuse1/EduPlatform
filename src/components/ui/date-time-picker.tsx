@@ -276,7 +276,7 @@ export function DateTimePicker({
       {open && (
         <div
           className={cn(
-            "absolute left-0 top-full z-[70] mt-2 max-w-[calc(100vw-3rem)] rounded-2xl border border-secondary/30 bg-white p-3 text-slate-900 shadow-[0_24px_70px_rgba(2,8,23,0.30)] ring-1 ring-secondary/10 dark:bg-slate-950 dark:text-slate-100 dark:shadow-[0_24px_70px_rgba(0,0,0,0.55)]",
+            "fixed inset-x-3 bottom-3 z-[70] max-h-[calc(100dvh-1.5rem)] max-w-[calc(100vw-1.5rem)] overflow-auto rounded-2xl border border-secondary/30 bg-white p-3 text-slate-900 shadow-[0_24px_70px_rgba(2,8,23,0.30)] ring-1 ring-secondary/10 dark:bg-slate-950 dark:text-slate-100 dark:shadow-[0_24px_70px_rgba(0,0,0,0.55)] sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-full sm:mt-2 sm:max-h-none sm:max-w-[calc(100vw-3rem)]",
             mode === "datetime" ? "w-[34rem]" : "w-[20rem]",
           )}
           dir="rtl"

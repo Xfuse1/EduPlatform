@@ -139,15 +139,15 @@ export function TeacherLanding({
         <ThemeToggle />
       </div>
 
-      <section className="relative z-10 mx-auto max-w-6xl space-y-8 px-4 py-12 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-[32px] border-2 border-slate-300/80 bg-white/70 shadow-[0_8px_40px_rgb(0,0,0,0.08)] backdrop-blur-3xl dark:border-white/10 dark:bg-white/5 text-slate-900 dark:text-white">
-          <div className="grid gap-8 px-6 py-10 lg:grid-cols-[1.2fr_0.8fr] lg:px-10">
+      <section className="relative z-10 mx-auto max-w-6xl space-y-6 px-3 py-10 sm:space-y-8 sm:px-6 sm:py-12 lg:px-8">
+        <div className="overflow-hidden rounded-[22px] border-2 border-slate-300/80 bg-white/70 text-slate-900 shadow-[0_8px_40px_rgb(0,0,0,0.08)] backdrop-blur-3xl dark:border-white/10 dark:bg-white/5 dark:text-white sm:rounded-[32px]">
+          <div className="grid gap-6 px-4 py-7 sm:px-6 sm:py-10 lg:grid-cols-[1.2fr_0.8fr] lg:px-10">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold dark:bg-white/15">
+              <div className="inline-flex max-w-full items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold dark:bg-white/15 sm:px-4 sm:text-sm">
                 <Sparkles className="h-4 w-4" />
                 صفحة تعريف احترافية للطلاب وأولياء الأمور
               </div>
-              <h1 className="mt-5 text-4xl font-extrabold leading-tight sm:text-5xl">{teacher.name}</h1>
+              <h1 className="mt-5 break-words text-3xl font-extrabold leading-tight sm:text-5xl">{teacher.name}</h1>
               <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600 dark:text-white/90">
                 {teacher.bio ?? "خبرة عملية في تأسيس ومتابعة الطلاب مع نظام واضح للحضور والتحصيل والمتابعة المنتظمة."}
               </p>
@@ -170,7 +170,7 @@ export function TeacherLanding({
               </div>
             </div>
 
-            <div className="rounded-[28px] bg-slate-100/50 p-6 backdrop-blur dark:bg-white/12">
+            <div className="rounded-[20px] bg-slate-100/50 p-4 backdrop-blur dark:bg-white/12 sm:rounded-[28px] sm:p-6">
               <div
                 className="mx-auto flex h-28 w-28 items-center justify-center rounded-full border border-white/25 bg-white/20 text-3xl font-extrabold"
                 style={{ backgroundColor: `${teacher.themeColor}55` }}
@@ -203,9 +203,9 @@ export function TeacherLanding({
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-black text-slate-900 dark:text-white" suppressHydrationWarning>المجموعات المتاحة</h2>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl" suppressHydrationWarning>المجموعات المتاحة</h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-white/50">اطلع على السعة المتبقية والرسوم والجدول لكل مجموعة.</p>
           </div>
           <Link className="hidden rounded-xl bg-[#00B8A0] px-5 py-3 text-sm font-bold text-white shadow-[0_0_15px_rgba(0,184,160,0.3)] transition hover:bg-[#00B8A0]/90 sm:inline-flex" href={`/${teacher.slug}/register`}>
@@ -220,8 +220,8 @@ export function TeacherLanding({
             return (
               <Card key={group.id} className="overflow-hidden border-2 border-slate-300/80 bg-white/70 shadow-lg backdrop-blur-3xl dark:border-white/10 dark:bg-white/5 dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">
                 <CardContent className="space-y-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
+                  <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
+                    <div className="min-w-0">
                       <h3 className="text-lg font-bold text-slate-900 dark:text-white" suppressHydrationWarning>{group.name}</h3>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {group.days.map((day) => (
@@ -252,7 +252,7 @@ export function TeacherLanding({
                     </span>
                   </p>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
                     <p className="text-lg font-extrabold text-primary dark:text-sky-300">{formatCurrency(group.monthlyFee)}</p>
                     <p className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                       <Users className="h-4 w-4" />

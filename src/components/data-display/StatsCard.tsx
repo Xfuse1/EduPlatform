@@ -41,20 +41,20 @@ export function StatsCard({
 
   return (
     <Card className={cn("overflow-hidden border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm", toneStyles[tone])}>
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <p className="text-start text-sm font-bold text-slate-500 dark:text-[#94A3B8]">{title}</p>
-            <p className={cn("mt-3 text-start text-3xl font-extrabold tracking-tight", toneColors[tone])}>{value}</p>
+            <p className={cn("mt-3 break-words text-start text-2xl font-extrabold tracking-tight sm:text-3xl", toneColors[tone])}>{value}</p>
             {hint ? (
-              <div className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-slate-100 dark:bg-white/10 px-3 py-2 text-xs font-extrabold text-slate-600 dark:text-white/80">
+              <div className="mt-4 inline-flex min-h-11 max-w-full items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-xs font-extrabold text-slate-600 dark:bg-white/10 dark:text-white/80">
                 <TrendIcon className={cn("h-4 w-4", toneColors[tone])} />
-                <span>{hint}</span>
+                <span className="min-w-0 truncate">{hint}</span>
               </div>
             ) : null}
           </div>
-          <div className={cn("flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] bg-slate-100 dark:bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]", toneColors[tone])}>
-            <Icon className="h-7 w-7" />
+          <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] bg-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] dark:bg-white/10 sm:h-14 sm:w-14 sm:rounded-[20px]", toneColors[tone])}>
+            <Icon className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
         </div>
       </CardContent>

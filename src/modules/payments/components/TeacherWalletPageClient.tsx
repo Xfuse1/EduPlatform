@@ -137,7 +137,7 @@ function ActivityDetailsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 overflow-y-auto p-5 sm:p-6">
+        <div className="min-h-0 overflow-y-auto p-4 sm:p-6">
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-800">
               <p className="text-xs text-slate-500">المبلغ</p>
@@ -158,7 +158,8 @@ function ActivityDetailsDialog({
           </div>
 
           {item.kind === 'GROUP_SESSION' ? (
-            <div className="mt-5 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+            <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+              <div className="min-w-[680px]">
               <div className="grid grid-cols-[1.4fr_0.8fr_0.9fr_0.9fr] gap-3 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-500 dark:bg-slate-900">
                 <span>الطالب</span>
                 <span>المبلغ</span>
@@ -181,6 +182,7 @@ function ActivityDetailsDialog({
                     </span>
                   </div>
                 ))}
+              </div>
               </div>
             </div>
           ) : (
@@ -278,13 +280,13 @@ export function TeacherWalletPageClient({ data }: { data: TeacherWalletData }) {
   }
 
   return (
-    <div className="space-y-6 p-4" dir="rtl">
+    <div className="space-y-5 pb-8 sm:space-y-6" dir="rtl">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">محفظة المعلم</h1>
+          <h1 className="text-2xl font-bold sm:text-3xl">محفظة المعلم</h1>
           <p className="text-sm text-slate-500">رصيد المدفوعات التي تم تحصيلها لحسابك بعد خصم رسوم المنصة.</p>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           {adminContactUrl ? (
             <a
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-cyan-300/30 bg-cyan-300/10 px-6 py-3 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300/20"
@@ -310,7 +312,7 @@ export function TeacherWalletPageClient({ data }: { data: TeacherWalletData }) {
         <Card>
           <CardContent className="space-y-2 p-4">
             <p className="text-sm text-slate-500">الرصيد الحالي</p>
-            <p className="text-4xl font-extrabold text-cyan-300 drop-shadow-[0_0_14px_rgba(34,211,238,0.28)]">{formatCurrency(data.wallet.balance)}</p>
+            <p className="break-words text-3xl font-extrabold text-cyan-300 drop-shadow-[0_0_14px_rgba(34,211,238,0.28)] sm:text-4xl">{formatCurrency(data.wallet.balance)}</p>
             <p className="text-xs text-slate-500">آخر تحديث: {formatDate(data.wallet.updatedAt)}</p>
           </CardContent>
         </Card>
@@ -395,12 +397,12 @@ export function TeacherWalletPageClient({ data }: { data: TeacherWalletData }) {
 
                 return (
                   <div key={item.id} className="rounded-lg border p-3 text-sm">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
                         <p className="font-bold">{item.title}</p>
                         <p className="mt-1 text-xs text-slate-500">{metaLabel}</p>
                       </div>
-                      <div className="flex shrink-0 items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                         <p className={`font-bold ${amountClass}`}>
                           {isDebit ? '-' : '+'}{formatCurrency(item.amount)}
                         </p>
@@ -429,7 +431,7 @@ export function TeacherWalletPageClient({ data }: { data: TeacherWalletData }) {
             ) : (
               data.withdrawals.map((withdrawal) => (
                 <div key={withdrawal.id} className="rounded-lg border p-3 text-sm">
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                     <p className="font-bold">{formatCurrency(withdrawal.amount)}</p>
                     <p className={`font-bold ${withdrawal.status === 'FAILED' ? 'text-rose-600' : withdrawal.status === 'SUCCESS' ? 'text-emerald-600' : 'text-sky-600'}`}>
                       {WITHDRAWAL_STATUS_LABELS[withdrawal.status] ?? withdrawal.status}

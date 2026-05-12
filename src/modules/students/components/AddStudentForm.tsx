@@ -449,7 +449,7 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
                     <Label>اختيار المجموعات</Label>
                     <button
                       type="button"
@@ -465,21 +465,21 @@ export function AddStudentForm({ groups, student }: { groups: GroupOption[]; stu
                       <label 
                         key={group.id} 
                         className={cn(
-                          "flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer",
+                          "flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between p-3 rounded-xl border transition-all cursor-pointer",
                           formState.groupIds.includes(group.id)
                             ? "bg-primary/10 border-primary dark:bg-sky-400/10 dark:border-sky-400"
                             : "bg-white border-slate-200 hover:border-slate-300 dark:bg-slate-950 dark:border-slate-800"
                         )}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
                           <input
                             type="checkbox"
                             className="h-4 w-4 rounded-md border-slate-300 text-primary focus:ring-primary"
                             checked={formState.groupIds.includes(group.id)}
                             onChange={() => handleGroupSelection(group.id)}
                           />
-                          <div>
-                            <p className="text-sm font-bold text-slate-900 dark:text-white">{group.name}</p>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{group.name}</p>
                             <p className="text-[10px] text-slate-500">الأماكن المتاحة: {group.remainingCapacity}</p>
                           </div>
                         </div>

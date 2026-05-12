@@ -53,11 +53,11 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
       />
 
       <Card className="overflow-hidden border border-white/10 bg-gradient-to-br from-[#1A2B6D] to-[#00B8A0] rounded-[20px] text-white shadow-xl">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <p className="text-sm font-bold text-white/70">الحصة القادمة</p>
           {data.nextSession ? (
             <div className="mt-4 space-y-3">
-              <p className="text-2xl font-black text-white">{data.nextSession.group.name}</p>
+              <p className="break-words text-xl font-black text-white sm:text-2xl">{data.nextSession.group.name}</p>
               <p className="text-sm font-medium text-white/90">{nextSessionDate || formatArabicDate(data.nextSession.date)}</p>
               <p className="flex items-center gap-2 text-sm font-medium text-white/90">
                 <Clock3 className="h-4 w-4" />
@@ -123,8 +123,8 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
             data.profile.enrollments.map((enrollment, index) => (
               <div key={enrollment.group.id} className="rounded-[18px] border bg-white p-4 dark:bg-slate-900">
                 <div className="mb-4 h-1.5 rounded-full" style={{ backgroundColor: groupColors[index % groupColors.length] }} />
-                <div className="flex items-start justify-between gap-3">
-                  <p className="text-lg font-bold text-slate-900 dark:text-white">{enrollment.group.name}</p>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <p className="break-words text-lg font-bold text-slate-900 dark:text-white">{enrollment.group.name}</p>
                   {enrollment.status === "PENDING" ? (
                     <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">
                       قيد المراجعة
@@ -165,8 +165,8 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
                   className="rounded-[18px] border bg-white p-4 dark:bg-slate-900"
                   style={{ borderInlineStart: `4px solid ${group.color ?? "#1A5276"}` }}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
                       <p className="font-bold text-slate-900 dark:text-white">{group.name}</p>
                       <p className="text-sm text-slate-500 mt-1">{group.gradeLevel} — {group.subject}</p>
                       <p className="text-sm text-slate-500 mt-1">{group.days.join(" • ")}</p>
@@ -174,7 +174,7 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
                         {formatTimeRange12Hour(group.timeStart, group.timeEnd)}
                       </p>
                     </div>
-                    <div className="text-end">
+                    <div className="shrink-0 text-start sm:text-end">
                       <p className="text-lg font-extrabold text-primary">{group.monthlyFee} ج</p>
                       <p className="text-xs text-slate-500">{group.remainingCapacity} مقعد متبقي</p>
                     </div>

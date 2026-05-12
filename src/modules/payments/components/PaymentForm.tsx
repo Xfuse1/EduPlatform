@@ -97,16 +97,16 @@ export function PaymentForm({ students }: PaymentFormProps) {
   // شاشة النجاح (يدوي فقط — Kashier يعود عبر callback)
   if (receiptNumber) {
     return (
-      <div className="text-center space-y-4 p-6">
-        <span className="text-5xl block">✅</span>
+      <div className="space-y-4 p-4 text-center sm:p-6">
+        <span className="block text-4xl sm:text-5xl">✅</span>
         <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
           تم تسجيل الدفعة بنجاح
         </h2>
         <p className="text-slate-500 dark:text-slate-400">رقم الإيصال:</p>
-        <p className="font-mono font-bold text-lg bg-slate-100 dark:bg-slate-800 p-3 rounded-lg">
+        <p className="break-all rounded-lg bg-slate-100 p-3 font-mono text-base font-bold dark:bg-slate-800 sm:text-lg">
           {receiptNumber}
         </p>
-        <div className="flex gap-3 justify-center flex-wrap">
+        <div className="flex flex-col flex-wrap justify-center gap-3 min-[420px]:flex-row">
           <button
             type="button"
             onClick={() => setReceiptNumber(null)}
@@ -159,7 +159,7 @@ export function PaymentForm({ students }: PaymentFormProps) {
       {/* نوع الدفع */}
       <div>
         <label className={labelClass}>نوع الدفع *</label>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 min-[420px]:flex-row">
           <button
             type="button"
             onClick={() => setPaymentType('full')}
@@ -223,7 +223,7 @@ export function PaymentForm({ students }: PaymentFormProps) {
           />
           {/* المبلغ المتبقي */}
           {totalAmount && partialAmount && Number(partialAmount) < Number(totalAmount) && (
-            <div className="mt-2 flex items-center justify-between rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-2.5">
+            <div className="mt-2 flex flex-col gap-1 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 dark:border-amber-800 dark:bg-amber-900/20 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
               <span className="text-xs font-bold text-amber-700 dark:text-amber-300">المبلغ المتبقي</span>
               <span className="text-sm font-extrabold text-amber-700 dark:text-amber-300">
                 {Number(totalAmount) - Number(partialAmount)} جنيه

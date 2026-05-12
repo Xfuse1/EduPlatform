@@ -103,10 +103,10 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">نظام الواجبات</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">نظام الواجبات</h1>
           <p className="mt-2 text-slate-600 dark:text-slate-300">إدارة وتقييم الواجبات المنزلية لجميع المجموعات.</p>
         </div>
         <Button onClick={() => setIsModalOpen(true)} className="min-h-12 px-6">
@@ -115,7 +115,7 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-200">البحث باسم الواجب أو الطالب</label>
               <div className="relative">
@@ -143,12 +143,12 @@ export function AssignmentsPageClient({ initialAssignments, groups }: Assignment
           </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
         {filtered.map((assignment) => (
           <Card key={assignment.id} className="group relative transition hover:-translate-y-1">
-            <CardContent className="pt-6 space-y-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1 flex-1">
+            <CardContent className="space-y-5 pt-4 sm:pt-6">
+              <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
+                <div className="min-w-0 flex-1 space-y-1">
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary transition">{assignment.title}</h3>
                   <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
                       <BookOpen className="h-4 w-4" />

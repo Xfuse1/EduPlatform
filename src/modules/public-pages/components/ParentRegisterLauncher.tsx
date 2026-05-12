@@ -156,7 +156,7 @@ export function ParentRegisterLauncher({ initialPhone, tenantSlug, tenantName }:
     <Card 
       className="overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
     >
-        <CardContent className="flex flex-col items-center gap-6 p-8 text-center sm:p-10">
+        <CardContent className="flex flex-col items-center gap-5 p-5 text-center sm:gap-6 sm:p-10">
           <div className="flex h-20 w-20 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/15 text-emerald-300">
             <CheckCircle2 className="h-10 w-10" />
           </div>
@@ -189,7 +189,7 @@ export function ParentRegisterLauncher({ initialPhone, tenantSlug, tenantName }:
     <Card 
       className="w-full overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
     >
-      <div className="border-b border-slate-100 dark:border-white/5 px-6 py-7 sm:px-8 text-center">
+      <div className="border-b border-slate-100 px-4 py-6 text-center dark:border-white/5 sm:px-8 sm:py-7">
         <div className="mx-auto mb-4 flex h-[48px] w-[48px] items-center justify-center">
           <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
         </div>
@@ -201,7 +201,7 @@ export function ParentRegisterLauncher({ initialPhone, tenantSlug, tenantName }:
         </p>
       </div>
 
-      <CardContent className="space-y-6 p-6 sm:p-8">
+      <CardContent className="space-y-5 p-4 sm:space-y-6 sm:p-8">
         {pageError ? (
           <div className="flex items-start gap-3 rounded-[18px] border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
             <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" />

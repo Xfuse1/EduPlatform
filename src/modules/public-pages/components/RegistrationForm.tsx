@@ -74,7 +74,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
     <Card 
       className="overflow-hidden border-slate-200 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/5 dark:shadow-[0_0_60px_rgba(0,184,160,0.08)] rounded-[20px]"
     >
-      <CardHeader className="border-b border-slate-100 dark:border-white/[0.08] px-6 py-7 text-slate-900 dark:text-white sm:px-8">
+      <CardHeader className="border-b border-slate-100 px-4 py-6 text-slate-900 dark:border-white/[0.08] dark:text-white sm:px-8 sm:py-7">
         <div className="mx-auto mb-6 flex h-[48px] w-[48px] items-center justify-center">
           <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
         </div>
@@ -83,7 +83,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
             <Sparkles className="h-3.5 w-3.5 text-[#00B8A0]" />
             <span>رحلة تسجيل سريعة ومنظمة</span>
           </div>
-          <CardTitle className="mt-4 text-3xl font-black tracking-tight text-slate-900 dark:text-white">استمارة التسجيل</CardTitle>
+          <CardTitle className="mt-4 text-2xl font-black tracking-normal text-slate-900 dark:text-white sm:text-3xl">استمارة التسجيل</CardTitle>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[#94A3B8]">
             خطوتان فقط لإرسال طلب التسجيل واختيار المجموعة الأنسب بشكل واضح ومريح.
           </p>
@@ -117,11 +117,11 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6 bg-transparent p-6 sm:p-8">
+      <CardContent className="space-y-5 bg-transparent p-4 sm:space-y-6 sm:p-8">
         <form className="space-y-5" onSubmit={handleSubmit}>
           {step === 1 ? (
             <>
-              <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-xl backdrop-blur">
+              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4 shadow-xl backdrop-blur sm:rounded-[28px] sm:p-5">
                 <div className="mb-5">
                   <p className="text-lg font-bold text-slate-900 dark:text-white">البيانات الأساسية</p>
                   <p className="mt-1 text-sm text-[#94A3B8]">أدخل بيانات الطالب وولي الأمر بصياغة واضحة ومرتبة.</p>
@@ -194,7 +194,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
             </>
           ) : (
             <>
-              <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-xl backdrop-blur">
+              <div className="rounded-[20px] border border-white/10 bg-white/5 p-4 shadow-xl backdrop-blur sm:rounded-[28px] sm:p-5">
                 <div className="mb-5">
                   <Label className="mb-0 text-base font-bold text-slate-900 dark:text-white">اختر المجموعة</Label>
                   <p className="mt-1 text-sm text-[#94A3B8]">اختر الموعد الأنسب لك من حيث الوقت والسعة والرسوم.</p>

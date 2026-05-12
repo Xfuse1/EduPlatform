@@ -70,11 +70,11 @@ export function AttendanceTable() {
   }
 
   return (
-    <Card className="w-full border-none shadow-xl overflow-hidden rounded-[32px] bg-white dark:bg-slate-950" dir="rtl">
-      <CardHeader className="p-8 space-y-6">
+    <Card className="w-full overflow-hidden rounded-[20px] border-none bg-white shadow-xl dark:bg-slate-950 sm:rounded-[32px]" dir="rtl">
+      <CardHeader className="space-y-5 p-4 sm:space-y-6 sm:p-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <CardTitle className="text-2xl font-black">تعقّب الحضور الكامل</CardTitle>
+            <CardTitle className="text-xl font-black sm:text-2xl">تعقّب الحضور الكامل</CardTitle>
             <CardDescription className="text-slate-500 font-bold mt-1">إظهار جميع السجلات لكل الطلاب والمجموعات</CardDescription>
           </div>
           <Button 
@@ -116,7 +116,7 @@ export function AttendanceTable() {
 
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <table className="w-full text-right border-collapse">
+          <table className="min-w-[720px] w-full border-collapse text-right">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-900/50">
                 <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">اسم الطالب</th>
@@ -168,7 +168,7 @@ export function AttendanceTable() {
         </div>
       </CardContent>
       {filteredRecords.length > 0 && (
-        <CardFooter className="p-6 bg-slate-50/50 dark:bg-slate-900/50 flex justify-center border-t">
+        <CardFooter className="flex justify-center border-t bg-slate-50/50 p-4 dark:bg-slate-900/50 sm:p-6">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">إجمالي السجلات المعروضة: {toArabicDigits(filteredRecords.length)}</p>
         </CardFooter>
       )}

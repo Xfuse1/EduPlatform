@@ -11,7 +11,7 @@ export function TenantSuspendedNotice({
 }) {
   return (
     <section dir="rtl" className="flex min-h-[calc(100vh-8rem)] items-center justify-center">
-      <div className="w-full max-w-2xl rounded-2xl border border-rose-300/20 bg-slate-950/70 p-6 text-center shadow-2xl backdrop-blur dark:bg-slate-950/70">
+      <div className="w-full max-w-2xl rounded-2xl border border-rose-300/20 bg-slate-950/70 p-4 text-center shadow-2xl backdrop-blur dark:bg-slate-950/70 sm:p-6">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-rose-300/25 bg-rose-500/10 text-rose-200">
           <ShieldAlert className="h-8 w-8" />
         </div>

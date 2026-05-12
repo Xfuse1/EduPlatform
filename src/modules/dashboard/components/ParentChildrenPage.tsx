@@ -36,9 +36,9 @@ export function ParentChildrenPage({ data }: ParentChildrenPageProps) {
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[24px] bg-[linear-gradient(135deg,_#163b54,_#1A5276_45%,_#2E86C1)] px-6 py-7 text-white shadow-[0_20px_60px_rgba(26,82,118,0.25)]">
+      <section className="overflow-hidden rounded-[20px] bg-[linear-gradient(135deg,_#163b54,_#1A5276_45%,_#2E86C1)] px-4 py-5 text-white shadow-[0_20px_60px_rgba(26,82,118,0.25)] sm:rounded-[24px] sm:px-6 sm:py-7">
         <p className="text-start text-sm font-semibold text-white/75">صفحة الأبناء</p>
-        <h1 className="mt-3 text-start text-3xl font-extrabold">أبنائي</h1>
+        <h1 className="mt-3 text-start text-2xl font-extrabold sm:text-3xl">أبنائي</h1>
         <p className="mt-3 max-w-2xl text-start text-sm leading-7 text-white/85">
           استخدم زر إضافة ابن جديد لفتح الفورم وربط الأبناء بحسابك، ثم تابع الحضور والمصاريف والحصة القادمة لكل ابن.
         </p>
@@ -48,15 +48,15 @@ export function ParentChildrenPage({ data }: ParentChildrenPageProps) {
 
       <section className="grid gap-4 md:grid-cols-3">
         <Card className="bg-[linear-gradient(135deg,_#1A5276,_#2E86C1)] text-white">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <p className="text-sm text-white/75">إجمالي الأبناء</p>
-            <p className="mt-3 text-3xl font-extrabold">{toArabicDigits(data.children.length)}</p>
+            <p className="mt-3 text-2xl font-extrabold sm:text-3xl">{toArabicDigits(data.children.length)}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <p className="text-sm text-slate-500 dark:text-slate-400">متوسط الحضور</p>
-            <p className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-white">
+            <p className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">
               {data.children.length
                 ? `${toArabicDigits(Math.round(data.children.reduce((sum, child) => sum + child.attendanceRate, 0) / data.children.length))}%`
                 : "٠٪"}
@@ -64,9 +64,9 @@ export function ParentChildrenPage({ data }: ParentChildrenPageProps) {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <p className="text-sm text-slate-500 dark:text-slate-400">الحسابات التي تحتاج متابعة</p>
-            <p className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-white">
+            <p className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">
               {toArabicDigits(data.children.filter((child) => child.payment.status !== "PAID").length)}
             </p>
           </CardContent>
@@ -82,10 +82,10 @@ export function ParentChildrenPage({ data }: ParentChildrenPageProps) {
         <div className="grid gap-5 lg:grid-cols-2">
           {data.children.map((child) => (
             <Card key={child.id} className="overflow-hidden border-slate-200/80 dark:border-slate-800/80">
-              <div className="bg-[linear-gradient(135deg,_rgba(26,82,118,0.12),_rgba(46,134,193,0.18))] px-6 py-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-2xl font-extrabold text-primary dark:text-sky-300">{child.name}</h2>
+              <div className="bg-[linear-gradient(135deg,_rgba(26,82,118,0.12),_rgba(46,134,193,0.18))] px-4 py-5 sm:px-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <h2 className="break-words text-xl font-extrabold text-primary dark:text-sky-300 sm:text-2xl">{child.name}</h2>
                     <p className="mt-2 inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                       <GraduationCap className="h-4 w-4" />
                       {child.grade}
@@ -100,7 +100,7 @@ export function ParentChildrenPage({ data }: ParentChildrenPageProps) {
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-end gap-2 sm:min-w-[320px]">
+                  <div className="flex flex-wrap items-center gap-2 sm:min-w-[320px] sm:justify-end">
                     <ChildGroupEnrollmentButton
                       availableGroups={child.availableGroups ?? []}
                       childId={child.id}
@@ -112,7 +112,7 @@ export function ParentChildrenPage({ data }: ParentChildrenPageProps) {
                 </div>
               </div>
 
-              <CardContent className="space-y-5 p-6">
+              <CardContent className="space-y-5 p-4 sm:p-6">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="flex items-start gap-3 rounded-[16px] bg-slate-50 p-4 dark:bg-slate-900">
                     <CheckCircle2 className="mt-1 h-5 w-5 text-emerald-500" />

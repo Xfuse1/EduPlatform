@@ -33,7 +33,7 @@ export default function EmptyState({
   action,
 }: EmptyStateProps) {
   return (
-    <div className="rounded-[28px] border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <div className="rounded-[20px] border border-dashed border-slate-300 bg-white px-4 py-10 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:rounded-[28px] sm:px-6 sm:py-12">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200">
         {icon ?? <DefaultIcon />}
       </div>

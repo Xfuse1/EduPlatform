@@ -25,7 +25,7 @@ export default async function CenterAttendancePage() {
     <div className="space-y-6">
       <OfflineState />
 
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+      <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr] sm:gap-6">
         <ScheduleTimeline
           items={todaySessions.map((session) => ({
             id: session.id,

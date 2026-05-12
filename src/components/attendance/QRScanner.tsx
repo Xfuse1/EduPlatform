@@ -76,21 +76,21 @@ export function QRScanner() {
     <div className="w-full flex flex-col items-center gap-4" dir="rtl">
       <Button 
         variant="default" 
-        className="w-full h-24 rounded-[32px] text-xl font-black gap-4 shadow-xl shadow-primary/20 transition-all active:scale-95 bg-[linear-gradient(135deg,_#1A5276,_#3498DB)]"
+        className="h-auto min-h-20 w-full rounded-[24px] gap-3 bg-[linear-gradient(135deg,_#1A5276,_#3498DB)] px-4 py-4 text-base font-black shadow-xl shadow-primary/20 transition-all active:scale-95 sm:h-24 sm:rounded-[32px] sm:gap-4 sm:text-xl"
         onClick={() => setIsOpen(true)}
       >
         <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-md">
           <QrCode className="h-6 w-6 text-white" />
         </div>
-        <div className="flex flex-col items-start gap-0.5">
+        <div className="flex min-w-0 flex-col items-start gap-0.5 text-start">
           <span>سجّل حضوري الآن</span>
-          <span className="text-[10px] opacity-70 font-bold uppercase tracking-widest leading-none">امسح رمز الـ QR من المدرس</span>
+          <span className="text-[10px] font-bold uppercase leading-none tracking-normal opacity-70 sm:tracking-widest">امسح رمز الـ QR من المدرس</span>
         </div>
       </Button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md animate-in fade-in duration-300">
-          <Card className="w-full max-w-lg border-none shadow-2xl overflow-hidden rounded-[32px] bg-white dark:bg-slate-950 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-md animate-in fade-in duration-300 sm:p-4">
+          <Card className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-[24px] border-none bg-white shadow-2xl dark:bg-slate-950 sm:rounded-[32px]">
             <Button 
               variant="ghost" 
               className="absolute top-4 left-4 h-10 w-10 p-0 rounded-full z-10"
@@ -100,34 +100,34 @@ export function QRScanner() {
             </Button>
 
             {!result ? (
-              <div className="p-8 space-y-6 flex flex-col items-center">
+              <div className="flex flex-col items-center space-y-5 p-4 sm:space-y-6 sm:p-8">
                 <div className="text-center">
                   <CardTitle className="text-xl font-black">ماسح رموز الحضور</CardTitle>
                   <p className="text-sm text-slate-500 font-bold mt-1">وجّه الكاميرا نحو رمز المدرس لبدء المسح</p>
                 </div>
 
-                <div className="w-full aspect-square relative rounded-[40px] overflow-hidden bg-slate-900 border-8 border-slate-50 dark:border-slate-800 shadow-inner">
+                <div className="relative aspect-square w-full overflow-hidden rounded-[28px] border-4 border-slate-50 bg-slate-900 shadow-inner dark:border-slate-800 sm:rounded-[40px] sm:border-8">
                   <div id={scannerId} className="w-full h-full" />
                   
                   {/* Decorative Scan Overlay */}
                   <div className="absolute inset-x-10 top-1/2 -translate-y-1/2 h-0.5 bg-primary/50 animate-bounce shadow-[0_0_15px_#1A5276]" />
                 </div>
 
-                <div className="flex items-center gap-3 text-xs font-bold text-slate-400 bg-slate-50 dark:bg-slate-900 px-4 py-2 rounded-full">
+                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-2 text-xs font-bold text-slate-400 dark:bg-slate-900 sm:rounded-full">
                   <Camera className="h-4 w-4" />
                   <span>تأكد من وجود إضاءة كافية وسرعة إنترنت مستقرة</span>
                 </div>
               </div>
             ) : (
-              <div className="p-12 flex flex-col items-center gap-6 text-center animate-in zoom-in-95 duration-500">
+              <div className="flex flex-col items-center gap-5 p-5 text-center animate-in zoom-in-95 duration-500 sm:gap-6 sm:p-12">
                 {result.success ? (
                   <>
                     <div className="h-24 w-24 bg-emerald-50 dark:bg-emerald-950/30 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                       <CheckCircle2 className="h-16 w-16" />
                     </div>
                     <div className="space-y-4">
-                      <h3 className="text-2xl font-black text-slate-900 dark:text-white">تم تسجيل حضورك!</h3>
-                      <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-[24px] border border-slate-100 dark:border-slate-800 space-y-2">
+                      <h3 className="text-xl font-black text-slate-900 dark:text-white sm:text-2xl">تم تسجيل حضورك!</h3>
+                      <div className="space-y-2 rounded-[20px] border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900 sm:rounded-[24px] sm:p-6">
                         <p className="text-sm font-bold text-slate-600 dark:text-slate-300">{result.sessionName}</p>
                         <p className="text-xs text-slate-400">توقيت الحضور: {toArabicDigits(result.time || "")}</p>
                       </div>
@@ -145,7 +145,7 @@ export function QRScanner() {
                       <AlertCircle className="h-16 w-16" />
                     </div>
                     <div className="space-y-4">
-                      <h3 className="text-2xl font-black text-slate-900 dark:text-white">خطأ في الحضور</h3>
+                      <h3 className="text-xl font-black text-slate-900 dark:text-white sm:text-2xl">خطأ في الحضور</h3>
                       <p className="text-sm text-rose-600 dark:text-rose-400 font-bold max-w-xs">{result.error}</p>
                     </div>
                     <div className="w-full space-y-3 mt-4">

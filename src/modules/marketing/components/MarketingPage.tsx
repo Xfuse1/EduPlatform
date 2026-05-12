@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -48,9 +48,9 @@ const navigationLinks = [
 ] as const;
 
 const heroStats = [
-  { count: "120", suffix: "+", label: "طالب تحت المتابعة" },
-  { count: "92", suffix: "٪", label: "متوسط حضور شهري" },
-  { count: "24", suffix: "/٧", label: "وصول من كل الأجهزة" },
+  { value: "+١٢٠", label: "طالب تحت المتابعة" },
+  { value: "٩٢٪", label: "متوسط حضور شهري" },
+  { value: "٢٤/٧", label: "وصول من كل الأجهزة" },
 ] as const;
 
 const steps = [
@@ -204,57 +204,6 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
     window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
   };
   const scrollToHash = (hash: string) => scrollToSection(hash.replace("#", ""));
-  
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible')
-            observer.unobserve(entry.target)
-          }
-        })
-      },
-      { threshold: 0.1 }
-    )
-
-    document.querySelectorAll('.reveal').forEach((el) => {
-      observer.observe(el)
-    })
-
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
-    const counters = document.querySelectorAll('[data-count]')
-    
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return
-        
-        const el = entry.target as HTMLElement
-        const target = parseFloat(el.dataset.count ?? '0')
-        const duration = 2000
-        const start = performance.now()
-        
-        const tick = (now: number) => {
-          const progress = Math.min((now - start) / duration, 1)
-          const eased = 1 - Math.pow(1 - progress, 3)
-          const current = Math.floor(eased * target)
-          // Display Arabic digits
-          const arabicDigits = current.toString().replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[parseInt(d)])
-          el.textContent = arabicDigits + (el.dataset.suffix ?? '')
-          if (progress < 1) requestAnimationFrame(tick)
-        }
-        
-        requestAnimationFrame(tick)
-        observer.unobserve(el)
-      })
-    }, { threshold: 0.5 })
-    
-    counters.forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
 
   return (
     <main
@@ -360,23 +309,17 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
         <div className="absolute bottom-[-15%] right-[0%] h-[600px] w-[600px] rounded-full bg-indigo-900/10 blur-[180px]" />
 
         <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl dark:border-white/[0.03] dark:bg-slate-950/40">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-3 sm:gap-4 sm:px-6 sm:py-4 lg:px-8">
             {/* Action Buttons */}
-            <div className="flex items-center gap-4">
+            <div className="flex shrink-0 items-center gap-2 sm:gap-4">
               <ThemeToggle />
-              <div className="hidden items-center gap-3 sm:flex">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <Link
-                  className="group relative flex items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-100 px-6 py-2.5 text-sm font-bold text-slate-700 transition-all hover:border-sky-500/50 hover:bg-sky-500/5 dark:border-sky-500/30 dark:bg-sky-500/5 dark:text-sky-400 dark:hover:bg-sky-500/10"
+                  className="group relative flex min-h-10 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition-all hover:border-sky-500/50 hover:bg-sky-500/5 dark:border-sky-500/30 dark:bg-sky-500/5 dark:text-sky-400 dark:hover:bg-sky-500/10 sm:px-6 sm:py-2.5 sm:text-sm"
                   href="/login"
                 >
-                  <span className="relative z-10">تسجيل الدخول</span>
+                  <span className="relative z-10 whitespace-nowrap">تسجيل الدخول</span>
                   <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-sky-500/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
-                </Link>
-                <Link
-                  className="relative flex items-center justify-center overflow-hidden rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all hover:bg-emerald-600 hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] active:scale-95"
-                  href="/signup"
-                >
-                  ابدأ مجاناً
                 </Link>
               </div>
             </div>
@@ -397,14 +340,14 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
             </nav>
 
             {/* Logo */}
-            <div className="flex items-center gap-4">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <div className="flex flex-col items-end">
                 <span className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
                   EduPlatform
                 </span>
                 <div className="h-0.5 w-1/2 rounded-full bg-gradient-to-l from-sky-400 to-transparent" />
               </div>
-              <div className="group relative flex h-11 w-11 items-center justify-center">
+              <div className="group relative flex h-10 w-10 shrink-0 items-center justify-center sm:h-11 sm:w-11">
                 <div className="absolute inset-0 animate-pulse rounded-full bg-sky-500/20 blur-[8px]" />
                 <div className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-slate-900 shadow-2xl transition-transform group-hover:scale-110">
                   <div className="h-4 w-4 rounded-full bg-gradient-to-br from-sky-300 via-blue-500 to-emerald-400" />
@@ -415,24 +358,24 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
           </div>
         </header>
 
-        <div className="mx-auto max-w-7xl px-4 pb-12 pt-40 sm:px-6 lg:px-8 space-y-16 lg:space-y-24">
-          <section className="relative overflow-hidden rounded-[48px] border border-slate-300/60 bg-white/40 shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-3xl dark:border-white/[0.05] dark:bg-white/[0.02] sm:px-12 sm:py-16 lg:px-20 lg:py-20">
+        <div className="mx-auto max-w-7xl space-y-10 px-3 pb-8 pt-28 sm:space-y-16 sm:px-6 sm:pb-12 sm:pt-40 lg:space-y-24 lg:px-8">
+          <section className="relative overflow-hidden rounded-[24px] border border-slate-300/60 bg-white/40 px-4 py-8 shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-3xl dark:border-white/[0.05] dark:bg-white/[0.02] sm:rounded-[48px] sm:px-12 sm:py-16 lg:px-20 lg:py-20">
             {/* Refined Grid Pattern */}
             <div className="absolute inset-0 opacity-[0.15] [mask-image:radial-gradient(ellipse_at_center,black,transparent)]">
               <div className="h-full w-full bg-[size:32px_32px] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)]" />
             </div>
 
-            <div className="relative grid gap-20 lg:grid-cols-[1fr_1fr]">
+            <div className="relative grid gap-10 lg:grid-cols-[1fr_1fr] lg:gap-20">
               {/* Right Side (Visual Right in RTL): Hero Content */}
               <div className="flex flex-col justify-center">
-                <div className="group inline-flex w-fit items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-bold text-sky-400 backdrop-blur-md transition-all hover:bg-white/10">
+                <div className="group inline-flex max-w-full items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-sky-400 backdrop-blur-md transition-all hover:bg-white/10 sm:w-fit sm:px-5">
                   <div className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-500/20 text-[10px]">
                     <Sparkles className="h-3 w-3" />
                   </div>
                   منصة متخصصة للمعلمين المستقلين في مصر
                 </div>
 
-                <h1 className="mt-10 text-5xl font-black leading-[1.1] tracking-tight text-slate-900 sm:text-6xl lg:text-7xl dark:text-white">
+                <h1 className="mt-7 text-3xl font-black leading-[1.15] tracking-normal text-slate-900 sm:mt-10 sm:text-6xl lg:text-7xl dark:text-white">
                   حوّل إدارة دروسك <br />
                   إلى تجربة <span className="relative">
                     <span className="relative z-10 bg-gradient-to-l from-sky-300 via-emerald-300 to-sky-300 bg-clip-text text-transparent">أنيقة</span>
@@ -440,13 +383,13 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                   </span> وسريعة.
                 </h1>
 
-                <p className="mt-10 max-w-2xl text-xl leading-relaxed text-slate-600 dark:text-slate-400">
+                <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-400 sm:mt-10 sm:text-xl sm:leading-relaxed">
                   منصة التعليم المتكاملة لتحصيل المصاريف، تنظيم الجداول، وإدارة شؤون الطلاب بضغطة واحدة من أي مكان.
                 </p>
 
-                <div className="mt-14 flex flex-col gap-6 sm:flex-row sm:items-center">
+                <div className="mt-8 flex flex-col gap-3 sm:mt-14 sm:flex-row sm:items-center sm:gap-6">
                   <Link
-                    className="relative flex h-16 items-center justify-center gap-3 overflow-hidden rounded-[20px] bg-emerald-500 px-10 text-lg font-black text-white shadow-[0_20px_40px_rgba(16,185,129,0.25)] transition-all hover:bg-emerald-600 hover:shadow-[0_25px_50px_rgba(16,185,129,0.35)] hover:-translate-y-1 active:translate-y-0"
+                    className="relative flex min-h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-[16px] bg-emerald-500 px-5 py-3 text-base font-black text-white shadow-[0_20px_40px_rgba(16,185,129,0.25)] transition-all hover:-translate-y-1 hover:bg-emerald-600 hover:shadow-[0_25px_50px_rgba(16,185,129,0.35)] active:translate-y-0 sm:h-16 sm:w-auto sm:rounded-[20px] sm:px-10 sm:text-lg"
                     href="/signup"
                   >
                     ابدأ مجاناً — سجّل الآن
@@ -455,7 +398,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                   <button
                     type="button"
                     onClick={() => scrollToSection("how-it-works")}
-                    className="group relative flex h-16 items-center justify-center gap-3 overflow-hidden rounded-[20px] border border-slate-200 bg-slate-50 px-10 text-lg font-bold text-slate-900 backdrop-blur-md transition-all hover:bg-slate-100 hover:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:border-white/20"
+                    className="group relative flex min-h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-[16px] border border-slate-200 bg-slate-50 px-5 py-3 text-base font-bold text-slate-900 backdrop-blur-md transition-all hover:border-slate-300 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:border-white/20 dark:hover:bg-white/10 sm:h-16 sm:w-auto sm:rounded-[20px] sm:px-10 sm:text-lg"
                   >
                     <span>شاهد كيف يعمل</span>
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 transition-transform group-hover:scale-110">
@@ -468,23 +411,21 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
               {/* Left Side (Visual Left in RTL): Dashboard Mockup & Statistics */}
               <div className="flex flex-col justify-center">
                 {/* Horizontal Statistics with Dividers */}
-                <div className="mb-12 flex items-center justify-between rounded-3xl border border-slate-200 bg-slate-50 p-8 backdrop-blur-md dark:border-white/[0.03] dark:bg-white/[0.02]">
+                <div className="mb-6 grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 backdrop-blur-md dark:border-white/[0.03] dark:bg-white/[0.02] sm:mb-12 sm:flex sm:items-center sm:justify-between sm:rounded-3xl sm:p-8">
                   {heroStats.map((stat, i) => (
                     <React.Fragment key={stat.label}>
                       <div className="flex-1 text-center">
-                        <p className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">
-                          <span data-count={stat.count} data-suffix={stat.suffix}>٠</span>
-                        </p>
+                        <p className="text-2xl font-black tracking-normal text-slate-900 dark:text-white sm:text-4xl">{stat.value}</p>
                         <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">{stat.label}</p>
                       </div>
-                      {i < heroStats.length - 1 && <div className="h-10 w-px bg-slate-200 dark:bg-white/5" />}
+                      {i < heroStats.length - 1 && <div className="hidden h-10 w-px bg-slate-200 dark:bg-white/5 sm:block" />}
                     </React.Fragment>
                   ))}
                 </div>
 
                 {/* Highly Detailed Dashboard Mockup */}
                 <div 
-                  className="group relative rounded-[40px] border border-slate-200 bg-white p-6 shadow-2xl backdrop-blur-2xl transition-all duration-700 hover:border-sky-500/20 dark:border-white/10 dark:bg-slate-900/40 dark:hover:bg-slate-900/60"
+                  className="group relative rounded-[24px] border border-slate-200 bg-white p-4 shadow-2xl backdrop-blur-2xl transition-all duration-700 hover:border-sky-500/20 dark:border-white/10 dark:bg-slate-900/40 dark:hover:bg-slate-900/60 sm:rounded-[40px] sm:p-6"
                   style={{ 
                     animation: "float 3.5s ease-in-out infinite",
                     transformStyle: "preserve-3d"
@@ -506,7 +447,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-12 gap-6">
+                    <div className="grid grid-cols-12 gap-3 sm:gap-6">
                       {/* Sidebar Mockup */}
                       <div className="col-span-3 space-y-4">
                         {[...Array(4)].map((_, i) => (
@@ -519,7 +460,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
 
                       {/* Main Chart Area */}
                       <div className="col-span-9">
-                        <div className="relative h-48 w-full overflow-hidden rounded-3xl bg-slate-50 p-5 dark:bg-white/[0.03]">
+                        <div className="relative h-36 w-full overflow-hidden rounded-2xl bg-slate-50 p-3 dark:bg-white/[0.03] sm:h-48 sm:rounded-3xl sm:p-5">
                           <div className="flex h-full items-end gap-1.5">
                             {[30, 60, 40, 80, 55, 90, 45, 100, 70, 85, 60, 75].map((h, i) => (
                               <div
@@ -558,40 +499,40 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
             </div>
           </section>
 
-          <section className="reveal mt-8 scroll-mt-20 rounded-[40px] border border-slate-300/60 bg-white p-8 shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-sm sm:p-10 lg:p-12 dark:border-white/10 dark:bg-white/[0.03]" id="features">
+          <section className="mt-8 scroll-mt-20 rounded-[24px] border border-slate-300/60 bg-white p-4 shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.03] sm:rounded-[40px] sm:p-10 lg:p-12" id="features">
 
             <div className="max-w-2xl">
               <p className="text-start text-sm font-semibold text-sky-300">المميزات</p>
-              <h2 className="mt-3 text-start text-3xl font-extrabold text-slate-900 sm:text-4xl dark:text-white">كل ما تحتاجه في مكان واحد</h2>
+              <h2 className="mt-3 text-start text-2xl font-extrabold text-slate-900 dark:text-white sm:text-4xl">كل ما تحتاجه في مكان واحد</h2>
               <p className="mt-3 text-start text-sm leading-7 text-slate-600 sm:text-base dark:text-slate-300">
                 منصة متكاملة تحل كل مشاكل تنظيم عملك التعليمي
               </p>
             </div>
 
-            <div className="mt-12 grid gap-8 lg:grid-cols-3">
+            <div className="mt-8 grid gap-4 sm:mt-12 sm:gap-8 lg:grid-cols-3">
               {features.map((feature) => (
-                <div key={feature.title} className="reveal group relative flex flex-col items-center rounded-[32px] border-2 border-slate-200 bg-white p-8 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
-                  <div className="relative mb-4 flex h-[220px] w-full items-center justify-center overflow-hidden rounded-2xl">
+                <div key={feature.title} className="group relative flex flex-col items-center rounded-[20px] border-2 border-slate-200 bg-white p-5 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04] sm:rounded-[32px] sm:p-8">
+                  <div className="relative mb-4 flex h-40 w-full items-center justify-center overflow-hidden rounded-2xl sm:h-[220px]">
                     <img
                       src={feature.image}
                       alt={feature.title}
-                      className="h-[200px] w-[200px] object-contain transition-transform duration-500 group-hover:scale-110"
+                      className="h-36 w-36 object-contain transition-transform duration-500 group-hover:scale-110 sm:h-[200px] sm:w-[200px]"
                     />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{feature.title}</h3>
-                  <p className="mt-2 text-lg leading-relaxed text-slate-600 dark:text-slate-400">{feature.description}</p>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white sm:text-2xl">{feature.title}</h3>
+                  <p className="mt-2 text-base leading-7 text-slate-600 dark:text-slate-400 sm:text-lg sm:leading-relaxed">{feature.description}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="reveal scroll-mt-20 overflow-hidden rounded-[48px] border border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl lg:p-16 dark:border-white/5 dark:bg-[#0F172A]/40" id="how-it-works">
+          <section className="scroll-mt-20 overflow-hidden rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl dark:border-white/5 dark:bg-[#0F172A]/40 sm:rounded-[48px] sm:p-8 lg:p-16" id="how-it-works">
             <div className="max-w-2xl">
               <span className="rounded-full bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400">كيف يعمل</span>
-              <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">ابدأ في 3 خطوات بسيطة</h2>
+              <h2 className="mt-6 text-2xl font-black text-slate-900 dark:text-white sm:text-5xl">ابدأ في 3 خطوات بسيطة</h2>
             </div>
 
-            <div className="relative mt-12 grid gap-8 md:grid-cols-3">
+            <div className="relative mt-8 grid gap-4 sm:mt-12 sm:gap-8 md:grid-cols-3">
               <div className="absolute inset-x-32 top-20 hidden h-[1px] md:block">
                 {/* Background Glow */}
                 <div className="absolute inset-0 bg-sky-400/20 blur-[4px] dark:bg-sky-500/30" />
@@ -617,12 +558,12 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
               </div>
               {steps.map((step, index) => (
                 <React.Fragment key={step.number}>
-                  <div className="reveal group relative rounded-[32px] border-2 border-slate-200 bg-white p-10 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
-                    <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-sky-500/10 text-4xl font-black text-sky-400 shadow-[0_0_30px_rgba(14,165,233,0.1)] transition-transform group-hover:scale-110">
+                  <div className="group relative rounded-[20px] border-2 border-slate-200 bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04] sm:rounded-[32px] sm:p-10">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-500/10 text-3xl font-black text-sky-400 shadow-[0_0_30px_rgba(14,165,233,0.1)] transition-transform group-hover:scale-110 sm:h-20 sm:w-20 sm:rounded-3xl sm:text-4xl">
                       {step.number}
                     </div>
-                    <h3 className="mt-8 text-2xl font-bold text-slate-900 dark:text-white">{step.title}</h3>
-                    <p className="mt-4 text-lg leading-relaxed text-slate-600 dark:text-slate-400">{step.description}</p>
+                    <h3 className="mt-6 text-xl font-bold text-slate-900 dark:text-white sm:mt-8 sm:text-2xl">{step.title}</h3>
+                    <p className="mt-3 text-base leading-7 text-slate-600 dark:text-slate-400 sm:mt-4 sm:text-lg sm:leading-relaxed">{step.description}</p>
                   </div>
                   {index < steps.length - 1 && (
                     <div className="flex w-full justify-center py-4 md:hidden">
@@ -634,9 +575,9 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                 </React.Fragment>
               ))}
             </div>
-            <div className="mt-12 flex justify-center lg:justify-start">
+            <div className="mt-8 flex justify-center sm:mt-12 lg:justify-start">
               <Link
-                className="relative flex h-16 items-center justify-center gap-3 overflow-hidden rounded-[20px] bg-sky-500 px-10 text-lg font-black text-white shadow-xl transition-all hover:bg-sky-600 hover:-translate-y-1 active:translate-y-0"
+                className="relative flex min-h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-[16px] bg-sky-500 px-5 py-3 text-base font-black text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-sky-600 active:translate-y-0 sm:h-16 sm:w-auto sm:rounded-[20px] sm:px-10 sm:text-lg"
                 href="/signup"
               >
                 ابدأ الآن مجاناً
@@ -645,18 +586,18 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
             </div>
           </section>
 
-          <section className="reveal scroll-mt-20 overflow-hidden rounded-[48px] border border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl lg:p-16 dark:border-white/5 dark:bg-[#0F172A]/40" id="smart-tools">
+          <section className="scroll-mt-20 overflow-hidden rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl dark:border-white/5 dark:bg-[#0F172A]/40 sm:rounded-[48px] sm:p-8 lg:p-16" id="smart-tools">
             <div className="max-w-2xl">
               <span className="rounded-full bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400">أدوات ذكية للمعلم</span>
-              <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">منصة مصممة لخدمة المعلم</h2>
-              <p className="mt-6 text-lg leading-relaxed text-slate-600 dark:text-slate-400">كل ما تحتاجه لإدارة مجموعاتك بتركيز فائق وهدوء تام.</p>
+              <h2 className="mt-6 text-2xl font-black text-slate-900 dark:text-white sm:text-5xl">منصة مصممة لخدمة المعلم</h2>
+              <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-400 sm:mt-6 sm:text-lg sm:leading-relaxed">كل ما تحتاجه لإدارة مجموعاتك بتركيز فائق وهدوء تام.</p>
             </div>
 
-            <div className="mt-12 grid gap-8 lg:grid-cols-3">
+            <div className="mt-8 grid gap-4 sm:mt-12 sm:gap-8 lg:grid-cols-3">
               {audienceCards.map((card) => (
                 <div
                   key={card.title}
-                  className="reveal group relative flex flex-col items-center overflow-hidden rounded-[32px] border-2 border-slate-200 bg-white p-8 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-[#0F172A]/40 dark:hover:bg-[#0F172A]/60"
+                  className="group relative flex flex-col items-center overflow-hidden rounded-[20px] border-2 border-slate-200 bg-white p-5 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-[#0F172A]/40 dark:hover:bg-[#0F172A]/60 sm:rounded-[32px] sm:p-8"
                 >
                   {/* Badge */}
                   <div className="absolute left-6 top-6">
@@ -677,7 +618,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
 
                   {/* Content */}
                   <div className="space-y-3">
-                    <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                    <h3 className="text-xl font-black tracking-normal text-slate-900 dark:text-white sm:text-2xl">
                       {card.title}
                     </h3>
                     <p className="mx-auto max-w-[240px] text-sm leading-relaxed text-slate-500 dark:text-slate-400">
@@ -702,18 +643,18 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
           </section>
 
           {/* Simplified Pricing Section */}
-          <section className="reveal scroll-mt-20" id="pricing">
+          <section className="scroll-mt-20" id="pricing">
             <div className="mb-12 text-center">
               <span className="rounded-full bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400">الأسعار</span>
-              <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">خطط مرنة تناسب عدد طلابك</h2>
+              <h2 className="mt-6 text-2xl font-black text-slate-900 dark:text-white sm:text-5xl">خطط مرنة تناسب عدد طلابك</h2>
               <p className="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-400">اختر الخطة المناسبة وابدأ في تنظيم عملك اليوم</p>
             </div>
 
-            <div className="grid gap-8 lg:grid-cols-3">
+            <div className="grid gap-4 sm:gap-8 lg:grid-cols-3">
               {pricingPlans.map((plan, index) => (
                 <div
                   key={plan.key}
-                  className={`reveal relative flex flex-col rounded-[32px] border p-10 transition-all duration-300 hover:-translate-y-2 ${index === 1
+                  className={`relative flex flex-col rounded-[20px] border p-5 transition-all duration-300 hover:-translate-y-2 sm:rounded-[32px] sm:p-10 ${index === 1
                     ? "border-sky-500 bg-sky-50 shadow-[0_20px_50px_rgba(14,165,233,0.15)] dark:border-sky-500/50 dark:bg-sky-500/5"
                     : "border-slate-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] dark:border-white/5 dark:bg-white/[0.02]"
                     }`}
@@ -726,7 +667,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                   <div className="mb-8">
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white">{plan.name}</h3>
                     <div className="mt-4 flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-slate-900 dark:text-white">{plan.price}</span>
+                      <span className="break-words text-3xl font-black text-slate-900 dark:text-white sm:text-4xl">{plan.price}</span>
                       {!plan.isContactPlan && (
                         <span className="text-sm text-slate-400 dark:text-slate-500">/شهرياً</span>
                       )}
@@ -759,21 +700,21 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
           </section>
 
           {/* Simplified Testimonials */}
-          <section className="reveal scroll-mt-20">
+          <section className="scroll-mt-20">
             <div className="mb-12 text-center">
               <span className="rounded-full bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400">قالوا عنا</span>
-              <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">ماذا يقول معلمونا؟</h2>
+              <h2 className="mt-6 text-2xl font-black text-slate-900 dark:text-white sm:text-5xl">ماذا يقول معلمونا؟</h2>
             </div>
 
-            <div className="mt-12 grid gap-8 lg:grid-cols-3">
+            <div className="mt-8 grid gap-4 sm:mt-12 sm:gap-8 lg:grid-cols-3">
               {testimonials.map((item, i) => (
-                <div key={item.name} className="reveal group relative rounded-[32px] border-2 border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
+                <div key={item.name} className="group relative rounded-[20px] border-2 border-slate-200 bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04] sm:rounded-[32px] sm:p-8">
                   <div className="mb-6 flex gap-1">
                     {[...Array(5)].map((_, i) => (
                       <div key={i} className="h-4 w-4 text-amber-400">★</div>
                     ))}
                   </div>
-                  <p className="mb-8 text-lg leading-relaxed text-slate-600 italic dark:text-slate-300">"{item.text}"</p>
+                  <p className="mb-6 text-base leading-7 text-slate-600 italic dark:text-slate-300 sm:mb-8 sm:text-lg sm:leading-relaxed">"{item.text}"</p>
                   <div className="flex items-center gap-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-800 text-lg font-bold text-white">
                       {item.name[2]}
@@ -789,9 +730,9 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
           </section>
 
           {/* Simplified About & Impact */}
-          <section className="reveal scroll-mt-20" id="about">
-            <div className="overflow-hidden rounded-[48px] border border-slate-300/60 bg-white p-10 lg:p-20 shadow-[0_8px_40px_rgb(0,0,0,0.06)] dark:border-white/5 dark:bg-[#0F172A]/40 backdrop-blur-3xl">
-              <div className="grid gap-20 lg:grid-cols-[1.2fr_1fr]">
+          <section className="scroll-mt-20" id="about">
+            <div className="overflow-hidden rounded-[24px] border border-slate-300/60 bg-white p-5 shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-3xl dark:border-white/5 dark:bg-[#0F172A]/40 sm:rounded-[48px] sm:p-10 lg:p-20">
+              <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-20">
                 {/* Content Side */}
                 <div className="flex flex-col justify-center order-2 lg:order-1">
                   <div className="group inline-flex w-fit items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-bold text-indigo-400 backdrop-blur-md transition-all hover:bg-white/10">
@@ -801,20 +742,20 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                     من نحن
                   </div>
                   
-                  <h2 className="mt-10 text-4xl font-black leading-tight text-slate-900 sm:text-6xl dark:text-white">
+                  <h2 className="mt-7 text-2xl font-black leading-tight text-slate-900 dark:text-white sm:mt-10 sm:text-6xl">
                     نبني أدوات تعليمية <br />
                     <span className="bg-gradient-to-l from-indigo-400 via-sky-400 to-indigo-400 bg-clip-text text-transparent">تناسب واقع المعلم المصري</span>
                   </h2>
                   
-                  <p className="mt-10 text-xl leading-relaxed text-slate-600 dark:text-slate-400 max-w-xl">
+                  <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 dark:text-slate-400 sm:mt-10 sm:text-xl sm:leading-relaxed">
                     وداعاً للدفاتر الورقية وإرهاق تتبع المصاريف. EduPlatform منصة صُممت خصيصاً لتناسب تفاصيل يومك المعقدة كمعلم مصري، لنوفّر وقتك لتركّز على ما تبدع فيه: التدريس.
                   </p>
                   
-                  <div className="mt-12 p-8 rounded-[30px] border border-dashed border-indigo-500/30 bg-indigo-500/5 relative overflow-hidden group">
+                  <div className="group relative mt-8 overflow-hidden rounded-[20px] border border-dashed border-indigo-500/30 bg-indigo-500/5 p-4 sm:mt-12 sm:rounded-[30px] sm:p-8">
                     <div className="absolute top-0 right-0 p-4 opacity-10 transition-transform group-hover:scale-110">
                       <Sparkles className="h-12 w-12 text-indigo-400" />
                     </div>
-                    <p className="relative z-10 text-lg italic text-indigo-400/90 leading-relaxed font-medium">
+                    <p className="relative z-10 text-base font-medium italic leading-7 text-indigo-400/90 sm:text-lg sm:leading-relaxed">
                       "هدفنا ليس مجرد أتمتة العمليات، بل تمكين المعلم المصري بأدوات تكنولوجية تليق بمكانته وتسهل عليه رحلة العطاء المستمرة."
                     </p>
                   </div>
@@ -825,23 +766,23 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                   {/* Decorative Glow */}
                   <div className="absolute -top-20 -right-20 h-80 w-80 rounded-full bg-indigo-600/10 blur-[100px] pointer-events-none" />
                   
-                  <div className="grid gap-8">
+                  <div className="grid gap-4 sm:gap-8">
                     {aboutStats.map((stat, i) => (
                       <div 
                         key={stat.label} 
-                        className={`reveal group relative flex items-center gap-6 rounded-[32px] border-2 border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.03] dark:hover:bg-white/[0.05] ${i === 1 ? 'lg:mr-16' : ''}`}
+                        className={`group relative flex flex-col gap-4 rounded-[20px] border-2 border-slate-200 bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.03] dark:hover:bg-white/[0.05] sm:flex-row sm:items-center sm:gap-6 sm:rounded-[32px] sm:p-8 ${i === 1 ? 'lg:mr-16' : ''}`}
                       >
-                        <div className="relative flex h-36 w-36 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-white shadow-inner dark:bg-slate-900/50">
+                        <div className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-inner dark:bg-slate-900/50 sm:h-36 sm:w-36 sm:rounded-3xl">
                           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-sky-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                           <img 
                             src={stat.image} 
                             alt={stat.label} 
-                            className="relative z-10 h-32 w-32 object-contain transition-transform duration-500 group-hover:scale-110" 
+                            className="relative z-10 h-24 w-24 object-contain transition-transform duration-500 group-hover:scale-110 sm:h-32 sm:w-32"
                           />
                         </div>
                         <div>
                           <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-black text-indigo-400">{stat.value}</span>
+                            <span className="text-3xl font-black text-indigo-400 sm:text-4xl">{stat.value}</span>
                           </div>
                           <h4 className="text-xl font-black text-slate-900 dark:text-white mt-1">{stat.label}</h4>
                           <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
@@ -859,7 +800,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
           <MarketingFaq />
 
           {/* Premium Footer CTA */}
-          <section className="relative overflow-hidden rounded-[48px] bg-slate-900 p-12 text-center sm:p-20 shadow-2xl border border-white/10 dark:border-white/5 dark:bg-slate-900/40 backdrop-blur-3xl">
+          <section className="relative overflow-hidden rounded-[24px] border border-white/5 bg-transparent p-5 text-center shadow-2xl sm:rounded-[48px] sm:p-20">
             {/* Elegant Background Accents */}
             <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-indigo-600/20 blur-[100px]" />
             <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-emerald-600/10 blur-[100px]" />
@@ -871,16 +812,16 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
               <span className="inline-block rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400 backdrop-blur-sm mb-6">
                 ابدأ اليوم
               </span>
-              <h2 className="text-4xl font-black text-white sm:text-6xl leading-[1.1]">
+              <h2 className="text-2xl font-black leading-[1.15] text-white sm:text-6xl sm:leading-[1.1]">
                 جاهز تنظّم <span className="text-transparent bg-clip-text bg-gradient-to-l from-sky-400 via-emerald-400 to-indigo-400">دروسك؟</span>
               </h2>
-              <p className="mt-8 text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+              <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-300 sm:mt-8 sm:text-lg sm:leading-relaxed">
                 انضم لآلاف المعلمين الذين وثقوا في EduPlatform وارتقِ بمستوى إدارتك اليوم. تجربة سلسة، ذكية، ومصممة خصيصاً لك.
               </p>
               
-              <div className="mt-12 flex flex-col items-center gap-8">
+              <div className="mt-8 flex flex-col items-center gap-6 sm:mt-12 sm:gap-8">
                 <Link
-                  className="group relative flex h-16 items-center justify-center gap-3 overflow-hidden rounded-2xl bg-white px-12 text-lg font-black text-slate-950 transition-all hover:scale-105 active:scale-95 shadow-[0_20px_50px_rgba(255,255,255,0.1)]"
+                  className="group relative flex min-h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-white px-5 py-3 text-base font-black text-slate-950 shadow-[0_20px_50px_rgba(255,255,255,0.1)] transition-all hover:scale-105 active:scale-95 sm:h-16 sm:w-auto sm:px-12 sm:text-lg"
                   href="/signup"
                 >
                   <span className="relative z-10">ابدأ مجاناً الآن</span>
@@ -907,8 +848,8 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
           </section>
 
           {/* Clean Modern Footer */}
-          <footer className="mt-10 rounded-[40px] border border-slate-200 bg-white p-12 backdrop-blur-xl dark:border-white/5 dark:bg-slate-950/50" id="footer">
-            <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr]">
+          <footer className="mt-10 rounded-[24px] border border-slate-200 bg-white p-5 backdrop-blur-xl dark:border-white/5 dark:bg-slate-950/50 sm:rounded-[40px] sm:p-12" id="footer">
+            <div className="grid gap-8 sm:gap-12 lg:grid-cols-[1.5fr_1fr]">
               <div>
                 <div className="flex items-center gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-indigo-500 font-black text-white">E</div>
@@ -918,7 +859,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                   نحن نؤمن بأن التكنولوجيا يجب أن تخدم التعليم، لا أن تعقده. هدفنا هو جعل عملك كمعلم أسهل وأكثر كفاءة.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-8 min-[420px]:grid-cols-2 sm:grid-cols-3">
                 {footerGroups.map((group) => (
                   <div key={group.title}>
                     <h4 className="mb-6 text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{group.title}</h4>

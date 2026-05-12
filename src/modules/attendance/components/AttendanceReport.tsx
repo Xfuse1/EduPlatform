@@ -17,9 +17,9 @@ export function AttendanceReport({ sessions, totalSessions, avgAttendance }: Pro
   return (
     <div className="space-y-4">
       {/* ملخص الشهر */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
         <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
-          <p className="text-3xl font-bold text-sky-600 dark:text-sky-400">
+          <p className="text-2xl font-bold text-sky-600 dark:text-sky-400 sm:text-3xl">
             {totalSessions}
           </p>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -27,7 +27,7 @@ export function AttendanceReport({ sessions, totalSessions, avgAttendance }: Pro
           </p>
         </div>
         <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
-          <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 sm:text-3xl">
             {avgAttendance}
           </p>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -46,15 +46,15 @@ export function AttendanceReport({ sessions, totalSessions, avgAttendance }: Pro
           {sessions.map((session) => (
             <div
               key={session.id}
-              className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900"
+              className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <div
                   className="w-2 h-10 rounded-full shrink-0"
                   style={{ backgroundColor: session.group.color ?? '#94a3b8' }}
                 />
-                <div>
-                  <p className="font-medium text-slate-900 dark:text-slate-100 text-start">
+                <div className="min-w-0">
+                  <p className="truncate text-start font-medium text-slate-900 dark:text-slate-100">
                     {session.group.name}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400 text-start">
