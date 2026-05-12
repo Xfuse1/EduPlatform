@@ -344,6 +344,12 @@ export async function getPlatformWallets(input?: {
   const where = {
     AND: [
       { role: { not: "SUPER_ADMIN" as const } },
+      {
+        OR: [
+          { role: { not: "STUDENT" as const } },
+          { childStudents: { none: {} } },
+        ],
+      },
       ...(roleFilter ? [{ role: roleFilter }] : []),
       ...(search
         ? [
@@ -389,6 +395,36 @@ export async function getPlatformWallets(input?: {
         userWallets: {
           select: { id: true, balance: true, updatedAt: true },
         },
+        parentStudents: {
+          where: {
+            student: {
+              isActive: true,
+              role: "STUDENT",
+            },
+          },
+          select: {
+            student: {
+              select: {
+                id: true,
+                name: true,
+                phone: true,
+                tenantId: true,
+                groupStudents: {
+                  where: {
+                    status: { in: ["ACTIVE", "WAITLIST", "PENDING"] },
+                  },
+                  select: {
+                    group: {
+                      select: {
+                        tenantId: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     }),
     db.user.count({ where }),
@@ -409,6 +445,18 @@ export async function getPlatformWallets(input?: {
           phone: user.phone,
           role: user.role,
         },
+        children: user.parentStudents
+          .map((relation) => relation.student)
+          .filter((student) =>
+            student.tenantId === user.tenantId ||
+            student.groupStudents.some((enrollment) => enrollment.group.tenantId === user.tenantId)
+          )
+          .map((student) => ({
+            id: student.id,
+            name: student.name,
+            phone: student.phone,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name, "ar")),
       };
     }),
     total,

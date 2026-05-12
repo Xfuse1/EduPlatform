@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 
 import { db } from "@/lib/db";
 import { logFinancialEvent } from "@/lib/financial-audit";
+import { verifyFirebasePhoneIdToken } from "@/lib/firebase-admin";
+import { normalizeEgyptPhone } from "@/lib/phone";
 import { requireSuperAdminPage } from "@/lib/platform-admin";
 import {
   generatePlanKeyFromName,
@@ -154,6 +156,8 @@ export async function adjustUserWalletAction(formData: FormData) {
 
   const tenantId = String(formData.get("tenantId") ?? "").trim();
   const userId = String(formData.get("userId") ?? "").trim();
+  const targetStudentId = String(formData.get("targetStudentId") ?? "").trim();
+  const otpIdToken = String(formData.get("otpIdToken") ?? "").trim();
   const operation = String(formData.get("operation") ?? "").trim();
   const amount = Number(formData.get("amount") ?? 0);
   const reason = String(formData.get("reason") ?? "").trim() || "Admin wallet adjustment";
@@ -182,8 +186,47 @@ export async function adjustUserWalletAction(formData: FormData) {
     throw new Error("لا يمكن تعديل محفظة السوبر أدمن من هذه الصفحة");
   }
 
+  let walletSubjectUserId = userId;
+  let childContext: { targetStudentId: string; parentUserId: string } | null = null;
+
+  if (targetStudentId) {
+    if (user.role !== "PARENT") {
+      throw new Error("اختيار الابن متاح فقط لمحافظ أولياء الأمور");
+    }
+
+    const relation = await db.parentStudent.findFirst({
+      where: {
+        parentId: user.id,
+        studentId: targetStudentId,
+        student: {
+          isActive: true,
+          role: "STUDENT",
+          OR: [
+            { tenantId },
+            {
+              groupStudents: {
+                some: {
+                  status: { in: ["ACTIVE", "WAITLIST", "PENDING"] },
+                  group: { tenantId },
+                },
+              },
+            },
+          ],
+        },
+      },
+      select: { studentId: true },
+    });
+
+    if (!relation) {
+      throw new Error("الابن المختار غير مرتبط بولي الأمر داخل هذا الحساب");
+    }
+
+    walletSubjectUserId = targetStudentId;
+    childContext = { targetStudentId, parentUserId: user.id };
+  }
+
   if (operation === "CREDIT") {
-    const walletOwner = await resolveRechargeWalletOwner(userId, tenantId);
+    const walletOwner = await resolveRechargeWalletOwner(walletSubjectUserId, tenantId);
     await creditUserWallet({
       tenantId,
       userId: walletOwner.ownerUserId,
@@ -193,12 +236,31 @@ export async function adjustUserWalletAction(formData: FormData) {
       createdById: admin.id,
       metadata: {
         direction: "CREDIT",
-        requestedUserId: userId,
+        requestedUserId: walletSubjectUserId,
         ownerType: walletOwner.ownerType,
+        ...(childContext ?? {}),
       },
     });
   } else if (operation === "DEBIT") {
-    const walletOwner = await resolveRechargeWalletOwner(userId, tenantId);
+    const walletOwner = await resolveRechargeWalletOwner(walletSubjectUserId, tenantId);
+    const walletOwnerUser = await db.user.findFirst({
+      where: { id: walletOwner.ownerUserId, tenantId, isActive: true },
+      select: { phone: true },
+    });
+
+    if (!walletOwnerUser) {
+      throw new Error("صاحب المحفظة غير موجود داخل هذا الحساب");
+    }
+
+    if (!otpIdToken) {
+      throw new Error("يجب تأكيد خصم الرصيد بكود تحقق صاحب الحساب");
+    }
+
+    const verifiedOtp = await verifyFirebasePhoneIdToken(otpIdToken);
+    if (verifiedOtp.phoneNumber !== normalizeEgyptPhone(walletOwnerUser.phone)) {
+      throw new Error("كود التحقق لا يخص صاحب هذه المحفظة");
+    }
+
     await debitUserWallet({
       tenantId,
       userId: walletOwner.ownerUserId,
@@ -208,8 +270,9 @@ export async function adjustUserWalletAction(formData: FormData) {
       createdById: admin.id,
       metadata: {
         direction: operation,
-        requestedUserId: userId,
+        requestedUserId: walletSubjectUserId,
         ownerType: walletOwner.ownerType,
+        ...(childContext ?? {}),
       },
     });
   } else {
@@ -242,6 +305,7 @@ export async function adjustUserWalletAction(formData: FormData) {
           direction: "PAYOUT",
           withdrawalMethod: "ADMIN",
           adminMethod: adminWithdrawalMethod,
+          ...(childContext ?? {}),
         },
         tx,
       });
@@ -256,7 +320,7 @@ export async function adjustUserWalletAction(formData: FormData) {
       entityType: "TRANSFER",
       entityId: withdrawal.id,
       message: `Manual wallet withdrawal recorded (${adminWithdrawalMethod})`,
-      metadata: { userId, amount, adminMethod: adminWithdrawalMethod },
+      metadata: { userId, amount, adminMethod: adminWithdrawalMethod, ...(childContext ?? {}) },
     });
   }
 

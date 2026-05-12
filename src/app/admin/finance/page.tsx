@@ -1,5 +1,5 @@
-import { adjustUserWalletAction } from "@/modules/admin/actions";
 import { AdminFinanceSelect } from "@/modules/admin/components/AdminFinanceSelect";
+import { AdminWalletAdjustmentForm } from "@/modules/admin/components/AdminWalletAdjustmentForm";
 import {
   getPlatformPayments,
   getPlatformSubscriptions,
@@ -22,9 +22,6 @@ type PageProps = {
 
 const financeInputClass =
   "h-11 w-full rounded-xl border border-sky-300/20 bg-slate-950/80 px-3 text-sm font-semibold text-slate-100 placeholder:text-slate-500 outline-none transition [color-scheme:dark] hover:border-sky-300/40 focus:border-cyan-300/70 focus:ring-2 focus:ring-cyan-300/15";
-
-const compactControlClass =
-  "h-10 min-w-0 rounded-xl border border-sky-300/20 bg-slate-950/85 px-3 text-sm font-semibold text-slate-100 placeholder:text-slate-500 outline-none transition [color-scheme:dark] hover:border-sky-300/40 focus:border-cyan-300/70 focus:ring-2 focus:ring-cyan-300/15 [&>option]:bg-slate-950 [&>option]:text-slate-100";
 
 const subscriptionStatusOptions = [
   { value: "", label: "كل الاشتراكات" },
@@ -62,20 +59,6 @@ const walletBalanceOptions = [
   { value: "ZERO", label: "رصيد صفر" },
 ];
 
-const walletOperationOptions = [
-  { value: "CREDIT", label: "إضافة رصيد" },
-  { value: "DEBIT", label: "خصم رصيد" },
-  { value: "PAYOUT", label: "تسجيل سحب" },
-];
-
-const adminWithdrawalMethodOptions = [
-  { value: "CASH", label: "سحب كاش" },
-  { value: "ELECTRONIC_WALLET", label: "محفظة إلكترونية" },
-  { value: "INSTAPAY", label: "InstaPay" },
-  { value: "BANK_TRANSFER", label: "تحويل بنكي" },
-  { value: "OTHER", label: "طريقة أخرى" },
-];
-
 const withdrawalStatusOptions = [
   { value: "", label: "كل طلبات السحب" },
   { value: "PENDING", label: "معلقة" },
@@ -110,7 +93,7 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
   const paymentStatusRaw = params.paymentStatus?.trim() ?? "";
   const transferStatusRaw = params.transferStatus?.trim() ?? "";
   const withdrawalStatusRaw = params.withdrawalStatus?.trim() ?? "";
-  const walletRole = params.walletRole?.trim() ?? "";
+  const walletRoleRaw = params.walletRole?.trim() ?? "";
   const walletSearch = params.walletSearch?.trim() ?? "";
   const walletBalanceRaw = params.walletBalance?.trim() ?? "";
 
@@ -134,6 +117,7 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
     withdrawalStatusRaw === "PENDING" || withdrawalStatusRaw === "SUCCESS" || withdrawalStatusRaw === "FAILED"
       ? withdrawalStatusRaw
       : undefined;
+  const walletRole = walletRoleOptions.some((option) => option.value === walletRoleRaw) ? walletRoleRaw : "";
   const walletBalance = walletBalanceRaw === "POSITIVE" || walletBalanceRaw === "ZERO" ? walletBalanceRaw : undefined;
 
   const [subscriptions, payments, transfers, wallets, withdrawals] = await Promise.all([
@@ -199,15 +183,7 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
                   <p className="text-xl font-extrabold text-emerald-300">{wallet.balance.toLocaleString("en-US")} ج.م</p>
                 </div>
               </div>
-              <form action={adjustUserWalletAction} className="mt-4 grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2">
-                <input name="tenantId" type="hidden" value={wallet.tenantId} />
-                <input name="userId" type="hidden" value={wallet.userId} />
-                <AdminFinanceSelect defaultValue="CREDIT" name="operation" options={walletOperationOptions} />
-                <AdminFinanceSelect defaultValue="CASH" name="adminWithdrawalMethod" options={adminWithdrawalMethodOptions} />
-                <input className={compactControlClass} name="amount" placeholder="المبلغ" inputMode="numeric" />
-                <input className={compactControlClass} name="reason" placeholder="السبب" />
-                <button className="h-10 rounded-xl bg-gradient-to-l from-sky-500 to-cyan-400 px-4 text-sm font-extrabold text-white shadow-lg shadow-sky-950/25 transition hover:brightness-110 sm:col-span-2" type="submit">تنفيذ</button>
-              </form>
+              <AdminWalletAdjustmentForm wallet={wallet} />
             </article>
           ))}
         </div>
