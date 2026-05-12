@@ -48,9 +48,9 @@ const navigationLinks = [
 ] as const;
 
 const heroStats = [
-  { value: "+١٢٠", label: "طالب تحت المتابعة" },
-  { value: "٩٢٪", label: "متوسط حضور شهري" },
-  { value: "٢٤/٧", label: "وصول من كل الأجهزة" },
+  { count: "120", suffix: "+", label: "طالب تحت المتابعة" },
+  { count: "92", suffix: "٪", label: "متوسط حضور شهري" },
+  { count: "24", suffix: "/٧", label: "وصول من كل الأجهزة" },
 ] as const;
 
 const steps = [
@@ -222,6 +222,37 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
       observer.observe(el)
     })
 
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const counters = document.querySelectorAll('[data-count]')
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+        
+        const el = entry.target as HTMLElement
+        const target = parseFloat(el.dataset.count ?? '0')
+        const duration = 2000
+        const start = performance.now()
+        
+        const tick = (now: number) => {
+          const progress = Math.min((now - start) / duration, 1)
+          const eased = 1 - Math.pow(1 - progress, 3)
+          const current = Math.floor(eased * target)
+          // Display Arabic digits
+          const arabicDigits = current.toString().replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[parseInt(d)])
+          el.textContent = arabicDigits + (el.dataset.suffix ?? '')
+          if (progress < 1) requestAnimationFrame(tick)
+        }
+        
+        requestAnimationFrame(tick)
+        observer.unobserve(el)
+      })
+    }, { threshold: 0.5 })
+    
+    counters.forEach((el) => observer.observe(el))
     return () => observer.disconnect()
   }, [])
 
@@ -441,7 +472,9 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                   {heroStats.map((stat, i) => (
                     <React.Fragment key={stat.label}>
                       <div className="flex-1 text-center">
-                        <p className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">{stat.value}</p>
+                        <p className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white">
+                          <span data-count={stat.count} data-suffix={stat.suffix}>٠</span>
+                        </p>
                         <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">{stat.label}</p>
                       </div>
                       {i < heroStats.length - 1 && <div className="h-10 w-px bg-slate-200 dark:bg-white/5" />}
