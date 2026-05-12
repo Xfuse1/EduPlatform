@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -204,6 +204,26 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
     window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
   };
   const scrollToHash = (hash: string) => scrollToSection(hash.replace("#", ""));
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible')
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.1 }
+    )
+
+    document.querySelectorAll('.reveal').forEach((el) => {
+      observer.observe(el)
+    })
+
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <main
@@ -505,7 +525,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
             </div>
           </section>
 
-          <section className="mt-8 scroll-mt-20 rounded-[40px] border border-slate-300/60 bg-white p-8 shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-sm sm:p-10 lg:p-12 dark:border-white/10 dark:bg-white/[0.03]" id="features">
+          <section className="reveal mt-8 scroll-mt-20 rounded-[40px] border border-slate-300/60 bg-white p-8 shadow-[0_8px_40px_rgb(0,0,0,0.06)] backdrop-blur-sm sm:p-10 lg:p-12 dark:border-white/10 dark:bg-white/[0.03]" id="features">
 
             <div className="max-w-2xl">
               <p className="text-start text-sm font-semibold text-sky-300">المميزات</p>
@@ -517,7 +537,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
 
             <div className="mt-12 grid gap-8 lg:grid-cols-3">
               {features.map((feature) => (
-                <div key={feature.title} className="group relative flex flex-col items-center rounded-[32px] border-2 border-slate-200 bg-white p-8 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
+                <div key={feature.title} className="reveal group relative flex flex-col items-center rounded-[32px] border-2 border-slate-200 bg-white p-8 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
                   <div className="relative mb-4 flex h-[220px] w-full items-center justify-center overflow-hidden rounded-2xl">
                     <img
                       src={feature.image}
@@ -532,7 +552,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
             </div>
           </section>
 
-          <section className="scroll-mt-20 overflow-hidden rounded-[48px] border border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl lg:p-16 dark:border-white/5 dark:bg-[#0F172A]/40" id="how-it-works">
+          <section className="reveal scroll-mt-20 overflow-hidden rounded-[48px] border border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl lg:p-16 dark:border-white/5 dark:bg-[#0F172A]/40" id="how-it-works">
             <div className="max-w-2xl">
               <span className="rounded-full bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400">كيف يعمل</span>
               <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">ابدأ في 3 خطوات بسيطة</h2>
@@ -564,7 +584,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
               </div>
               {steps.map((step, index) => (
                 <React.Fragment key={step.number}>
-                  <div className="group relative rounded-[32px] border-2 border-slate-200 bg-white p-10 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
+                  <div className="reveal group relative rounded-[32px] border-2 border-slate-200 bg-white p-10 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
                     <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-sky-500/10 text-4xl font-black text-sky-400 shadow-[0_0_30px_rgba(14,165,233,0.1)] transition-transform group-hover:scale-110">
                       {step.number}
                     </div>
@@ -592,7 +612,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
             </div>
           </section>
 
-          <section className="scroll-mt-20 overflow-hidden rounded-[48px] border border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl lg:p-16 dark:border-white/5 dark:bg-[#0F172A]/40" id="smart-tools">
+          <section className="reveal scroll-mt-20 overflow-hidden rounded-[48px] border border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl lg:p-16 dark:border-white/5 dark:bg-[#0F172A]/40" id="smart-tools">
             <div className="max-w-2xl">
               <span className="rounded-full bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400">أدوات ذكية للمعلم</span>
               <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">منصة مصممة لخدمة المعلم</h2>
@@ -603,7 +623,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
               {audienceCards.map((card) => (
                 <div
                   key={card.title}
-                  className="group relative flex flex-col items-center overflow-hidden rounded-[32px] border-2 border-slate-200 bg-white p-8 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-[#0F172A]/40 dark:hover:bg-[#0F172A]/60"
+                  className="reveal group relative flex flex-col items-center overflow-hidden rounded-[32px] border-2 border-slate-200 bg-white p-8 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-[#0F172A]/40 dark:hover:bg-[#0F172A]/60"
                 >
                   {/* Badge */}
                   <div className="absolute left-6 top-6">
@@ -649,7 +669,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
           </section>
 
           {/* Simplified Pricing Section */}
-          <section className="scroll-mt-20" id="pricing">
+          <section className="reveal scroll-mt-20" id="pricing">
             <div className="mb-12 text-center">
               <span className="rounded-full bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400">الأسعار</span>
               <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">خطط مرنة تناسب عدد طلابك</h2>
@@ -660,7 +680,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
               {pricingPlans.map((plan, index) => (
                 <div
                   key={plan.key}
-                  className={`relative flex flex-col rounded-[32px] border p-10 transition-all duration-300 hover:-translate-y-2 ${index === 1
+                  className={`reveal relative flex flex-col rounded-[32px] border p-10 transition-all duration-300 hover:-translate-y-2 ${index === 1
                     ? "border-sky-500 bg-sky-50 shadow-[0_20px_50px_rgba(14,165,233,0.15)] dark:border-sky-500/50 dark:bg-sky-500/5"
                     : "border-slate-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] dark:border-white/5 dark:bg-white/[0.02]"
                     }`}
@@ -706,7 +726,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
           </section>
 
           {/* Simplified Testimonials */}
-          <section className="scroll-mt-20">
+          <section className="reveal scroll-mt-20">
             <div className="mb-12 text-center">
               <span className="rounded-full bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400">قالوا عنا</span>
               <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">ماذا يقول معلمونا؟</h2>
@@ -714,7 +734,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
 
             <div className="mt-12 grid gap-8 lg:grid-cols-3">
               {testimonials.map((item, i) => (
-                <div key={item.name} className="group relative rounded-[32px] border-2 border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
+                <div key={item.name} className="reveal group relative rounded-[32px] border-2 border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
                   <div className="mb-6 flex gap-1">
                     {[...Array(5)].map((_, i) => (
                       <div key={i} className="h-4 w-4 text-amber-400">★</div>
@@ -736,7 +756,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
           </section>
 
           {/* Simplified About & Impact */}
-          <section className="scroll-mt-20" id="about">
+          <section className="reveal scroll-mt-20" id="about">
             <div className="overflow-hidden rounded-[48px] border border-slate-300/60 bg-white p-10 lg:p-20 shadow-[0_8px_40px_rgb(0,0,0,0.06)] dark:border-white/5 dark:bg-[#0F172A]/40 backdrop-blur-3xl">
               <div className="grid gap-20 lg:grid-cols-[1.2fr_1fr]">
                 {/* Content Side */}
@@ -776,7 +796,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                     {aboutStats.map((stat, i) => (
                       <div 
                         key={stat.label} 
-                        className={`group relative flex items-center gap-6 rounded-[32px] border-2 border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.03] dark:hover:bg-white/[0.05] ${i === 1 ? 'lg:mr-16' : ''}`}
+                        className={`reveal group relative flex items-center gap-6 rounded-[32px] border-2 border-slate-200 bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.03] dark:hover:bg-white/[0.05] ${i === 1 ? 'lg:mr-16' : ''}`}
                       >
                         <div className="relative flex h-36 w-36 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-white shadow-inner dark:bg-slate-900/50">
                           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-sky-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -806,7 +826,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
           <MarketingFaq />
 
           {/* Premium Footer CTA */}
-          <section className="relative overflow-hidden rounded-[48px] bg-transparent p-12 text-center sm:p-20 shadow-2xl border border-white/5">
+          <section className="relative overflow-hidden rounded-[48px] bg-slate-900 p-12 text-center sm:p-20 shadow-2xl border border-white/10 dark:border-white/5 dark:bg-slate-900/40 backdrop-blur-3xl">
             {/* Elegant Background Accents */}
             <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-indigo-600/20 blur-[100px]" />
             <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-emerald-600/10 blur-[100px]" />
