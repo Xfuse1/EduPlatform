@@ -8,6 +8,7 @@ import { getAttendanceOverview, getStudentAttendanceSnapshot, getTodaySessions }
 import { getRevenueSummary, getStudentPaymentSnapshot } from "@/modules/payments/queries";
 import { getParentChildren, getStudentCountSummary, getStudentProfile } from "@/modules/students/queries";
 import { getOrCreateWallet, resolveTenantPayeeUserId } from "@/modules/wallet/provider";
+import { getPublicGroups } from "@/modules/public-pages/queries";
 
 const arabicDaysByIndex = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"] as const;
 
@@ -202,6 +203,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
       attendanceSeries,
       teacherSubscription,
       withdrawalSummary,
+      groups,
     ] = await Promise.all([
       getRevenueSummary(tenantId),
       getTodaySessions(tenantId),
@@ -267,6 +269,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
         _sum: { amount: true },
         _count: { status: true },
       }),
+      getPublicGroups(tenantId),
     ]);
 
     const teacherUserId = await resolveTenantPayeeUserId(tenantId);
@@ -278,7 +281,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
             where: {
               tenantId,
               id: {
-                in: repeatedAbsences.map((item) => item.studentId),
+                in: repeatedAbsences.map((item: any) => item.studentId),
               },
             },
             select: {
@@ -288,7 +291,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
           })
         : [];
 
-    const paymentAlerts = overduePayments.map((payment) => ({
+    const paymentAlerts = overduePayments.map((payment: any) => ({
       id: payment.id,
       studentName: payment.student.name,
       message: `مبلغ متأخر على ${payment.student.name}`,
@@ -296,7 +299,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
       severity: "high" as const,
     }));
 
-    const absenceAlerts = repeatedAbsences.map((absence) => {
+    const absenceAlerts = repeatedAbsences.map((absence: any) => {
       const student = absenceStudents.find((item) => item.id === absence.studentId);
       const studentName = student?.name ?? "طالب";
 
@@ -323,6 +326,8 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
       students,
       attendance,
       todaySessions,
+      tenantId,
+      groups,
       alerts: [...paymentAlerts, ...absenceAlerts],
       revenueSeries,
       attendanceSeries,
@@ -330,7 +335,7 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
       wallet: {
         balance: wallet.balance,
         transfers: withdrawalSummary.reduce(
-          (acc, item) => {
+          (acc: any, item: any) => {
             acc[item.status] = { amount: item._sum.amount ?? 0, count: item._count.status };
             return acc;
           },
@@ -369,6 +374,8 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
     students,
     attendance,
     todaySessions,
+    tenantId,
+    groups: [],
     alerts: [],
     revenueSeries: [],
     attendanceSeries: [],
@@ -729,7 +736,7 @@ export const getCenterDashboardData = cache(async (tenantId: string) => {
       attendanceRate: teacherData.attendance.rate,
       activeTeachers: teachersCount,
       activeStudents: teacherData.students.total,
-      liveSessions: teacherData.todaySessions.filter((session) => session.status === "IN_PROGRESS").length,
+      liveSessions: teacherData.todaySessions.filter((session: any) => session.status === "IN_PROGRESS").length,
     },
     attendanceSeries: [
       {
@@ -775,7 +782,7 @@ export const getCenterDashboardData = cache(async (tenantId: string) => {
       channelLabel: notification.channel,
       isUnread: notification.status === "QUEUED",
     })),
-    liveAttendance: teacherData.todaySessions.map((session) => ({
+    liveAttendance: teacherData.todaySessions.map((session: any) => ({
       id: session.id,
       sessionName: session.group.name,
       attendedCount: session.attendanceCount,

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { getInitials, toArabicDigits } from "@/lib/utils";
 import { AddStudentForm } from "@/modules/students/components/AddStudentForm";
+import CSVImporter from "@/modules/students/components/CSVImporter";
 
 type StudentPaymentStatus = "PAID" | "PARTIAL" | "OVERDUE" | "PENDING";
 
@@ -91,7 +92,7 @@ function uniqueValues(values: Array<string | undefined>) {
   return Array.from(new Set(values.map((value) => value?.trim()).filter(Boolean) as string[]));
 }
 
-export function StudentsPageClient({ students, groups, canAddStudents = true }: { students: StudentItem[]; groups: GroupOption[]; canAddStudents?: boolean }) {
+export function StudentsPageClient({ students, groups, tenantId, canAddStudents = true }: { students: StudentItem[]; groups: GroupOption[]; tenantId: string; canAddStudents?: boolean }) {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterValue>("ALL");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -232,6 +233,9 @@ export function StudentsPageClient({ students, groups, canAddStudents = true }: 
             <Download className="h-4 w-4" />
             تنزيل ملف الطلاب
           </button>
+          {canAddStudents && (
+            <CSVImporter groups={groups} tenantId={tenantId} />
+          )}
           {canAddStudents && (
             <AddStudentForm groups={groups} />
           )}

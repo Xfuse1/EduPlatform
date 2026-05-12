@@ -23,5 +23,5 @@ export default async function TeacherStudentsPage() {
     canAddStudent(tenant.id),
   ]);
 
-  return <StudentsPageClient groups={groups} students={students} canAddStudents={subscriptionCheck.allowed} />;
+  return <StudentsPageClient groups={groups} students={students} tenantId={tenant.id} canAddStudents={subscriptionCheck.allowed} />;
 }
