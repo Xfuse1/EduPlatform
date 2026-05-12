@@ -1,3 +1,4 @@
+"use client";
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, ArrowUpLeft, CalendarClock, CheckCircle2, DollarSign, Users } from "lucide-react";
 import Link from "next/link";
