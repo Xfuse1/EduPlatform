@@ -237,7 +237,7 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
                 src={tenant.logoUrl || "/images/logo.svg"} 
               />
             </div>
-            <h1 className="mt-5 text-3xl font-extrabold text-slate-900 dark:text-white">
+            <h1 className="mt-5 text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">
               {tenant.name}
             </h1>
             <p className="mt-3 text-sm leading-7 text-[#94A3B8]">سجّل الدخول برقم الهاتف.</p>
@@ -288,13 +288,13 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
 
           <Dialog open={showRegisterPrompt} onOpenChange={setShowRegisterPrompt}>
             <DialogContent className="max-w-md p-0">
-              <DialogHeader className="bg-slate-950/95 px-6 py-5 text-white">
+              <DialogHeader className="bg-slate-950/95 px-4 py-4 text-white sm:px-6 sm:py-5">
                 <DialogTitle>الرقم غير مرتبط بأي حساب</DialogTitle>
                 <DialogDescription>
                   يبدو أن الرقم الذي أدخلته غير مسجل. اختر نوع الحساب الذي تريد إنشاؤه ثم تابع.
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 bg-white px-6 py-6 dark:bg-slate-950">
+              <div className="space-y-4 bg-white px-4 py-5 dark:bg-slate-950 sm:px-6 sm:py-6">
                 <p className="text-sm text-slate-600 dark:text-slate-300">هل تريد إنشاء حساب طالب، حساب ولي أمر، أم حساب معلم؟</p>
                 <DialogFooter className="flex flex-col gap-3 px-0 pb-3 pt-2 sm:flex-row">
                   {!isMainDomain && (

@@ -33,19 +33,19 @@ export default function DataTable<T>({
   return (
     <div
       className={joinClasses(
-        'overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950',
+        'max-w-full overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 sm:rounded-[28px]',
         className,
       )}
     >
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+      <div className="overflow-x-auto overscroll-x-contain">
+        <table className="min-w-[640px] divide-y divide-slate-200 dark:divide-slate-800 sm:min-w-full">
           <thead className="bg-slate-50 dark:bg-slate-900">
             <tr>
               {columns.map((column) => (
                 <th
                   key={column.key}
                   className={joinClasses(
-                    'px-5 py-4 text-start text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400',
+                    'px-3 py-3 text-start text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 sm:px-5 sm:py-4',
                     column.className,
                   )}
                 >
@@ -65,7 +65,7 @@ export default function DataTable<T>({
                   <td
                     key={`${rowKey(row)}-${column.key}`}
                     className={joinClasses(
-                      'px-5 py-4 align-top text-sm text-slate-700 dark:text-slate-200',
+                      'px-3 py-3 align-top text-sm text-slate-700 dark:text-slate-200 sm:px-5 sm:py-4',
                       column.className,
                     )}
                   >

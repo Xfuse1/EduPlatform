@@ -41,14 +41,14 @@ export function MarketingFaq() {
 
   return (
     <section
-      className="relative scroll-mt-20 overflow-hidden rounded-[50px] border border-slate-200 bg-white p-8 shadow-2xl backdrop-blur-3xl dark:border-white/5 dark:bg-[#0F172A]/40 lg:p-16"
+      className="relative scroll-mt-20 overflow-hidden rounded-[24px] border border-slate-200 bg-white p-4 shadow-2xl backdrop-blur-3xl dark:border-white/5 dark:bg-[#0F172A]/40 sm:rounded-[50px] sm:p-8 lg:p-16"
       id="faq"
     >
-      <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-8 sm:gap-12 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-xl">
           <span className="rounded-full bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400">الأسئلة الشائعة</span>
-          <h2 className="mt-6 text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">كل ما تود معرفته</h2>
-          <p className="mt-6 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+          <h2 className="mt-6 text-2xl font-black text-slate-900 dark:text-white sm:text-5xl">كل ما تود معرفته</h2>
+          <p className="mt-4 text-base leading-8 text-slate-600 dark:text-slate-400 sm:mt-6 sm:text-lg sm:leading-relaxed">
             جمعنا أكثر الأسئلة التي قد تخطر ببالك في مكان واحد، لتكون تجربتك مع المنصة واضحة وسلسة من اللحظة الأولى.
           </p>
         </div>
@@ -62,7 +62,7 @@ export function MarketingFaq() {
         </div>
       </div>
 
-      <div className="mt-12 space-y-4">
+      <div className="mt-8 space-y-3 sm:mt-12 sm:space-y-4">
         {faqItems.map((item, index) => {
           const isOpen = openIndex === index;
 
@@ -70,18 +70,18 @@ export function MarketingFaq() {
             <div
               key={item.question}
               className={cn(
-                "overflow-hidden rounded-[30px] border transition-all duration-500",
+                "overflow-hidden rounded-[20px] border transition-all duration-500 sm:rounded-[30px]",
                 isOpen
                   ? "border-sky-500/30 bg-sky-500/5 shadow-lg shadow-sky-500/10"
                   : "border-slate-100 bg-slate-50 hover:bg-slate-100 dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]",
               )}
             >
               <button
-                className="flex w-full items-center justify-between gap-4 px-8 py-6 text-start"
+                className="flex w-full items-center justify-between gap-3 px-4 py-4 text-start sm:gap-4 sm:px-8 sm:py-6"
                 onClick={() => setOpenIndex(isOpen ? null : index)}
                 type="button"
               >
-                <div className="flex items-center gap-6">
+                <div className="flex min-w-0 items-center gap-3 sm:gap-6">
                   <span
                     className={cn(
                       "flex h-10 w-10 items-center justify-center rounded-full border text-xs font-black transition-all",
@@ -92,7 +92,7 @@ export function MarketingFaq() {
                   >
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <span className="text-start text-lg font-bold text-slate-900 dark:text-white">{item.question}</span>
+                  <span className="text-start text-base font-bold text-slate-900 dark:text-white sm:text-lg">{item.question}</span>
                 </div>
 
                 <span
@@ -109,7 +109,7 @@ export function MarketingFaq() {
 
               <div className={cn("grid transition-all duration-500 ease-in-out", isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}>
                 <div className="overflow-hidden">
-                  <div className="mx-8 mb-8 rounded-[24px] bg-slate-100 px-8 py-6 dark:bg-white/[0.03]">
+                  <div className="mx-4 mb-4 rounded-[18px] bg-slate-100 px-4 py-4 dark:bg-white/[0.03] sm:mx-8 sm:mb-8 sm:rounded-[24px] sm:px-8 sm:py-6">
                     <p className="text-base leading-relaxed text-slate-600 dark:text-slate-300">{item.answer}</p>
                   </div>
                 </div>

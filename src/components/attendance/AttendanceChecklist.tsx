@@ -55,11 +55,11 @@ export function AttendanceChecklist({ groupName = "المجموعة أ", student
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto shadow-2xl border-none overflow-hidden rounded-[32px] bg-slate-50 dark:bg-slate-900" dir="rtl">
-      <CardHeader className="bg-white dark:bg-slate-950 p-6 sm:p-8 space-y-6">
-        <div className="flex justify-between items-center gap-4">
+    <Card className="mx-auto w-full max-w-2xl overflow-hidden rounded-[24px] border-none bg-slate-50 shadow-2xl dark:bg-slate-900 sm:rounded-[32px]" dir="rtl">
+      <CardHeader className="space-y-5 bg-white p-4 dark:bg-slate-950 sm:space-y-6 sm:p-8">
+        <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
           <div>
-            <CardTitle className="text-2xl font-black">تسجيل الحضور اليدوي</CardTitle>
+            <CardTitle className="text-xl font-black sm:text-2xl">تسجيل الحضور اليدوي</CardTitle>
             <p className="text-sm text-slate-500 font-bold mt-1">المجموعة: {groupName}</p>
           </div>
           <Badge variant="outline" className="px-3 py-1 rounded-full text-xs font-black tracking-widest bg-slate-100 dark:bg-slate-900 border-none tabular-nums">
@@ -77,22 +77,22 @@ export function AttendanceChecklist({ groupName = "المجموعة أ", student
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="max-h-[500px] overflow-y-auto px-6 py-4 space-y-3 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+        <div className="max-h-[min(500px,60dvh)] space-y-3 overflow-y-auto px-3 py-4 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 sm:px-6">
           {studentList.map((student) => {
             const status = attendance[student.id] || "NONE"
             return (
               <div 
                 key={student.id} 
-                className="flex items-center justify-between p-4 bg-white dark:bg-slate-950 rounded-[20px] border border-slate-100 dark:border-slate-800 transition-all hover:shadow-sm"
+                className="flex flex-col gap-3 rounded-[18px] border border-slate-100 bg-white p-3 transition-all hover:shadow-sm dark:border-slate-800 dark:bg-slate-950 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between sm:rounded-[20px] sm:p-4"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-500 text-xs">
                     {getInitials(student.name)}
                   </div>
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate max-w-[150px]">{student.name}</span>
+                  <span className="min-w-0 max-w-full truncate text-sm font-bold text-slate-800 dark:text-slate-100 min-[420px]:max-w-[150px]">{student.name}</span>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex w-full gap-2 min-[420px]:w-auto">
                   <AttendanceButton 
                     status="PRESENT" 
                     active={status === "PRESENT"} 
@@ -115,10 +115,10 @@ export function AttendanceChecklist({ groupName = "المجموعة أ", student
         </div>
       </CardContent>
 
-      <CardFooter className="p-6 bg-white dark:bg-slate-950 border-t border-slate-50 dark:border-slate-800">
+      <CardFooter className="border-t border-slate-50 bg-white p-4 dark:border-slate-800 dark:bg-slate-950 sm:p-6">
         <Button 
           className={cn(
-            "w-full h-14 rounded-2xl text-lg font-black transition-all shadow-lg items-center gap-2",
+            "w-full h-14 rounded-2xl text-base sm:text-lg font-black transition-all shadow-lg items-center gap-2",
             isFinished ? "bg-primary shadow-primary/20" : "bg-slate-200 text-slate-400 hover:bg-slate-200 cursor-not-allowed opacity-50"
           )}
           disabled={!isFinished || isSaving}
@@ -151,7 +151,7 @@ function AttendanceButton({ status, active, onClick }: { status: AttendanceStatu
     <button
       onClick={onClick}
       className={cn(
-        "h-10 px-3 sm:px-4 rounded-xl flex items-center gap-2 text-xs font-black transition-all border",
+        "h-10 flex-1 px-3 sm:flex-none sm:px-4 rounded-xl flex items-center justify-center gap-2 text-xs font-black transition-all border",
         active ? `${config.color} text-white border-transparent shadow-md scale-110 z-10` : config.light
       )}
     >

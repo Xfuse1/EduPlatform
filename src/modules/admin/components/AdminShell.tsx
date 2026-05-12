@@ -30,9 +30,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(46,134,193,0.22),_transparent_28%),linear-gradient(180deg,_#040b1d_0%,_#07132a_42%,_#0b1d3a_100%)]"
       dir="rtl"
     >
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <nav className="mb-6 rounded-2xl border border-sky-300/20 bg-slate-900/50 p-2 backdrop-blur">
-          <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <nav className="mb-5 rounded-2xl border border-sky-300/20 bg-slate-900/50 p-2 backdrop-blur sm:mb-6">
+          <ul className="grid gap-2 min-[420px]:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;

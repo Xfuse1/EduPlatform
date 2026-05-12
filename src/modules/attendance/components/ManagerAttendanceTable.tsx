@@ -51,7 +51,7 @@ export function ManagerAttendanceTable({ initialRecords }: { initialRecords: Rec
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
+      <CardHeader className="flex flex-col gap-3 space-y-0 pb-5 sm:flex-row sm:items-center sm:justify-between sm:pb-7">
         <CardTitle className="text-xl font-bold">كل سجلات الحضور</CardTitle>
         <Button onClick={exportCSV} variant="outline" className="gap-2">
           <Download className="h-4 w-4" />
@@ -96,7 +96,7 @@ export function ManagerAttendanceTable({ initialRecords }: { initialRecords: Rec
 
         {/* Table */}
         <div className="relative overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-          <table className="w-full text-start text-sm text-slate-700 dark:text-slate-300">
+          <table className="min-w-[720px] w-full text-start text-sm text-slate-700 dark:text-slate-300">
             <thead className="bg-slate-50 text-xs uppercase text-slate-500 dark:bg-slate-900/50">
               <tr>
                 <th className="px-6 py-4 text-start">الطالب</th>

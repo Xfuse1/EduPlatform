@@ -6,8 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { TeacherShareButton } from "@/components/layout/TeacherShareButton";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
-import { useFontSize } from "@/hooks/useFontSize";
 
 function getInitials(name: string) {
   return name
@@ -42,20 +40,6 @@ export function Header({
     setAvatarFailed(false);
   }, [avatarUrl]);
 
-  const { fontSize, setFontSize } = useFontSize();
-
-  const handleToggleFontSize = () => {
-    if (fontSize === 'normal') setFontSize('large');
-    else if (fontSize === 'large') setFontSize('xlarge');
-    else setFontSize('normal');
-  };
-
-  const getFontSizeLabel = () => {
-    if (fontSize === 'normal') return 'أ';
-    if (fontSize === 'large') return 'أ+';
-    return 'أ++';
-  };
-
   const shouldRenderAvatar = useMemo(() => {
     if (!avatarUrl || avatarFailed) {
       return false;
@@ -74,10 +58,10 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-30 h-16 border-b border-slate-200 bg-white/80 backdrop-blur-[20px] shadow-sm dark:border-white/10 dark:bg-[#0D1B2A]/85">
-      <div className="flex h-full items-center justify-between gap-4 px-4 sm:px-6">
-        <div className="flex items-center gap-2">
-          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/90 p-1 text-sm font-extrabold text-primary shadow-lg shadow-primary/20 dark:bg-slate-900">
+    <header className="sticky top-0 z-30 min-h-16 border-b border-slate-200 bg-white/80 backdrop-blur-[20px] shadow-sm dark:border-white/10 dark:bg-[#0D1B2A]/85">
+      <div className="flex min-h-16 items-center justify-between gap-1.5 px-2.5 sm:gap-4 sm:px-6">
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+          <div className="hidden h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/90 p-1 text-sm font-extrabold text-primary shadow-lg shadow-primary/20 dark:bg-slate-900 sm:flex">
             {shouldRenderAvatar ? (
               <img src={avatarUrl as string} alt={userName} className="h-full w-full rounded-xl object-contain" onError={() => setAvatarFailed(true)} />
             ) : (
@@ -92,9 +76,9 @@ export function Header({
               type="button"
               aria-label="فتح القائمة الجانبية"
               onClick={onMenuToggle}
-              className="touch-target inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-[#00B8A0]/50 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 xl:hidden"
+              className="touch-target inline-flex min-h-9 min-w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-[#00B8A0]/50 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 sm:min-h-11 sm:min-w-11 sm:rounded-2xl xl:hidden"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           )}
 
@@ -102,34 +86,21 @@ export function Header({
             type="button"
             aria-label="تسجيل خروج"
             onClick={handleLogout}
-            className="touch-target inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 text-sm font-bold text-rose-400 transition hover:bg-rose-500/20 hover:border-rose-500/50"
+            className="touch-target inline-flex min-h-9 min-w-9 shrink-0 items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-2 text-xs font-bold text-rose-400 transition hover:border-rose-500/50 hover:bg-rose-500/20 sm:min-h-11 sm:min-w-0 sm:rounded-2xl sm:px-4 sm:text-sm"
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
             <span className="hidden sm:inline">تسجيل خروج</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleToggleFontSize}
-            className={`touch-target inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border transition-all duration-300 font-bold text-lg ${
-              fontSize !== 'normal'
-                ? 'border-[#00B8A0]/50 bg-[#00B8A0]/10 text-[#00B8A0] shadow-[0_0_15px_rgba(0,184,160,0.15)]'
-                : 'border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 hover:border-secondary/40 hover:text-primary'
-            }`}
-            title="تغيير حجم الخط"
-          >
-            <span className="mt-[-2px]">{getFontSizeLabel()}</span>
-          </button>
-          <ThemeToggle />
+        <div className="flex min-w-0 items-center justify-end gap-1 sm:gap-2">
           <NotificationBell />
           {role === "teacher" && tenantSlug ? (
             <TeacherShareButton tenantName={tenantName} tenantSlug={tenantSlug} hasSubscription={hasSubscription} />
           ) : null}
-          <div className="text-end">
+          <div className="hidden min-w-0 text-end md:block">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">المعلم</p>
-            <h1 className="text-base font-extrabold text-primary dark:text-sky-300">{tenantName}</h1>
+            <h1 className="truncate text-base font-extrabold text-primary dark:text-sky-300">{tenantName}</h1>
           </div>
         </div>
       </div>

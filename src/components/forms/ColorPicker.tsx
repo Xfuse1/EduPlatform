@@ -52,7 +52,7 @@ export default function ColorPicker({
         })}
       </div>
 
-      <div className="flex flex-col gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center dark:border-slate-700 dark:bg-slate-900">
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900 sm:flex-row sm:items-center sm:rounded-3xl">
         <input
           type="color"
           value={value}

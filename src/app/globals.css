@@ -65,6 +65,8 @@ html.dark body {
 html {
   font-family: "Cairo", "Tajawal", sans-serif;
   font-size: 16px;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 html[data-font="large"] {
@@ -81,10 +83,38 @@ body {
   color: var(--foreground);
   @apply min-h-screen antialiased transition-colors duration-300;
   font-family: "Cairo", "Tajawal", sans-serif;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 * {
   @apply border-slate-200 dark:border-white/[0.08];
+}
+
+*,
+*::before,
+*::after {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+table {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button,
+a {
+  max-width: 100%;
 }
 
 * {
@@ -102,6 +132,27 @@ input,
 select,
 textarea {
   touch-action: manipulation;
+}
+
+@supports (height: 100dvh) {
+  .h-screen {
+    height: 100dvh;
+  }
+
+  .min-h-screen {
+    min-height: 100dvh;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    background-attachment: scroll;
+  }
+
+  .recharts-wrapper,
+  .recharts-surface {
+    max-width: 100%;
+  }
 }
 
 .touch-target {

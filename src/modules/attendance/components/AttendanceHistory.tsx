@@ -25,15 +25,15 @@ export function AttendanceHistory({ sessions }: Props) {
       {sessions.map((session) => (
         <div
           key={session.id}
-          className="flex items-center justify-between p-3 border rounded-lg bg-white dark:bg-slate-900"
+          className="flex flex-col gap-3 rounded-lg border bg-white p-3 dark:bg-slate-900 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <div
               className="w-3 h-8 rounded-full shrink-0"
               style={{ backgroundColor: session.group.color ?? '#94a3b8' }}
             />
-            <div>
-              <p className="font-medium text-start">{session.group.name}</p>
+            <div className="min-w-0">
+              <p className="truncate text-start font-medium">{session.group.name}</p>
               <p className="text-xs text-muted-foreground text-start">
                 {new Date(session.date).toLocaleDateString('ar-EG', {
                   weekday: 'short',

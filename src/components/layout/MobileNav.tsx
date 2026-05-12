@@ -37,8 +37,8 @@ export default function MobileNav({
   const items = getNavigationItems(role, canManageTeachers)
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-2 py-2 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-950/95">
-      <nav className="flex items-center gap-2 overflow-x-auto">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-950/95">
+      <nav className="scrollbar-none flex items-center gap-2 overflow-x-auto">
         {items.map((item) => {
           const active = isActivePath(pathname, item)
 
@@ -48,14 +48,14 @@ export default function MobileNav({
               href={item.href}
               aria-current={active ? 'page' : undefined}
               className={joinClasses(
-                'flex min-w-[88px] flex-1 flex-col items-center justify-center rounded-2xl px-3 py-2 text-center text-xs font-medium transition-colors',
+                'flex min-w-[76px] flex-1 flex-col items-center justify-center rounded-2xl px-2 py-2 text-center text-[11px] font-medium transition-colors min-[390px]:min-w-[88px] min-[390px]:px-3 min-[390px]:text-xs',
                 active
                   ? 'bg-sky-100 text-sky-900 dark:bg-sky-900/40 dark:text-sky-100'
                   : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-white',
               )}
             >
               <span className="mb-1 h-2 w-2 rounded-full bg-current" />
-              <span>{item.label}</span>
+              <span className="max-w-full truncate">{item.label}</span>
             </Link>
           )
         })}

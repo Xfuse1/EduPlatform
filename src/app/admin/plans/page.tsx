@@ -43,12 +43,12 @@ export default async function AdminPlansPage() {
 
   return (
     <main className="space-y-6" dir="rtl">
-      <header className="rounded-3xl border border-sky-300/20 bg-slate-900/55 p-6 backdrop-blur">
+      <header className="rounded-2xl border border-sky-300/20 bg-slate-900/55 p-4 backdrop-blur sm:rounded-3xl sm:p-6">
         <h1 className="text-2xl font-extrabold text-white">إدارة باقات الاشتراك</h1>
         <p className="mt-2 text-sm text-slate-300">أضف باقات جديدة، وعدل الأسعار والحدود، أو أخفِ الباقات غير المناسبة من الشراء.</p>
       </header>
 
-      <section className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur">
+      <section className="rounded-2xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur sm:rounded-3xl">
         <div className="mb-3 flex items-center gap-2 text-white">
           <Plus className="h-5 w-5 text-sky-300" />
           <h2 className="text-lg font-bold">إضافة باقة جديدة</h2>
@@ -103,8 +103,8 @@ export default async function AdminPlansPage() {
 
       <section className="grid gap-4 lg:grid-cols-3">
         {plans.map((plan) => (
-          <article key={plan.key} className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur">
-            <div className="mb-3 flex items-center justify-between gap-3">
+          <article key={plan.key} className="rounded-2xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur sm:rounded-3xl">
+            <div className="mb-3 flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between min-[420px]:gap-3">
               <div>
                 <h2 className="text-lg font-bold text-white">{plan.name}</h2>
                 <p className="text-xs text-slate-400" dir="ltr">

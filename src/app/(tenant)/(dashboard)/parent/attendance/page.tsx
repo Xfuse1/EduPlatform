@@ -70,21 +70,21 @@ export default async function ParentAttendancePage({
   const attendanceRate = totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 0;
 
   return (
-    <div className="flex flex-col gap-6 p-6 pb-20 max-w-5xl mx-auto w-full" dir="rtl">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 pb-8 sm:gap-6" dir="rtl">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">سجل الحضور</h1>
+          <h1 className="text-2xl font-bold tracking-normal sm:text-3xl">سجل الحضور</h1>
           <p className="text-muted-foreground mt-1">تابع مواعيد حضور وغياب أبنائك بالتفصيل</p>
         </div>
         
-        <div className="flex items-center gap-3 bg-white dark:bg-slate-950 p-2 rounded-2xl border shadow-sm">
+        <div className="flex w-full items-center gap-3 rounded-2xl border bg-white p-2 shadow-sm dark:bg-slate-950 sm:w-auto">
           <User className="h-4 w-4 text-primary mr-2" />
           <form method="get">
             <select
               name="childId"
               defaultValue={selectedChildId}
-              className="border-none bg-transparent focus:ring-0 font-bold min-w-[150px] outline-none"
+              className="min-w-0 max-w-[180px] border-none bg-transparent font-bold outline-none focus:ring-0 sm:min-w-[150px]"
               onChange={undefined}
             >
               {children.map((child: any) => (
@@ -99,16 +99,16 @@ export default async function ParentAttendancePage({
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="bg-primary text-white border-none shadow-lg">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <p className="text-white/70 text-sm font-medium">نسبة الالتزام</p>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-4xl font-extrabold">{toArabicDigits(attendanceRate)}%</span>
+              <span className="text-3xl font-extrabold sm:text-4xl">{toArabicDigits(attendanceRate)}%</span>
               <span className="text-xs text-white/60">هذا الشهر</span>
             </div>
           </CardContent>
         </Card>
         <Card className="border-none shadow-sm bg-emerald-50 dark:bg-emerald-950/20">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <p className="text-emerald-600 dark:text-emerald-400 text-sm font-bold">إجمالي الحضور</p>
             <div className="mt-2 text-2xl font-extrabold text-emerald-800 dark:text-emerald-300">
               {toArabicDigits(presentCount)} <span className="text-xs font-normal opacity-60">جلسة</span>
@@ -116,7 +116,7 @@ export default async function ParentAttendancePage({
           </CardContent>
         </Card>
         <Card className="border-none shadow-sm bg-rose-50 dark:bg-rose-950/20">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <p className="text-rose-600 dark:text-rose-400 text-sm font-bold">إجمالي الغياب</p>
             <div className="mt-2 text-2xl font-extrabold text-rose-800 dark:text-rose-300">
               {toArabicDigits(totalCount - presentCount)} <span className="text-xs font-normal opacity-60">جلسة</span>
@@ -126,8 +126,8 @@ export default async function ParentAttendancePage({
       </div>
 
       {/* Filter and Table */}
-      <Card className="border-none shadow-md overflow-hidden rounded-[32px]">
-        <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between p-6">
+      <Card className="overflow-hidden rounded-[20px] border-none shadow-md sm:rounded-[32px]">
+        <CardHeader className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <CardTitle className="text-lg font-bold">تفاصيل السجل</CardTitle>
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-slate-400" />
@@ -143,7 +143,7 @@ export default async function ParentAttendancePage({
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-right border-collapse">
+            <table className="min-w-[640px] w-full border-collapse text-right">
               <thead>
                 <tr className="bg-slate-50/30 dark:bg-slate-900/10">
                   <th className="p-4 text-xs font-extrabold text-slate-400 uppercase tracking-widest border-b">التاريخ</th>

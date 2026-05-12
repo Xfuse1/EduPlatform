@@ -192,7 +192,7 @@ export function StudentAssignments({
 
   return (
     <div className="space-y-4" dir="rtl">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
         <div className="flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-primary" />
           <h2 className="text-xl font-bold">{title}</h2>
@@ -210,7 +210,7 @@ export function StudentAssignments({
           <p className="text-muted-foreground font-medium">{emptyMessage}</p>
         </Card>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
           {assignments.map((assignment) => (
             <AssignmentCard
               key={assignment.id}
@@ -225,9 +225,9 @@ export function StudentAssignments({
       {/* Feedback Modal */}
       <Dialog open={feedbackModalOpen} onOpenChange={setFeedbackModalOpen}>
         <DialogContent className="sm:max-w-2xl w-[95vw] p-0 overflow-hidden border-none" dir="rtl">
-          <div className="bg-gradient-to-br from-purple-50 via-background to-background dark:from-purple-900/10 dark:via-slate-950 dark:to-slate-950 p-6">
-            <DialogHeader className="mb-6">
-              <div className="flex items-center gap-3">
+          <div className="bg-gradient-to-br from-purple-50 via-background to-background p-4 dark:from-purple-900/10 dark:via-slate-950 dark:to-slate-950 sm:p-6">
+            <DialogHeader className="mb-5 sm:mb-6">
+              <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center">
                 <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-2xl">
                   <Sparkles className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
@@ -282,7 +282,7 @@ export function StudentAssignments({
             </div>
           )}
 
-            <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+            <div className="flex justify-end border-t border-slate-100 pt-5 dark:border-slate-800 sm:pt-6">
               <Button onClick={() => setFeedbackModalOpen(false)} variant="outline" className="px-8 rounded-xl font-bold bg-white dark:bg-slate-900">إغلاق التقرير</Button>
             </div>
           </div>
@@ -292,9 +292,9 @@ export function StudentAssignments({
       {/* Submit Modal */}
       <Dialog open={isSubmitModalOpen} onOpenChange={setIsSubmitModalOpen}>
         <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none" dir="rtl">
-          <div className="bg-gradient-to-br from-primary/10 via-background to-background p-6">
-            <DialogHeader className="mb-6">
-              <div className="flex items-center gap-3">
+          <div className="bg-gradient-to-br from-primary/10 via-background to-background p-4 sm:p-6">
+            <DialogHeader className="mb-5 sm:mb-6">
+              <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center">
                 <div className="p-3 bg-primary/10 rounded-2xl">
                   <Upload className="h-6 w-6 text-primary" />
                 </div>
@@ -312,7 +312,7 @@ export function StudentAssignments({
             {selectedAssignment && (
               <form onSubmit={handleSubmit} className="space-y-6">
                 {selectedAssignment.submission?.fileUrl && (
-                  <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800 animate-in fade-in slide-in-from-top-2">
+                  <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 animate-in fade-in slide-in-from-top-2 dark:border-slate-700 dark:bg-slate-800 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                       <span className="text-sm font-medium">ملف مرفوع بالفعل</span>
@@ -337,13 +337,13 @@ export function StudentAssignments({
                   </div>
                 )}
 
-                <div className="p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 backdrop-blur-sm">
+                <div className="rounded-2xl border border-slate-200/60 bg-white/50 p-3 backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/50 sm:p-4">
                   <Label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">الواجب المختار</Label>
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
                     <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-primary text-white font-bold">
                       {selectedAssignment.group.name.charAt(0)}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="font-bold text-slate-900 dark:text-white line-clamp-1">{selectedAssignment.title}</div>
                       <div className="text-xs text-slate-500">{selectedAssignment.group.name}</div>
                     </div>
@@ -362,7 +362,7 @@ export function StudentAssignments({
                       if (file) handleFileChange(file);
                     }}
                     className={cn(
-                      "group relative cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-8",
+                      "group relative cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-5 sm:p-8",
                       isDragging 
                         ? "border-primary bg-primary/5 ring-4 ring-primary/5" 
                         : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50",
@@ -477,7 +477,7 @@ function AssignmentCard({ assignment, onSubmit, onViewFeedback }: { assignment: 
       
       <CardContent className="p-5 space-y-5">
         <div className="flex flex-col space-y-2">
-          <div className="flex justify-between items-start gap-2">
+          <div className="flex items-start justify-between gap-2">
             <h3 className="font-extrabold text-slate-900 dark:text-white leading-tight text-lg group-hover:text-primary transition-colors">
               {assignment.title}
             </h3>
@@ -486,7 +486,7 @@ function AssignmentCard({ assignment, onSubmit, onViewFeedback }: { assignment: 
             <div className="h-5 w-5 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
               <BookOpen className="h-3 w-3" />
             </div>
-            <span className="text-xs uppercase tracking-wide">{assignment.group?.name || assignment.group?.subject}</span>
+            <span className="min-w-0 truncate text-xs uppercase tracking-wide">{assignment.group?.name || assignment.group?.subject}</span>
           </div>
         </div>
 
@@ -503,7 +503,7 @@ function AssignmentCard({ assignment, onSubmit, onViewFeedback }: { assignment: 
         )}
 
         <div className="flex flex-col space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
             <StatusBadge
               status={assignment.status}
               grade={assignment.submission?.grade}

@@ -107,13 +107,13 @@ export function NotificationBell() {
       <button
         aria-expanded={isOpen ? "true" : "false"}
         aria-label="الإشعارات"
-        className="touch-target relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition hover:border-secondary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+        className="touch-target relative inline-flex min-h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-secondary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 sm:min-h-11 sm:min-w-11 sm:rounded-2xl"
         onClick={() => setIsOpen((current) => !current)}
         type="button"
       >
-        <Bell className="h-5 w-5" />
+        <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-white dark:ring-slate-900">
+          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-white dark:ring-slate-900 sm:h-5 sm:w-5 sm:text-[10px]">
             {unreadCount}
           </span>
         )}
@@ -127,7 +127,7 @@ export function NotificationBell() {
             onClick={() => setIsOpen(false)}
             type="button"
           />
-          <div className="absolute end-0 top-14 z-40 w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-slate-100 bg-white/95 backdrop-blur-sm shadow-2xl dark:border-slate-800 dark:bg-slate-950/95 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 origin-top">
+          <div className="fixed inset-x-3 top-20 z-40 flex max-h-[calc(100dvh-6rem)] flex-col overflow-hidden rounded-[20px] border border-slate-100 bg-white/95 shadow-2xl backdrop-blur-sm duration-200 animate-in fade-in zoom-in-95 dark:border-slate-800 dark:bg-slate-950/95 sm:absolute sm:inset-x-auto sm:end-0 sm:top-14 sm:w-[360px] sm:max-w-[calc(100vw-2rem)] sm:origin-top sm:rounded-[24px]">
 
             {/* Header */}
             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
@@ -160,7 +160,7 @@ export function NotificationBell() {
             </div>
 
             {/* List */}
-            <div className="max-h-[400px] overflow-y-auto overflow-x-hidden">
+            <div className="max-h-[min(400px,calc(100dvh-13rem))] overflow-y-auto overflow-x-hidden">
               {isLoading ? (
                 <div className="py-12 flex items-center justify-center">
                   <Loader2 className="h-6 w-6 animate-spin text-slate-400" />

@@ -26,10 +26,10 @@ export default async function AttendancePage() {
   const records = isManager ? await getAllAttendanceRecords(tenant.id) : [];
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-6">
+    <div className="space-y-8 sm:space-y-10">
+      <div className="space-y-5 sm:space-y-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">جلسات اليوم</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">جلسات اليوم</h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">اختر جلسة لبدء تسجيل الحضور أو متابعة الطلاب.</p>
         </div>
 
@@ -41,8 +41,8 @@ export default async function AttendancePage() {
               <Link key={session.id} href={`/attendance/${session.id}`} className="block transition group hover:-translate-y-1">
                 <Card className={statusBorder(session.status)}>
                   <CardContent className="min-h-20 space-y-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
+                    <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between min-[420px]:gap-4">
+                      <div className="min-w-0">
                         <h2 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary transition">{session.title}</h2>
                         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 capitalize">{session.group}</p>
                       </div>
@@ -85,9 +85,9 @@ export default async function AttendancePage() {
       </div>
 
       {isManager && (
-          <div className="space-y-6">
+          <div className="space-y-5 sm:space-y-6">
             <div>
-              <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">إحصائيات وتقارير</h2>
+              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white sm:text-2xl">إحصائيات وتقارير</h2>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">سجل كامل بجميع عمليات الحضور المسجلة عبر المنصة.</p>
             </div>
             <ManagerAttendanceTable initialRecords={records as any} />

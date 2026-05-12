@@ -166,7 +166,7 @@ export function TeachersPageClient({ currentUserId, initialTeachers }: TeachersP
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-[24px] border border-slate-200 bg-white/70 p-5 backdrop-blur dark:border-slate-800 dark:bg-slate-900/50 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">مدرسين</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">مدرسين</h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
             إدارة قائمة المدرسين داخل السنتر مع بيانات المادة والتواصل والحسابات الجاهزة لتسجيل الدخول.
           </p>
@@ -190,7 +190,7 @@ export function TeachersPageClient({ currentUserId, initialTeachers }: TeachersP
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{item.label}</p>
-                  <p className="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white">{item.value}</p>
+                  <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">{item.value}</p>
                 </div>
               </CardContent>
             </Card>
@@ -231,8 +231,8 @@ export function TeachersPageClient({ currentUserId, initialTeachers }: TeachersP
         {filteredTeachers.map((teacher, index) => (
           <Card key={teacher.id}>
             <CardContent className="space-y-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
+                <div className="flex min-w-0 items-center gap-3">
                   <div
                     className="flex h-14 w-14 items-center justify-center rounded-full text-sm font-extrabold text-white"
                     style={{
@@ -244,7 +244,7 @@ export function TeachersPageClient({ currentUserId, initialTeachers }: TeachersP
                   >
                     {getInitials(teacher.name)}
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h2 className="text-lg font-bold text-slate-900 dark:text-white">{teacher.name}</h2>
                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                       تمت إضافته في {formatDateTime(teacher.createdAt)}
@@ -334,7 +334,7 @@ export function TeachersPageClient({ currentUserId, initialTeachers }: TeachersP
 
       {isDialogOpen ? (
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/45 p-4 sm:items-center">
-          <div className="w-full max-w-xl rounded-[24px] bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.25)] dark:bg-slate-950">
+          <div className="w-full max-w-xl rounded-[20px] bg-white p-4 shadow-[0_24px_60px_rgba(15,23,42,0.25)] dark:bg-slate-950 sm:rounded-[24px] sm:p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">إضافة مدرس</h2>

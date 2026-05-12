@@ -60,25 +60,25 @@ export function StartSessionCard({ session = MOCK_SESSION, onManualAttendance }:
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto overflow-hidden border-none shadow-xl bg-white dark:bg-slate-950 transition-all duration-300">
-      <div className="bg-[linear-gradient(135deg,_#1A5276,_#2E86C1)] p-6 text-white">
-        <div className="flex justify-between items-start">
+    <Card className="mx-auto w-full max-w-md overflow-hidden border-none bg-white shadow-xl transition-all duration-300 dark:bg-slate-950">
+      <div className="bg-[linear-gradient(135deg,_#1A5276,_#2E86C1)] p-4 text-white sm:p-6">
+        <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
           <Badge className="bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-md">حصّة جارية</Badge>
           <div className="flex items-center gap-1.5 opacity-80">
             <Users className="h-4 w-4" />
             <span className="text-xs font-bold">{toArabicDigits(session.studentsCount)} طالب مسجّل</span>
           </div>
         </div>
-        <CardTitle className="mt-4 text-2xl font-black">{session.groupName}</CardTitle>
+        <CardTitle className="mt-4 text-xl font-black sm:text-2xl">{session.groupName}</CardTitle>
         <div className="mt-2 flex items-center gap-2 opacity-75 text-sm font-bold">
           <Clock className="h-4 w-4" />
           <span>{session.timeRange}</span>
         </div>
       </div>
 
-      <CardContent className="p-8 flex flex-col items-center gap-6">
+      <CardContent className="flex flex-col items-center gap-5 p-4 sm:gap-6 sm:p-8">
         {status === "IDLE" && (
-          <div className="py-10 text-center space-y-6">
+          <div className="space-y-5 py-8 text-center sm:space-y-6 sm:py-10">
             <div className="h-24 w-24 bg-primary/5 rounded-full flex items-center justify-center mx-auto">
               <QrCode className="h-12 w-12 text-primary opacity-20" />
             </div>
@@ -87,7 +87,7 @@ export function StartSessionCard({ session = MOCK_SESSION, onManualAttendance }:
               <p className="text-sm text-slate-500">سيتم توليد رمز QR ليقوم الطلاب بمسحه وتسجيل حضورهم ذاتياً.</p>
             </div>
             <Button 
-              className="w-full h-14 text-lg font-black rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-95"
+              className="h-14 w-full rounded-2xl text-base font-black shadow-lg shadow-primary/20 transition-all active:scale-95 sm:text-lg"
               onClick={handleStartSession}
             >
               ابدأ الحصة الآن
@@ -103,10 +103,10 @@ export function StartSessionCard({ session = MOCK_SESSION, onManualAttendance }:
         )}
 
         {(status === "STARTED" || status === "EXPIRED") && (
-          <div className="w-full flex flex-col items-center gap-6 animate-in zoom-in-95 duration-500">
-            <div className="relative p-6 bg-white rounded-[32px] border-4 border-slate-50 shadow-inner">
+          <div className="flex w-full flex-col items-center gap-5 animate-in zoom-in-95 duration-500 sm:gap-6">
+            <div className="relative max-w-full rounded-[24px] border-4 border-slate-50 bg-white p-3 shadow-inner sm:rounded-[32px] sm:p-6">
               <div className={cn("transition-opacity duration-300", status === "EXPIRED" ? "opacity-10 grayscale blur-[2px]" : "opacity-100")}>
-                <QRCodeSVG value={qrToken} size={200} level="H" includeMargin />
+                <QRCodeSVG value={qrToken} size={200} level="H" includeMargin className="h-auto max-w-full" />
               </div>
               
               {status === "EXPIRED" && (
@@ -125,7 +125,7 @@ export function StartSessionCard({ session = MOCK_SESSION, onManualAttendance }:
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-sm font-bold text-slate-700 dark:text-slate-300">الـ QR متاح للمسح الآن</span>
               </div>
-              <div className="text-4xl font-black text-slate-900 dark:text-white tracking-widest tabular-nums font-mono">
+              <div className="font-mono text-3xl font-black tracking-normal text-slate-900 dark:text-white sm:text-4xl">
                 {formatTime(timeLeft)}
               </div>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">الوقت المتبقي لصلاحية الرمز</p>
@@ -133,7 +133,7 @@ export function StartSessionCard({ session = MOCK_SESSION, onManualAttendance }:
 
             <div className="w-full h-px bg-slate-100 dark:bg-slate-800" />
 
-            <div className="w-full grid grid-cols-2 gap-3">
+            <div className="grid w-full grid-cols-1 gap-3 min-[420px]:grid-cols-2">
               <Button 
                 variant="outline" 
                 className="rounded-2xl h-12 gap-2 border-slate-200 dark:border-slate-800"

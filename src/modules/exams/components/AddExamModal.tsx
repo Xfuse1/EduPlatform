@@ -149,14 +149,14 @@ export function AddExamModal({ isOpen, onClose, groups, onAdd, examToEdit }: Add
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-[min(760px,calc(100vw-2rem))] max-h-[92vh] overflow-hidden border-slate-200 bg-white p-0 shadow-[0_30px_90px_rgba(2,8,23,0.38)] dark:border-slate-800 dark:bg-slate-950" dir="rtl">
-        <DialogHeader className="border-b border-slate-200 bg-slate-50/80 px-6 py-5 dark:border-slate-800 dark:bg-slate-900/35">
+        <DialogHeader className="border-b border-slate-200 bg-slate-50/80 px-4 py-4 dark:border-slate-800 dark:bg-slate-900/35 sm:px-6 sm:py-5">
           <DialogTitle className="text-center text-2xl font-extrabold text-slate-950 dark:text-white">
             {examToEdit ? "تعديل الامتحان" : "إضافة امتحان جديد"}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
           <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/30 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="title" className="text-sm font-bold text-slate-700 dark:text-slate-200">عنوان الامتحان</Label>

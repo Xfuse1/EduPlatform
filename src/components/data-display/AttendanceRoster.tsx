@@ -57,9 +57,9 @@ export function AttendanceRoster({ title = "كشف الحضور", items }: { tit
 
             return (
               <div key={item.id} className="rounded-[20px] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
                   <div className="min-w-0 flex-1">
-                    <p className="text-start text-base font-bold text-slate-900 dark:text-white">{item.name}</p>
+                    <p className="truncate text-start text-base font-bold text-slate-900 dark:text-white">{item.name}</p>
                     {item.groupName ? <p className="mt-1 text-start text-sm text-slate-500 dark:text-slate-400">{item.groupName}</p> : null}
                     {item.note ? <p className="mt-2 text-start text-sm text-slate-600 dark:text-slate-300">{item.note}</p> : null}
                   </div>

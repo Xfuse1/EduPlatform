@@ -18,8 +18,8 @@ export function MockSectionPage({ title, description, items }: MockSectionPagePr
       <Card className="overflow-hidden">
         <div className="bg-[linear-gradient(135deg,_rgba(26,82,118,0.12),_rgba(46,134,193,0.18))]">
           <CardHeader className="border-b-0">
-            <div className="flex items-center justify-between gap-4">
-              <div>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <CardTitle>{title}</CardTitle>
                 <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">{description}</p>
               </div>

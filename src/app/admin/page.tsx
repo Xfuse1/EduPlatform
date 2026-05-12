@@ -15,12 +15,12 @@ export default async function SuperAdminDashboardPage() {
 
   return (
     <main className="space-y-6" dir="rtl">
-      <header className="rounded-3xl border border-sky-300/20 bg-slate-900/55 p-6 shadow-[0_16px_45px_rgba(2,8,23,0.45)] backdrop-blur">
+      <header className="rounded-2xl border border-sky-300/20 bg-slate-900/55 p-4 shadow-[0_16px_45px_rgba(2,8,23,0.45)] backdrop-blur sm:rounded-3xl sm:p-6">
         <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-3 py-1 text-xs font-bold text-sky-200">
           <ShieldAlert className="h-3.5 w-3.5" />
           تحكم شامل على مستوى المنصة
         </p>
-        <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">لوحة السوبر أدمن</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-4xl">لوحة السوبر أدمن</h1>
         <p className="mt-2 text-sm text-slate-300">ملخص سريع للمؤسسات والمستخدمين والمدفوعات.</p>
       </header>
 
@@ -42,9 +42,9 @@ export default async function SuperAdminDashboardPage() {
         <StatCard icon={ShieldAlert} label="تحويلات فاشلة" value={overview.failedTransfers} />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-2">
-        <div className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-5 shadow-[0_16px_45px_rgba(2,8,23,0.35)] backdrop-blur">
-          <div className="mb-4 flex items-center justify-between">
+      <section className="grid gap-4 xl:grid-cols-2 sm:gap-6">
+        <div className="rounded-2xl border border-sky-300/20 bg-slate-900/50 p-4 shadow-[0_16px_45px_rgba(2,8,23,0.35)] backdrop-blur sm:rounded-3xl sm:p-5">
+          <div className="mb-4 flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
             <h2 className="text-xl font-bold text-white">آخر المؤسسات</h2>
             <p className="rounded-full border border-sky-300/20 bg-sky-300/10 px-3 py-1 text-xs text-sky-200">الإجمالي: {tenantsResult.total}</p>
           </div>
@@ -52,7 +52,7 @@ export default async function SuperAdminDashboardPage() {
           <div className="space-y-3">
             {tenantsResult.items.map((tenant) => (
               <article key={tenant.id} className="rounded-2xl border border-slate-700/60 bg-slate-950/50 p-4">
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
                   <div>
                     <p className="text-base font-bold text-white">{tenant.name}</p>
                     <p className="mt-1 text-xs text-slate-400">{tenant.slug}</p>
@@ -77,8 +77,8 @@ export default async function SuperAdminDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-5 shadow-[0_16px_45px_rgba(2,8,23,0.35)] backdrop-blur">
-          <div className="mb-4 flex items-center justify-between">
+        <div className="rounded-2xl border border-sky-300/20 bg-slate-900/50 p-4 shadow-[0_16px_45px_rgba(2,8,23,0.35)] backdrop-blur sm:rounded-3xl sm:p-5">
+          <div className="mb-4 flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
             <h2 className="text-xl font-bold text-white">آخر المستخدمين</h2>
             <p className="rounded-full border border-sky-300/20 bg-sky-300/10 px-3 py-1 text-xs text-sky-200">الإجمالي: {usersResult.total}</p>
           </div>
@@ -86,7 +86,7 @@ export default async function SuperAdminDashboardPage() {
           <div className="space-y-3">
             {usersResult.items.map((user) => (
               <article key={user.id} className="rounded-2xl border border-slate-700/60 bg-slate-950/50 p-4">
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
                   <div>
                     <p className="text-base font-bold text-white">{user.name}</p>
                     <p className="mt-1 text-xs text-slate-400">
@@ -121,7 +121,7 @@ function QuickLink({ href, title, description }: { href: string; title: string; 
       href={href}
       className="group rounded-2xl border border-sky-300/20 bg-slate-900/55 p-4 shadow-[0_12px_35px_rgba(2,8,23,0.33)] transition hover:-translate-y-0.5 hover:border-sky-300/35"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <p className="text-base font-bold text-white">{title}</p>
         <ArrowUpLeft className="h-4 w-4 text-slate-400 transition group-hover:text-sky-200" />
       </div>
@@ -143,13 +143,13 @@ function StatCard({
 }) {
   return (
     <article className="rounded-2xl border border-sky-300/20 bg-slate-900/55 p-4 shadow-[0_12px_35px_rgba(2,8,23,0.33)] backdrop-blur">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-medium text-slate-300">{label}</p>
         <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-300/25 bg-sky-300/10 text-sky-200">
           <Icon className="h-4 w-4" />
         </span>
       </div>
-      <p className="mt-4 text-3xl font-extrabold text-white">
+      <p className="mt-4 break-words text-2xl font-extrabold text-white sm:text-3xl">
         {isMoney ? `${value.toLocaleString("en-US")} ج.م` : value.toLocaleString("en-US")}
       </p>
     </article>

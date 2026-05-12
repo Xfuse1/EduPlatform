@@ -130,16 +130,16 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
 
   return (
     <main className="space-y-6" dir="rtl">
-      <header className="rounded-3xl border border-sky-300/20 bg-slate-900/55 p-6 backdrop-blur">
+      <header className="rounded-2xl border border-sky-300/20 bg-slate-900/55 p-4 backdrop-blur sm:rounded-3xl sm:p-6">
         <h1 className="text-2xl font-extrabold text-white">المتابعة المالية</h1>
         <p className="mt-2 text-sm text-slate-300">لوحة تجمع الاشتراكات والمدفوعات والتحويلات ومحافظ المستخدمين.</p>
       </header>
 
-      <section className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur">
+      <section className="rounded-2xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur sm:rounded-3xl">
         <form className="grid gap-3 md:grid-cols-3" method="GET">
           <AdminFinanceSelect defaultValue={subscriptionStatus ?? ""} name="subscriptionStatus" options={subscriptionStatusOptions} />
           <AdminFinanceSelect defaultValue={paymentStatus ?? ""} name="paymentStatus" options={paymentStatusOptions} />
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 min-[420px]:flex-row">
             <AdminFinanceSelect defaultValue={transferStatus ?? ""} name="transferStatus" options={transferStatusOptions} />
             <button className="rounded-xl border border-sky-300/30 bg-sky-300/15 px-4 py-2 text-sm font-bold text-white transition hover:bg-sky-300/25" type="submit">
               تطبيق
@@ -148,7 +148,7 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
         </form>
       </section>
 
-      <section className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur">
+      <section className="rounded-2xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur sm:rounded-3xl">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-bold text-white">محافظ المستخدمين</h2>
@@ -178,9 +178,9 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
                   </div>
                   <p className="truncate text-xs text-slate-500">{wallet.tenant.name} / {wallet.tenant.slug}</p>
                 </div>
-                <div className="shrink-0 rounded-2xl border border-emerald-300/15 bg-emerald-300/10 px-3 py-2 text-start">
+                <div className="rounded-2xl border border-emerald-300/15 bg-emerald-300/10 px-3 py-2 text-start sm:shrink-0">
                   <p className="text-[11px] font-bold text-emerald-100/80">رصيد المحفظة</p>
-                  <p className="text-xl font-extrabold text-emerald-300">{wallet.balance.toLocaleString("en-US")} ج.م</p>
+                  <p className="break-words text-lg font-extrabold text-emerald-300 sm:text-xl">{wallet.balance.toLocaleString("en-US")} ج.م</p>
                 </div>
               </div>
               <AdminWalletAdjustmentForm wallet={wallet} />
@@ -189,13 +189,13 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur">
+      <section className="rounded-2xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur sm:rounded-3xl">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-bold text-white">طلبات سحب المحافظ</h2>
             <p className="text-xs text-slate-400">آخر {withdrawals.items.length} من أصل {withdrawals.total}</p>
           </div>
-          <form className="flex gap-2" method="GET">
+          <form className="flex w-full flex-col gap-2 min-[420px]:w-auto min-[420px]:flex-row" method="GET">
             <AdminFinanceSelect defaultValue={withdrawalStatus ?? ""} name="withdrawalStatus" options={withdrawalStatusOptions} />
             <button className="rounded-xl border border-sky-300/30 bg-sky-300/15 px-4 py-2 text-sm font-bold text-white transition hover:bg-sky-300/25" type="submit">
               تطبيق
@@ -225,8 +225,8 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-3">
-        <div className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur">
+      <section className="grid gap-4 xl:grid-cols-3 sm:gap-6">
+        <div className="rounded-2xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur sm:rounded-3xl">
           <h2 className="mb-3 text-lg font-bold text-white">الاشتراكات</h2>
           <p className="mb-3 text-xs text-slate-400">آخر {subscriptions.items.length} من أصل {subscriptions.total}</p>
           <div className="space-y-2">
@@ -244,7 +244,7 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur">
+        <div className="rounded-2xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur sm:rounded-3xl">
           <h2 className="mb-3 text-lg font-bold text-white">المدفوعات</h2>
           <p className="mb-3 text-xs text-slate-400">آخر {payments.items.length} من أصل {payments.total}</p>
           <div className="space-y-2">
@@ -259,7 +259,7 @@ export default async function AdminFinancePage({ searchParams }: PageProps) {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur">
+        <div className="rounded-2xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur sm:rounded-3xl">
           <h2 className="mb-3 text-lg font-bold text-white">التحويلات</h2>
           <p className="mb-3 text-xs text-slate-400">آخر {transfers.items.length} من أصل {transfers.total}</p>
           <div className="space-y-2">

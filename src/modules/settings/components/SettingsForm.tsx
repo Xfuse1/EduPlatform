@@ -218,7 +218,7 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierAp
       ) : null}
 
       <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">الإعدادات</h1>
+        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">الإعدادات</h1>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">حدّث بيانات السنتر والهوية البصرية ومعلومات التواصل من نفس الصفحة.</p>
       </div>
 
@@ -237,7 +237,7 @@ export function SettingsForm({ tenant, avatarUrl: initialAvatarUrl, hasKashierAp
               </p>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
               <div className="relative">
                 <div className="h-24 w-24 rounded-3xl bg-slate-100 dark:bg-slate-800 overflow-hidden border-2 border-white dark:border-slate-700 shadow-md">
                   {avatarUrl ? (

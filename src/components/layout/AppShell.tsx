@@ -52,8 +52,8 @@ export function AppShell({
   } as const;
 
   return (
-    <div className="h-screen overflow-hidden bg-background text-foreground transition-colors duration-300">
-      <div className="flex h-screen overflow-hidden">
+    <div className="h-[100dvh] overflow-hidden bg-background text-foreground transition-colors duration-300">
+      <div className="flex h-full overflow-hidden">
         {/* Mobile sidebar overlay backdrop */}
         {sidebarOpen && (
           <button
@@ -71,7 +71,7 @@ export function AppShell({
           onClose={() => setSidebarOpen(false)}
         />
 
-        <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
           <Header
             tenantName={tenantName}
             tenantSlug={tenantSlug}
@@ -81,8 +81,8 @@ export function AppShell({
             hasSubscription={hasSubscription}
             onMenuToggle={() => setSidebarOpen((prev) => !prev)}
           />
-          <main className="page-enter min-h-0 flex-1 overflow-y-auto">
-            <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
+          <main className="page-enter min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8">{children}</div>
           </main>
         </div>
       </div>

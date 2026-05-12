@@ -14,7 +14,7 @@ export default function LoadingSpinner({
   return (
     <div
       className={joinClasses(
-        'flex flex-col items-center justify-center gap-4 rounded-3xl bg-white/70 px-6 py-10 text-center shadow-sm dark:bg-slate-900/60',
+        'flex flex-col items-center justify-center gap-4 rounded-2xl bg-white/70 px-4 py-8 text-center shadow-sm dark:bg-slate-900/60 sm:rounded-3xl sm:px-6 sm:py-10',
         fullScreen && 'min-h-screen',
       )}
       role="status"

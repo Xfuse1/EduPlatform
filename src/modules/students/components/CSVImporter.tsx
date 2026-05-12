@@ -273,7 +273,7 @@ export default function CSVImporter({ tenantId, groups, hideHeader = false }: CS
             </div>
 
             <div className="mt-5 overflow-x-auto rounded-3xl border border-slate-200 dark:border-slate-800">
-              <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+              <table className="min-w-[720px] divide-y divide-slate-200 dark:divide-slate-800">
                 <thead className="bg-slate-50 dark:bg-slate-900">
                   <tr>
                     {headers.map((header) => (

@@ -49,12 +49,12 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
 
   return (
     <main className="space-y-6" dir="rtl">
-      <header className="rounded-3xl border border-sky-300/20 bg-slate-900/55 p-6 backdrop-blur">
+      <header className="rounded-2xl border border-sky-300/20 bg-slate-900/55 p-4 backdrop-blur sm:rounded-3xl sm:p-6">
         <h1 className="text-2xl font-extrabold text-white">إدارة المستخدمين</h1>
         <p className="mt-2 text-sm text-slate-300">بحث وتصفية المستخدمين على مستوى كل المؤسسات.</p>
       </header>
 
-      <section className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur">
+      <section className="rounded-2xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur sm:rounded-3xl">
         <form className="grid gap-3 lg:grid-cols-4" method="GET">
           <input
             className="rounded-xl border border-slate-600 bg-slate-950/50 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-400 focus:border-sky-300/40"
@@ -94,8 +94,8 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
         </form>
       </section>
 
-      <section className="rounded-3xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur">
-        <div className="mb-3 flex items-center justify-between">
+      <section className="rounded-2xl border border-sky-300/20 bg-slate-900/50 p-4 backdrop-blur sm:rounded-3xl">
+        <div className="mb-3 flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
           <p className="text-sm text-slate-300">عدد النتائج: {usersResult.total}</p>
           <p className="text-xs text-slate-400">صفحة {page} من {totalPages}</p>
         </div>
@@ -142,7 +142,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
           </table>
         </div>
 
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex items-center justify-between gap-3">
           <Link
             href={page > 1 ? makeUrl(page - 1) : "#"}
             className={`rounded-xl border px-4 py-2 text-sm font-bold ${

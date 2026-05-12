@@ -55,41 +55,41 @@ export function StudentExamsPageClient({ initialExams = [] }: StudentExamsPageCl
   };
 
   return (
-    <div className="space-y-8 min-h-[calc(100vh-8rem)]">
-      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+    <div className="min-h-[calc(100dvh-8rem)] space-y-6 sm:space-y-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">امتحاناتي</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">امتحاناتي</h1>
           <p className="mt-2 text-slate-600 dark:text-slate-300">تابع مواعيد امتحاناتك وراجع نتائجك السابقة لتقييم مستواك.</p>
         </div>
         
-        <div className="flex bg-slate-100 p-1.5 rounded-2xl dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+        <div className="flex max-w-full overflow-x-auto rounded-2xl border border-slate-200 bg-slate-100 p-1.5 dark:border-slate-700 dark:bg-slate-800">
             <button 
                 onClick={() => setFilterStatus("all")}
-                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${filterStatus === "all" ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"}`}
+                className={`rounded-xl px-4 py-2 text-sm font-bold transition-all sm:px-6 ${filterStatus === "all" ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"}`}
             >
                 الكل
             </button>
             <button 
                 onClick={() => setFilterStatus("active")}
-                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all relative ${filterStatus === "active" ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"}`}
+                className={`relative rounded-xl px-4 py-2 text-sm font-bold transition-all sm:px-6 ${filterStatus === "active" ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"}`}
             >
                 متاح الآن
                 <span className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
             </button>
             <button 
                 onClick={() => setFilterStatus("completed")}
-                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${filterStatus === "completed" ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"}`}
+                className={`rounded-xl px-4 py-2 text-sm font-bold transition-all sm:px-6 ${filterStatus === "completed" ? "bg-white dark:bg-slate-900 shadow-sm text-primary" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"}`}
             >
                 المنتهية
             </button>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2 lg:gap-8">
         {filteredExams.map((exam) => (
           <Card key={exam.id} className="group overflow-hidden rounded-[24px] border border-slate-200 shadow-sm dark:border-slate-800 transition hover:shadow-md hover:border-primary/20 bg-white dark:bg-slate-900">
             <div className="flex flex-col sm:flex-row">
-                <div className="flex-1 p-6 space-y-5">
+                <div className="flex-1 space-y-5 p-4 sm:p-6">
                     <div className="flex items-start justify-between gap-4">
                         <div className="space-y-1.5">
                             <h3 className="text-[1.15rem] font-bold text-slate-900 dark:text-white leading-tight">{exam.title}</h3>
@@ -112,7 +112,7 @@ export function StudentExamsPageClient({ initialExams = [] }: StudentExamsPageCl
                 </div>
 
                 {/* Right Side / Actions */}
-                <div className="flex flex-row sm:flex-col sm:w-48 bg-slate-50/50 dark:bg-slate-800/20 border-t sm:border-t-0 sm:border-r border-slate-100 dark:border-slate-800 p-6 items-center sm:items-stretch justify-center gap-4">
+                <div className="flex flex-col items-stretch justify-center gap-4 border-t border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/20 sm:w-48 sm:border-r sm:border-t-0 sm:p-6">
                     <div className="mx-auto block">
                         {getStatusBadge(exam.status)}
                     </div>

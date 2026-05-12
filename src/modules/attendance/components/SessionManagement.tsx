@@ -172,17 +172,17 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
   }, [autoEndEnabled, session.sessionEndAt, session.status]);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
+    <div className="grid gap-4 lg:grid-cols-3 sm:gap-6">
       {/* Session Controls & QR */}
       <Card className="lg:col-span-1">
-        <CardContent className="space-y-6 pt-6 text-center">
+        <CardContent className="space-y-5 pt-4 text-center sm:space-y-6 sm:pt-6">
           <div className="space-y-1">
             <h2 className="text-xl font-bold">{session.title}</h2>
             <p className="text-sm text-slate-500">الحالة: {session.status}</p>
           </div>
 
           {session.status !== "COMPLETED" && (
-            <label className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-bold text-slate-700 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200">
+            <label className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-bold text-slate-700 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
               <span>إنهاء الحصة تلقائيا في موعد الانتهاء</span>
               <input
                 checked={autoEndEnabled}
@@ -244,17 +244,17 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
       {/* Student List */}
       <Card className="lg:col-span-2">
         <CardContent className="pt-6">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
             <h3 className="text-lg font-bold">قائمة الحضور ({session.students.filter(s => s.status === 'PRESENT').length}/{session.students.length})</h3>
           </div>
           
           <div className="space-y-3">
             {session.students.map((student) => (
-              <div key={student.id} className="flex items-center justify-between rounded-xl border p-3 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <div>
+              <div key={student.id} className="flex flex-col gap-3 rounded-xl border p-3 dark:border-slate-800 min-[460px]:flex-row min-[460px]:items-center min-[460px]:justify-between">
+                <div className="flex min-w-0 items-center gap-2">
+                  <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <p className="font-bold">{student.name}</p>
+                      <p className="truncate font-bold">{student.name}</p>
                       {student.method === 'QR_GUEST' && (
                         <User className="h-4 w-4 text-amber-500" />
                       )}
@@ -263,7 +263,7 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                   <Button
                     onClick={() => markStudent(student.id, "PRESENT")}
                     variant={student.status === "PRESENT" ? "default" : "outline"}
@@ -315,7 +315,7 @@ export function SessionManagement({ initialSession }: { initialSession: Session 
       <div className="lg:col-span-3">
         <Link
           href={`/teacher/assignments?groupId=${session.groupId}&autoOpen=true`}
-          className="flex w-full items-center justify-center gap-3 rounded-2xl bg-primary hover:bg-primary/90 transition-colors px-6 py-4 text-white font-bold shadow-md"
+          className="flex w-full items-center justify-center gap-3 rounded-2xl bg-primary px-4 py-4 font-bold text-white shadow-md transition-colors hover:bg-primary/90 sm:px-6"
         >
           <Plus className="h-5 w-5" />
           إضافة واجب لهذه الحصة

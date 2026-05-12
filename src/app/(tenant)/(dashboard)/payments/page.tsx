@@ -39,9 +39,9 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
     const needsSubscription = subscriptionRequired && (!subscription || !subscription.isActive);
 
     return (
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {needsSubscription ? (
-          <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-6 py-5 text-right">
+          <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-4 text-right sm:px-6 sm:py-5">
             <p className="text-lg font-bold text-amber-400">الاشتراك مطلوب للوصول للمنصة</p>
             <p className="mt-1 text-sm text-amber-300/80">
               اختر الباقة المناسبة من صفحة <strong>الاشتراك</strong> لتفعيل حسابك والوصول لجميع ميزات المنصة.
@@ -73,7 +73,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
     ]);
 
     return (
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         <section id="wallet" className="scroll-mt-24">
           <WalletPageClient
             role="PARENT"
@@ -90,7 +90,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
     const adminContact = await getPlatformConfigValue("admin_contact");
 
     return (
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         <section id="wallet" className="scroll-mt-24">
           <WalletPageClient role="STUDENT" userId={user.id} adminContact={adminContact} />
         </section>
@@ -112,7 +112,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   }));
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <section id="expenses">
         <PaymentsPageClient
           initialPayments={clientPayments}

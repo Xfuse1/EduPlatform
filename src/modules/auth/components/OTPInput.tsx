@@ -290,7 +290,7 @@ export function OTPInput({
       <Card 
         className="overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0F1B2D]/90 shadow-[0_0_60px_rgba(0,184,160,0.08)] backdrop-blur-xl"
       >
-        <div className="px-6 py-7 text-center text-white sm:px-8">
+        <div className="px-4 py-6 text-center text-white sm:px-8 sm:py-7">
           <div className="mx-auto mb-4 flex h-[48px] w-[48px] items-center justify-center">
             <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
           </div>
@@ -308,19 +308,19 @@ export function OTPInput({
     <Card 
       className="overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0F1B2D]/90 shadow-[0_0_60px_rgba(0,184,160,0.08)] backdrop-blur-xl"
     >
-      <div className="px-6 py-8 text-center text-white sm:px-8">
+      <div className="px-4 py-6 text-center text-white sm:px-8 sm:py-8">
         <div className="mx-auto mb-4 flex h-[48px] w-[48px] items-center justify-center">
           <img alt="Logo" className="h-full w-full object-contain" src="/images/logo.svg" />
         </div>
         <p className="mt-4 text-sm font-medium text-[#94A3B8]">{tenantName}</p>
-        <h1 className="mt-3 text-3xl font-extrabold">أدخل كود التحقق</h1>
+        <h1 className="mt-3 text-2xl font-extrabold sm:text-3xl">أدخل كود التحقق</h1>
         <p className="mt-3 text-sm leading-7 text-[#94A3B8]">
           أدخل الكود المرسل إلى <span dir="ltr">{phone}</span>
         </p>
       </div>
 
       <CardContent className="space-y-6 p-6 sm:p-8">
-        <div className="flex items-center justify-between rounded-[16px] bg-white/5 border border-white/10 px-4 py-3">
+        <div className="flex flex-col gap-2 rounded-[16px] border border-white/10 bg-white/5 px-4 py-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
           <div className="text-start">
             <p className="text-sm font-bold text-white">مدة صلاحية الكود</p>
             <p className="text-sm text-[#94A3B8]">يرجى إدخال الرمز قبل انتهاء العد التنازلي</p>
@@ -331,7 +331,7 @@ export function OTPInput({
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-2" dir="ltr">
+        <div className="flex items-center justify-between gap-1 min-[380px]:gap-2" dir="ltr">
           {digits.map((digit, index) => (
             <input
               key={`otp-digit-${index}`}

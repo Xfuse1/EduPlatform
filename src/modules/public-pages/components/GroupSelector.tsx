@@ -108,7 +108,7 @@ export function GroupSelector({
                   </p>
 
                   <div className="rounded-2xl border border-white/6 bg-white/[0.04] px-3 py-3 text-sm text-slate-300">
-                    <div className="mb-2 flex items-center justify-between">
+                    <div className="mb-2 flex flex-col gap-1 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
                       <span className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-sky-300" />
                         <span>السعة الحالية</span>
@@ -131,7 +131,7 @@ export function GroupSelector({
 
               <div className="rounded-[24px] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] p-4 text-end">
                 <p className="text-xs font-semibold tracking-wide text-slate-400">الرسوم الشهرية</p>
-                <p className="mt-2 text-3xl font-extrabold text-sky-300">{formatCurrency(group.monthlyFee)}</p>
+                <p className="mt-2 break-words text-2xl font-extrabold text-sky-300 sm:text-3xl">{formatCurrency(group.monthlyFee)}</p>
 
                 <p className="mt-4 text-xs font-semibold tracking-wide text-slate-400">المقاعد المتبقية</p>
                 <p className="mt-2 text-lg font-bold text-slate-100">

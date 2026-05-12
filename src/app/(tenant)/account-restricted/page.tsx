@@ -42,7 +42,7 @@ export default async function AccountRestrictedPage() {
       className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(244,63,94,0.18),_transparent_32%),linear-gradient(145deg,_#020617_0%,_#0f172a_55%,_#111827_100%)] px-4 py-10"
       dir="rtl"
     >
-      <section className="w-full max-w-lg rounded-2xl border border-rose-300/20 bg-slate-950/70 p-6 text-center shadow-2xl backdrop-blur">
+      <section className="w-full max-w-lg rounded-2xl border border-rose-300/20 bg-slate-950/70 p-4 text-center shadow-2xl backdrop-blur sm:p-6">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-300/25 bg-rose-500/10 text-rose-200">
           <AlertTriangle className="h-7 w-7" />
         </div>

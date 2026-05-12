@@ -19,7 +19,7 @@ export default async function CenterAnnouncementsPage() {
   const logs = await getNotificationLogs(tenant.id);
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+    <div className="grid gap-4 xl:grid-cols-[1fr_1fr] sm:gap-6">
       <NotificationCenter
         items={logs.slice(0, 8).map((item) => ({
           id: item.id,

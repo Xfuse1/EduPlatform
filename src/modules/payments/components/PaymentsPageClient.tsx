@@ -159,10 +159,10 @@ export function PaymentsPageClient({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-end justify-between gap-4">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
         <div>
-          <h1 className="text-start text-3xl font-extrabold text-slate-900 dark:text-white">المصاريف</h1>
+          <h1 className="text-start text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">المصاريف</h1>
           <p className="mt-2 text-start text-sm text-slate-600 dark:text-slate-300">ملخص واضح للتحصيل والمديونيات مع إبراز المبلغ والحالة.</p>
         </div>
         <Button className="hidden gap-2 sm:inline-flex" onClick={openCreateDialog}>
@@ -241,15 +241,15 @@ export function PaymentsPageClient({
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="bg-[linear-gradient(135deg,_#1A5276,_#2E86C1)] text-white">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <p className="text-start text-sm text-white/75">إجمالي المحصل</p>
-            <p className="mt-3 text-start text-3xl font-extrabold">{formatCurrency(totalCollected)}</p>
+            <p className="mt-3 break-words text-start text-2xl font-extrabold sm:text-3xl">{formatCurrency(totalCollected)}</p>
           </CardContent>
         </Card>
         <Card className="bg-[linear-gradient(135deg,_#F39C12,_#E74C3C)] text-white">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <p className="text-start text-sm text-white/75">إجمالي المتأخر</p>
-            <p className="mt-3 text-start text-3xl font-extrabold">{formatCurrency(totalOverdue)}</p>
+            <p className="mt-3 break-words text-start text-2xl font-extrabold sm:text-3xl">{formatCurrency(totalOverdue)}</p>
           </CardContent>
         </Card>
       </div>
@@ -281,7 +281,7 @@ export function PaymentsPageClient({
 
       {filteredPayments.length === 0 ? (
         <Card>
-          <CardContent className="p-8 text-center">
+          <CardContent className="p-5 text-center sm:p-8">
             <p className="text-lg font-bold text-slate-900 dark:text-white">لا توجد نتائج مطابقة</p>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">جرّب تغيير البحث أو الفلتر للوصول إلى سجل تحصيل آخر.</p>
           </CardContent>
@@ -298,7 +298,7 @@ export function PaymentsPageClient({
               }
             >
               <CardContent className="space-y-4">
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
                   <div>
                     <h2 className="text-start text-lg font-bold text-slate-900 dark:text-white">{payment.studentName}</h2>
                     <p className="mt-1 text-start text-sm text-slate-500 dark:text-slate-400">{payment.month}</p>
@@ -306,9 +306,9 @@ export function PaymentsPageClient({
                   <span className={`rounded-full px-3 py-2 text-xs font-bold ${statusClass(payment.status)}`}>{statusLabel(payment.status)}</span>
                 </div>
 
-                <p className="text-start text-3xl font-extrabold text-primary dark:text-sky-300">{formatCurrency(payment.amount)}</p>
+                <p className="break-words text-start text-2xl font-extrabold text-primary dark:text-sky-300 sm:text-3xl">{formatCurrency(payment.amount)}</p>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 min-[420px]:flex-row">
                   <Button className="flex-1 gap-2" onClick={() => openEditDialog(payment)} type="button" variant="outline">
                     <Pencil className="h-4 w-4" />
                     تعديل
@@ -336,7 +336,7 @@ export function PaymentsPageClient({
 
       {isOpen ? (
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/45 p-4 sm:items-center">
-          <div className="max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-[24px] bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.25)] dark:bg-slate-950">
+          <div className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-[20px] bg-white p-4 shadow-[0_24px_60px_rgba(15,23,42,0.25)] dark:bg-slate-950 sm:rounded-[24px] sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-start text-xl font-extrabold text-slate-900 dark:text-white">
@@ -367,7 +367,7 @@ export function PaymentsPageClient({
               </div>
               <div>
                 <label className="mb-2 block text-start text-sm font-semibold text-slate-700 dark:text-slate-200">حالة الدفعة</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-3">
                   {paymentStatuses.map((item) => (
                     <button
                       key={item.value}
@@ -394,7 +394,7 @@ export function PaymentsPageClient({
                   value={amount}
                 />
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3 min-[420px]:flex-row">
                 <Button className="w-full" type="submit">
                   {editingPaymentId ? "حفظ التعديلات" : "حفظ الدفعة"}
                 </Button>
@@ -409,9 +409,9 @@ export function PaymentsPageClient({
 
       {isInvoiceOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm overflow-y-auto">
-          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[32px] bg-slate-50 dark:bg-slate-900 shadow-2xl relative">
+          <div className="relative max-h-[92dvh] w-full max-w-4xl overflow-y-auto rounded-[20px] bg-slate-50 shadow-2xl dark:bg-slate-900 sm:rounded-[32px]">
             <button 
-              className="absolute top-6 left-6 z-10 h-10 w-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center border shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+              className="absolute left-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border bg-white shadow-md transition hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 sm:left-6 sm:top-6"
               onClick={() => setIsInvoiceOpen(false)}
             >
               <X className="h-5 w-5" />

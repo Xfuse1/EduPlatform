@@ -17,6 +17,8 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { useFontSize } from "@/hooks/useFontSize";
 import { cn } from "@/lib/utils";
 
 export type DashboardRole = "teacher" | "student" | "parent";
@@ -82,19 +84,32 @@ export function Sidebar({
   onClose?: () => void;
 }) {
   const pathname = usePathname();
+  const { fontSize, setFontSize } = useFontSize();
+
+  const handleToggleFontSize = () => {
+    if (fontSize === "normal") setFontSize("large");
+    else if (fontSize === "large") setFontSize("xlarge");
+    else setFontSize("normal");
+  };
+
+  const getFontSizeLabel = () => {
+    if (fontSize === "normal") return "أ";
+    if (fontSize === "large") return "أ+";
+    return "أ++";
+  };
 
   return (
     <aside
       className={cn(
         // Base styles shared between desktop and mobile
-        "h-screen w-[300px] shrink-0 border-e border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-[#0F1D3A] dark:text-white",
+        "h-[100dvh] w-[min(300px,calc(100vw-1rem))] shrink-0 border-e border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-[#0F1D3A] dark:text-white xl:w-[300px]",
         // Desktop: always visible, part of the flow
         "hidden xl:block",
         // Mobile: overlay drawer, visible only when isOpen
         isOpen && "fixed inset-y-0 start-0 z-50 flex xl:relative xl:flex",
       )}
     >
-      <div className="relative flex h-full min-h-0 flex-col overflow-y-auto overflow-x-hidden px-7 py-7">
+      <div className="relative flex h-full min-h-0 flex-col overflow-y-auto overflow-x-hidden px-4 py-4 sm:px-7 sm:py-7">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-x-0 top-0 h-52 bg-[radial-gradient(circle_at_top,rgba(125,211,252,0.12),transparent_62%)] dark:bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.10),transparent_58%)]" />
           <div className="absolute inset-y-0 start-0 w-px bg-white/10 dark:bg-white/5" />
@@ -113,7 +128,7 @@ export function Sidebar({
           </button>
         )}
 
-        <div className="relative flex min-h-[14.25rem] flex-col justify-center overflow-hidden rounded-[24px] border border-slate-200 bg-slate-50 dark:border-secondary/20 dark:bg-[#081426] px-5 py-12 shadow-[0_14px_32px_rgba(3,10,25,0.05)] dark:shadow-[0_14px_32px_rgba(3,10,25,0.22)]">
+        <div className="relative flex min-h-[11rem] flex-col justify-center overflow-hidden rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-8 shadow-[0_14px_32px_rgba(3,10,25,0.05)] dark:border-secondary/20 dark:bg-[#081426] dark:shadow-[0_14px_32px_rgba(3,10,25,0.22)] sm:min-h-[14.25rem] sm:rounded-[24px] sm:px-5 sm:py-12">
           <div className="flex items-center gap-3">
             <div className="grid h-16 w-16 shrink-0 place-items-center rounded-[22px] bg-[linear-gradient(135deg,#00B8A0,#5EEAD4)] text-slate-950 shadow-[0_12px_30px_rgba(0,184,160,0.24)]">
               <span className="text-xl font-black leading-none tracking-normal">EP</span>
@@ -128,12 +143,29 @@ export function Sidebar({
           </p>
         </div>
 
-        <div className="relative mt-8">
+        <div className="relative mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-slate-50/80 p-2 dark:border-white/10 dark:bg-white/[0.04]">
+          <ThemeToggle className="inline-flex min-h-10 min-w-0 w-full rounded-xl bg-white dark:bg-slate-900" />
+          <button
+            type="button"
+            onClick={handleToggleFontSize}
+            className={cn(
+              "touch-target inline-flex min-h-10 w-full items-center justify-center rounded-xl border text-base font-bold transition-all duration-300",
+              fontSize !== "normal"
+                ? "border-[#00B8A0]/50 bg-[#00B8A0]/10 text-[#00B8A0] shadow-[0_0_15px_rgba(0,184,160,0.15)]"
+                : "border-slate-200 bg-white text-slate-600 hover:border-secondary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100",
+            )}
+            title="تغيير حجم الخط"
+          >
+            <span className="mt-[-2px]">{getFontSizeLabel()}</span>
+          </button>
+        </div>
+
+        <div className="relative mt-5 sm:mt-8">
           <div className="mb-4 px-2">
             <p className="text-xs font-bold tracking-wide text-slate-400 dark:text-white/40">التنقل الرئيسي</p>
           </div>
 
-          <nav className="space-y-3.5">
+          <nav className="space-y-2.5 sm:space-y-3.5">
             {navigation[role].map((item) => {
               const isActive = isItemActive(pathname, item);
               const Icon = item.icon;
@@ -144,7 +176,7 @@ export function Sidebar({
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    "group relative flex min-h-[58px] items-center gap-4 overflow-hidden px-5 py-3 transition duration-300",
+                    "group relative flex min-h-12 items-center gap-3 overflow-hidden px-4 py-2.5 transition duration-300 sm:min-h-[58px] sm:gap-4 sm:px-5 sm:py-3",
                     isActive
                       ? "bg-[#00B8A0]/10 text-[#00B8A0] border-s-[3px] border-[#00B8A0] rounded-[8px]"
                       : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-[#94A3B8] dark:hover:text-[#ffffff] dark:hover:bg-white/[0.04]",
