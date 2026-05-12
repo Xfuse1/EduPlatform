@@ -218,29 +218,70 @@ export function StudentsPageClient({ students, groups, tenantId, canAddStudents 
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">الطلاب</h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">بحث سريع ومؤشرات واضحة للحضور والسداد لكل طالب.</p>
+    <div className="space-y-8">
+      {/* --- HEADER SECTION --- */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#00B8A0]/10 text-[#00B8A0]">
+                <Download className="h-6 w-6" />
+             </div>
+             <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white md:text-4xl">
+              إدارة الطلاب
+            </h1>
+          </div>
+          <p className="max-w-2xl text-base font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+            تابع مستويات الطلاب، الحضور، والمدفوعات. يمكنك إضافة الطلاب يدوياً أو عبر استيراد ملف Excel.
+          </p>
         </div>
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+
+        <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={exportStudents}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-bold text-slate-800 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+            className="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
           >
-            <Download className="h-4 w-4" />
-            تنزيل ملف الطلاب
+            <Download className="h-5 w-5" />
+            تصدير البيانات
           </button>
+          
           {canAddStudents && (
-            <CSVImporter groups={groups} tenantId={tenantId} />
-          )}
-          {canAddStudents && (
-            <AddStudentForm groups={groups} />
+            <div className="h-[52px]">
+               <AddStudentForm groups={groups} />
+            </div>
           )}
         </div>
       </div>
+
+      {/* --- QUICK ACTIONS / IMPORT SECTION --- */}
+      {canAddStudents && (
+        <section className="relative overflow-hidden rounded-[28px] border border-[#00B8A0]/20 bg-white/40 p-1 dark:bg-white/[0.02]">
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#00B8A0]/10 blur-[80px]" />
+          <div className="relative rounded-[24px] bg-white/80 p-6 backdrop-blur-xl dark:bg-slate-950/50">
+            <div className="grid items-center gap-8 lg:grid-cols-2">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#00B8A0]/10 px-4 py-1.5 text-xs font-bold text-[#00B8A0]">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#00B8A0] opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[#00B8A0]" />
+                  </span>
+                  استيراد ذكي
+                </div>
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+                  هل لديك قائمة طلاب جاهزة؟
+                </h2>
+                <p className="text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+                  ارفع ملف الطلاب (CSV/Excel) وسنتولى نحن مطابقة البيانات وتنظيمها لك في ثوانٍ معدودة.
+                </p>
+              </div>
+              
+              <div className="rounded-3xl bg-slate-50/50 p-2 dark:bg-white/5">
+                <CSVImporter groups={groups} tenantId={tenantId} hideHeader />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <Card>
         <CardContent className="space-y-4">
@@ -328,79 +369,48 @@ export function StudentsPageClient({ students, groups, tenantId, canAddStudents 
         </Card>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {uniqueStudents.map((student, index) => (
-          <Card key={student.id}>
-            <CardContent className="space-y-4">
-              {/* Header الكارد */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
+          <Card 
+            key={student.id} 
+            className="group relative overflow-hidden border-slate-200/60 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#00B8A0]/30 hover:shadow-[0_20px_40px_rgba(0,184,160,0.08)] dark:border-white/5 dark:bg-white/[0.03]"
+          >
+            <CardContent className="p-6">
+              {/* Header: Avatar + Info + Actions */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-4">
                   <div
-                    className="flex h-14 w-14 items-center justify-center rounded-full text-sm font-extrabold text-white"
-                    style={{ background: index % 2 === 0 ? "linear-gradient(135deg, #1A5276, #2E86C1)" : "linear-gradient(135deg, #117A65, #48C9B0)" }}
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-base font-black text-white shadow-lg shadow-black/5"
+                    style={{ 
+                      background: index % 2 === 0 
+                        ? "linear-gradient(135deg, #00B8A0, #00D1B2)" 
+                        : "linear-gradient(135deg, #1A2B6D, #2E4C9D)" 
+                    }}
                   >
                     {getInitials(student.name)}
                   </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">{student.name}</h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{student.grade}</p>
+                  <div className="space-y-1">
+                    <h2 className="line-clamp-1 text-lg font-bold text-slate-900 dark:text-white">
+                      {student.name}
+                    </h2>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-[#00B8A0]">
+                        {student.grade}
+                      </span>
+                      <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700" />
+                      <span className="text-xs font-medium text-slate-500">
+                        {student.group}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className={`rounded-full px-3 py-2 text-xs font-bold ${paymentBadge(student.paymentStatus)}`}>
-                    {paymentLabel(student.paymentStatus)}
-                  </span>
-
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setOpenStatusId(openStatusId === student.id ? null : student.id)}
-                      className={`flex items-center gap-1 rounded-full px-3 py-2 text-xs font-bold ${statusBadge(student.studentStatus)}`}
-                    >
-                      {statusLabel(student.studentStatus)}
-                      <span className="text-[10px]">▼</span>
-                    </button>
-
-                    {openStatusId === student.id && (
-                      <>
-                        <button
-                          className="fixed inset-0 z-10"
-                          onClick={() => setOpenStatusId(null)}
-                        />
-                        <div className="absolute left-0 top-9 z-20 w-36 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-950">
-                          <button
-                            type="button"
-                            onClick={() => { setOpenStatusId(null); handleStatusChange(student.id, "ACTIVE"); }}
-                            className="flex w-full items-center gap-2 px-4 py-2.5 text-right text-sm font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
-                          >
-                            ✅ نشط
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => { setOpenStatusId(null); handleStatusChange(student.id, "SUSPENDED"); }}
-                            className="flex w-full items-center gap-2 border-t border-slate-100 px-4 py-2.5 text-right text-sm font-bold text-amber-600 hover:bg-amber-50 dark:border-slate-800 dark:hover:bg-amber-950/30"
-                          >
-                            ⏸ موقوف
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => { setOpenStatusId(null); handleStatusChange(student.id, "REJECTED"); }}
-                            className="flex w-full items-center gap-2 border-t border-slate-100 px-4 py-2.5 text-right text-sm font-bold text-rose-600 hover:bg-rose-50 dark:border-slate-800 dark:hover:bg-rose-950/30"
-                          >
-                            ❌ مرفوض
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* 3 نقاط */}
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setOpenMenuId(openMenuId === student.id ? null : student.id)}
-                      className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 transition-colors hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10"
                     >
                       <span className="text-lg leading-none text-slate-500">⋮</span>
                     </button>
@@ -411,51 +421,50 @@ export function StudentsPageClient({ students, groups, tenantId, canAddStudents 
                           className="fixed inset-0 z-10"
                           onClick={() => setOpenMenuId(null)}
                         />
-                        <div className="absolute left-0 top-9 z-20 w-44 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-950">
-                          {/* تعديل */}
-                          <span onClick={(e) => e.stopPropagation()}>
-                            <AddStudentForm
-                              groups={groups}
-                              student={{
-                                id: student.id,
-                                name: student.name,
-                                studentPhone: student.studentPhone,
-                                parentName: student.parentName,
-                                parentPhone: student.parentPhone,
-                                gradeLevel: student.gradeLevel,
-                                groupId: student.groupId,
+                        <div className="absolute left-0 top-11 z-20 w-48 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-2xl dark:border-white/10 dark:bg-slate-950">
+                          <div className="p-1">
+                            <span onClick={(e) => e.stopPropagation()}>
+                              <AddStudentForm
+                                groups={groups}
+                                student={{
+                                  id: student.id,
+                                  name: student.name,
+                                  studentPhone: student.studentPhone,
+                                  parentName: student.parentName,
+                                  parentPhone: student.parentPhone,
+                                  gradeLevel: student.gradeLevel,
+                                  groupId: student.groupId,
+                                }}
+                              />
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                if (student.parentId) {
+                                  window.location.href = `/messages?contact=${student.parentId}`;
+                                } else if (student.parentPhone) {
+                                  const phone = student.parentPhone.replace(/^0/, "20");
+                                  const message = encodeURIComponent("مرحباً، لديك رسالة على منصة السنتر التعليمية.");
+                                  window.location.href = `https://wa.me/${phone}?text=${message}`;
+                                }
                               }}
-                            />
-                          </span>
+                              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-right text-sm font-bold text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-white/5"
+                            >
+                              <MessageSquare className="h-4 w-4 text-[#00B8A0]" />
+                              راسل ولي الأمر
+                            </button>
 
-                          {/* راسل ولي الأمر */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOpenMenuId(null);
-                              if (student.parentId) {
-                                window.location.href = `/messages?contact=${student.parentId}`;
-                              } else if (student.parentPhone) {
-                                const phone = student.parentPhone.replace(/^0/, "20");
-                                const message = encodeURIComponent("مرحباً، لديك رسالة على منصة السنتر التعليمية.");
-                                window.location.href = `https://wa.me/${phone}?text=${message}`;
-                              }
-                            }}
-                            className="flex w-full items-center gap-2 px-4 py-3 text-right text-sm font-bold text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
-                          >
-                            <MessageSquare className="h-4 w-4" />
-                            راسل ولي الأمر
-                          </button>
-
-                          {/* حذف */}
-                          <button
-                            type="button"
-                            onClick={() => { setOpenMenuId(null); handleDeleteStudent(student.id); }}
-                            className="flex w-full items-center gap-2 border-t border-slate-100 px-4 py-3 text-right text-sm font-bold text-rose-600 hover:bg-rose-50 dark:border-slate-800 dark:hover:bg-rose-950/30"
-                          >
-                            <span>🗑️</span>
-                            حذف الطالب
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => { setOpenMenuId(null); handleDeleteStudent(student.id); }}
+                              className="mt-1 flex w-full items-center gap-3 rounded-xl border-t border-slate-100 px-4 py-3 text-right text-sm font-bold text-rose-600 transition hover:bg-rose-50 dark:border-white/5 dark:hover:bg-rose-950/30"
+                            >
+                              <span className="text-lg">🗑️</span>
+                              حذف الطالب
+                            </button>
+                          </div>
                         </div>
                       </>
                     )}
@@ -463,32 +472,90 @@ export function StudentsPageClient({ students, groups, tenantId, canAddStudents 
                 </div>
               </div>
 
-              <p className="text-sm text-slate-600 dark:text-slate-300">{student.group}</p>
-              <p className="text-sm font-bold text-amber-700 dark:text-amber-300">
-                الغياب المتتالي: {toArabicDigits(student.consecutiveAbsences)} حصة
-              </p>
+              {/* Status Section */}
+              <div className="flex flex-wrap items-center gap-2 pt-2">
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider ${paymentBadge(student.paymentStatus)}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${student.paymentStatus === 'PAID' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                  {paymentLabel(student.paymentStatus)}
+                </span>
 
-              <div className="flex items-center justify-between gap-4">
-                <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-900">
-                  <svg className="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 100 100">
-                    <circle className="stroke-slate-200 dark:stroke-slate-700" cx="50" cy="50" fill="none" r="42" strokeWidth="8" />
-                    <circle
-                      className="stroke-primary"
-                      cx="50"
-                      cy="50"
-                      fill="none"
-                      r="42"
-                      strokeDasharray={`${2.64 * student.attendance} 999`}
-                      strokeLinecap="round"
-                      strokeWidth="8"
-                    />
-                  </svg>
-                  <span className="text-xs font-extrabold text-slate-700 dark:text-slate-200">{toArabicDigits(student.attendance)}%</span>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setOpenStatusId(openStatusId === student.id ? null : student.id)}
+                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition ${statusBadge(student.studentStatus)}`}
+                  >
+                    {statusLabel(student.studentStatus)}
+                    <span className="text-[10px] opacity-60">▼</span>
+                  </button>
+
+                  {openStatusId === student.id && (
+                    <>
+                      <button
+                        className="fixed inset-0 z-10"
+                        onClick={() => setOpenStatusId(null)}
+                      />
+                      <div className="absolute left-0 top-10 z-20 w-40 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-2xl dark:border-white/10 dark:bg-slate-950">
+                        <div className="p-1">
+                          <button
+                            type="button"
+                            onClick={() => { setOpenStatusId(null); handleStatusChange(student.id, "ACTIVE"); }}
+                            className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-right text-sm font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                          >
+                            نشط
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setOpenStatusId(null); handleStatusChange(student.id, "SUSPENDED"); }}
+                            className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-right text-sm font-bold text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                          >
+                            موقوف
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setOpenStatusId(null); handleStatusChange(student.id, "REJECTED"); }}
+                            className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-right text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                          >
+                            مرفوض
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">نسبة الحضور</p>
-                  <Progress className="mt-2 h-2.5" value={student.attendance} />
+              </div>
+
+              {/* Attendance & Progress */}
+              <div className="mt-4 rounded-2xl bg-slate-50/50 p-4 dark:bg-white/[0.02]">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">نسبة الحضور</p>
+                    <p className="text-lg font-black text-slate-900 dark:text-white">{toArabicDigits(student.attendance)}%</p>
+                  </div>
+                  <div className="relative flex h-14 w-14 items-center justify-center">
+                    <svg className="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 100 100">
+                      <circle className="stroke-slate-200/50 dark:stroke-white/5" cx="50" cy="50" fill="none" r="42" strokeWidth="10" />
+                      <circle
+                        className="stroke-[#00B8A0] transition-all duration-1000"
+                        cx="50"
+                        cy="50"
+                        fill="none"
+                        r="42"
+                        strokeDasharray={`${2.64 * student.attendance} 999`}
+                        strokeLinecap="round"
+                        strokeWidth="10"
+                      />
+                    </svg>
+                  </div>
                 </div>
+                <Progress className="mt-4 h-2 bg-slate-200 dark:bg-white/5" value={student.attendance} />
+              </div>
+
+              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-white/5">
+                <p className="text-xs font-bold text-slate-500">الغياب المتتالي</p>
+                <span className={`rounded-lg px-2 py-1 text-xs font-black ${student.consecutiveAbsences >= 3 ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-600'} dark:bg-white/5`}>
+                  {toArabicDigits(student.consecutiveAbsences)} حصص
+                </span>
               </div>
             </CardContent>
           </Card>

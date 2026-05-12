@@ -984,7 +984,7 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.19.3
+   * Prisma Client JS version: 6.19.2
    * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
    */
   export type PrismaVersion = {
@@ -6105,6 +6105,8 @@ export namespace Prisma {
     parentName: string | null
     parentPhone: string | null
     isActive: boolean | null
+    subject: string | null
+    bio: string | null
     lastLoginAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -6123,6 +6125,8 @@ export namespace Prisma {
     parentName: string | null
     parentPhone: string | null
     isActive: boolean | null
+    subject: string | null
+    bio: string | null
     lastLoginAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -6141,6 +6145,8 @@ export namespace Prisma {
     parentName: number
     parentPhone: number
     isActive: number
+    subject: number
+    bio: number
     lastLoginAt: number
     createdAt: number
     updatedAt: number
@@ -6162,6 +6168,8 @@ export namespace Prisma {
     parentName?: true
     parentPhone?: true
     isActive?: true
+    subject?: true
+    bio?: true
     lastLoginAt?: true
     createdAt?: true
     updatedAt?: true
@@ -6180,6 +6188,8 @@ export namespace Prisma {
     parentName?: true
     parentPhone?: true
     isActive?: true
+    subject?: true
+    bio?: true
     lastLoginAt?: true
     createdAt?: true
     updatedAt?: true
@@ -6198,6 +6208,8 @@ export namespace Prisma {
     parentName?: true
     parentPhone?: true
     isActive?: true
+    subject?: true
+    bio?: true
     lastLoginAt?: true
     createdAt?: true
     updatedAt?: true
@@ -6290,6 +6302,8 @@ export namespace Prisma {
     parentName: string | null
     parentPhone: string | null
     isActive: boolean
+    subject: string | null
+    bio: string | null
     lastLoginAt: Date | null
     createdAt: Date
     updatedAt: Date
@@ -6326,6 +6340,8 @@ export namespace Prisma {
     parentName?: boolean
     parentPhone?: boolean
     isActive?: boolean
+    subject?: boolean
+    bio?: boolean
     lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -6367,6 +6383,8 @@ export namespace Prisma {
     parentName?: boolean
     parentPhone?: boolean
     isActive?: boolean
+    subject?: boolean
+    bio?: boolean
     lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -6387,6 +6405,8 @@ export namespace Prisma {
     parentName?: boolean
     parentPhone?: boolean
     isActive?: boolean
+    subject?: boolean
+    bio?: boolean
     lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -6407,6 +6427,8 @@ export namespace Prisma {
     parentName?: boolean
     parentPhone?: boolean
     isActive?: boolean
+    subject?: boolean
+    bio?: boolean
     lastLoginAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -6415,7 +6437,7 @@ export namespace Prisma {
     settings?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "phone" | "name" | "role" | "avatarUrl" | "gradeLevel" | "parentName" | "parentPhone" | "isActive" | "lastLoginAt" | "createdAt" | "updatedAt" | "pinHash" | "email" | "settings", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "phone" | "name" | "role" | "avatarUrl" | "gradeLevel" | "parentName" | "parentPhone" | "isActive" | "subject" | "bio" | "lastLoginAt" | "createdAt" | "updatedAt" | "pinHash" | "email" | "settings", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     assignmentSubmissions?: boolean | User$assignmentSubmissionsArgs<ExtArgs>
     markedAttendances?: boolean | User$markedAttendancesArgs<ExtArgs>
@@ -6483,6 +6505,8 @@ export namespace Prisma {
       parentName: string | null
       parentPhone: string | null
       isActive: boolean
+      subject: string | null
+      bio: string | null
       lastLoginAt: Date | null
       createdAt: Date
       updatedAt: Date
@@ -6943,6 +6967,8 @@ export namespace Prisma {
     readonly parentName: FieldRef<"User", 'String'>
     readonly parentPhone: FieldRef<"User", 'String'>
     readonly isActive: FieldRef<"User", 'Boolean'>
+    readonly subject: FieldRef<"User", 'String'>
+    readonly bio: FieldRef<"User", 'String'>
     readonly lastLoginAt: FieldRef<"User", 'DateTime'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
@@ -38672,6 +38698,8 @@ export namespace Prisma {
     parentName: 'parentName',
     parentPhone: 'parentPhone',
     isActive: 'isActive',
+    subject: 'subject',
+    bio: 'bio',
     lastLoginAt: 'lastLoginAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -39783,6 +39811,8 @@ export namespace Prisma {
     parentName?: StringNullableFilter<"User"> | string | null
     parentPhone?: StringNullableFilter<"User"> | string | null
     isActive?: BoolFilter<"User"> | boolean
+    subject?: StringNullableFilter<"User"> | string | null
+    bio?: StringNullableFilter<"User"> | string | null
     lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -39823,6 +39853,8 @@ export namespace Prisma {
     parentName?: SortOrderInput | SortOrder
     parentPhone?: SortOrderInput | SortOrder
     isActive?: SortOrder
+    subject?: SortOrderInput | SortOrder
+    bio?: SortOrderInput | SortOrder
     lastLoginAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -39867,6 +39899,8 @@ export namespace Prisma {
     parentName?: StringNullableFilter<"User"> | string | null
     parentPhone?: StringNullableFilter<"User"> | string | null
     isActive?: BoolFilter<"User"> | boolean
+    subject?: StringNullableFilter<"User"> | string | null
+    bio?: StringNullableFilter<"User"> | string | null
     lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -39907,6 +39941,8 @@ export namespace Prisma {
     parentName?: SortOrderInput | SortOrder
     parentPhone?: SortOrderInput | SortOrder
     isActive?: SortOrder
+    subject?: SortOrderInput | SortOrder
+    bio?: SortOrderInput | SortOrder
     lastLoginAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -39932,6 +39968,8 @@ export namespace Prisma {
     parentName?: StringNullableWithAggregatesFilter<"User"> | string | null
     parentPhone?: StringNullableWithAggregatesFilter<"User"> | string | null
     isActive?: BoolWithAggregatesFilter<"User"> | boolean
+    subject?: StringNullableWithAggregatesFilter<"User"> | string | null
+    bio?: StringNullableWithAggregatesFilter<"User"> | string | null
     lastLoginAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -42494,6 +42532,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -42534,6 +42574,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -42572,6 +42614,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42612,6 +42656,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42651,6 +42697,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -42669,6 +42717,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42688,6 +42738,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -45715,6 +45767,8 @@ export namespace Prisma {
     parentName?: SortOrder
     parentPhone?: SortOrder
     isActive?: SortOrder
+    subject?: SortOrder
+    bio?: SortOrder
     lastLoginAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -45734,6 +45788,8 @@ export namespace Prisma {
     parentName?: SortOrder
     parentPhone?: SortOrder
     isActive?: SortOrder
+    subject?: SortOrder
+    bio?: SortOrder
     lastLoginAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -45752,6 +45808,8 @@ export namespace Prisma {
     parentName?: SortOrder
     parentPhone?: SortOrder
     isActive?: SortOrder
+    subject?: SortOrder
+    bio?: SortOrder
     lastLoginAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -51911,6 +51969,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -51949,6 +52009,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -52582,6 +52644,8 @@ export namespace Prisma {
     parentName?: StringNullableFilter<"User"> | string | null
     parentPhone?: StringNullableFilter<"User"> | string | null
     isActive?: BoolFilter<"User"> | boolean
+    subject?: StringNullableFilter<"User"> | string | null
+    bio?: StringNullableFilter<"User"> | string | null
     lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -54140,6 +54204,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -54179,6 +54245,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -54221,6 +54289,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -54260,6 +54330,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -54313,6 +54385,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -54352,6 +54426,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -54400,6 +54476,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -54439,6 +54517,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -54943,6 +55023,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -54982,6 +55064,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -55096,6 +55180,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -55135,6 +55221,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -55547,6 +55635,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -55586,6 +55676,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -55665,6 +55757,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -55704,6 +55798,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -55891,6 +55987,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -55930,6 +56028,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56021,6 +56121,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56060,6 +56162,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56176,6 +56280,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -56215,6 +56321,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -56257,6 +56365,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -56296,6 +56406,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -56534,6 +56646,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56573,6 +56687,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56621,6 +56737,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56660,6 +56778,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56897,6 +57017,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -56936,6 +57058,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -57068,6 +57192,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -57107,6 +57233,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -57144,6 +57272,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -57183,6 +57313,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -57236,6 +57368,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -57275,6 +57409,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -57667,6 +57803,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -57706,6 +57844,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -57798,6 +57938,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -57837,6 +57979,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -57874,6 +58018,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -57913,6 +58059,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -57955,6 +58103,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -57994,6 +58144,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -58120,6 +58272,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -58159,6 +58313,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -58207,6 +58363,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -58246,6 +58404,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -58847,6 +59007,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -58886,6 +59048,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -58978,6 +59142,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -59017,6 +59183,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -59206,6 +59374,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -59245,6 +59415,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -59287,6 +59459,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -59326,6 +59500,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -59484,6 +59660,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -59523,6 +59701,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -59571,6 +59751,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -59610,6 +59792,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -60461,6 +60645,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -60500,6 +60686,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -60720,6 +60908,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -60759,6 +60949,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -60926,6 +61118,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -60965,6 +61159,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -61007,6 +61203,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -61046,6 +61244,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -61336,6 +61536,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -61375,6 +61577,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -61423,6 +61627,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -61462,6 +61668,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -61717,6 +61925,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -61756,6 +61966,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -61823,6 +62035,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -61862,6 +62076,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -62036,6 +62252,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -62075,6 +62293,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -62154,6 +62374,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -62193,6 +62415,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -62516,6 +62740,8 @@ export namespace Prisma {
     parentName?: string | null
     parentPhone?: string | null
     isActive?: boolean
+    subject?: string | null
+    bio?: string | null
     lastLoginAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -62998,6 +63224,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -63036,6 +63264,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -63074,6 +63304,8 @@ export namespace Prisma {
     parentName?: NullableStringFieldUpdateOperationsInput | string | null
     parentPhone?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
