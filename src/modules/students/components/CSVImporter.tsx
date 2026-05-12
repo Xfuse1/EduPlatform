@@ -7,6 +7,17 @@ import Badge from '@/components/data-display/Badge'
 import EmptyState from '@/components/shared/EmptyState'
 import { bulkImport } from '@/modules/students/actions'
 
+import { 
+  parseCsvText, 
+  guessFieldForHeader, 
+  fieldLabels, 
+  requiredFields, 
+  type ImportField 
+} from '../utils/csv'
+
+
+const numberFormatter = new Intl.NumberFormat('ar-EG')
+
 type AvailableGroup = {
   id: string
   name: string
@@ -18,137 +29,6 @@ type CSVImporterProps = {
   hideHeader?: boolean
 }
 
-type ImportField =
-  | 'name'
-  | 'phone'
-  | 'parentName'
-  | 'parentPhone'
-  | 'gradeLevel'
-  | 'groupId'
-
-const requiredFields: ImportField[] = [
-  'name',
-  'phone',
-  'parentName',
-  'parentPhone',
-  'gradeLevel',
-]
-
-const fieldLabels: Record<ImportField, string> = {
-  name: 'اسم الطالب',
-  phone: 'هاتف الطالب',
-  parentName: 'اسم ولي الأمر',
-  parentPhone: 'هاتف ولي الأمر',
-  gradeLevel: 'الصف الدراسي',
-  groupId: 'المجموعة',
-}
-
-const numberFormatter = new Intl.NumberFormat('ar-EG')
-
-function parseCsvText(text: string) {
-  const rows: string[][] = []
-  let currentCell = ''
-  let currentRow: string[] = []
-  let insideQuotes = false
-
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index]
-    const nextCharacter = text[index + 1]
-
-    if (character === '"') {
-      if (insideQuotes && nextCharacter === '"') {
-        currentCell += '"'
-        index += 1
-      } else {
-        insideQuotes = !insideQuotes
-      }
-
-      continue
-    }
-
-    if (character === ',' && !insideQuotes) {
-      currentRow.push(currentCell)
-      currentCell = ''
-      continue
-    }
-
-    if ((character === '\n' || character === '\r') && !insideQuotes) {
-      if (character === '\r' && nextCharacter === '\n') {
-        index += 1
-      }
-
-      currentRow.push(currentCell)
-      currentCell = ''
-
-      if (currentRow.some((cell) => cell.trim() !== '')) {
-        rows.push(currentRow.map((cell) => cell.trim()))
-      }
-
-      currentRow = []
-      continue
-    }
-
-    currentCell += character
-  }
-
-  if (currentCell || currentRow.length > 0) {
-    currentRow.push(currentCell)
-
-    if (currentRow.some((cell) => cell.trim() !== '')) {
-      rows.push(currentRow.map((cell) => cell.trim()))
-    }
-  }
-
-  return rows
-}
-
-function guessFieldForHeader(header: string): ImportField | '' {
-  const normalizedHeader = header.trim().toLowerCase()
-
-  if (['name', 'student', 'اسم', 'اسم الطالب'].includes(normalizedHeader)) {
-    return 'name'
-  }
-
-  if (
-    ['phone', 'student phone', 'هاتف الطالب', 'رقم الطالب'].includes(
-      normalizedHeader,
-    )
-  ) {
-    return 'phone'
-  }
-
-  if (
-    ['parent', 'parent name', 'ولي الأمر', 'اسم ولي الأمر'].includes(
-      normalizedHeader,
-    )
-  ) {
-    return 'parentName'
-  }
-
-  if (
-    ['parent phone', 'guardian phone', 'هاتف ولي الأمر', 'رقم ولي الأمر'].includes(
-      normalizedHeader,
-    )
-  ) {
-    return 'parentPhone'
-  }
-
-  if (
-    ['grade', 'grade level', 'الصف', 'الصف الدراسي'].includes(normalizedHeader)
-  ) {
-    return 'gradeLevel'
-  }
-
-  if (
-    ['group', 'group id', 'group name', 'المجموعة', 'اسم المجموعة'].includes(
-      normalizedHeader,
-    )
-  ) {
-    return 'groupId'
-  }
-
-  return ''
-}
 
 export default function CSVImporter({ tenantId, groups, hideHeader = false }: CSVImporterProps) {
   const router = useRouter()
@@ -445,6 +325,66 @@ export default function CSVImporter({ tenantId, groups, hideHeader = false }: CS
               {numberFormatter.format(result.failed)} أخطاء
             </Badge>
           </div>
+
+          {result.created > 0 && (
+            <div className="mt-5 space-y-3">
+              <p className="text-sm font-bold text-slate-950 dark:text-white">
+                أرسل لينك التسجيل لأولياء الأمور:
+              </p>
+              {rows
+                .filter((_, index) => result.results[index]?.success)
+                .map((row, index) => {
+                  const parentPhone = mapping.parentPhone 
+                    ? row[mapping.parentPhone]?.replace(/^0/, '20') 
+                    : null
+                  const studentPhone = mapping.phone 
+                    ? row[mapping.phone]?.replace(/^0/, '20') 
+                    : null
+                  const studentName = mapping.name 
+                    ? row[mapping.name] 
+                    : `الطالب ${index + 1}`
+
+                  if (!parentPhone && !studentPhone) return null
+
+                  return (
+                    <div
+                      key={`whatsapp-row-${index}`}
+                      className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/50 px-4 py-3 dark:border-white/10 dark:bg-white/5"
+                    >
+                      <span className="text-sm font-bold text-slate-900 dark:text-white">
+                        {studentName}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {parentPhone && (
+                          <a
+                            href={`https://wa.me/${parentPhone}?text=${encodeURIComponent(
+                              `مرحباً، تم تسجيل ${studentName} في المنصة. سجّل حسابك كولي أمر من هنا: ${window.location.origin}/parent-register?phone=${row[mapping.parentPhone ?? ''] ?? ''}`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2 text-xs font-bold text-white transition hover:opacity-90"
+                          >
+                            📱 ولي الأمر
+                          </a>
+                        )}
+                        {studentPhone && (
+                          <a
+                            href={`https://wa.me/${studentPhone}?text=${encodeURIComponent(
+                              `مرحباً ${studentName}، تم تسجيلك في المنصة. سجّل حسابك من هنا: ${window.location.origin}/register?phone=${row[mapping.phone ?? ''] ?? ''}`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2 text-xs font-bold text-white transition hover:opacity-90"
+                          >
+                            📱 الطالب
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+          )}
 
           {result.results.some((item) => !item.success) ? (
             <div className="mt-5 space-y-3">

@@ -61,7 +61,7 @@ export const getTeachersPageData = cache(async (tenantId: string) => {
 
   const teacherItems: TeacherListItem[] = teachers.map((teacher) => {
     const relevantGroups = teachers.length === 1 ? groups : groups.filter((group) => group.teacherId === teacher.id);
-    const studentIds = new Set(relevantGroups.flatMap((group) => group.students.map((student) => student.studentId)));
+    const studentIds = new Set(relevantGroups.flatMap((group) => group.students.map((s: { studentId: string }) => s.studentId)));
 
     return {
       id: teacher.id,

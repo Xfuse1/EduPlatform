@@ -57,6 +57,8 @@ model User {
   parentName            String?
   parentPhone           String?
   isActive              Boolean                @default(true)
+  subject               String?
+  bio                   String?
   lastLoginAt           DateTime?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
