@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { CSSProperties, ReactNode, useEffect, useState } from "react";
 import {
@@ -64,7 +64,7 @@ function ChartTooltip({
 function ChartCard({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div
-      className="rounded-[16px] p-5 border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]"
+      className="rounded-[16px] p-5 border border-border-soft bg-surface backdrop-blur-[16px]"
     >
       <h2 className="text-start text-lg font-bold text-slate-900 dark:text-slate-100">{title}</h2>
       <div className="mt-4 h-[300px] w-full" style={{ width: '100%', height: 300 }}>{children}</div>

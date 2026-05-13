@@ -1,4 +1,4 @@
-import { Clock3, MapPin } from "lucide-react";
+﻿import { Clock3, MapPin } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -21,7 +21,7 @@ export function ScheduleTimeline({
   items: ScheduleTimelineItem[];
 }) {
   return (
-    <Card className="border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
+    <Card className="border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-border-soft dark:bg-surface shadow-sm">
       <CardHeader>
         <CardTitle className="text-start text-slate-900 dark:text-white">{title}</CardTitle>
       </CardHeader>
@@ -35,7 +35,7 @@ export function ScheduleTimeline({
             <div key={item.id} className="relative ps-8">
               {index < items.length - 1 ? <div className="absolute bottom-0 start-[13px] top-10 w-px bg-slate-300 dark:bg-slate-800" /> : null}
               <div className="absolute start-0 top-1 flex h-7 w-7 items-center justify-center rounded-full border-4 border-white shadow-sm dark:border-slate-950" style={{ backgroundColor: item.accentColor ?? "#1A5276" }} />
-              <div className="rounded-[20px] border border-slate-200 bg-slate-50 dark:border-[rgba(255,255,255,0.08)] dark:bg-white/5 p-4 shadow-sm">
+              <div className="rounded-[20px] border border-slate-200 bg-slate-50 dark:border-border-soft dark:bg-white/5 p-4 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-start text-base font-bold text-slate-900 dark:text-white">{item.title}</p>

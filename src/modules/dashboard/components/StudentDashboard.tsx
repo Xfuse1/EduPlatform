@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useTransition } from "react";
 import { Clock3, Wallet } from "lucide-react";
@@ -114,7 +114,7 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
         </Card>
       </div>
 
-      <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
+      <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-border-soft dark:bg-surface shadow-sm">
         <CardHeader>
           <CardTitle className="text-slate-900 dark:text-white">مجموعاتي</CardTitle>
         </CardHeader>
@@ -152,7 +152,7 @@ export function StudentDashboard({ data, availableGroups, pendingGroupIds = [] }
 
       {/* المجموعات المتاحة للانضمام */}
       {availableGroups && availableGroups.length > 0 && (
-        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-border-soft dark:bg-surface shadow-sm">
           <CardHeader>
             <CardTitle className="text-slate-900 dark:text-white">المجموعات المتاحة للانضمام</CardTitle>
           </CardHeader>

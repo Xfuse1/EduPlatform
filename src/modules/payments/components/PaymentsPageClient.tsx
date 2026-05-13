@@ -165,7 +165,7 @@ export function PaymentsPageClient({
           <h1 className="text-start text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">المصاريف</h1>
           <p className="mt-2 text-start text-sm text-slate-600 dark:text-slate-300">ملخص واضح للتحصيل والمديونيات مع إبراز المبلغ والحالة.</p>
         </div>
-        <Button className="hidden gap-2 sm:inline-flex" onClick={openCreateDialog}>
+        <Button className="w-full gap-2 sm:w-auto" onClick={openCreateDialog}>
           <Plus className="h-4 w-4" />
           تسجيل دفعة جديدة
         </Button>
@@ -329,14 +329,9 @@ export function PaymentsPageClient({
         </div>
       )}
 
-      <Button className="w-full gap-2 sm:hidden" onClick={openCreateDialog}>
-        <Plus className="h-4 w-4" />
-        تسجيل دفعة جديدة
-      </Button>
-
       {isOpen ? (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/45 p-4 sm:items-center">
-          <div className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-[20px] bg-white p-4 shadow-[0_24px_60px_rgba(15,23,42,0.25)] dark:bg-slate-950 sm:rounded-[24px] sm:p-6">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 p-4 sm:items-center">
+          <div className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-[24px] bg-white p-4 shadow-[0_24px_60px_rgba(15,23,42,0.25)] dark:bg-slate-950 sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-start text-xl font-extrabold text-slate-900 dark:text-white">

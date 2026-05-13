@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useEffect, Fragment } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -413,13 +413,13 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                 {/* Horizontal Statistics with Dividers */}
                 <div className="mb-6 grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 backdrop-blur-md dark:border-white/[0.03] dark:bg-white/[0.02] sm:mb-12 sm:flex sm:items-center sm:justify-between sm:rounded-3xl sm:p-8">
                   {heroStats.map((stat, i) => (
-                    <React.Fragment key={stat.label}>
+                    <Fragment key={stat.label}>
                       <div className="flex-1 text-center">
                         <p className="text-2xl font-black tracking-normal text-slate-900 dark:text-white sm:text-4xl">{stat.value}</p>
                         <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">{stat.label}</p>
                       </div>
                       {i < heroStats.length - 1 && <div className="hidden h-10 w-px bg-slate-200 dark:bg-white/5 sm:block" />}
-                    </React.Fragment>
+                    </Fragment>
                   ))}
                 </div>
 
@@ -557,7 +557,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                 </div>
               </div>
               {steps.map((step, index) => (
-                <React.Fragment key={step.number}>
+                <Fragment key={step.number}>
                   <div className="group relative rounded-[20px] border-2 border-slate-200 bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)] dark:border-white/5 dark:bg-white/[0.02] dark:hover:bg-white/[0.04] sm:rounded-[32px] sm:p-10">
                     <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-500/10 text-3xl font-black text-sky-400 shadow-[0_0_30px_rgba(14,165,233,0.1)] transition-transform group-hover:scale-110 sm:h-20 sm:w-20 sm:rounded-3xl sm:text-4xl">
                       {step.number}
@@ -572,7 +572,7 @@ export default function MarketingPage({ plans, adminContact }: MarketingPageProp
                       />
                     </div>
                   )}
-                </React.Fragment>
+                </Fragment>
               ))}
             </div>
             <div className="mt-8 flex justify-center sm:mt-12 lg:justify-start">

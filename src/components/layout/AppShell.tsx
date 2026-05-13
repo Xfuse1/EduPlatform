@@ -52,8 +52,7 @@ export function AppShell({
   } as const;
 
   return (
-    <div className="h-[100dvh] overflow-hidden bg-background text-foreground transition-colors duration-300">
-      <div className="flex h-full overflow-hidden">
+    <div className="flex h-[100dvh] overflow-hidden bg-background text-foreground transition-colors duration-300">
         {/* Mobile sidebar overlay backdrop */}
         {sidebarOpen && (
           <button
@@ -85,8 +84,6 @@ export function AppShell({
             <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8">{children}</div>
           </main>
         </div>
-      </div>
     </div>
   );
 }
-

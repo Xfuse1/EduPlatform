@@ -2,14 +2,14 @@
 
 import { CalendarClock, CheckCircle2, CreditCard, UserRound, Bell, MessageSquare, Clock, BookOpen, AlertTriangle, X, Sparkles } from "lucide-react";
 import { useState } from "react";
-import { BarChart, Bar, ResponsiveContainer } from 'recharts';
+
 import { Button } from "@/components/ui/button";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency, formatTime12Hour, toArabicDigits, cn } from "@/lib/utils";
-import { showToast } from "@/components/ui/Toast";
+import { formatCurrency, formatTime12Hour, toArabicDigits } from "@/lib/utils";
+
 
 type ParentDashboardProps = {
   data: Awaited<ReturnType<typeof import("@/modules/dashboard/queries").getParentDashboardData>>;
@@ -39,7 +39,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
     <div className="space-y-6" dir="rtl">
       {/* Subscription Expiry Banner */}
       {showBanner && (
-        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] shadow-sm overflow-hidden animate-in fade-in slide-in-from-top duration-500">
+        <Card className="border-border-soft bg-surface backdrop-blur-[16px] shadow-sm overflow-hidden animate-in fade-in slide-in-from-top duration-500">
           <CardContent className="flex flex-col items-stretch justify-between gap-4 p-4 sm:flex-row sm:items-center">
             <div className="flex items-start gap-3 sm:items-center">
               <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900 flex items-center justify-center text-amber-600">
@@ -72,7 +72,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
 
       {/* Notifications Section */}
       {data.notifications && data.notifications.length > 0 && (
-        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
+        <Card className="border-border-soft bg-surface backdrop-blur-[16px]">
           <CardContent className="p-4 space-y-3">
             <h3 className="flex items-center gap-2 text-sm font-bold text-emerald-800 dark:text-emerald-300">
               <Bell className="h-4 w-4" />
@@ -94,13 +94,13 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
 
       {/* Stats Section */}
       <section className="grid gap-4 md:grid-cols-3">
-        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-border-soft dark:bg-surface shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">
           <CardContent className="p-4 sm:p-6">
             <p className="text-sm text-slate-500 dark:text-[#94A3B8] font-bold">إجمالي الأبناء</p>
             <p className="mt-3 text-2xl font-extrabold sm:text-3xl">{toArabicDigits(data.children.length)}</p>
           </CardContent>
         </Card>
-        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-border-soft dark:bg-surface shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">
           <CardContent className="p-4 sm:p-6">
             <p className="text-sm text-slate-500 dark:text-[#94A3B8] font-bold">متوسط الحضور</p>
             <p className="mt-3 text-2xl font-extrabold text-[#00B8A0] sm:text-3xl">
@@ -108,7 +108,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
             </p>
           </CardContent>
         </Card>
-        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(245,166,35,0.1)]">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-border-soft dark:bg-surface shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_0_20px_rgba(245,166,35,0.1)]">
           <CardContent className="p-4 sm:p-6">
             <p className="text-sm text-slate-500 dark:text-[#94A3B8] font-bold">حالة المصروفات</p>
             <p className="mt-3 text-lg font-extrabold text-[#F5A623]">
@@ -121,7 +121,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
       {/* Main Grid for Schedule and Performance */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Today's Schedule Section */}
-        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
+        <Card className="border-border-soft bg-surface backdrop-blur-[16px]">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
               <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">جدول الحصص اليوم</CardTitle>
@@ -137,7 +137,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
                   <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{child.name}</span>
                 </div>
                 {child.nextSession ? (
-                  <div key={child.id} className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 items-center gap-4">
                       <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
                         {formatTime12Hour(child.nextSession.timeStart)}
@@ -160,7 +160,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
         </Card>
 
         {/* Performance and Attendance Chart Section */}
-        <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px] overflow-hidden">
+        <Card className="border-border-soft bg-surface backdrop-blur-[16px] overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
               <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">الأداء والتقدم</CardTitle>
@@ -229,13 +229,13 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
           تفاصيل الأبناء
         </h3>
         {data.children.length === 0 ? (
-          <Card className="border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
-            <CardContent className="p-4 text-sm text-slate-500 dark:text-slate-300 sm:p-6">لا توجد بيانات أبناء مرتبطة بهذا الحساب</CardContent>
+          <Card className="border-border-soft bg-surface backdrop-blur-[16px]">
+            <CardContent className="p-4 sm:p-6 text-sm text-slate-500 dark:text-slate-300">لا توجد بيانات أبناء مرتبطة بهذا الحساب</CardContent>
           </Card>
         ) : (
           data.children.map((child) => (
-            <Card key={child.id} className="overflow-hidden border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] backdrop-blur-[16px]">
-              <div className="bg-[linear-gradient(135deg,rgba(26,43,109,0.6),rgba(0,184,160,0.1))] px-6 py-5 border-b border-[rgba(255,255,255,0.08)]">
+            <Card key={child.id} className="overflow-hidden border border-border-soft bg-surface backdrop-blur-[16px]">
+              <div className="bg-[linear-gradient(135deg,rgba(26,43,109,0.6),rgba(0,184,160,0.1))] px-6 py-5 border-b border-border-soft">
                 <div className="flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <h2 className="break-words text-xl font-extrabold text-primary dark:text-sky-300 sm:text-2xl">{child.name}</h2>
