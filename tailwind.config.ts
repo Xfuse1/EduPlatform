@@ -17,6 +17,8 @@ const config: Config = {
         foreground: "var(--foreground)",
         surface: "var(--color-surface)",
         border: "var(--color-border)",
+        /* Static semi-transparent tokens for glassmorphism components */
+        "border-soft": "rgba(255,255,255,0.08)",
       },
       boxShadow: {
         soft: "0 20px 45px rgba(26, 82, 118, 0.14)",

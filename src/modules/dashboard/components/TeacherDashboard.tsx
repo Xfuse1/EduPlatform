@@ -1,5 +1,5 @@
 "use client";
-import React, { Component, ErrorInfo, ReactNode } from "react";
+import { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, ArrowUpLeft, CalendarClock, CheckCircle2, DollarSign, Users } from "lucide-react";
 import Link from "next/link";
 
@@ -143,7 +143,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
       )}
 
       {!data.kashierApiConfigured ? (
-        <section className="rounded-[22px] border border-amber-200 bg-amber-50/50 backdrop-blur-[16px] px-5 py-4 dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
+        <section className="rounded-[22px] border border-amber-200 bg-amber-50/50 backdrop-blur-[16px] px-5 py-4 dark:border-border-soft dark:bg-surface shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-200">
@@ -167,7 +167,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
       ) : null}
 
       <section className="grid gap-4 md:grid-cols-4">
-        <Card className="md:col-span-2 border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
+        <Card className="md:col-span-2 border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-border-soft dark:bg-surface shadow-sm">
           <CardContent className="p-5">
             <p className="text-start text-sm font-semibold text-slate-600 dark:text-slate-400">رصيد محفظة المعلم</p>
             <p className="mt-3 text-start text-3xl font-extrabold text-slate-950 dark:text-white">{formatCurrency(data.wallet.balance)}</p>
@@ -182,14 +182,14 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
             </Link>
           </CardContent>
         </Card>
-        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-border-soft dark:bg-surface shadow-sm">
           <CardContent className="p-5">
             <p className="text-start text-sm font-semibold text-slate-600 dark:text-slate-400">سحوبات ناجحة</p>
             <p className="mt-3 text-start text-2xl font-extrabold text-emerald-600 dark:text-emerald-300">{formatCurrency(data.wallet.transfers.SUCCESS.amount)}</p>
             <p className="mt-2 text-start text-xs text-slate-500 dark:text-slate-400">{toArabicDigits(data.wallet.transfers.SUCCESS.count)} عملية</p>
           </CardContent>
         </Card>
-        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-border-soft dark:bg-surface shadow-sm">
           <CardContent className="p-5">
             <p className="text-start text-sm font-semibold text-slate-600 dark:text-slate-400">سحوبات معلقة</p>
             <p className="mt-3 text-start text-2xl font-extrabold text-amber-600 dark:text-amber-300">{formatCurrency(data.wallet.transfers.PENDING.amount + data.wallet.transfers.RETRY.amount)}</p>
@@ -229,7 +229,7 @@ export function TeacherDashboard({ data, teacherName }: TeacherDashboardProps) {
       <TeacherDashboardCharts revenueData={data.revenueSeries} attendanceData={data.attendanceSeries} />
 
       <section>
-        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
+        <Card className="border border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-border-soft dark:bg-surface shadow-sm">
           <CardHeader>
             <CardTitle className="text-start text-slate-900 dark:text-white">حصص اليوم</CardTitle>
           </CardHeader>

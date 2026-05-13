@@ -40,7 +40,7 @@ export function StatsCard({
   const TrendIcon = trend === "down" ? ArrowDownLeft : ArrowUpLeft;
 
   return (
-    <Card className={cn("overflow-hidden border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm", toneStyles[tone])}>
+    <Card className={cn("overflow-hidden border border-slate-200 bg-white/50 backdrop-blur-[16px] rounded-[16px] text-slate-900 dark:text-white dark:border-border-soft dark:bg-surface shadow-sm", toneStyles[tone])}>
       <CardContent className="p-4 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">

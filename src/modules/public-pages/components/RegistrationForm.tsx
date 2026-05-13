@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { CheckCircle2, ChevronLeft, Sparkles, UserRound } from "lucide-react";
 import { useState, useTransition } from "react";
@@ -55,7 +55,7 @@ export function RegistrationForm({ groups }: { groups: GroupSummary[] }) {
 
   if (success) {
     return (
-      <Card className="overflow-hidden rounded-[32px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] shadow-[0_30px_80px_rgba(7,15,30,0.22)] backdrop-blur-[16px]">
+      <Card className="overflow-hidden rounded-[32px] border border-border-soft bg-surface shadow-[0_30px_80px_rgba(7,15,30,0.22)] backdrop-blur-[16px]">
         <CardContent className="p-8 text-center sm:p-10">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-lg shadow-emerald-500/10 dark:bg-emerald-950/40 dark:text-emerald-300">
             <CheckCircle2 className="h-10 w-10" />

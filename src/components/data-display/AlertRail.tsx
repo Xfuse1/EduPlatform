@@ -1,4 +1,4 @@
-import { AlertTriangle, BellRing, CircleAlert } from "lucide-react";
+﻿import { AlertTriangle, BellRing, CircleAlert } from "lucide-react";
 import Link from "next/link";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,7 +34,7 @@ const severityStyles = {
 
 export function AlertRail({ title = "ما يحتاج تدخل", items }: { title?: string; items: AlertItem[] }) {
   return (
-    <Card className="border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-[rgba(255,255,255,0.08)] dark:bg-[rgba(255,255,255,0.05)] shadow-sm">
+    <Card className="border-slate-200 bg-white/50 backdrop-blur-[16px] dark:border-border-soft dark:bg-surface shadow-sm">
       <CardHeader>
         <CardTitle className="text-start text-slate-900 dark:text-white">{title}</CardTitle>
       </CardHeader>

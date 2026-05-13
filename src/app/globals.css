@@ -87,9 +87,13 @@ body {
   overflow-x: hidden;
 }
 
-* {
-  @apply border-slate-200 dark:border-white/[0.08];
-}
+/* Z-Index Scale */
+/* z-10 → dropdowns  */
+/* z-20 → tooltips   */
+/* z-30 → panels     */
+/* z-40 → sidebar    */
+/* z-50 → modals     */
+/* z-60 → toasts     */
 
 *,
 *::before,
@@ -118,6 +122,7 @@ a {
 }
 
 * {
+  @apply border-slate-200 dark:border-white/[0.08];
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -158,15 +163,6 @@ textarea {
 .touch-target {
   min-width: 44px;
   min-height: 44px;
-}
-
-.scrollbar-none {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
 }
 
 .page-enter {
