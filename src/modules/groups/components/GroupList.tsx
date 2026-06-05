@@ -14,6 +14,7 @@ type GroupListProps = {
     color: string
     room: string | null
     studentCount: number
+    pendingCount: number
   }>
 }
 

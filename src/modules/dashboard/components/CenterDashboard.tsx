@@ -42,7 +42,7 @@ export function CenterDashboard({
             title: item.subject,
             dayLabel: item.day,
             timeLabel: formatTimeRange12Hour(item.timeStart, item.timeEnd),
-            location: item.room,
+            location: item.room ?? undefined,
             statusLabel: item.isToday ? "اليوم" : undefined,
             accentColor: item.color,
           }))}

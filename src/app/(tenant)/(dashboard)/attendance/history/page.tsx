@@ -18,7 +18,7 @@ export default async function AttendanceHistoryPage() {
   const user = await requireAuth()
   const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
 
-  const sessions = (await db.session.findMany({
+  const rows = await db.session.findMany({
     where: {
       tenantId: tenant.id,
       status: 'COMPLETED',
@@ -32,11 +32,18 @@ export default async function AttendanceHistoryPage() {
     },
     include: {
       group: { select: { name: true, color: true } },
-      _count: { select: { attendance: { where: { status: 'PRESENT' } } } },
+      _count: { select: { attendances: { where: { status: 'PRESENT' } } } },
     },
     orderBy: { date: 'desc' },
     take: 30,
-  })) as HistorySession[]
+  })
+
+  const sessions: HistorySession[] = rows.map((s) => ({
+    id: s.id,
+    date: s.date,
+    group: s.group,
+    _count: { attendance: s._count.attendances },
+  }))
 
   return (
     <div className="p-4 space-y-4">

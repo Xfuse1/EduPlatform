@@ -13,7 +13,9 @@ const nextConfig: NextConfig = {
     "/*": ["./next.config.ts"],
   },
   typescript: {
-    ignoreBuildErrors: true,
+    // Type errors now fail the build — the type system is part of the
+    // tenant-isolation / financial-correctness safety net.
+    ignoreBuildErrors: false,
   },
   async headers() {
     const securityHeaders = [

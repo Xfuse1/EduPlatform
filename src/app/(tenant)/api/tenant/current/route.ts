@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const [tenant, user] = await Promise.all([
       requireTenant(),
-      getCurrentUser(request),
+      getCurrentUser(),
     ])
 
     return successResponse({

@@ -42,7 +42,7 @@ export default async function CenterAttendancePage() {
           items={(focusSession?.students ?? []).map((student) => ({
             id: student.id,
             name: student.name,
-            attendanceStatus: student.attendanceStatus,
+            attendanceStatus: student.attendanceStatus as "PRESENT" | "ABSENT" | "LATE" | "EXCUSED",
             paymentStatus: student.paymentStatus,
             groupName: focusSession?.session.group.name,
           }))}

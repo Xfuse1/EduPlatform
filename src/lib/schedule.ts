@@ -6,7 +6,6 @@ const normalizedDayMap: Record<string, (typeof orderedArabicDays)[number]> = {
   السبت: "السبت",
   الاحد: "الأحد",
   الأحد: "الأحد",
-  الاحد: "الأحد",
   الاثنين: "الاثنين",
   الإثنين: "الاثنين",
   الثلاثاء: "الثلاثاء",

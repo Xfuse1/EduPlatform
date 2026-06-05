@@ -70,6 +70,7 @@ export const getPublicGroups = cache(async (tenantId: string) => {
         days: group.days,
         timeStart: group.timeStart,
         timeEnd: group.timeEnd,
+        room: group.room,
         schedule,
         monthlyFee: group.monthlyFee,
         maxCapacity: group.maxCapacity,

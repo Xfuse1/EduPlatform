@@ -25,12 +25,12 @@ export function notFound(message = 'غير موجود') {
   return errorResponse('NOT_FOUND', message, 404)
 }
 
-export function unauthorized() {
-  return errorResponse('UNAUTHORIZED', 'يرجى تسجيل الدخول', 401)
+export function unauthorized(message = 'يرجى تسجيل الدخول') {
+  return errorResponse('UNAUTHORIZED', message, 401)
 }
 
-export function forbidden() {
-  return errorResponse('FORBIDDEN', 'ليس لديك صلاحية', 403)
+export function forbidden(message = 'ليس لديك صلاحية') {
+  return errorResponse('FORBIDDEN', message, 403)
 }
 
 export function validationError<TDetails = unknown>(details?: TDetails) {
