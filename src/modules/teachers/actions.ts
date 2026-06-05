@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { canManageTeacherAccounts } from "@/lib/teacher-access";
 import { requireTenant } from "@/lib/tenant";
 import { buildPhoneConflictMessage, findUserByPhone, isPhoneUniqueConstraintError } from "@/lib/user-phone";
 import { phoneSchema } from "@/modules/auth/validations";
@@ -47,15 +48,14 @@ const deleteTeacherSchema = z.object({
 
 export async function createTeacher(input: z.infer<typeof createTeacherSchema>) {
   const user = await requireAuth();
+  const tenant = await requireTenant();
 
-  if (!["CENTER_ADMIN", "TEACHER", "ASSISTANT"].includes(user.role)) {
+  if (!canManageTeacherAccounts(tenant, user)) {
     return {
       success: false,
       message: "غير مصرح لك بإدارة المدرسين",
     };
   }
-
-  const tenant = await requireTenant();
 
   if (tenant.accountType !== "CENTER") {
     return {
@@ -165,15 +165,14 @@ export async function createTeacher(input: z.infer<typeof createTeacherSchema>) 
 
 export async function deleteTeacher(input: z.infer<typeof deleteTeacherSchema>) {
   const user = await requireAuth();
+  const tenant = await requireTenant();
 
-  if (!["CENTER_ADMIN", "TEACHER", "ASSISTANT"].includes(user.role)) {
+  if (!canManageTeacherAccounts(tenant, user)) {
     return {
       success: false,
       message: "غير مصرح لك بإدارة المدرسين",
     };
   }
-
-  const tenant = await requireTenant();
 
   if (tenant.accountType !== "CENTER") {
     return {

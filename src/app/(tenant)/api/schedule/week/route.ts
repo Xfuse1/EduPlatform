@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import { errorResponse, forbidden, successResponse } from '@/lib/api-response'
+import { checkRole, STAFF_ROLES } from '@/lib/permissions'
 import { requireTenant } from '@/lib/tenant'
 import { getWeeklySchedule } from '@/modules/schedule/queries'
 
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
       requireAuth(request),
     ])
 
-    if (user.role !== 'TEACHER' && user.role !== 'ASSISTANT') {
+    if (!checkRole(user.role, STAFF_ROLES)) {
       return forbidden()
     }
 

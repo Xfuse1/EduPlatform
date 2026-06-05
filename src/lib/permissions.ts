@@ -7,6 +7,13 @@ export class PermissionError extends Error {
   }
 }
 
+/** Roles allowed to manage center/teacher operational data (students, groups, attendance, payments). */
+export const STAFF_ROLES = ['CENTER_ADMIN', 'ADMIN', 'MANAGER', 'TEACHER', 'ASSISTANT'] as const
+/** Center-owner / administrative roles (no plain TEACHER). */
+export const CENTER_ADMIN_ROLES = ['CENTER_ADMIN', 'ADMIN', 'MANAGER'] as const
+/** Platform-level super admins. */
+export const PLATFORM_ADMIN_ROLES = ['SUPER_ADMIN'] as const
+
 export function checkRole(
   role: UserRole,
   allowedRoles: readonly UserRole[],

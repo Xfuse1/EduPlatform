@@ -8,6 +8,7 @@ import { EnrollmentStatus, UserRole, type Prisma } from '@/generated/client'
 import { requireAuth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { logFinancialEvent } from '@/lib/financial-audit'
+import { requireRole, STAFF_ROLES } from '@/lib/permissions'
 import { requireTenant } from '@/lib/tenant'
 
 import {
@@ -18,9 +19,9 @@ import {
   rechargeBalanceSchema,
   updateSubscriptionSchema,
 } from './validations'
-import { creditBalance, debitBalance } from './providers/balance'
+import { debitBalance } from './providers/balance'
 import { createKashierCheckoutUrl } from './providers/kashier'
-import { activateOrRenewSubscriptionForTenant, cancelSubscription, createTeacherSubscription } from './providers/subscription'
+import { activateOrRenewSubscriptionForTenant, cancelSubscription } from './providers/subscription'
 import { getSubscriptionPlanConfig } from './providers/plan-config'
 import { requestTeacherKashierWithdrawal, settleTeacherPaymentToWallet } from './providers/transfer'
 import { debitUserWallet, getOrCreateWallet, resolveTenantPayeeUserId } from '@/modules/wallet/provider'
@@ -201,6 +202,7 @@ function mapPaymentToClientItem(payment: {
 export async function recordPayment(formData: FormData) {
   const tenant = await requireTenant()
   const user = await requireAuth()
+  requireRole(user.role, STAFF_ROLES)
 
   const data = paymentRecordSchema.parse({
     studentId: formData.get('studentId'),
@@ -282,7 +284,8 @@ export async function recordPayment(formData: FormData) {
 
 export async function sendPaymentReminder(studentIds: string[]) {
   const tenant = await requireTenant()
-  await requireAuth()
+  const user = await requireAuth()
+  requireRole(user.role, STAFF_ROLES)
 
   const results = await Promise.allSettled(
     studentIds.map(async (studentId) => {
@@ -312,7 +315,8 @@ export async function sendPaymentReminder(studentIds: string[]) {
 
 export async function generateReceipt(paymentId: string) {
   const tenant = await requireTenant()
-  await requireAuth()
+  const user = await requireAuth()
+  requireRole(user.role, STAFF_ROLES)
 
   const payment = await db.payment.findFirst({
     where: { id: paymentId, tenantId: tenant.id },
@@ -543,6 +547,7 @@ export async function savePayment(input: {
   try {
     const tenant = await requireTenant()
     const user = await requireAuth()
+    requireRole(user.role, STAFF_ROLES)
 
     const student = await db.user.findFirst({
       where: tenantStudentAccessWhere(tenant.id, input.studentId),
@@ -638,6 +643,10 @@ export async function debitStudentBalance(input: {
   try {
     const tenant = await requireTenant()
     const user = await requireAuth()
+    // SECURITY: only staff may debit a student/parent wallet. Previously any
+    // authenticated user (incl. STUDENT/PARENT) could drain another student's
+    // balance and route the funds to the teacher wallet.
+    requireRole(user.role, STAFF_ROLES)
 
     const validated = debitBalanceSchema.parse({
       studentId: input.studentId,
@@ -712,36 +721,10 @@ export async function debitStudentBalance(input: {
   }
 }
 
-export async function creditBalanceAfterPayment(input: {
-  studentId: string
-  amount: number
-  relatedPaymentId?: string
-  reason?: string
-}) {
-  try {
-    await requireAuth()
-
-    const result = await creditBalance(
-      input.studentId,
-      input.amount,
-      input.reason ?? '????? ???? ??? Kashier',
-      input.relatedPaymentId,
-    )
-
-    revalidatePath('/dashboard')
-
-    return {
-      success: true,
-      message: '?? ????? ?????? ?????',
-      balance: result.wallet,
-    }
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : '??? ????? ??????',
-    }
-  }
-}
+// SECURITY: creditBalanceAfterPayment was REMOVED. As an exported 'use server'
+// action it let any authenticated user mint arbitrary wallet balance with no
+// payment verification. Wallet crediting now happens ONLY inside the
+// signature-verified Kashier webhook (creditBalanceForTenant).
 
 export async function addTeacherKashierApi(input: { kashierApiKey: string; kashierMerId: string }) {
   try {
@@ -812,55 +795,11 @@ export async function requestTeacherWalletWithdrawal(input: { amount: number }) 
   }
 }
 
-export async function createTeacherSubscriptionPayment(input: {
-  subscriptionPlan: string
-  billingCycle: 'MONTHLY' | 'YEARLY'
-  amount: number
-  transactionId: string
-}) {
-  try {
-    const tenant = await requireTenant()
-    const user = await requireAuth()
-
-    const planConfig = await getSubscriptionPlanConfig(input.subscriptionPlan)
-    const expectedAmount = input.billingCycle === 'MONTHLY' ? planConfig.monthlyPrice : planConfig.yearlyPrice
-
-    if (input.amount !== expectedAmount) {
-      throw new Error('?????? ??????? ?? ?????? ?? ??? ?????')
-    }
-
-    const subscription = await createTeacherSubscription(input.subscriptionPlan, input.billingCycle)
-
-    await db.payment.create({
-      data: {
-        tenantId: tenant.id,
-        studentId: user.id,
-        amount: input.amount,
-        month: new Date().toISOString().slice(0, 7),
-        status: 'PAID',
-        method: 'CARD',
-        receiptNumber: `SUB-${tenant.slug}-${input.subscriptionPlan}-${Date.now()}`,
-        recordedById: user.id,
-        transactionId: input.transactionId,
-        paidAt: new Date(),
-        notes: `SUBSCRIPTION:${input.subscriptionPlan}:${input.billingCycle}`,
-      },
-    })
-
-    revalidatePath('/dashboard')
-
-    return {
-      success: true,
-      message: '?? ????? ???????? ?????',
-      subscription,
-    }
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : '??? ????? ????????',
-    }
-  }
-}
+// SECURITY: createTeacherSubscriptionPayment was REMOVED. It activated a fully
+// PAID subscription from a client-supplied amount + arbitrary transactionId with
+// no gateway verification, allowing free paid subscriptions. Subscriptions are
+// now activated only via initiateTeacherSubscriptionCheckout + the verified
+// Kashier webhook (activateOrRenewSubscriptionForTenant).
 
 export async function initiateTeacherSubscriptionCheckout(input: {
   subscriptionPlan: string
@@ -869,6 +808,12 @@ export async function initiateTeacherSubscriptionCheckout(input: {
 }) {
   const tenant = await requireTenant()
   const user = await requireAuth()
+
+  // SECURITY: only the financial account owner (teacher/center) may spend the
+  // tenant payee wallet and change the subscription plan.
+  if (!['TEACHER', 'CENTER_ADMIN'].includes(user.role)) {
+    throw new Error('الاشتراك متاح لحساب المعلم أو السنتر فقط')
+  }
 
   const validated = updateSubscriptionSchema.parse(input)
 
@@ -882,6 +827,10 @@ export async function initiateTeacherSubscriptionCheckout(input: {
   }
 
   const payeeUserId = await resolveTenantPayeeUserId(tenant.id)
+  // SECURITY: only the wallet owner may spend their own balance on a subscription.
+  if (payeeUserId !== user.id) {
+    throw new Error('هذا الرصيد يخص مالك الحساب المالي')
+  }
   const wallet = await getOrCreateWallet(tenant.id, payeeUserId)
   const walletContribution = Math.min(wallet.balance, amount)
   const kashierAmount = amount - walletContribution

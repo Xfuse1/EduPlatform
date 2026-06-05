@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 
+import { requireSuperAdminPage } from "@/lib/platform-admin";
 import { getPlatformTenants, getPlatformUsers } from "@/modules/admin/queries";
 
 const roleOptions = [
@@ -23,6 +24,8 @@ type PageProps = {
 };
 
 export default async function AdminUsersPage({ searchParams }: PageProps) {
+  await requireSuperAdminPage();
+
   const params = (await searchParams) ?? {};
   const q = params.q?.trim() ?? "";
   const role = params.role?.trim() ?? "";

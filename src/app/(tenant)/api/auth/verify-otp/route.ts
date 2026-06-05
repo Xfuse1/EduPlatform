@@ -6,6 +6,7 @@ import {
   UnauthorizedError,
 } from '@/lib/auth'
 import { errorResponse, successResponse, validationError } from '@/lib/api-response'
+import { rateLimit } from '@/lib/rate-limit'
 import { applyTenantContextCookie } from '@/lib/tenant-context'
 import { requireTenant } from '@/lib/tenant'
 import { verifyOtp } from '@/modules/auth/actions'
@@ -13,6 +14,14 @@ import { verifyOtp } from '@/modules/auth/actions'
 export async function POST(request: NextRequest) {
   try {
     const tenant = await requireTenant()
+
+    // Throttle verification attempts per client IP to limit OTP brute force.
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+    const rl = rateLimit(`otp-verify:${ip}`, 20, 10 * 60 * 1000)
+    if (!rl.allowed) {
+      return errorResponse('RATE_LIMITED', 'محاولات كثيرة. يرجى المحاولة لاحقاً', 429)
+    }
+
     const payload = await request.json()
     const result = await verifyOtp(tenant.id, payload)
     const response = successResponse({

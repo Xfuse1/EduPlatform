@@ -1,4 +1,7 @@
+import { redirect } from 'next/navigation'
+
 import { requireAuth } from '@/lib/auth'
+import { checkRole, STAFF_ROLES } from '@/lib/permissions'
 import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
 import { getRevenueSummary } from '@/modules/payments/queries'
@@ -8,6 +11,10 @@ import { getRevenueSummary } from '@/modules/payments/queries'
 export default async function PaymentReportsPage() {
   const tenant = await requireTenant()
   const user = await requireAuth()
+  // Staff-only page: send students/parents back to their own dashboard.
+  if (!checkRole(user.role, STAFF_ROLES)) {
+    redirect(user.role === 'PARENT' ? '/parent' : '/student')
+  }
   const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
 
   // اجمع آخر 6 شهور
@@ -40,10 +47,10 @@ export default async function PaymentReportsPage() {
               </span>
             </div>
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>متأخر: {s.outstanding.total.toLocaleString('ar-EG')} جنيه</span>
+              <span>متأخر: {s.outstanding.toLocaleString('ar-EG')} جنيه</span>
               <span>
                 نسبة التحصيل:{' '}
-                {Math.round((s.thisMonth / Math.max(s.thisMonth + s.outstanding.total, 1)) * 100)}%
+                {Math.round((s.thisMonth / Math.max(s.thisMonth + s.outstanding, 1)) * 100)}%
               </span>
             </div>
             {/* شريط التحصيل */}
@@ -51,7 +58,7 @@ export default async function PaymentReportsPage() {
               <div
                 className="bg-primary h-1.5 rounded-full transition-all duration-500"
                 style={{
-                  width: `${Math.round((s.thisMonth / Math.max(s.thisMonth + s.outstanding.total, 1)) * 100)}%`,
+                  width: `${Math.round((s.thisMonth / Math.max(s.thisMonth + s.outstanding, 1)) * 100)}%`,
                 }}
               />
             </div>

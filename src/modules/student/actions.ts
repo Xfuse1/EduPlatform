@@ -38,6 +38,7 @@ export async function enrollStudentInGroup(input: { groupId: string }) {
       where: {
         id: parsed.data.groupId,
         isActive: true,
+        tenantId: user.tenantId,
       },
       select: {
         id: true,

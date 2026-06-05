@@ -3,11 +3,13 @@
 import { notFound, redirect } from "next/navigation";
 
 import { requireAuth } from "@/lib/auth";
+import { requireTenant } from "@/lib/tenant";
 import { formatTimeRange12Hour } from "@/lib/utils";
 import { getSessionWithStudents } from "@/modules/attendance/queries";
 import { SessionManagement } from "@/modules/attendance/components/SessionManagement";
 
 export default async function SessionPage({ params }: { params: Promise<{ sessionId: string }> }) {
+  const tenant = await requireTenant();
   const user = await requireAuth();
   const { sessionId } = await params;
 
@@ -15,7 +17,7 @@ export default async function SessionPage({ params }: { params: Promise<{ sessio
     redirect("/attendance");
   }
 
-  const session = await getSessionWithStudents(sessionId);
+  const session = await getSessionWithStudents(sessionId, tenant.id);
 
   if (!session) {
     notFound();

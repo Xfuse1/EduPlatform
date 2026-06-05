@@ -1,6 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { requireAuth } from "@/lib/auth";
+import { requireTenant } from "@/lib/tenant";
+import { checkRole, STAFF_ROLES } from "@/lib/permissions";
+import { getTeacherScopeUserId } from "@/lib/teacher-access";
+import { rateLimit } from "@/lib/rate-limit";
 // const pdfParse = require("pdf-parse/lib/pdf-parse.js");
 // const mammoth = require("mammoth");
+
+/**
+ * SSRF guard: only allow fetching files from the project's Supabase storage host.
+ * Returns the allowed hostname (from NEXT_PUBLIC_SUPABASE_URL) or null when not configured.
+ */
+function getAllowedStorageHost(): string | null {
+  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  if (!raw) return null;
+  try {
+    return new URL(raw).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+function isAllowedStorageUrl(url: string, allowedHost: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" && parsed.hostname.toLowerCase() === allowedHost;
+  } catch {
+    return false;
+  }
+}
 
 const NETWORK_RETRYABLE_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
 const MODEL_FALLBACK_STATUS_CODES = new Set([404, 408, 429, 500, 502, 503, 504]);
@@ -209,18 +238,85 @@ function extractJsonObjectText(rawText: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  console.log("POST /api/ai-grade hit");
-
   try {
+    const user = await requireAuth(req);
+    if (!checkRole(user.role, STAFF_ROLES)) {
+      return NextResponse.json({ error: "ليس لديك صلاحية" }, { status: 403 });
+    }
+    const tenant = await requireTenant();
+    const teacherScopeUserId = getTeacherScopeUserId(tenant, user);
+
+    const rl = rateLimit(`ai-grade:${user.id}`, 20, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "تم تجاوز الحد المسموح. حاول مرة أخرى لاحقاً." },
+        { status: 429 },
+      );
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json({ error: "GEMINI_API_KEY is missing" }, { status: 500 });
+    }
+
+    const allowedHost = getAllowedStorageHost();
+    if (!allowedHost) {
+      return NextResponse.json({ error: "Storage host is not configured" }, { status: 500 });
+    }
+
     const body = await req.json();
-    const { assignmentFileUrl, answerKeyUrl, submissionFileUrl, maxGrade } = body ?? {};
+    const { submissionId, submissionFileUrl: requestedSubmissionFileUrl } = body ?? {};
+
+    if (!submissionId && !requestedSubmissionFileUrl) {
+      return NextResponse.json({ error: "Missing submissionId" }, { status: 400 });
+    }
+
+    // Resolve the submission + assignment server-side (never trust body-supplied file URLs)
+    // and verify tenant/teacher ownership. Prefer the explicit id; otherwise locate the
+    // submission by its stored file URL, always scoped to the current tenant.
+    const submission = await db.assignmentSubmission.findFirst({
+      where: {
+        ...(submissionId
+          ? { id: submissionId }
+          : { fileUrl: requestedSubmissionFileUrl }),
+        assignment: { tenantId: tenant.id },
+      },
+      select: {
+        fileUrl: true,
+        assignment: {
+          select: {
+            tenantId: true,
+            fileUrl: true,
+            answerKeyUrl: true,
+            maxGrade: true,
+            group: { select: { teacherId: true } },
+          },
+        },
+      },
+    });
+
+    if (!submission || submission.assignment.tenantId !== tenant.id) {
+      return NextResponse.json({ error: "التسليم غير موجود." }, { status: 404 });
+    }
+    if (teacherScopeUserId && submission.assignment.group.teacherId !== teacherScopeUserId) {
+      return NextResponse.json({ error: "ليس لديك صلاحية" }, { status: 403 });
+    }
+
+    const assignmentFileUrl = submission.assignment.fileUrl;
+    const answerKeyUrl = submission.assignment.answerKeyUrl;
+    const submissionFileUrl = submission.fileUrl;
+    const maxGrade = submission.assignment.maxGrade;
 
     if (!assignmentFileUrl || !answerKeyUrl || !submissionFileUrl) {
       return NextResponse.json({ error: "Missing required file URLs" }, { status: 400 });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: "GEMINI_API_KEY is missing" }, { status: 500 });
+    // SSRF guard: every fetched file URL must live on the project's Supabase storage host.
+    if (
+      !isAllowedStorageUrl(assignmentFileUrl, allowedHost) ||
+      !isAllowedStorageUrl(answerKeyUrl, allowedHost) ||
+      !isAllowedStorageUrl(submissionFileUrl, allowedHost)
+    ) {
+      return NextResponse.json({ error: "رابط ملف غير مسموح به." }, { status: 400 });
     }
 
     // استخراج النصوص وتحميل الملف للطالب (Vision)
@@ -344,8 +440,9 @@ ${studentAnswerText ? `## نص إجابة الطالب (تم استخراجه آ
     const aiResult = JSON.parse(jsonText);
 
     // تحويل التنسيق الجديد إلى التنسيق الذي تتوقعه الواجهة الأمامية
+    const cap = maxGrade || 100;
     const result = {
-      grade: aiResult.totalScore ?? 0,
+      grade: Math.max(0, Math.min(Number(aiResult.totalScore ?? 0), cap)),
       summary: aiResult.generalFeedback ?? "",
       feedback: (aiResult.questions || []).map((q: any) => ({
         question: q.questionNumber || q.questionText,

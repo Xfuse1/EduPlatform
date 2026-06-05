@@ -4,14 +4,15 @@ import { createClient } from "@supabase/supabase-js";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 
-const MAX_AVATAR_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_AVATAR_SIZE_BYTES = 2 * 1024 * 1024;
 
-function getImageExtension(fileType: string) {
-  if (fileType === "image/png") return "png";
-  if (fileType === "image/webp") return "webp";
-  if (fileType === "image/gif") return "gif";
-  return "jpg";
-}
+// Fixed allowlist of safe raster image types. SVG (image/svg+xml) and any other
+// type are rejected because SVG can carry embedded scripts.
+const ALLOWED_AVATAR_TYPES: Record<string, { ext: string; contentType: string }> = {
+  "image/png": { ext: "png", contentType: "image/png" },
+  "image/jpeg": { ext: "jpg", contentType: "image/jpeg" },
+  "image/webp": { ext: "webp", contentType: "image/webp" },
+};
 
 // Supabase client بصلاحيات الـ service role — lazy init to avoid build-time crash
 function getSupabase() {
@@ -42,19 +43,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "لم يتم إرسال ملف" }, { status: 400 });
     }
 
-    // التحقق من نوع الملف
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json({ error: "يجب أن يكون الملف صورة" }, { status: 400 });
+    // التحقق من نوع الملف — قائمة مسموح بها صارمة للصور النقطية فقط (لا SVG)
+    const allowedType = ALLOWED_AVATAR_TYPES[file.type];
+    if (!allowedType) {
+      return NextResponse.json({ error: "يجب أن يكون الملف صورة بصيغة PNG أو JPEG أو WebP" }, { status: 400 });
     }
 
-    // التحقق من حجم الملف (max 10MB)
+    // التحقق من حجم الملف (max 2MB)
     if (file.size > MAX_AVATAR_SIZE_BYTES) {
-      return NextResponse.json({ error: "حجم الصورة يجب أن يكون أقل من 10MB" }, { status: 400 });
+      return NextResponse.json({ error: "حجم الصورة يجب أن يكون أقل من 2MB" }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const ext = getImageExtension(file.type);
+    const ext = allowedType.ext;
+    const contentType = allowedType.contentType;
     const storagePath = `${user.id}/avatar.${ext}`;
 
     const supabase = getSupabase();
@@ -72,7 +75,7 @@ export async function POST(req: Request) {
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(storagePath, buffer, {
-        contentType: file.type,
+        contentType, // نوع آمن مُجبر من القائمة المسموح بها، لا نثق بـ file.type المخزَّن
         upsert: true, // استبدال الصورة القديمة
       });
 

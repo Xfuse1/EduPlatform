@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 
+import { requireSuperAdminPage } from "@/lib/platform-admin";
 import { setTenantStatusAction } from "@/modules/admin/actions";
 import { getPlatformTenants } from "@/modules/admin/queries";
 
@@ -12,6 +13,8 @@ type PageProps = {
 };
 
 export default async function AdminTenantsPage({ searchParams }: PageProps) {
+  await requireSuperAdminPage();
+
   const params = (await searchParams) ?? {};
   const q = params.q?.trim() ?? "";
   const statusRaw = params.status?.trim() ?? "";

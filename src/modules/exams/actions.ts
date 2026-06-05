@@ -2,6 +2,9 @@
 
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { requireTenant } from "@/lib/tenant";
+import { requireRole, STAFF_ROLES } from "@/lib/permissions";
+import { getTeacherScopeUserId } from "@/lib/teacher-access";
 import { revalidatePath } from "next/cache";
 import { sendNotification } from "@/modules/notifications/actions";
 
@@ -58,13 +61,41 @@ export async function submitExamAction(examId: string, studentId: string, answer
             return { success: false, error: "غير مصرح لك بتسليم هذا الامتحان." };
         }
 
-        const exam = await db.exam.findUnique({
-            where: { id: examId },
+        const tenant = await requireTenant();
+
+        const exam = await db.exam.findFirst({
+            where: { id: examId, tenantId: tenant.id },
             include: { questions: true }
         });
 
         if (!exam) {
             return { success: false, error: "الامتحان غير موجود." };
+        }
+
+        // Ensure the student is actively enrolled in the exam's group.
+        const enrollment = await db.groupStudent.findFirst({
+            where: { groupId: exam.groupId, studentId, status: "ACTIVE" },
+            select: { id: true },
+        });
+        if (!enrollment) {
+            return { success: false, error: "غير مصرح لك بتسليم هذا الامتحان." };
+        }
+
+        // Enforce the exam time window: now within [startAt, startAt + duration].
+        const now = Date.now();
+        const startMs = new Date(exam.startAt).getTime();
+        const endMs = startMs + exam.duration * 60 * 1000;
+        if (now < startMs || now > endMs) {
+            return { success: false, error: "انتهى وقت تسليم هذا الامتحان أو لم يبدأ بعد." };
+        }
+
+        // Block duplicate submissions (relies on @@unique([examId, studentId])).
+        const existingSubmission = await db.examSubmission.findFirst({
+            where: { examId, studentId },
+            select: { id: true },
+        });
+        if (existingSubmission) {
+            return { success: false, error: "لقد قمت بتسليم هذا الامتحان بالفعل." };
         }
 
         // Calculate auto-grade for objective questions (MCQ + TRUE_FALSE)
@@ -83,16 +114,26 @@ export async function submitExamAction(examId: string, studentId: string, answer
             }
         }
 
-        // Save submission
-        await db.examSubmission.create({
-            data: {
-                examId,
-                studentId,
-                answers: answers as any,
-                totalGrade: earnedGrade,
-                submittedAt: new Date(),
+        // Clamp grade to [0, exam.maxGrade].
+        earnedGrade = Math.max(0, Math.min(earnedGrade, exam.maxGrade));
+
+        // Save submission (unique constraint guards against race-condition duplicates).
+        try {
+            await db.examSubmission.create({
+                data: {
+                    examId,
+                    studentId,
+                    answers: answers as any,
+                    totalGrade: earnedGrade,
+                    submittedAt: new Date(),
+                }
+            });
+        } catch (error: any) {
+            if (error?.code === "P2002") {
+                return { success: false, error: "لقد قمت بتسليم هذا الامتحان بالفعل." };
             }
-        });
+            throw error;
+        }
 
         revalidatePath('/student/exams');
 
@@ -132,11 +173,29 @@ export async function submitExamAction(examId: string, studentId: string, answer
 
 export async function updateExamSubmissionAction(submissionId: string, grade: number, comment: string) {
     try {
-        await requireAuth();
+        const user = await requireAuth();
+        requireRole(user.role, STAFF_ROLES);
+        const tenant = await requireTenant();
+        const teacherScopeUserId = getTeacherScopeUserId(tenant, user);
+
+        const submission = await db.examSubmission.findUnique({
+            where: { id: submissionId },
+            include: { exam: { select: { tenantId: true, groupId: true, maxGrade: true, group: { select: { teacherId: true } } } } },
+        });
+
+        if (!submission || submission.exam.tenantId !== tenant.id) {
+            return { success: false, error: "التسليم غير موجود." };
+        }
+        if (teacherScopeUserId && submission.exam.group.teacherId !== teacherScopeUserId) {
+            return { success: false, error: "ليس لديك صلاحية." };
+        }
+
+        const clampedGrade = Math.max(0, Math.min(grade, submission.exam.maxGrade));
+
         await db.examSubmission.update({
             where: { id: submissionId },
             data: {
-                totalGrade: grade,
+                totalGrade: clampedGrade,
                 teacherComment: comment,
             }
         });
@@ -150,11 +209,18 @@ export async function updateExamSubmissionAction(submissionId: string, grade: nu
 
 export async function approveAutoGradeByModelAnswerAction(examId: string, submissionId: string) {
     try {
-        await requireAuth();
+        const user = await requireAuth();
+        requireRole(user.role, STAFF_ROLES);
+        const tenant = await requireTenant();
+        const teacherScopeUserId = getTeacherScopeUserId(tenant, user);
 
         const [exam, submission] = await Promise.all([
-            db.exam.findUnique({
-                where: { id: examId },
+            db.exam.findFirst({
+                where: {
+                    id: examId,
+                    tenantId: tenant.id,
+                    ...(teacherScopeUserId ? { group: { teacherId: teacherScopeUserId } } : {}),
+                },
                 include: { questions: true },
             }),
             db.examSubmission.findUnique({
@@ -174,6 +240,9 @@ export async function approveAutoGradeByModelAnswerAction(examId: string, submis
                 autoGrade += question.grade;
             }
         }
+
+        // Clamp grade to [0, exam.maxGrade].
+        autoGrade = Math.max(0, Math.min(autoGrade, exam.maxGrade));
 
         const teacherComment =
             submission.teacherComment ?? "تم اعتماد التصحيح التلقائي بمقارنة الإجابات بالنموذج.";
@@ -211,16 +280,24 @@ export async function approveAutoGradeByModelAnswerAction(examId: string, submis
 
 export async function aiGradeExamAction(examId: string, submissionId: string) {
     try {
-        await requireAuth();
-        const exam = await db.exam.findUnique({
-            where: { id: examId },
+        const user = await requireAuth();
+        requireRole(user.role, STAFF_ROLES);
+        const tenant = await requireTenant();
+        const teacherScopeUserId = getTeacherScopeUserId(tenant, user);
+
+        const exam = await db.exam.findFirst({
+            where: {
+                id: examId,
+                tenantId: tenant.id,
+                ...(teacherScopeUserId ? { group: { teacherId: teacherScopeUserId } } : {}),
+            },
             include: { questions: true }
         });
         const submission = await db.examSubmission.findUnique({
             where: { id: submissionId },
         });
 
-        if (!exam || !submission) return { success: false, error: "البيانات غير موجودة." };
+        if (!exam || !submission || submission.examId !== examId) return { success: false, error: "البيانات غير موجودة." };
 
         const answers = submission.answers as Record<string, string>;
         
@@ -268,6 +345,11 @@ ${JSON.stringify(questionsList, null, 2)}
         const geminiData = await geminiResponse.json();
         const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
         const result = JSON.parse(rawText);
+
+        // Clamp the AI-suggested grade to [0, exam.maxGrade].
+        if (typeof result?.grade === "number") {
+            result.grade = Math.max(0, Math.min(result.grade, exam.maxGrade));
+        }
 
         return { success: true, data: result };
     } catch (error) {

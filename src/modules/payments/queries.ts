@@ -1,5 +1,6 @@
 ﻿import { cache } from "react";
 
+import type { Prisma } from "@/generated/client";
 import { db } from "@/lib/db";
 import { getOrCreateWallet, resolveRechargeWalletOwner, resolveTenantPayeeUserId } from "@/modules/wallet/provider";
 
@@ -16,6 +17,33 @@ function startOfPreviousMonth() {
 
 function currentMonthKey() {
   return new Date().toISOString().slice(0, 7);
+}
+
+/** Resolve the [gte, lt) createdAt range for a "YYYY-MM" month key. */
+function monthRange(monthKey: string) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 1);
+  return { start, end };
+}
+
+/**
+ * Restrict payment queries to a TEACHER's own students (enrolled in groups they
+ * own). Returns an empty object for admins/assistants so they see tenant-wide data.
+ */
+function teacherScopePaymentWhere(teacherId?: string): Prisma.PaymentWhereInput {
+  if (!teacherId) return {};
+  return {
+    student: {
+      groupStudents: {
+        some: {
+          group: {
+            teacherId,
+          },
+        },
+      },
+    },
+  };
 }
 
 function toClientPaymentStatus(status?: string | null): "PAID" | "OVERDUE" | "PENDING" {
@@ -46,16 +74,32 @@ function mapPaymentItem(payment: {
   };
 }
 
-export const getRevenueSummary = cache(async (tenantId: string) => {
+export const getRevenueSummary = cache(async (tenantId: string, month?: string, teacherId?: string) => {
   try {
-    const currentMonthStart = startOfCurrentMonth();
-    const previousMonthStart = startOfPreviousMonth();
+    // When a month is supplied, the collected/outstanding figures are constrained to
+    // that month's createdAt range so each report card shows its own numbers; without
+    // a month we keep the original all-time totals for the dashboard callers.
+    // thisMonth/lastMonth always reflect the requested month vs the one before it.
+    const requestedMonthStart = month ? monthRange(month).start : startOfCurrentMonth();
+    const requestedMonthEnd = month ? monthRange(month).end : null;
+    const previousMonthStart = month
+      ? new Date(requestedMonthStart.getFullYear(), requestedMonthStart.getMonth() - 1, 1)
+      : startOfPreviousMonth();
 
-    const [paidAllTime, pendingAllTime, overdueAllTime, paidCurrentMonth, paidPreviousMonth] = await Promise.all([
+    const scopeWhere = teacherScopePaymentWhere(teacherId);
+    const requestedMonthCreatedAt = requestedMonthEnd
+      ? { gte: requestedMonthStart, lt: requestedMonthEnd }
+      : { gte: requestedMonthStart };
+    // For totals: scope to the requested month when one is given, otherwise all-time.
+    const totalsCreatedAt = month ? { createdAt: requestedMonthCreatedAt } : {};
+
+    const [paidScope, pendingScope, overdueScope, paidThisMonth, paidPreviousMonth] = await Promise.all([
       db.payment.aggregate({
         where: {
           tenantId,
           status: "PAID",
+          ...totalsCreatedAt,
+          ...scopeWhere,
         },
         _sum: {
           amount: true,
@@ -65,6 +109,8 @@ export const getRevenueSummary = cache(async (tenantId: string) => {
         where: {
           tenantId,
           status: "PENDING",
+          ...totalsCreatedAt,
+          ...scopeWhere,
         },
         _sum: {
           amount: true,
@@ -74,6 +120,8 @@ export const getRevenueSummary = cache(async (tenantId: string) => {
         where: {
           tenantId,
           status: "OVERDUE",
+          ...totalsCreatedAt,
+          ...scopeWhere,
         },
         _sum: {
           amount: true,
@@ -83,9 +131,8 @@ export const getRevenueSummary = cache(async (tenantId: string) => {
         where: {
           tenantId,
           status: "PAID",
-          createdAt: {
-            gte: currentMonthStart,
-          },
+          createdAt: requestedMonthCreatedAt,
+          ...scopeWhere,
         },
         _sum: {
           amount: true,
@@ -97,8 +144,9 @@ export const getRevenueSummary = cache(async (tenantId: string) => {
           status: "PAID",
           createdAt: {
             gte: previousMonthStart,
-            lt: currentMonthStart,
+            lt: requestedMonthStart,
           },
+          ...scopeWhere,
         },
         _sum: {
           amount: true,
@@ -106,11 +154,11 @@ export const getRevenueSummary = cache(async (tenantId: string) => {
       }),
     ]);
 
-    const collected = paidAllTime._sum.amount ?? 0;
-    const pending = pendingAllTime._sum.amount ?? 0;
-    const overdue = overdueAllTime._sum.amount ?? 0;
+    const collected = paidScope._sum.amount ?? 0;
+    const pending = pendingScope._sum.amount ?? 0;
+    const overdue = overdueScope._sum.amount ?? 0;
     const total = collected + pending + overdue;
-    const thisMonth = paidCurrentMonth._sum.amount ?? 0;
+    const thisMonth = paidThisMonth._sum.amount ?? 0;
     const lastMonth = paidPreviousMonth._sum.amount ?? 0;
     const collectionRate = total > 0 ? Math.round((collected / total) * 100) : 0;
     const change = lastMonth > 0 ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : thisMonth > 0 ? 100 : 0;
@@ -218,6 +266,7 @@ export const getPayments = cache(async (
     month?: string;
     status?: string;
   } = {},
+  teacherId?: string,
 ) => {
   const payments = await db.payment.findMany({
     where: {
@@ -226,6 +275,8 @@ export const getPayments = cache(async (
       ...(filters.studentId ? { studentId: filters.studentId } : {}),
       ...(filters.month ? { month: filters.month } : {}),
       ...(filters.status ? { status: filters.status as any } : {}),
+      // TEACHER scope: restrict to students in groups this teacher owns.
+      ...teacherScopePaymentWhere(teacherId),
     },
     include: {
       student: {
@@ -253,11 +304,13 @@ export const getPaymentsList = cache(async (tenantId: string) => {
   return [];
 });
 
-export const getOverdueStudents = cache(async (tenantId: string, _teacherId?: string) => {
+export const getOverdueStudents = cache(async (tenantId: string, teacherId?: string) => {
   return db.payment.findMany({
     where: {
       tenantId,
       status: "OVERDUE",
+      // TEACHER scope: only students enrolled in groups this teacher owns.
+      ...teacherScopePaymentWhere(teacherId),
     },
     include: {
       student: {

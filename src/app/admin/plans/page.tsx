@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
 
+import { requireSuperAdminPage } from "@/lib/platform-admin";
 import { createPlanConfigAction, deletePlanConfigAction, updatePlanConfigAction } from "@/modules/admin/actions";
 import { getSubscriptionPlanConfigs } from "@/modules/payments/providers/plan-config";
 
@@ -38,6 +39,8 @@ function PlanKeyInput({ defaultValue = "", helperText }: { defaultValue?: string
 }
 
 export default async function AdminPlansPage() {
+  await requireSuperAdminPage();
+
   const plansMap = await getSubscriptionPlanConfigs({ includeDeleted: true });
   const plans = Object.values(plansMap).sort((a, b) => a.key.localeCompare(b.key));
 

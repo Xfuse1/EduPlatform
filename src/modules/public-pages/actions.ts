@@ -74,33 +74,40 @@ export async function registerStudent(formData: FormData): Promise<RegistrationR
       };
     }
 
-    const parent = await db.user.upsert({
+    const existingParent = await db.user.findFirst({
       where: {
-        tenantId_phone: {
-          tenantId: tenant.id,
-          phone: parentPhone,
-        },
-      },
-      update: {
-        name: parentName,
-        role: "PARENT",
-        parentName,
-        parentPhone,
-        isActive: true,
-      },
-      create: {
         tenantId: tenant.id,
         phone: parentPhone,
-        name: parentName,
-        role: "PARENT",
-        parentName,
-        parentPhone,
-        isActive: true,
       },
       select: {
         id: true,
+        role: true,
       },
     });
+
+    if (existingParent && existingParent.role !== "PARENT") {
+      return {
+        success: false,
+        message: "رقم الهاتف مستخدم بالفعل لحساب آخر",
+      };
+    }
+
+    const parent =
+      existingParent ??
+      (await db.user.create({
+        data: {
+          tenantId: tenant.id,
+          phone: parentPhone,
+          name: parentName,
+          role: "PARENT",
+          parentName,
+          parentPhone,
+          isActive: true,
+        },
+        select: {
+          id: true,
+        },
+      }));
 
     const student = await db.user.create({
       data: {

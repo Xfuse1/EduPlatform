@@ -1,10 +1,9 @@
 "use client"
 
 import React from "react"
-import { Printer, Download, CheckCircle2, CreditCard, Calendar, User, Hash, Info } from "lucide-react"
+import { Printer, CheckCircle2, Calendar, User, Hash, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { showToast } from "@/components/ui/Toast"
 import { toArabicDigits, formatCurrency } from "@/lib/utils"
 
 // --- Types ---
@@ -16,7 +15,7 @@ interface InvoiceItem {
   price: number
 }
 
-interface InvoiceData {
+export interface InvoiceData {
   centerName: string
   studentName: string
   invoiceNumber: string
@@ -25,32 +24,11 @@ interface InvoiceData {
   total: number
 }
 
-// --- Mock Data ---
-
-const MOCK_INVOICE: InvoiceData = {
-  centerName: "سنتر التفوق التعليمي",
-  studentName: "أحمد بن محمد",
-  invoiceNumber: "INV-2026-0042",
-  invoiceDate: "2026-03-25",
-  items: [
-    { id: "i1", sessionName: "حصة الرياضيات 1", date: "2026-03-01", price: 150 },
-    { id: "i2", sessionName: "حصة الرياضيات 2", date: "2026-03-08", price: 150 },
-    { id: "i3", sessionName: "حصة الفيزياء 1", date: "2026-03-05", price: 120 },
-    { id: "i4", sessionName: "حصة الفيزياء 2", date: "2026-03-12", price: 120 },
-    { id: "i5", sessionName: "حصة الكيمياء 1", date: "2026-03-15", price: 130 },
-    { id: "i6", sessionName: "حصة الكيمياء 2", date: "2026-03-22", price: 130 },
-  ],
-  total: 800,
-}
-
-export function InvoiceView({ invoice = MOCK_INVOICE }: { invoice?: InvoiceData }) {
+// SECURITY/INTEGRITY: invoice is a required prop derived from the real payment.
+// The previous MOCK_INVOICE default rendered fabricated financial data to users.
+export function InvoiceView({ invoice }: { invoice: InvoiceData }) {
   const handlePrint = () => {
     window.print()
-  }
-
-  const handleDownloadPDF = () => {
-    // TODO: implement PDF generation with @react-pdf/renderer
-    showToast.info("ميزة تحميل PDF قيد التطوير حالياً وسيتم تفعيلها قريباً.")
   }
 
   return (
@@ -67,10 +45,6 @@ export function InvoiceView({ invoice = MOCK_INVOICE }: { invoice?: InvoiceData 
           <Button variant="outline" className="gap-2 h-10 px-4 rounded-xl text-xs" onClick={handlePrint}>
             <Printer className="h-4 w-4" />
             طباعة الفاتورة
-          </Button>
-          <Button variant="default" className="gap-2 h-10 px-4 rounded-xl text-xs" onClick={handleDownloadPDF}>
-            <Download className="h-4 w-4" />
-            تحميل PDF
           </Button>
         </div>
       </div>
@@ -109,7 +83,7 @@ export function InvoiceView({ invoice = MOCK_INVOICE }: { invoice?: InvoiceData 
                   <p className="text-base font-black text-slate-800 dark:text-slate-100">{invoice.studentName}</p>
                 </div>
                 <div className="flex items-center gap-3 opacity-60">
-                  <span className="text-xs font-bold text-slate-500 pr-7">الرقم التعريفي: {toArabicDigits('120485')}</span>
+                  <span className="text-xs font-bold text-slate-500 pr-7">الرقم التعريفي: {invoice.invoiceNumber}</span>
                 </div>
               </div>
             </div>

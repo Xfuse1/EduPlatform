@@ -12,6 +12,20 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { title, description, groupId, dueDate, fileUrl, answerKeyUrl, maxGrade } = body;
 
+    // Validate the target group belongs to this tenant (and to the teacher when scoped).
+    const isTeacher = user.role === "TEACHER";
+    const group = await db.group.findFirst({
+      where: {
+        id: groupId,
+        tenantId: user.tenantId,
+        ...(isTeacher ? { teacherId: user.id } : {}),
+      },
+      select: { id: true },
+    });
+    if (!group) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const assignment = await db.assignment.create({
       data: {
         tenantId: user.tenantId,

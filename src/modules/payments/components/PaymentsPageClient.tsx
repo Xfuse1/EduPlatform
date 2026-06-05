@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
-import { InvoiceView } from "@/components/payments/InvoiceView";
+import { InvoiceView, type InvoiceData } from "@/components/payments/InvoiceView";
 
 type PaymentStatus = "PAID" | "OVERDUE" | "PENDING";
 type PaymentFilter = PaymentStatus | "ALL";
@@ -59,6 +59,7 @@ export function PaymentsPageClient({
   const [payments, setPayments] = useState(initialPayments);
   const [isOpen, setIsOpen] = useState(false);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
   const [studentName, setStudentName] = useState("");
   const [month, setMonth] = useState("");
@@ -313,10 +314,20 @@ export function PaymentsPageClient({
                     <Pencil className="h-4 w-4" />
                     تعديل
                   </Button>
-                  <Button 
-                    className="flex-1 gap-2 border-primary/20 text-primary hover:bg-primary/5" 
-                    onClick={() => setIsInvoiceOpen(true)} 
-                    type="button" 
+                  <Button
+                    className="flex-1 gap-2 border-primary/20 text-primary hover:bg-primary/5"
+                    onClick={() => {
+                      setInvoiceData({
+                        centerName: "",
+                        studentName: payment.studentName,
+                        invoiceNumber: payment.id,
+                        invoiceDate: payment.month,
+                        items: [{ id: payment.id, sessionName: `رسوم ${payment.month}`, date: payment.month, price: payment.amount }],
+                        total: payment.amount,
+                      });
+                      setIsInvoiceOpen(true);
+                    }}
+                    type="button"
                     variant="outline"
                   >
                     <FileText className="h-4 w-4" />
@@ -402,7 +413,7 @@ export function PaymentsPageClient({
         </div>
       ) : null}
 
-      {isInvoiceOpen && (
+      {isInvoiceOpen && invoiceData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm overflow-y-auto">
           <div className="relative max-h-[92dvh] w-full max-w-4xl overflow-y-auto rounded-[20px] bg-slate-50 shadow-2xl dark:bg-slate-900 sm:rounded-[32px]">
             <button 
@@ -412,7 +423,7 @@ export function PaymentsPageClient({
               <X className="h-5 w-5" />
             </button>
             <div className="p-4 sm:p-10 pb-20">
-              <InvoiceView />
+              <InvoiceView invoice={invoiceData} />
             </div>
           </div>
         </div>

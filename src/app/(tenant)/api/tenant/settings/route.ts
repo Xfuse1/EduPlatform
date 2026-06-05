@@ -3,6 +3,7 @@ import { ZodError } from 'zod'
 
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import { errorResponse, forbidden, successResponse, validationError } from '@/lib/api-response'
+import { CENTER_ADMIN_ROLES, checkRole } from '@/lib/permissions'
 import { requireTenant } from '@/lib/tenant'
 import { updateTenant } from '@/modules/settings/actions'
 import { getTenantSettings } from '@/modules/settings/queries'
@@ -62,6 +63,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await requireAuth(request)
+
+    if (!checkRole(user.role, [...CENTER_ADMIN_ROLES, 'TEACHER'])) {
+      return forbidden()
+    }
+
     const formData = await requestToFormData(request)
     const tenant = await updateTenant(formData)
     return successResponse(tenant)

@@ -55,6 +55,30 @@ export async function POST(req: NextRequest) {
     return successResponse({ received: true })
   }
 
+  // SECURITY: verify the gateway-reported amount and currency match the stored
+  // order before transitioning to PAID / crediting. Prevents over-crediting from
+  // partial captures, a different currency, or a mismatched/replayed payload.
+  if (status === 'SUCCESS') {
+    const paidAmount = Number(amount)
+    const amountMatches =
+      Boolean(amount) &&
+      Number.isFinite(paidAmount) &&
+      Math.round(paidAmount * 100) === Math.round(payment.amount * 100)
+    const currencyMatches = (currency ?? 'EGP') === 'EGP'
+
+    if (!amountMatches || !currencyMatches) {
+      await logFinancialEvent({
+        tenantId: payment.tenantId,
+        eventType: 'PAYMENT_FAILED',
+        entityType: 'PAYMENT',
+        entityId: payment.id,
+        message: 'Kashier webhook amount/currency mismatch',
+        metadata: { orderId, expected: payment.amount, reported: amount, currency },
+      })
+      return errorResponse('AMOUNT_MISMATCH', 'Reported amount does not match the order', 400)
+    }
+  }
+
   const wasAlreadyPaid = payment.status === 'PAID'
   const newStatus = wasAlreadyPaid ? 'PAID' : status === 'SUCCESS' ? 'PAID' : status === 'FAILED' ? 'OVERDUE' : 'PENDING'
 
@@ -93,7 +117,12 @@ export async function POST(req: NextRequest) {
       const validCycles = new Set(['MONTHLY', 'YEARLY'])
       const hasWalletSplitMetadata = notes.includes('WALLET_CONTRIBUTION:') || notes.includes('SUBSCRIPTION_TOTAL:')
 
-      if (planRaw && validCycles.has(cycleRaw) && !hasSubscriptionApplied(notes) && (!wasAlreadyPaid || hasWalletSplitMetadata)) {
+      // SECURITY: apply subscription effects at most once. Rely solely on the
+      // durable SUBSCRIPTION_APPLIED marker + not-already-paid; the previous
+      // `|| hasWalletSplitMetadata` bypass allowed a replayed webhook to
+      // re-debit the wallet and extend the subscription an extra cycle.
+      void hasWalletSplitMetadata
+      if (planRaw && validCycles.has(cycleRaw) && !hasSubscriptionApplied(notes) && !wasAlreadyPaid) {
         const walletContribution = getNoteNumber(notes, 'WALLET_CONTRIBUTION')
         if (walletContribution > 0) {
           const payeeUserId = await resolveTenantPayeeUserId(updatedPayment.tenantId)

@@ -3,6 +3,7 @@ import { ZodError, z } from 'zod'
 
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import { errorResponse, forbidden, successResponse, validationError } from '@/lib/api-response'
+import { checkRole, STAFF_ROLES } from '@/lib/permissions'
 import { requireTenant } from '@/lib/tenant'
 import { checkConflicts } from '@/modules/schedule/queries'
 
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
       request.json(),
     ])
 
-    if (user.role !== 'TEACHER' && user.role !== 'ASSISTANT') {
+    if (!checkRole(user.role, STAFF_ROLES)) {
       return forbidden()
     }
 

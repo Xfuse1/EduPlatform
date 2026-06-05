@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 
+import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requireRole } from "@/lib/permissions";
 import { requireTenant } from "@/lib/tenant";
 import { parseTenantSettingsFormData } from "@/modules/settings/validations";
 
@@ -23,6 +25,17 @@ type UpdateTenantSettingsResult = {
 
 export async function updateTenantSettings(data: SettingsPayload): Promise<UpdateTenantSettingsResult> {
   const tenant = await requireTenant();
+  const user = await requireAuth();
+
+  if (user.tenantId !== tenant.id) {
+    return {
+      success: false,
+      message: "ليس لديك صلاحية",
+    };
+  }
+
+  requireRole(user.role, ["CENTER_ADMIN", "ADMIN", "MANAGER", "TEACHER"]);
+
   const normalizedSubjects = Array.from(new Set((data.subjects ?? []).map((subject) => subject.trim()).filter(Boolean)));
 
   try {

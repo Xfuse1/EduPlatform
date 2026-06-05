@@ -62,7 +62,14 @@ export const getAssignmentsByStudent = cache(async (studentId: string) => {
 
     const assignments = await db.assignment.findMany({
       where: { groupId: { in: groupIds } },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        dueDate: true,
+        fileUrl: true,
+        maxGrade: true,
+        // NOTE: answerKeyUrl is intentionally EXCLUDED — students must never see it.
         group: { select: { name: true, subject: true } },
         submissions: {
           where: { studentId },
@@ -82,7 +89,7 @@ export const getAssignmentsByStudent = cache(async (studentId: string) => {
       return {
         ...a,
         fileUrl: a.fileUrl ?? null,
-        fileLink: a.fileLink ?? null,
+        fileLink: null,
         submission,
         status,
       };

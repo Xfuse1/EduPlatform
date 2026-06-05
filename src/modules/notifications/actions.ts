@@ -1,6 +1,8 @@
 'use server'
 import { requireTenant } from '@/lib/tenant'
 import { requireAuth } from '@/lib/auth'
+import { requireRole, STAFF_ROLES } from '@/lib/permissions'
+import { rateLimit } from '@/lib/rate-limit'
 import { db } from '@/lib/db'
 import { sendSMS } from './providers/sms'
 import { sendWhatsApp } from './providers/whatsapp'
@@ -31,7 +33,24 @@ interface NotificationPayload {
  */
 export async function sendNotification(payload: NotificationPayload) {
   const tenant = await requireTenant()
-  await requireAuth()
+  const user = await requireAuth()
+  requireRole(user.role, STAFF_ROLES)
+
+  // حد المعدّل لكل tenant — يقلّل خطر إساءة استخدام إرسال الرسائل (SMS bombing)
+  const rl = rateLimit(`notify:${tenant.id}`, 100, 60_000)
+  if (!rl.allowed) {
+    throw new Error('تم تجاوز الحد المسموح لإرسال الإشعارات، حاول لاحقاً')
+  }
+
+  // تحقّق أن المستلم تابع لنفس الـ tenant واشتق رقم الهاتف من DB (لا نثق بالـ client)
+  const recipient = await db.user.findFirst({
+    where: { id: payload.userId, tenantId: tenant.id },
+    select: { id: true, phone: true, parentPhone: true },
+  })
+  if (!recipient) {
+    throw new Error('المستلم غير موجود')
+  }
+  const recipientPhone = recipient.parentPhone ?? recipient.phone
 
   // اختار القالب المناسب حسب نوع الإشعار
   const d = payload.templateData
@@ -84,15 +103,19 @@ export async function sendNotification(payload: NotificationPayload) {
         body: `تمت إضافة درجة جديدة للطالب ${d.studentName as string}`,
       }
       break
+    default:
+      throw new Error('نوع إشعار غير معروف')
   }
 
-  // أرسل عبر القناة المناسبة
+  // أرسل عبر القناة المناسبة — رقم المستلم مشتق من DB لا من الـ client
+  // TODO: enforce Tenant.smsQuota here (decrement/check) once a quota-usage
+  // counter is tracked per tenant; currently smsQuota is a static cap only.
   let success = payload.channel === 'IN_APP' || payload.channel === 'PUSH'
   try {
     if (payload.channel === 'SMS') {
-      success = await sendSMS(payload.recipientPhone as string, template.body)
+      success = await sendSMS(recipientPhone, template.body)
     } else if (payload.channel === 'WHATSAPP') {
-      success = await sendWhatsApp(payload.recipientPhone as string, template.body)
+      success = await sendWhatsApp(recipientPhone, template.body)
     }
   } catch {
     success = false
@@ -102,11 +125,11 @@ export async function sendNotification(payload: NotificationPayload) {
   await db.notification.create({
     data: {
       tenantId: tenant.id,
-      userId: payload.userId,
+      userId: recipient.id,
       type: payload.type,
       message: template.body,
       channel: payload.channel === 'IN_APP' ? 'PUSH' : payload.channel,
-      recipientPhone: payload.recipientPhone ?? '',
+      recipientPhone,
       status: success ? 'SENT' : 'FAILED',
       sentAt: success ? new Date() : null,
     },

@@ -1,3 +1,4 @@
+import { requireSuperAdminPage } from "@/lib/platform-admin";
 import { AdminFinanceSelect } from "@/modules/admin/components/AdminFinanceSelect";
 import { AdminWalletAdjustmentForm } from "@/modules/admin/components/AdminWalletAdjustmentForm";
 import {
@@ -88,6 +89,8 @@ function getWalletRoleLabel(role: string) {
 }
 
 export default async function AdminFinancePage({ searchParams }: PageProps) {
+  await requireSuperAdminPage();
+
   const params = (await searchParams) ?? {};
   const subscriptionStatusRaw = params.subscriptionStatus?.trim() ?? "";
   const paymentStatusRaw = params.paymentStatus?.trim() ?? "";

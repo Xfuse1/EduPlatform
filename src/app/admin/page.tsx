@@ -4,9 +4,12 @@ import Link from "next/link";
 import { Activity, ArrowUpLeft, Building2, CreditCard, RefreshCw, ShieldAlert, Users } from "lucide-react";
 import type { ComponentType } from "react";
 
+import { requireSuperAdminPage } from "@/lib/platform-admin";
 import { getPlatformOverview, getPlatformTenants, getPlatformUsers } from "@/modules/admin/queries";
 
 export default async function SuperAdminDashboardPage() {
+  await requireSuperAdminPage();
+
   const [overview, tenantsResult, usersResult] = await Promise.all([
     getPlatformOverview(),
     getPlatformTenants({ limit: 6 }),

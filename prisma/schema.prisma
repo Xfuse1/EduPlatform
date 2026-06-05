@@ -42,6 +42,7 @@ model Tenant {
   walletTransactions    WalletTransaction[]
   walletWithdrawals     WalletWithdrawal[]
   financialAuditLogs    FinancialAuditLog[]
+  authSessions          AuthSession[]
 
   @@index([slug])
 }
@@ -273,10 +274,12 @@ model AuthSession {
   expiresAt    DateTime
   createdAt    DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([token])
   @@index([refreshToken])
   @@index([expiresAt])
+  @@index([tenantId])
 }
 
 model Assignment {
@@ -380,6 +383,10 @@ model ExamSubmission {
   updatedAt      DateTime @updatedAt
   exam           Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
   student        User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, studentId])
+  @@index([examId])
+  @@index([studentId])
 }
 
 enum Plan {

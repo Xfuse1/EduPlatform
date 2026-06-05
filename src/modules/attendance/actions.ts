@@ -1,6 +1,10 @@
 'use server'
 import { requireTenant } from '@/lib/tenant'
 import { requireAuth } from '@/lib/auth'
+import { requireRole, STAFF_ROLES } from '@/lib/permissions'
+import { getTeacherScopeUserId } from '@/lib/teacher-access'
+import { buildDateTime } from '@/lib/schedule'
+import { getSessionEndDate } from '@/modules/attendance/sessionStatus'
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import {
@@ -11,66 +15,8 @@ import {
 import { sendNotification } from '@/modules/notifications/actions'
 
 // ── B-01 + B-06: Attendance Actions (mutations — 'use server') ───────────────
-
-/**
- * يولّد حصص اليوم الحالي تلقائياً للمجموعات النشطة
- * يتحقق من عدم وجود حصة مسبقاً (idempotent)
- * ⚠️ لازم تتنادى قبل getTodaySessions() في الـ page
- */
-export async function generateTodaySessions() {
-  const tenant = await requireTenant()
-
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const todayEnd = new Date(today)
-  todayEnd.setHours(23, 59, 59, 999)
-
-  const dayNames = [
-    'sunday',
-    'monday',
-    'tuesday',
-    'wednesday',
-    'thursday',
-    'friday',
-    'saturday',
-  ]
-  const todayName = dayNames[new Date().getDay()]
-
-  const existingSessions = (await db.session.findMany({
-    where: {
-      tenantId: tenant.id,
-      date: { gte: today, lte: todayEnd },
-    },
-    select: { groupId: true },
-  })) as Array<{ groupId: string }>
-  const existingGroupIds = new Set(existingSessions.map((s) => s.groupId))
-
-  const groups = (await db.group.findMany({
-    where: {
-      tenantId: tenant.id,
-      isActive: true,
-      days: { has: todayName },
-    },
-  })) as Array<{ id: string; timeStart: string; timeEnd: string }>
-
-  if (groups.length === 0) return
-
-  const newSessions = groups
-    .filter((group) => !existingGroupIds.has(group.id))
-    .map((group) => ({
-      tenantId: tenant.id,
-      groupId: group.id,
-      date: today,
-      timeStart: group.timeStart,
-      timeEnd: group.timeEnd,
-      status: 'SCHEDULED' as const,
-      type: 'REGULAR' as const,
-    }))
-
-  if (newSessions.length > 0) {
-    await db.session.createMany({ data: newSessions, skipDuplicates: true })
-  }
-}
+// ملاحظة: توليد حصص اليوم يتم عبر getTodaySessions() (upsert على نفس مفتاح
+// التاريخ القانوني) لتفادي اختلاف مفتاح @@unique([groupId, date]).
 
 /**
  * تسجيل حضور bulk لحصة كاملة + إرسال إشعارات (B-06)
@@ -85,6 +31,7 @@ export async function markAttendance(
 ) {
   const tenant = await requireTenant()
   const user = await requireAuth()
+  requireRole(user.role, STAFF_ROLES)
 
   const validated = attendanceBulkSchema.parse({ sessionId, records })
 
@@ -95,9 +42,28 @@ export async function markAttendance(
   })
   if (!session) throw new Error('الحصة غير موجودة أو لا تنتمي لهذا الحساب')
 
+  // المعلّم يقتصر على مجموعاته فقط
+  const scopeUserId = getTeacherScopeUserId(tenant, user)
+  if (scopeUserId && session.group.teacherId !== scopeUserId) {
+    throw new Error('الحصة غير موجودة أو لا تنتمي لهذا الحساب')
+  }
+
+  // استبعاد أي طالب ليس عضواً نشطاً في مجموعة الحصة
+  const activeMembers = await db.groupStudent.findMany({
+    where: { groupId: session.groupId, status: 'ACTIVE' },
+    select: { studentId: true },
+  })
+  const activeStudentIds = new Set(activeMembers.map((m) => m.studentId))
+  const validRecords = validated.records.filter((record) =>
+    activeStudentIds.has(record.studentId),
+  )
+  if (validRecords.length === 0) {
+    throw new Error('لا يوجد طلاب صالحون لتسجيل الحضور في هذه الحصة')
+  }
+
   // Bulk upsert
   await Promise.all(
-    validated.records.map((record) =>
+    validRecords.map((record) =>
       db.attendance.upsert({
         where: {
           sessionId_studentId: {
@@ -135,7 +101,7 @@ export async function markAttendance(
   // ── B-06: إرسال إشعارات — fire & forget (لا يوقف الـ response) ──────────
   // ✅ session.group موجود لأننا عملنا include: { group: true } فوق
   void Promise.allSettled(
-    validated.records.map(async (record) => {
+    validRecords.map(async (record) => {
       const student = await db.user.findUnique({
         where: { id: record.studentId },
         select: { parentPhone: true, name: true },
@@ -179,12 +145,18 @@ export async function createManualSession(
   type: 'MAKEUP' | 'EXTRA',
 ) {
   const tenant = await requireTenant()
-  await requireAuth()
+  const user = await requireAuth()
+  requireRole(user.role, STAFF_ROLES)
 
   const validated = manualSessionSchema.parse({ groupId, date, type })
 
+  const scopeUserId = getTeacherScopeUserId(tenant, user)
   const group = await db.group.findFirst({
-    where: { id: validated.groupId, tenantId: tenant.id },
+    where: {
+      id: validated.groupId,
+      tenantId: tenant.id,
+      ...(scopeUserId ? { teacherId: scopeUserId } : {}),
+    },
   })
   if (!group) throw new Error('المجموعة غير موجودة أو لا تنتمي لهذا الحساب')
 
@@ -228,15 +200,49 @@ export async function syncOfflineRecords(
 ) {
   const tenant = await requireTenant()
   const user = await requireAuth()
+  requireRole(user.role, STAFF_ROLES)
 
   const validated = offlineSyncSchema.parse(records)
+
+  const scopeUserId = getTeacherScopeUserId(tenant, user)
 
   const results = await Promise.allSettled(
     validated.map(async (record) => {
       const session = await db.session.findFirst({
         where: { id: record.sessionId, tenantId: tenant.id },
+        include: { group: { select: { teacherId: true } } },
       })
-      if (!session) return
+      if (!session) throw new Error('الحصة غير موجودة أو لا تنتمي لهذا الحساب')
+
+      // المعلّم يقتصر على مجموعاته فقط
+      if (scopeUserId && session.group.teacherId !== scopeUserId) {
+        throw new Error('الحصة غير موجودة أو لا تنتمي لهذا الحساب')
+      }
+
+      // لا يُسمح بمزامنة سجلات لحصة مكتملة
+      if (session.status === 'COMPLETED') {
+        throw new Error('لا يمكن مزامنة سجلات لحصة مكتملة')
+      }
+
+      // استبعاد أي طالب ليس عضواً نشطاً في مجموعة الحصة
+      const membership = await db.groupStudent.findFirst({
+        where: {
+          groupId: session.groupId,
+          studentId: record.studentId,
+          status: 'ACTIVE',
+        },
+        select: { studentId: true },
+      })
+      if (!membership) {
+        throw new Error('الطالب ليس عضواً نشطاً في مجموعة الحصة')
+      }
+
+      // تثبيت markedAt داخل نطاق الحصة (من البداية حتى النهاية)
+      const sessionStart = buildDateTime(session.date, session.timeStart)
+      const sessionEnd = getSessionEndDate(session)
+      let markedAt = new Date(record.markedAt)
+      if (sessionStart && markedAt < sessionStart) markedAt = sessionStart
+      if (sessionEnd && markedAt > sessionEnd) markedAt = sessionEnd
 
       await db.attendance.upsert({
         where: {
@@ -247,6 +253,8 @@ export async function syncOfflineRecords(
         },
         update: {
           status: record.status,
+          markedById: user.id,
+          markedAt,
           synced: true,
         },
         create: {
@@ -257,7 +265,7 @@ export async function syncOfflineRecords(
           status: record.status,
           markedById: user.id,
           method: 'MANUAL',
-          markedAt: new Date(record.markedAt),
+          markedAt,
           synced: true,
         },
       })

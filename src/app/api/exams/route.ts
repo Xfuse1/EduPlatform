@@ -1,14 +1,28 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { checkRole, STAFF_ROLES } from "@/lib/permissions";
 
 export async function POST(req: Request) {
   const user = await getCurrentUser();
   if (!user) return new NextResponse("Unauthorized", { status: 401 });
+  if (!checkRole(user.role, STAFF_ROLES)) return new NextResponse("Forbidden", { status: 403 });
 
   try {
     const { title, description, groupId, startAt, duration, maxGrade, questions } =
       await req.json();
+
+    // Validate the target group belongs to this tenant (and to the teacher when scoped).
+    const isTeacher = user.role === "TEACHER";
+    const group = await db.group.findFirst({
+      where: {
+        id: groupId,
+        tenantId: user.tenantId,
+        ...(isTeacher ? { teacherId: user.id } : {}),
+      },
+      select: { id: true },
+    });
+    if (!group) return new NextResponse("Forbidden", { status: 403 });
 
     const exam = await db.exam.create({
       data: {

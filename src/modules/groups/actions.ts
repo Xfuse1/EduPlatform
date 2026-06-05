@@ -323,6 +323,25 @@ export async function archiveGroup(groupId: string) {
     throw new Error("غير مسموح لك بأرشفة المجموعة");
   }
 
+  const existingGroup = await db.group.findFirst({
+    where: {
+      id: groupId,
+      tenantId: tenant.id,
+    },
+    select: {
+      id: true,
+      teacherId: true,
+    },
+  });
+
+  if (!existingGroup) {
+    throw new Error("المجموعة غير موجودة");
+  }
+
+  if (user.role === "TEACHER" && existingGroup.teacherId && existingGroup.teacherId !== user.id) {
+    throw new Error("لا يمكنك أرشفة مجموعة لا تتبعك");
+  }
+
   const group = await db.group.update({
     where: {
       id: groupId,

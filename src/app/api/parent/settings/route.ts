@@ -2,6 +2,44 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 
+// Strict allowlist for stored avatar URLs: only a relative path under
+// /uploads/ OR an absolute URL whose host matches the configured Supabase
+// storage host / app host. Rejects data:, javascript:, and external hosts.
+function isAllowedAvatarUrl(value: string) {
+  const url = value.trim();
+
+  // Relative path served from our own public/uploads directory.
+  if (url.startsWith("/uploads/") && !url.startsWith("//")) {
+    return true;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    return false;
+  }
+
+  const allowedHosts = new Set<string>();
+  for (const candidate of [
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_APP_URL,
+  ]) {
+    if (!candidate) continue;
+    try {
+      allowedHosts.add(new URL(candidate).host);
+    } catch {
+      // ignore malformed env values
+    }
+  }
+
+  return allowedHosts.has(parsed.host);
+}
+
 export async function GET() {
   const user = await getCurrentUser();
   if (!user || user.role !== "PARENT") {
@@ -27,6 +65,14 @@ export async function PATCH(req: Request) {
 
     if (name && (typeof name !== "string" || name.trim().length < 2)) {
       return NextResponse.json({ error: "الاسم يجب أن يكون حرفين على الأقل" }, { status: 400 });
+    }
+
+    // Validate avatarUrl against the strict allowlist before persisting. Allow
+    // null/empty to clear the avatar, but reject any unsafe/external URL.
+    if (avatarUrl !== undefined && avatarUrl !== null && avatarUrl !== "") {
+      if (typeof avatarUrl !== "string" || !isAllowedAvatarUrl(avatarUrl)) {
+        return NextResponse.json({ error: "رابط الصورة غير صحيح" }, { status: 400 });
+      }
     }
 
     const updated = await db.user.update({

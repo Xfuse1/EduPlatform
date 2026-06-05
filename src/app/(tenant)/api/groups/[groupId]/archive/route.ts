@@ -1,7 +1,9 @@
 import type { NextRequest } from 'next/server'
 
-import { UnauthorizedError } from '@/lib/auth'
-import { errorResponse, successResponse } from '@/lib/api-response'
+import { requireAuth, UnauthorizedError } from '@/lib/auth'
+import { errorResponse, forbidden, successResponse } from '@/lib/api-response'
+import { checkRole, STAFF_ROLES } from '@/lib/permissions'
+import { requireTenant } from '@/lib/tenant'
 import { archiveGroup } from '@/modules/groups/actions'
 
 type RouteProps = {
@@ -10,9 +12,18 @@ type RouteProps = {
   }>
 }
 
-export async function POST(_request: NextRequest, { params }: RouteProps) {
+export async function POST(request: NextRequest, { params }: RouteProps) {
   try {
-    const { groupId } = await params
+    const [{ groupId }, , user] = await Promise.all([
+      params,
+      requireTenant(),
+      requireAuth(request),
+    ])
+
+    if (!checkRole(user.role, STAFF_ROLES)) {
+      return forbidden()
+    }
+
     const group = await archiveGroup(groupId)
     return successResponse(group)
   } catch (error) {
@@ -20,10 +31,6 @@ export async function POST(_request: NextRequest, { params }: RouteProps) {
       return errorResponse('UNAUTHORIZED', error.message, 401)
     }
 
-    return errorResponse(
-      'GROUP_ARCHIVE_FAILED',
-      error instanceof Error ? error.message : 'تعذر أرشفة المجموعة',
-      400,
-    )
+    return errorResponse('GROUP_ARCHIVE_FAILED', 'تعذر أرشفة المجموعة', 400)
   }
 }

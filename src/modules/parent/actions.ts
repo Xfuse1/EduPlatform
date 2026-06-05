@@ -59,17 +59,12 @@ async function resolveTargetTenant(tenantSlug?: string) {
   return targetTenant;
 }
 
-function getLookupTenantScopeFilter(targetTenantId: string, tenantSlug?: string) {
-  if (tenantSlug) {
-    return {
-      tenantId: targetTenantId,
-    };
-  }
-
+function getLookupTenantScopeFilter(targetTenantId: string) {
+  // Always scope the student lookup to a single resolved tenant (the current
+  // tenant when no slug is provided, or the slug-resolved tenant) so we never
+  // leak other tenants' student name/grade/center for non-matching probes.
   return {
-    tenant: {
-      isActive: true,
-    },
+    tenantId: targetTenantId,
   };
 }
 
@@ -103,7 +98,7 @@ export async function linkChildToParent(input: {
     const gradeLevel = parsed.data.gradeLevel.trim();
     const tenantSlug = parsed.data.tenantSlug?.trim().toLowerCase();
     const targetTenant = await resolveTargetTenant(tenantSlug);
-    const lookupTenantScopeFilter = getLookupTenantScopeFilter(targetTenant.id, tenantSlug);
+    const lookupTenantScopeFilter = getLookupTenantScopeFilter(targetTenant.id);
 
     const matchingStudents = await db.user.findMany({
       where: {
@@ -327,11 +322,13 @@ export async function removeChildFromParent(input: { studentId: string }) {
         },
       },
       select: {
+        id: true,
         student: {
           select: {
             id: true,
             name: true,
             role: true,
+            tenantId: true,
           },
         },
       },
@@ -351,18 +348,32 @@ export async function removeChildFromParent(input: { studentId: string }) {
       };
     }
 
+    // The student User row is shared across tenants/parents, so we never
+    // hard-delete it here. Remove only the link between this parent and the
+    // child, and soft-disable the child's enrollments inside the parent's own
+    // tenant so we never touch other tenants' enrollment data.
     await db.$transaction(async (tx) => {
-      await tx.examSubmission.deleteMany({
+      await tx.parentStudent.delete({
         where: {
-          studentId: relation.student.id,
+          id: relation.id,
         },
       });
 
-      await tx.user.delete({
-        where: {
-          id: relation.student.id,
-        },
-      });
+      if (relation.student.tenantId === parent.tenantId) {
+        await tx.groupStudent.updateMany({
+          where: {
+            studentId: relation.student.id,
+            status: { in: ["ACTIVE", "PENDING", "WAITLIST"] },
+            group: {
+              tenantId: parent.tenantId,
+            },
+          },
+          data: {
+            status: "DROPPED",
+            droppedAt: new Date(),
+          },
+        });
+      }
     });
 
     revalidatePath(ROUTES.center.dashboard);
@@ -374,7 +385,7 @@ export async function removeChildFromParent(input: { studentId: string }) {
 
     return {
       success: true,
-      message: `تم حذف ${relation.student.name} وجميع بياناته من السنتر.`,
+      message: `تم إلغاء ربط ${relation.student.name} بحسابك.`,
     };
   } catch (error) {
     return {
@@ -632,6 +643,15 @@ export async function enrollChildInGroup(input: { studentId: string; groupId: st
       return {
         success: false,
         message: "المجموعة المطلوبة غير متاحة.",
+      };
+    }
+
+    // Only allow enrolling (and charging) into groups that belong to the
+    // child's own home tenant — never into an arbitrary tenant's group.
+    if (group.tenantId !== relation.student.tenantId) {
+      return {
+        success: false,
+        message: "هذه المجموعة لا تتبع نفس السنتر الخاص بالابن.",
       };
     }
 

@@ -147,12 +147,15 @@ export async function POST(req: Request) {
     const isGuest = !session.group.groupStudents.some((gs) => gs.studentId === user.id);
 
     await db.$transaction(async (tx) => {
-      await ensureQrBillingBeforeAttendance({
-        tenantId: tenant.id,
-        sessionId: session.id,
-        studentId: user.id,
-        tx,
-      });
+      // الضيوف (غير الأعضاء النشطين) يُسجَّل حضورهم بدون أي خصم من المحفظة
+      if (!isGuest) {
+        await ensureQrBillingBeforeAttendance({
+          tenantId: tenant.id,
+          sessionId: session.id,
+          studentId: user.id,
+          tx,
+        });
+      }
 
       await tx.attendance.upsert({
         where: {
@@ -179,12 +182,14 @@ export async function POST(req: Request) {
         },
       });
 
-      await incrementMonthlyConsumption({
-        tenantId: tenant.id,
-        groupId: session.group.id,
-        studentId: user.id,
-        tx,
-      });
+      if (!isGuest) {
+        await incrementMonthlyConsumption({
+          tenantId: tenant.id,
+          groupId: session.group.id,
+          studentId: user.id,
+          tx,
+        });
+      }
     });
 
     return NextResponse.json({

@@ -204,9 +204,11 @@ export async function getStudentScheduleItems(tenantId: string, studentId: strin
       status: EnrollmentStatus.ACTIVE,
       student: {
         role: UserRole.STUDENT,
+        tenantId,
       },
       group: {
         isActive: true,
+        tenantId,
       },
     },
     select: {

@@ -80,7 +80,20 @@ export async function verifyFirebasePhoneIdToken(idToken: string) {
   try {
     decodedToken = await getAuth(app).verifyIdToken(idToken);
   } catch (error) {
-    if (process.env.NODE_ENV !== "production" && isLocalCertificateVerificationError(error)) {
+    // SECURITY: never accept an unsigned/undecoded token for authentication.
+    // The insecure decode fallback is only permitted on a local developer
+    // machine that BOTH runs in development AND explicitly opts in. It can
+    // never trigger in any deployed environment (NODE_ENV !== 'development'),
+    // closing the auth-bypass where a self-signed-cert error let a forged JWT
+    // authenticate as any user.
+    if (
+      process.env.NODE_ENV === "development" &&
+      process.env.ALLOW_INSECURE_FIREBASE_DECODE === "true" &&
+      isLocalCertificateVerificationError(error)
+    ) {
+      console.warn(
+        "⚠️ verifyFirebasePhoneIdToken: using INSECURE unsigned-JWT decode (dev opt-in). Never enable in production.",
+      );
       return decodeFirebasePhoneFromJwt(idToken);
     }
 

@@ -107,8 +107,10 @@ export async function registerStudentAction(formData: FormData): Promise<ActionR
     return { success: false, message: nameResult.error.issues[0]?.message ?? "الاسم غير صحيح" };
   }
 
-  const actualTenantId = formData.get("actualTenantId");
-  const tenantId = (typeof actualTenantId === "string" && actualTenantId) ? actualTenantId : tenant.id;
+  // SECURITY: bind the new account to the server-resolved tenant only. The
+  // client-supplied actualTenantId is ignored — OTP proves phone ownership,
+  // not authorization to provision an account inside an arbitrary tenant.
+  const tenantId = tenant.id;
 
   try {
     const verified = await verifyFirebasePhoneIdToken(idTokenResult.data);
@@ -189,8 +191,9 @@ export async function verifyOTPAction(formData: FormData): Promise<ActionResult>
     };
   }
 
-  const actualTenantId = formData.get("actualTenantId");
-  const tenantId = (typeof actualTenantId === "string" && actualTenantId) ? actualTenantId : tenant.id;
+  // SECURITY: authenticate strictly within the server-resolved tenant; never
+  // trust a client-supplied tenant id (prevented arbitrary-tenant session minting).
+  const tenantId = tenant.id;
 
   try {
     const result = await verifyOTP(phoneResult.data, idTokenResult.data, tenantId);

@@ -9,6 +9,8 @@ import { db } from "@/lib/db";
 import { normalizeEgyptPhone } from "@/lib/phone";
 import { requireTenant } from "@/lib/tenant";
 import { requireAuth } from "@/lib/auth";
+import { requireRole, STAFF_ROLES, CENTER_ADMIN_ROLES } from "@/lib/permissions";
+import { getTeacherScopeUserId } from "@/lib/teacher-access";
 import { chargeGroupEnrollmentIfNeeded } from "@/modules/groups/billing";
 import { canAddStudent } from "@/lib/subscription-helpers";
 
@@ -172,8 +174,27 @@ async function syncParentLink(parentId: string, studentId: string) {
   });
 }
 
-async function syncGroupMemberships(tenantId: string, studentId: string, groupIds: string[]) {
+async function assertStudentInTenant(tenantId: string, studentId: string) {
+  const student = await db.user.findFirst({
+    where: { id: studentId, tenantId, role: "STUDENT" },
+    select: { id: true },
+  });
+
+  return Boolean(student);
+}
+
+async function syncGroupMemberships(
+  tenantId: string,
+  studentId: string,
+  groupIds: string[],
+  teacherScopeUserId: string | null = null,
+) {
   const desiredGroupIds = [...new Set(groupIds.filter(Boolean))];
+
+  // أمان: تأكد أن الطالب يخص هذا الـ tenant قبل التعديل أو الخصم
+  if (!(await assertStudentInTenant(tenantId, studentId))) {
+    return;
+  }
 
   const existingEnrollments = await db.groupStudent.findMany({
     where: {
@@ -215,6 +236,7 @@ async function syncGroupMemberships(tenantId: string, studentId: string, groupId
         id: groupId,
         tenantId,
         isActive: true,
+        ...(teacherScopeUserId ? { teacherId: teacherScopeUserId } : {}),
       },
       select: {
         id: true,
@@ -503,13 +525,21 @@ export async function bulkImport(_tenantId: string, records: Record<string, unkn
 
 export async function syncStudentGroups(studentId: string, groupIds: string[]) {
   const tenant = await requireTenant();
-  await syncGroupMemberships(tenant.id, studentId, groupIds);
+  const user = await requireAuth();
+  requireRole(user.role, STAFF_ROLES);
+  const teacherScopeUserId = getTeacherScopeUserId(tenant, user);
+
+  await syncGroupMemberships(tenant.id, studentId, groupIds, teacherScopeUserId);
   revalidatePath(`/teacher/students/${studentId}`);
   revalidatePath("/teacher/groups");
 }
 
 export async function enrollInGroup(studentId: string, groupId: string) {
   const tenant = await requireTenant();
+  const user = await requireAuth();
+  requireRole(user.role, STAFF_ROLES);
+  const teacherScopeUserId = getTeacherScopeUserId(tenant, user);
+
   const currentGroups = await db.groupStudent.findMany({
     where: {
       studentId,
@@ -525,18 +555,27 @@ export async function enrollInGroup(studentId: string, groupId: string) {
     },
   });
 
-  await syncGroupMemberships(tenant.id, studentId, [...currentGroups.map((group) => group.groupId), groupId]);
+  await syncGroupMemberships(
+    tenant.id,
+    studentId,
+    [...currentGroups.map((group) => group.groupId), groupId],
+    teacherScopeUserId,
+  );
   revalidatePath("/teacher/groups");
 }
 
 export async function removeFromGroup(studentId: string, groupId: string) {
   const tenant = await requireTenant();
+  const user = await requireAuth();
+  requireRole(user.role, STAFF_ROLES);
+  const teacherScopeUserId = getTeacherScopeUserId(tenant, user);
 
-  // ✅ تأكد أن المجموعة تنتمي لهذا الـ tenant (أمان)
+  // ✅ تأكد أن المجموعة تنتمي لهذا الـ tenant (أمان) مع ملكية المعلم
   const group = await db.group.findFirst({
     where: {
       id: groupId,
       tenantId: tenant.id,
+      ...(teacherScopeUserId ? { teacherId: teacherScopeUserId } : {}),
     },
     select: { id: true },
   });
@@ -545,13 +584,16 @@ export async function removeFromGroup(studentId: string, groupId: string) {
     return { success: false, message: "المجموعة غير موجودة" };
   }
 
+  // ✅ تأكد أن الطالب يخص هذا الـ tenant
+  if (!(await assertStudentInTenant(tenant.id, studentId))) {
+    return { success: false, message: "الطالب غير موجود" };
+  }
+
   // ✅ حذف السجل نهائياً
-  await db.groupStudent.delete({
+  await db.groupStudent.deleteMany({
     where: {
-      groupId_studentId: {
-        groupId,
-        studentId,
-      },
+      groupId,
+      studentId,
     },
   });
 
@@ -563,10 +605,15 @@ export async function removeFromGroup(studentId: string, groupId: string) {
 }
 
 
-export async function deleteStudent(tenantId: string, studentId: string) {
+export async function deleteStudent(_tenantId: string, studentId: string) {
+  // أمان: اشتقاق الـ tenant من الجلسة وتجاهل الوسيط القادم من العميل
+  const tenant = await requireTenant();
+  const user = await requireAuth();
+  requireRole(user.role, CENTER_ADMIN_ROLES);
+
   // 1. تحقق من ملكية الحساب للـ tenant
   const student = await db.user.findFirst({
-    where: { id: studentId, tenantId, role: "STUDENT" },
+    where: { id: studentId, tenantId: tenant.id, role: "STUDENT" },
   });
 
   if (!student) {
@@ -694,11 +741,15 @@ export async function findStudentByPhone(phone: string): Promise<{
 export async function enrollExistingStudent(studentId: string, groupId: string): Promise<{ success: boolean; message?: string }> {
   try {
     const tenant = await requireTenant();
+    const user = await requireAuth();
+    requireRole(user.role, STAFF_ROLES);
+    const teacherScopeUserId = getTeacherScopeUserId(tenant, user);
 
     const [student, group] = await Promise.all([
       db.user.findFirst({
         where: {
           id: studentId,
+          tenantId: tenant.id,
           role: "STUDENT",
           isActive: true,
         },
@@ -709,6 +760,7 @@ export async function enrollExistingStudent(studentId: string, groupId: string):
           id: groupId,
           tenantId: tenant.id,
           isActive: true,
+          ...(teacherScopeUserId ? { teacherId: teacherScopeUserId } : {}),
         },
         select: { id: true },
       }),
@@ -775,13 +827,35 @@ export async function enrollExistingStudent(studentId: string, groupId: string):
 export async function approveEnrollment(groupId: string, studentId: string) {
   const tenant = await requireTenant()
   const user = await requireAuth()
-  if (!['TEACHER', 'ASSISTANT'].includes(user.role)) 
-    throw new Error('غير مصرح')
+  requireRole(user.role, STAFF_ROLES)
+  const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
+
+  // تحقق من ملكية المجموعة للـ tenant (وملكية المعلم) قبل التعديل
+  const group = await db.group.findFirst({
+    where: {
+      id: groupId,
+      tenantId: tenant.id,
+      ...(teacherScopeUserId ? { teacherId: teacherScopeUserId } : {}),
+    },
+    select: { id: true, maxCapacity: true },
+  })
+
+  if (!group) {
+    return { success: false, message: 'المجموعة غير موجودة' }
+  }
+
+  // إعادة التحقق من السعة قبل التفعيل
+  const activeCount = await db.groupStudent.count({
+    where: { groupId, status: 'ACTIVE' },
+  })
+
+  if (activeCount >= group.maxCapacity) {
+    return { success: false, message: 'المجموعة ممتلئة' }
+  }
 
   await db.groupStudent.update({
     where: {
       groupId_studentId: { groupId, studentId },
-      group: { tenantId: tenant.id }
     },
     data: { status: 'ACTIVE' }
   })
@@ -793,13 +867,26 @@ export async function approveEnrollment(groupId: string, studentId: string) {
 export async function rejectEnrollment(groupId: string, studentId: string) {
   const tenant = await requireTenant()
   const user = await requireAuth()
-  if (!['TEACHER', 'ASSISTANT'].includes(user.role)) 
-    throw new Error('غير مصرح')
+  requireRole(user.role, STAFF_ROLES)
+  const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
+
+  // تحقق من ملكية المجموعة للـ tenant (وملكية المعلم) قبل التعديل
+  const group = await db.group.findFirst({
+    where: {
+      id: groupId,
+      tenantId: tenant.id,
+      ...(teacherScopeUserId ? { teacherId: teacherScopeUserId } : {}),
+    },
+    select: { id: true },
+  })
+
+  if (!group) {
+    return { success: false, message: 'المجموعة غير موجودة' }
+  }
 
   await db.groupStudent.update({
     where: {
       groupId_studentId: { groupId, studentId },
-      group: { tenantId: tenant.id }
     },
     data: { status: 'DROPPED' }
   })

@@ -2,7 +2,8 @@
 
 import { EnrollmentStatus, UserRole } from '@/generated/client'
 import { requireAuth } from '@/lib/auth'
-import { errorResponse, successResponse } from '@/lib/api-response'
+import { errorResponse, forbidden, successResponse } from '@/lib/api-response'
+import { checkRole, STAFF_ROLES } from '@/lib/permissions'
 import { db } from '@/lib/db'
 import { requireTenant } from '@/lib/tenant'
 import { debitStudentBalance } from '@/modules/payments/actions'
@@ -15,6 +16,16 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const studentId = searchParams.get('studentId') ?? user.id
     let walletTenantId = tenant.id
+
+    // STUDENTs may only read their own balance; staff may read any in the tenant;
+    // PARENTs are validated against their linked child below.
+    if (
+      studentId !== user.id &&
+      user.role !== UserRole.PARENT &&
+      !checkRole(user.role, STAFF_ROLES)
+    ) {
+      return forbidden()
+    }
 
     if (user.role === UserRole.PARENT && studentId !== user.id) {
       const linkedChild = await db.parentStudent.findFirst({
@@ -65,7 +76,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await requireAuth(req)
+    const user = await requireAuth(req)
+    // Staff-only: this endpoint triggers a wallet debit against a student balance.
+    if (!checkRole(user.role, STAFF_ROLES)) return forbidden()
     const body = await req.json()
 
     const result = await debitStudentBalance({

@@ -1,4 +1,7 @@
+import { redirect } from 'next/navigation'
+
 import { requireAuth } from '@/lib/auth'
+import { checkRole, STAFF_ROLES } from '@/lib/permissions'
 import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
 import { getOverdueStudents } from '@/modules/payments/queries'
@@ -9,6 +12,10 @@ import { OverdueList } from '@/modules/payments/components/OverdueList'
 export default async function OverduePage() {
   const tenant = await requireTenant()
   const user = await requireAuth()
+  // Staff-only page: send students/parents back to their own dashboard.
+  if (!checkRole(user.role, STAFF_ROLES)) {
+    redirect(user.role === 'PARENT' ? '/parent' : '/student')
+  }
   const teacherScopeUserId = getTeacherScopeUserId(tenant, user)
   const overduePayments = await getOverdueStudents(tenant.id, teacherScopeUserId ?? undefined)
 

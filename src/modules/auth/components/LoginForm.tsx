@@ -112,7 +112,6 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
   const [step, setStep] = useState<LoginStep>("phone");
   const [phone, setPhone] = useState("");
   const [pin, setPin] = useState("");
-  const [actualTenantId, setActualTenantId] = useState<string | undefined>();
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const [sendingOtp, setSendingOtp] = useState(false);
@@ -131,22 +130,20 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
     setError("");
 
     startTransition(async () => {
-      const { hasPin, exists, actualTenantId: tid } = await checkUserPin(phone);
+      const { hasPin, exists } = await checkUserPin(phone);
 
       if (!exists) {
         setShowRegisterPrompt(true);
         return;
       }
 
-      if (tid) setActualTenantId(tid);
-
       if (hasPin) {
         setStep("pin");
         return;
       }
 
-      // No PIN → go OTP flow (pass tid directly, don't rely on state update)
-      await sendOtp(tid);
+      // No PIN → go OTP flow within the current tenant
+      await sendOtp();
     });
   };
 
@@ -182,7 +179,7 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
     setError("");
 
     startTransition(async () => {
-      const result = await verifyPinAction(phone, currentPin, actualTenantId);
+      const result = await verifyPinAction(phone, currentPin);
       if (!result.success) {
         setError(result.message ?? "الـ PIN غير صحيح");
         setPin("");
@@ -391,7 +388,7 @@ export function LoginForm({ tenant, nextPath, isMainDomain = false }: {
 
         <button
           type="button"
-          onClick={async () => { setPin(""); setError(""); setSendingOtp(true); await sendOtp(actualTenantId); setSendingOtp(false); }}
+          onClick={async () => { setPin(""); setError(""); setSendingOtp(true); await sendOtp(); setSendingOtp(false); }}
           disabled={sendingOtp}
           className="w-full text-center text-sm text-sky-600 dark:text-sky-300 transition hover:text-sky-700 dark:hover:text-sky-200 hover:underline disabled:cursor-wait disabled:opacity-50"
         >

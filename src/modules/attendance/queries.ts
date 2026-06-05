@@ -16,13 +16,14 @@ function getTodayInfo() {
   };
 }
 
-export const getTodaySessions = cache(async (tenantId: string) => {
+export const getTodaySessions = cache(async (tenantId: string, scopeUserId?: string) => {
   try {
     const today = getTodayInfo();
     const groups = await db.group.findMany({
       where: {
         tenantId,
         isActive: true,
+        ...(scopeUserId ? { teacherId: scopeUserId } : {}),
       },
       include: {
         groupStudents: {
@@ -217,10 +218,10 @@ export const getAttendanceSessionsList = cache(async (tenantId: string) => {
 
   return [];
 });
-export const getSessionWithStudents = cache(async (sessionId: string) => {
+export const getSessionWithStudents = cache(async (sessionId: string, tenantId: string) => {
   try {
-    const session = await db.session.findUnique({
-      where: { id: sessionId },
+    const session = await db.session.findFirst({
+      where: { id: sessionId, tenantId },
       include: {
         group: {
           include: {
@@ -294,10 +295,13 @@ export const getSessionWithStudents = cache(async (sessionId: string) => {
     return null;
   }
 });
-export const getAllAttendanceRecords = cache(async (tenantId: string) => {
+export const getAllAttendanceRecords = cache(async (tenantId: string, teacherId?: string) => {
   try {
     const records = await db.attendance.findMany({
-      where: { tenantId },
+      where: {
+        tenantId,
+        ...(teacherId ? { session: { group: { teacherId } } } : {}),
+      },
       include: {
         student: { select: { name: true } },
         session: { select: { date: true, group: { select: { name: true } } } },
@@ -320,7 +324,7 @@ export const getAllAttendanceRecords = cache(async (tenantId: string) => {
   }
 });
 
-export const getAttendanceReport = cache(async (tenantId: string, month: string, _teacherId?: string) => {
+export const getAttendanceReport = cache(async (tenantId: string, month: string, teacherId?: string) => {
   const monthStart = new Date(`${month}-01T00:00:00.000Z`);
   const monthEnd = new Date(monthStart);
   monthEnd.setMonth(monthEnd.getMonth() + 1);
@@ -332,6 +336,7 @@ export const getAttendanceReport = cache(async (tenantId: string, month: string,
         gte: monthStart,
         lt: monthEnd,
       },
+      ...(teacherId ? { group: { teacherId } } : {}),
     },
     select: {
       id: true,
@@ -361,11 +366,23 @@ export const getAttendanceReport = cache(async (tenantId: string, month: string,
   }));
 });
 
-export const getSessionAttendance = cache(async (tenantId: string, sessionId: string, _teacherId?: string) => {
-  const session = await getSessionWithStudents(sessionId);
+export const getSessionAttendance = cache(async (tenantId: string, sessionId: string, teacherId?: string) => {
+  const session = await getSessionWithStudents(sessionId, tenantId);
 
   if (!session || session.tenantId !== tenantId) {
     return null;
+  }
+
+  // Restrict TEACHER to their own groups
+  if (teacherId) {
+    const ownedGroup = await db.group.findFirst({
+      where: { id: session.groupId, tenantId, teacherId },
+      select: { id: true },
+    });
+
+    if (!ownedGroup) {
+      return null;
+    }
   }
 
   const { getCurrentMonthPaymentStatusMap, resolvePaymentStatus } = await import("@/modules/payments/queries");

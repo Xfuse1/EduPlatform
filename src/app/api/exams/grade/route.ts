@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { requireTenant } from "@/lib/tenant";
+import { checkRole, STAFF_ROLES } from "@/lib/permissions";
+import { getTeacherScopeUserId } from "@/lib/teacher-access";
 
 function normalizeTrueFalse(value: string | null | undefined) {
   const normalized = (value ?? "").trim().toLowerCase();
@@ -27,12 +30,22 @@ function isObjectiveAnswerCorrect(
 
 export async function POST(req: NextRequest) {
   try {
-    await requireAuth();
+    const user = await requireAuth(req);
+    if (!checkRole(user.role, STAFF_ROLES)) {
+      return NextResponse.json({ error: "ليس لديك صلاحية" }, { status: 403 });
+    }
+    const tenant = await requireTenant();
+    const teacherScopeUserId = getTeacherScopeUserId(tenant, user);
+
     const body = await req.json();
     const { examId, submissionId } = body;
 
-    const exam = await db.exam.findUnique({
-      where: { id: examId },
+    const exam = await db.exam.findFirst({
+      where: {
+        id: examId,
+        tenantId: tenant.id,
+        ...(teacherScopeUserId ? { group: { teacherId: teacherScopeUserId } } : {}),
+      },
       include: { questions: true }
     });
 
@@ -40,7 +53,7 @@ export async function POST(req: NextRequest) {
       where: { id: submissionId },
     });
 
-    if (!exam || !submission) {
+    if (!exam || !submission || submission.examId !== examId) {
       return NextResponse.json({ error: "البيانات غير موجودة." }, { status: 404 });
     }
 
@@ -108,7 +121,7 @@ ${JSON.stringify(essayQuestions, null, 2)}
     }
 
     // 3. اجمع النتيجة النهائية
-    const totalGrade = objectiveTotal + essayGrade;
+    const totalGrade = Math.max(0, Math.min(objectiveTotal + essayGrade, exam.maxGrade));
     const fullSummary = [
       objectiveFeedback.join('\n'),
       essaySummary

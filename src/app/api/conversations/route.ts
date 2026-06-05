@@ -6,9 +6,10 @@ export async function GET() {
   try {
     const user = await requireAuth();
 
-    // Fetch all messages where user is sender or receiver
+    // Fetch all messages where user is sender or receiver (scoped to tenant)
     const messages = await db.message.findMany({
       where: {
+        tenantId: user.tenantId,
         OR: [
           { senderId: user.id },
           { receiverId: user.id }
@@ -71,8 +72,22 @@ export async function PATCH(request: Request) {
     const user = await requireAuth();
     const { contactId } = await request.json();
 
+    if (!contactId) {
+      return NextResponse.json({ error: "Missing contactId" }, { status: 400 });
+    }
+
+    // تأكد أن جهة الاتصال تابعة لنفس الـ tenant
+    const contact = await db.user.findFirst({
+      where: { id: contactId, tenantId: user.tenantId },
+      select: { id: true },
+    });
+    if (!contact) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await db.message.updateMany({
       where: {
+        tenantId: user.tenantId,
         senderId: contactId,
         receiverId: user.id,
         readAt: null
