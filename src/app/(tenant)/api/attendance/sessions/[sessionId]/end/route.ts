@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
+import { getTeacherScopeUserId } from "@/lib/teacher-access";
 
 export async function POST(
   _req: Request,
@@ -21,8 +22,13 @@ export async function POST(
       );
     }
 
+    const scopeUserId = getTeacherScopeUserId(tenant, user);
     const session = await db.session.findFirst({
-      where: { id: sessionId, tenantId: tenant.id },
+      where: {
+        id: sessionId,
+        tenantId: tenant.id,
+        ...(scopeUserId ? { group: { teacherId: scopeUserId } } : {}),
+      },
       select: { id: true },
     });
 

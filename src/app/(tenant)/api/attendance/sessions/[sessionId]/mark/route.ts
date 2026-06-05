@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/lib/tenant";
+import { getTeacherScopeUserId } from "@/lib/teacher-access";
 import { completeExpiredSession } from "@/modules/attendance/sessionStatus";
 
 const ALLOWED_STATUSES = ["PRESENT", "ABSENT", "LATE", "EXCUSED"] as const;
@@ -35,8 +36,14 @@ export async function POST(
       );
     }
 
+    // A TEACHER may only act on sessions of their own groups; admins unrestricted.
+    const scopeUserId = getTeacherScopeUserId(tenant, user);
     const session = await db.session.findFirst({
-      where: { id: sessionId, tenantId: tenant.id },
+      where: {
+        id: sessionId,
+        tenantId: tenant.id,
+        ...(scopeUserId ? { group: { teacherId: scopeUserId } } : {}),
+      },
       select: { id: true, groupId: true, date: true, timeEnd: true, status: true, notes: true },
     });
 

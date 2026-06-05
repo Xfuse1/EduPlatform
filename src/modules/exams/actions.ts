@@ -81,10 +81,18 @@ export async function submitExamAction(examId: string, studentId: string, answer
             return { success: false, error: "غير مصرح لك بتسليم هذا الامتحان." };
         }
 
-        // Enforce the exam time window: now within [startAt, startAt + duration].
+        // Enforce the exam window WITH a grace period. The client timer is
+        // anchored to page-open time (not startAt) because the schema has no
+        // per-student startedAt, so a student who legitimately opens the exam
+        // partway through the window gets a full-duration timer that can expire
+        // after startAt+duration. Without grace, that legitimate first (and only)
+        // submission would be discarded. We add one extra duration of grace to
+        // cover late opens + auto-submit/network latency, while still rejecting
+        // clearly out-of-window attempts and submissions before the exam opens.
         const now = Date.now();
         const startMs = new Date(exam.startAt).getTime();
-        const endMs = startMs + exam.duration * 60 * 1000;
+        const windowMs = exam.duration * 60 * 1000;
+        const endMs = startMs + windowMs * 2; // duration + one duration of grace
         if (now < startMs || now > endMs) {
             return { success: false, error: "انتهى وقت تسليم هذا الامتحان أو لم يبدأ بعد." };
         }

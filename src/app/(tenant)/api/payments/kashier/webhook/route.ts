@@ -64,15 +64,24 @@ export async function POST(req: NextRequest) {
     return successResponse({ received: true })
   }
 
-  // SECURITY: verify the gateway-reported amount and currency match the stored
-  // order before transitioning to PAID / crediting. Prevents over-crediting from
-  // partial captures, a different currency, or a mismatched/replayed payload.
+  // SECURITY: verify the gateway-reported amount and currency match what the
+  // gateway was actually asked to charge before transitioning to PAID / crediting.
+  // Prevents over-crediting from partial captures, a different currency, or a
+  // mismatched/replayed payload.
+  // NOTE: for split-payment subscriptions (part wallet + part card), payment.amount
+  // holds the FULL plan total while Kashier was only charged KASHIER_AMOUNT. The
+  // expected gateway amount is therefore KASHIER_AMOUNT for those orders; plain
+  // tuition (KSH-) and recharge (RCH-) charge the full amount.
   if (status === 'SUCCESS') {
+    const notesForAmount = payment.notes ?? ''
+    const isSubscriptionOrder = orderId.startsWith('SUBK-') || notesForAmount.startsWith('SUBSCRIPTION:')
+    const kashierPortion = getNoteNumber(notesForAmount, 'KASHIER_AMOUNT')
+    const expectedAmount = isSubscriptionOrder && kashierPortion > 0 ? kashierPortion : payment.amount
     const paidAmount = Number(amount)
     const amountMatches =
       Boolean(amount) &&
       Number.isFinite(paidAmount) &&
-      Math.round(paidAmount * 100) === Math.round(payment.amount * 100)
+      Math.round(paidAmount * 100) === Math.round(expectedAmount * 100)
     const currencyMatches = (currency ?? 'EGP') === 'EGP'
 
     if (!amountMatches || !currencyMatches) {
@@ -82,7 +91,7 @@ export async function POST(req: NextRequest) {
         entityType: 'PAYMENT',
         entityId: payment.id,
         message: 'Kashier webhook amount/currency mismatch',
-        metadata: { orderId, expected: payment.amount, reported: amount, currency },
+        metadata: { orderId, expected: expectedAmount, reported: amount, currency },
       })
       return errorResponse('AMOUNT_MISMATCH', 'Reported amount does not match the order', 400)
     }

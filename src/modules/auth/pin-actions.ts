@@ -35,9 +35,10 @@ const redirectMap: Record<string, string> = {
 };
 
 // Check if a phone number has a PIN set (called before showing login options).
-// SECURITY: strictly scoped to the tenant resolved from host/cookie. We never
-// search across tenants nor return another tenant's id, to avoid leaking which
-// phones/accounts exist on the platform and which tenant they belong to.
+// SECURITY: tenant is resolved SERVER-SIDE. We prefer the current tenant, then
+// fall back across tenants so the apex/main-domain login can find a user whose
+// account lives in their own center (cross-tenant resolution is done on the
+// server only — we never return the tenant id to the client).
 export async function checkUserPin(
   phone: string,
 ): Promise<{ hasPin: boolean; exists: boolean }> {
@@ -45,10 +46,15 @@ export async function checkUserPin(
   const parsed = phoneSchema.safeParse(phone);
   if (!parsed.success) return { hasPin: false, exists: false };
 
-  const user = await db.user.findFirst({
-    where: { phone: parsed.data, tenantId: tenant.id, isActive: true },
-    select: { pinHash: true },
-  });
+  const user =
+    (await db.user.findFirst({
+      where: { phone: parsed.data, tenantId: tenant.id, isActive: true },
+      select: { pinHash: true },
+    })) ??
+    (await db.user.findFirst({
+      where: { phone: parsed.data, isActive: true },
+      select: { pinHash: true },
+    }));
 
   if (!user) return { hasPin: false, exists: false };
 
@@ -56,10 +62,11 @@ export async function checkUserPin(
 }
 
 // Verify PIN and create session.
-// SECURITY: the session is always bound to the tenant resolved server-side
-// (requireTenant); the client-supplied actualTenantId is ignored to prevent
-// cross-tenant login / arbitrary-tenant session minting. Brute force is
-// throttled per (tenant, phone).
+// SECURITY: the session is bound to the tenant resolved SERVER-SIDE from the
+// matched user record (preferring the current tenant, else the user's own
+// tenant). The client never supplies or sees a tenant id, so this restores
+// apex-domain login without reintroducing the arbitrary-tenant-mint hole.
+// Brute force is throttled per phone.
 export async function verifyPinAction(
   phone: string,
   pin: string,
@@ -73,7 +80,7 @@ export async function verifyPinAction(
   if (!phoneResult.success) return { success: false, message: "رقم الهاتف غير صحيح" };
   if (!pinResult.success) return { success: false, message: pinResult.error.issues[0]?.message };
 
-  const rlKey = `pin:${tenant.id}:${phoneResult.data}`;
+  const rlKey = `pin:${phoneResult.data}`;
   const rl = rateLimit(rlKey, PIN_MAX_ATTEMPTS, PIN_WINDOW_MS);
   if (!rl.allowed) {
     return {
@@ -82,10 +89,17 @@ export async function verifyPinAction(
     };
   }
 
-  const user = await db.user.findFirst({
-    where: { phone: phoneResult.data, tenantId: tenant.id, isActive: true },
-    select: { id: true, tenantId: true, name: true, phone: true, role: true, pinHash: true },
-  });
+  // Prefer a match in the current tenant; otherwise resolve the user's own
+  // tenant server-side (apex login). Never trust a client-supplied tenant id.
+  const user =
+    (await db.user.findFirst({
+      where: { phone: phoneResult.data, tenantId: tenant.id, isActive: true },
+      select: { id: true, tenantId: true, name: true, phone: true, role: true, pinHash: true },
+    })) ??
+    (await db.user.findFirst({
+      where: { phone: phoneResult.data, isActive: true },
+      select: { id: true, tenantId: true, name: true, phone: true, role: true, pinHash: true },
+    }));
 
   if (!user || !user.pinHash) {
     return { success: false, message: "لا يوجد PIN مفعّل لهذا الحساب" };

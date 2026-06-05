@@ -193,9 +193,9 @@ export const getStudentAttendanceSnapshot = cache(async (tenantId: string, stude
   return { rate: 0, records: [] };
 });
 
-export const getAttendanceSessionsList = cache(async (tenantId: string) => {
+export const getAttendanceSessionsList = cache(async (tenantId: string, scopeUserId?: string) => {
   try {
-    const sessions = await getTodaySessions(tenantId);
+    const sessions = await getTodaySessions(tenantId, scopeUserId);
 
     return sessions.map((session) => {
       const remaining = session.status === "IN_PROGRESS" ? "الحصة جارية الآن" : session.status === "SCHEDULED" ? "لم تبدأ بعد" : "اكتملت الحصة";

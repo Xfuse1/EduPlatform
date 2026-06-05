@@ -6,10 +6,12 @@ export async function GET() {
   try {
     const user = await requireAuth();
 
-    // Fetch all messages where user is sender or receiver (scoped to tenant)
+    // Fetch all messages where the user is sender or receiver. Ownership is the
+    // (senderId|receiverId == user.id) boundary — NOT tenantId — because
+    // parent<->teacher threads are cross-tenant by design (each side stamps the
+    // message with its own tenant), so a tenant filter would hide half of them.
     const messages = await db.message.findMany({
       where: {
-        tenantId: user.tenantId,
         OR: [
           { senderId: user.id },
           { receiverId: user.id }
@@ -70,22 +72,15 @@ export async function PATCH(request: Request) {
     const user = await requireAuth();
     const { contactId } = await request.json();
 
-    if (!contactId) {
+    if (!contactId || typeof contactId !== "string") {
       return NextResponse.json({ error: "Missing contactId" }, { status: 400 });
     }
 
-    // تأكد أن جهة الاتصال تابعة لنفس الـ tenant
-    const contact = await db.user.findFirst({
-      where: { id: contactId, tenantId: user.tenantId },
-      select: { id: true },
-    });
-    if (!contact) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
+    // Ownership boundary: only mark messages ADDRESSED TO the caller as read.
+    // Scoped by receiverId === user.id (not tenantId) so cross-tenant
+    // parent<->teacher threads can be marked read by their actual recipient.
     await db.message.updateMany({
       where: {
-        tenantId: user.tenantId,
         senderId: contactId,
         receiverId: user.id,
         readAt: null

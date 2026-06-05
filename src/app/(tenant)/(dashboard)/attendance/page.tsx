@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { requireAuth } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
+import { getTeacherScopeUserId } from "@/lib/teacher-access";
 import { formatTimeRange12Hour, getSessionStatusLabel, toArabicDigits } from "@/lib/utils";
 import { getAttendanceSessionsList, getAllAttendanceRecords } from "@/modules/attendance/queries";
 import { ManagerAttendanceTable } from "@/modules/attendance/components/ManagerAttendanceTable";
@@ -20,10 +21,12 @@ function statusBorder(status: string) {
 export default async function AttendancePage() {
   const tenant = await requireTenant();
   const user = await requireAuth();
-  const sessions = await getAttendanceSessionsList(tenant.id);
-  
+  // A TEACHER sees only their own groups' sessions/records; admins see all.
+  const scopeUserId = getTeacherScopeUserId(tenant, user) ?? undefined;
+  const sessions = await getAttendanceSessionsList(tenant.id, scopeUserId);
+
   const isManager = ["MANAGER", "ADMIN", "TEACHER", "ASSISTANT"].includes(user.role);
-  const records = isManager ? await getAllAttendanceRecords(tenant.id) : [];
+  const records = isManager ? await getAllAttendanceRecords(tenant.id, scopeUserId) : [];
 
   return (
     <div className="space-y-8 sm:space-y-10">

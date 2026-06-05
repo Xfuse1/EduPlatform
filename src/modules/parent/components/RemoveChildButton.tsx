@@ -65,9 +65,9 @@ export function RemoveChildButton({ childId, childName }: RemoveChildButtonProps
                 <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-300">
                   <AlertTriangle className="h-6 w-6" />
                 </div>
-                <h2 className="text-2xl font-extrabold text-slate-950 dark:text-white">حذف {childName}</h2>
+                <h2 className="text-2xl font-extrabold text-slate-950 dark:text-white">إلغاء ربط {childName}</h2>
                 <p className="mt-2 text-sm leading-7 text-slate-500 dark:text-slate-400">
-                  سيتم حذف ملف الابن وبياناته المرتبطة من السنتر نهائيًا. لا يمكن التراجع عن هذه العملية.
+                  سيتم إلغاء ربط الابن بحسابك فقط؛ لن يُحذف حساب الطالب ولا بياناته في السنتر. يمكنك إعادة ربطه لاحقًا.
                 </p>
               </div>
 
@@ -99,12 +99,12 @@ export function RemoveChildButton({ childId, childName }: RemoveChildButtonProps
                 {isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    جارٍ الحذف...
+                    جارٍ الإلغاء...
                   </>
                 ) : (
                   <>
                     <Trash2 className="h-4 w-4" />
-                    حذف نهائي
+                    إلغاء الربط
                   </>
                 )}
               </Button>

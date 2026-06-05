@@ -1,3 +1,5 @@
+import { timingSafeEqual } from 'node:crypto'
+
 import { NextRequest } from 'next/server'
 
 import { env } from '@/config/env'
@@ -6,7 +8,11 @@ import { reconcileTeacherWalletsFromPaidPayments } from '@/modules/payments/prov
 
 function isAuthorized(req: NextRequest) {
   const token = req.headers.get('x-internal-jobs-secret')
-  return !!env.INTERNAL_JOBS_SECRET && token === env.INTERNAL_JOBS_SECRET
+  const secret = env.INTERNAL_JOBS_SECRET
+  if (!secret || !token) return false
+  const a = Buffer.from(token)
+  const b = Buffer.from(secret)
+  return a.length === b.length && timingSafeEqual(a, b)
 }
 
 export async function POST(req: NextRequest) {

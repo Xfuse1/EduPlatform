@@ -99,10 +99,19 @@ export async function verifyOTP(phone: string, idToken: string, tenantId: string
     throw new Error("PHONE_MISMATCH");
   }
 
-  const existingUser = await db.user.findFirst({
-    where: { phone, tenantId, isActive: true },
-    select: { id: true, tenantId: true, name: true, phone: true, role: true, pinHash: true },
-  });
+  // Prefer a match in the requested tenant; otherwise resolve the user's own
+  // tenant SERVER-SIDE (apex/main-domain OTP login). The session is always bound
+  // to the matched user's real tenantId below — no client-supplied tenant is
+  // trusted, so this supports cross-center login without an arbitrary-tenant mint.
+  const existingUser =
+    (await db.user.findFirst({
+      where: { phone, tenantId, isActive: true },
+      select: { id: true, tenantId: true, name: true, phone: true, role: true, pinHash: true },
+    })) ??
+    (await db.user.findFirst({
+      where: { phone, isActive: true },
+      select: { id: true, tenantId: true, name: true, phone: true, role: true, pinHash: true },
+    }));
 
   if (!existingUser) {
     throw new Error("USER_NOT_FOUND");

@@ -194,11 +194,13 @@ export async function creditUserWallet(input: {
 
   const result = input.tx ? await run(input.tx) : await db.$transaction(run)
 
-  // Always emit a balance audit row when an actual mutation occurred, regardless of
-  // whether the op ran inside an external (parent) transaction or its own. Skip the
-  // idempotent no-op path. logFinancialEvent swallows its own errors so it never
-  // breaks the financial path.
-  if (result.mutated) {
+  // Emit a balance audit row only for STANDALONE mutations (not when running
+  // inside a caller transaction): logFinancialEvent writes on the global db
+  // connection, so emitting it for a tx-scoped call would persist a phantom
+  // audit row if the caller's transaction later rolls back. For tx-scoped calls
+  // the durable domain row (e.g. GroupBillingCharge) is the audit of record.
+  // logFinancialEvent swallows its own errors so it never breaks the path.
+  if (!input.tx && result.mutated) {
     await logFinancialEvent({
       tenantId: input.tenantId,
       actorId: input.createdById ?? null,
@@ -289,11 +291,13 @@ export async function debitUserWallet(input: {
 
   const result = input.tx ? await run(input.tx) : await db.$transaction(run)
 
-  // Always emit a balance audit row when an actual mutation occurred, regardless of
-  // whether the op ran inside an external (parent) transaction or its own. Skip the
-  // idempotent no-op path. logFinancialEvent swallows its own errors so it never
-  // breaks the financial path.
-  if (result.mutated) {
+  // Emit a balance audit row only for STANDALONE mutations (not when running
+  // inside a caller transaction): logFinancialEvent writes on the global db
+  // connection, so emitting it for a tx-scoped call would persist a phantom
+  // audit row if the caller's transaction later rolls back. For tx-scoped calls
+  // the durable domain row (e.g. GroupBillingCharge) is the audit of record.
+  // logFinancialEvent swallows its own errors so it never breaks the path.
+  if (!input.tx && result.mutated) {
     await logFinancialEvent({
       tenantId: input.tenantId,
       actorId: input.createdById ?? null,

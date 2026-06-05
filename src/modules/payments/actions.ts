@@ -810,9 +810,11 @@ export async function initiateTeacherSubscriptionCheckout(input: {
   const tenant = await requireTenant()
   const user = await requireAuth()
 
-  // SECURITY: only the financial account owner (teacher/center) may spend the
-  // tenant payee wallet and change the subscription plan.
-  if (!['TEACHER', 'CENTER_ADMIN'].includes(user.role)) {
+  // SECURITY: only the financial account owner may spend the tenant payee wallet
+  // and change the subscription plan. The allow-list mirrors the payee-resolution
+  // priority (CENTER_ADMIN/TEACHER/ADMIN/MANAGER); the payeeUserId === user.id
+  // check below is the real ownership gate.
+  if (!['TEACHER', 'CENTER_ADMIN', 'ADMIN', 'MANAGER'].includes(user.role)) {
     throw new Error('الاشتراك متاح لحساب المعلم أو السنتر فقط')
   }
 

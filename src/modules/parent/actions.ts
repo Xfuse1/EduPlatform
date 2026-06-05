@@ -646,14 +646,12 @@ export async function enrollChildInGroup(input: { studentId: string; groupId: st
       };
     }
 
-    // Only allow enrolling (and charging) into groups that belong to the
-    // child's own home tenant — never into an arbitrary tenant's group.
-    if (group.tenantId !== relation.student.tenantId) {
-      return {
-        success: false,
-        message: "هذه المجموعة لا تتبع نفس السنتر الخاص بالابن.",
-      };
-    }
+    // NOTE: cross-center enrollment is intentional — a parent can enroll their
+    // (verified, via `relation`) child into a group at ANY center, mirroring
+    // searchGroupsForChild which surfaces groups across all active tenants. The
+    // child's wallet/parent wallet is charged for that center's group via
+    // chargeGroupEnrollmentIfNeeded(group.tenantId). Authorization rests on the
+    // verified parent->child link above, not on tenant equality.
 
     if (relation.student.gradeLevel && !isSameGradeLevel(relation.student.gradeLevel, group.gradeLevel)) {
       return {

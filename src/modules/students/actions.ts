@@ -472,6 +472,10 @@ async function updateStudentForTenant(tenantId: string, input: NormalizedStudent
 
 export async function createStudent(formData: FormData): Promise<CreateStudentResult> {
   const tenant = await requireTenant();
+  // SECURITY: staff-only. Server actions are directly invocable, so the role
+  // gate must live here (not only in the API route).
+  const user = await requireAuth();
+  requireRole(user.role, STAFF_ROLES);
   return createStudentForTenant(tenant.id, normalizeStudentInput(formData));
 }
 
@@ -480,6 +484,10 @@ export async function updateStudent(
   maybeFormData?: FormData,
 ): Promise<UpdateStudentResult> {
   const tenant = await requireTenant();
+  // SECURITY: staff-only (directly-invocable server action; updateStudent can
+  // re-sync group memberships and trigger billing).
+  const user = await requireAuth();
+  requireRole(user.role, STAFF_ROLES);
   const formData = studentIdOrFormData instanceof FormData ? studentIdOrFormData : maybeFormData;
 
   if (!formData) {
@@ -718,19 +726,30 @@ export async function findStudentByPhone(phone: string): Promise<{
       },
     } satisfies Prisma.UserSelect;
 
-    // أمان: البحث محصور داخل الـ tenant الحالي فقط — لا نكشف وجود/اسم/صف
-    // طالب يخص سنترًا آخر (منع تعداد الطلاب عبر السنترات).
-    const student = await db.user.findFirst({
-      where: {
-        tenantId: tenant.id,
-        role: "STUDENT",
-        isActive: true,
-        phone: {
-          in: phoneLookupValues,
+    // Cross-tenant by design: this powers the "add an existing student from
+    // another center to my group without moving their account" flow (the
+    // isSameTenant/tenantName banner in AddStudentForm). It is gated to STAFF
+    // (requireRole above), so the residual student-enumeration risk is limited
+    // to authenticated staff. Prefer a same-tenant match, then fall back across
+    // tenants.
+    const student =
+      (await db.user.findFirst({
+        where: {
+          tenantId: tenant.id,
+          role: "STUDENT",
+          isActive: true,
+          phone: { in: phoneLookupValues },
         },
-      },
-      select: studentSelect,
-    });
+        select: studentSelect,
+      })) ??
+      (await db.user.findFirst({
+        where: {
+          role: "STUDENT",
+          isActive: true,
+          phone: { in: phoneLookupValues },
+        },
+        select: studentSelect,
+      }));
 
     if (!student) {
       return { found: false };
@@ -769,10 +788,12 @@ export async function enrollExistingStudent(studentId: string, groupId: string):
     const teacherScopeUserId = getTeacherScopeUserId(tenant, user);
 
     const [student, group] = await Promise.all([
+      // Cross-tenant by design: the student may belong to another center; we add
+      // them to OUR (tenant-scoped, teacher-owned) group without moving their
+      // account. Group ownership below is what constrains the write to this tenant.
       db.user.findFirst({
         where: {
           id: studentId,
-          tenantId: tenant.id,
           role: "STUDENT",
           isActive: true,
         },
