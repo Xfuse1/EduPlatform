@@ -33,13 +33,19 @@ function normalizeSubjects(value: unknown) {
   return value
 }
 
+// Restrict logo sources to reduce stored-XSS / SSRF surface, since logoUrl is
+// rendered as an <img src> on public tenant pages:
+// - https URLs only (no plain http, no tracking-prone insecure origins)
+// - app-relative upload paths ("/...")
+// - data: URIs only for raster image types (never SVG, which can carry script)
+const RASTER_DATA_URI = /^data:image\/(png|jpe?g|webp|gif|avif)[;,]/i
+
 function isSupportedLogoValue(value: string) {
-  return (
-    value.startsWith('data:image/') ||
-    value.startsWith('http://') ||
-    value.startsWith('https://') ||
-    value.startsWith('/')
-  )
+  if (value.startsWith('data:')) {
+    return RASTER_DATA_URI.test(value)
+  }
+
+  return value.startsWith('https://') || value.startsWith('/')
 }
 
 export const tenantSettingsSchema = z.object({

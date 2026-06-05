@@ -5,6 +5,7 @@ import { cache } from "react";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TENANT_CONTEXT_COOKIE_NAME } from "@/lib/tenant-context";
+import { extractSubdomain } from "@/lib/tenant-host";
 
 export class TenantNotFoundError extends Error {
   constructor() {
@@ -54,26 +55,8 @@ const FALLBACK_TENANT: ResolvedTenant = {
   subjects: [],
 };
 
-function extractSubdomain(host: string) {
-  const hostname = host.trim().toLowerCase().split(":")[0] ?? "";
-
-  if (hostname.endsWith(".localhost")) {
-    return hostname.split(".")[0] ?? "";
-  }
-
-  const parts = hostname.split(".");
-  if (parts.length > 2) {
-    return parts[0] ?? "";
-  }
-
-  return hostname;
-}
-
 const findTenantByHost = cache(async (host: string): Promise<ResolvedTenant> => {
-  const subdomain = extractSubdomain(host)
-    .replace(":3000", "")
-    .replace(":3001", "");
-  console.log("🔍 host:", host, "→ subdomain:", subdomain);
+  const subdomain = extractSubdomain(host);
 
   try {
     if (!subdomain || SPECIAL_SUBDOMAINS.has(subdomain) || subdomain.includes("vercel")) {

@@ -30,6 +30,12 @@ function isTuitionSettlementPayment(payment: PaymentForSettlement) {
   )
 }
 
+// The Kashier disbursement/transfer endpoint is not integrated yet. Until it is,
+// automated teacher payouts are unavailable and withdrawals are handled manually
+// by an admin. Flip this flag (and implement callKashierTransferApi) when the
+// real payout API is wired so the existing success path becomes reachable.
+const KASHIER_TRANSFER_API_AVAILABLE = false
+
 async function callKashierTransferApi(params: {
   withdrawalId: string
   amount: number
@@ -123,6 +129,13 @@ export async function requestTeacherKashierWithdrawal(input: {
 }) {
   if (!Number.isInteger(input.amount) || input.amount <= 0) {
     throw new Error('المبلغ يجب أن يكون رقمًا صحيحًا موجبًا')
+  }
+
+  // The automated payout integration is not available yet. Fail fast WITHOUT
+  // persisting a PENDING-then-FAILED WalletWithdrawal row on every request; the
+  // caller surfaces this message and teachers use admin-processed withdrawals.
+  if (!KASHIER_TRANSFER_API_AVAILABLE) {
+    throw new Error('السحب التلقائي غير متاح حاليًا. يرجى التواصل مع الإدارة لإتمام السحب يدويًا')
   }
 
   const credentials = await getKashierApiCredentialsByTenantId(input.tenantId)

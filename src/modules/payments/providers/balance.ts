@@ -10,6 +10,12 @@ import {
   resolveStudentWalletPayer,
 } from '@/modules/wallet/provider'
 
+/**
+ * Returns the recharge wallet that funds this student's fees. For a student with a
+ * linked parent the wallet belongs to the PARENT (a shared payer wallet), so the
+ * balance is NOT student-exclusive. `owner` ('STUDENT' | 'PARENT') makes the actual
+ * wallet owner explicit so callers/UI do not present it as the student's own balance.
+ */
 export async function getStudentBalance(studentId: string, tenantId: string) {
   const { ownerType, ownerUserId } = await resolveRechargeWalletOwner(studentId, tenantId)
   const balance = await getOrCreateWallet(tenantId, ownerUserId)

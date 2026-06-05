@@ -11,8 +11,8 @@ export default async function TeacherAssignmentsPage() {
   const tenant = await requireTenant();
   const user = await requireAuth();
 
-  // Basic check for teacher/management roles
-  if (!["TEACHER", "ASSISTANT", "MANAGER", "ADMIN"].includes(user.role)) {
+  // Restrict to teacher staff, consistent with the rest of the teacher slice.
+  if (!["TEACHER", "ASSISTANT"].includes(user.role)) {
     redirect(user.role === "STUDENT" ? "/student" : "/parent");
   }
 

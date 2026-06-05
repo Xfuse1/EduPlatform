@@ -100,6 +100,15 @@ export function createKashierCheckoutUrl(params: KashierOrderParams): string {
 }
 
 // timingSafeEqual يمنع Timing Attacks عند مقارنة الـ hash
+//
+// AUTHORITATIVE MODEL: webhook signatures are signed and verified with the
+// platform-wide credentials (env.KASHIER_API_KEY / env.KASHIER_MERCHANT_ID),
+// matching createKashierCheckoutUrl above which always signs with the same
+// platform key. Per-tenant Kashier credentials (TeacherSubscription.kashierApiKey)
+// are NOT used here. If a checkout flow is ever added that signs an order with a
+// tenant's own merchant credentials, this verifier MUST be updated to resolve the
+// order's tenant and verify with that tenant's key — otherwise such orders would
+// fail verification (or, worse, be verifiable with the wrong key).
 export function verifyKashierWebhookSignature(
   orderId: string,
   amount: string,

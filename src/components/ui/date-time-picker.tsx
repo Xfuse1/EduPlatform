@@ -38,7 +38,11 @@ function pad(value: number) {
 }
 
 function parsePickerValue(value: string): ParsedValue | null {
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?$/);
+  // Accept "YYYY-MM-DD", "YYYY-M-D", optional "T HH:MM" and tolerate a
+  // trailing ":ss(.sss)?" and timezone suffix (Z or ±hh:mm) from ISO strings.
+  const match = value
+    .trim()
+    .match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T ](\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/);
 
   if (!match) {
     return null;
@@ -416,13 +420,24 @@ export function DateTimePicker({
               مسح
             </button>
 
-            <button
-              type="button"
-              className="rounded-lg px-2 py-1.5 text-xs font-bold text-secondary transition hover:bg-secondary/10"
-              onClick={selectToday}
-            >
-              اليوم
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="rounded-lg px-2 py-1.5 text-xs font-bold text-secondary transition hover:bg-secondary/10"
+                onClick={selectToday}
+              >
+                اليوم
+              </button>
+              {mode === "datetime" && (
+                <button
+                  type="button"
+                  className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-bold text-white transition hover:bg-secondary/90"
+                  onClick={() => setOpen(false)}
+                >
+                  تم
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

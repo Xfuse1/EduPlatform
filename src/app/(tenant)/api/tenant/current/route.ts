@@ -1,15 +1,19 @@
 import type { NextRequest } from 'next/server'
 
 import { getCurrentUser } from '@/lib/auth'
-import { errorResponse, successResponse } from '@/lib/api-response'
+import { errorResponse, successResponse, unauthorized } from '@/lib/api-response'
 import { requireTenant } from '@/lib/tenant'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const [tenant, user] = await Promise.all([
       requireTenant(),
       getCurrentUser(),
     ])
+
+    if (!user) {
+      return unauthorized()
+    }
 
     return successResponse({
       tenant,

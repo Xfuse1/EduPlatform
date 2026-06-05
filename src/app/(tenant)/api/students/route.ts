@@ -82,6 +82,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    await requireTenant()
+    const user = await requireAuth(request)
+
+    if (
+      user.role !== 'TEACHER' &&
+      user.role !== 'ASSISTANT' &&
+      user.role !== 'CENTER_ADMIN'
+    ) {
+      return forbidden()
+    }
+
     const formData = await requestToFormData(request)
     const result = await createStudent(formData)
 

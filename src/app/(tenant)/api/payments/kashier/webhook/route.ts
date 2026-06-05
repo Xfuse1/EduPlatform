@@ -52,6 +52,15 @@ export async function POST(req: NextRequest) {
   })
 
   if (!payment) {
+    // A signature-valid webhook referencing an unknown order is anomalous
+    // (possible order-id probing). Log it for detectability but keep the 200
+    // response the gateway expects. We have no tenantId to attach a financial
+    // audit row to here, so emit a server-side warning instead.
+    console.warn('[KASHIER_WEBHOOK] signature-valid webhook references unknown orderId', {
+      orderId,
+      transactionId,
+      status,
+    })
     return successResponse({ received: true })
   }
 
@@ -82,19 +91,33 @@ export async function POST(req: NextRequest) {
   const wasAlreadyPaid = payment.status === 'PAID'
   const newStatus = wasAlreadyPaid ? 'PAID' : status === 'SUCCESS' ? 'PAID' : status === 'FAILED' ? 'OVERDUE' : 'PENDING'
 
-  const updatedPayment = wasAlreadyPaid
-    ? payment
-    : await db.payment.update({
-        where: { id: payment.id },
-        data: {
-          status: newStatus,
-          transactionId: transactionId ?? payment.transactionId,
-          paidAt: status === 'SUCCESS' ? new Date() : null,
-          notes: transactionId
-            ? `${payment.notes ?? ''}\nKashier transaction: ${transactionId}`.trim()
-            : payment.notes,
-        },
-      })
+  // RACE-CONDITION: atomically claim the payment so concurrent webhook
+  // deliveries (Kashier retries are common) cannot both pass the "not yet PAID"
+  // check and double-run the subscription/wallet side-effects below. Only the
+  // delivery whose conditional update actually changes a row proceeds.
+  let updatedPayment = payment
+  if (!wasAlreadyPaid) {
+    const claimed = await db.payment.updateMany({
+      where: { id: payment.id, status: payment.status },
+      data: {
+        status: newStatus,
+        transactionId: transactionId ?? payment.transactionId,
+        paidAt: status === 'SUCCESS' ? new Date() : null,
+        notes: transactionId
+          ? `${payment.notes ?? ''}\nKashier transaction: ${transactionId}`.trim()
+          : payment.notes,
+      },
+    })
+
+    if (claimed.count === 0) {
+      // Another concurrent delivery already transitioned this payment; treat as
+      // idempotent and do not re-run side-effects.
+      return successResponse({ received: true, idempotent: true })
+    }
+
+    const refreshed = await db.payment.findUnique({ where: { id: payment.id } })
+    if (refreshed) updatedPayment = refreshed
+  }
 
   if (newStatus === 'PAID') {
     const notes = updatedPayment.notes ?? ''

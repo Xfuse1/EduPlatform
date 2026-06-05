@@ -6,7 +6,11 @@ import {
 
 import type { DayOfWeek } from '@/types'
 import { db } from '@/lib/db'
-import { parseStoredGroupSchedule } from '@/modules/groups/schedule'
+import {
+  getMinutesFromTime as parseTimeToMinutes,
+  isValidTimeValue,
+  parseStoredGroupSchedule,
+} from '@/modules/groups/schedule'
 
 const DAY_ORDER: DayOfWeek[] = [
   'saturday',
@@ -22,7 +26,7 @@ const ATTENDED_STATUSES: AttendanceStatus[] = [
   AttendanceStatus.LATE,
 ]
 
-type ConflictType = 'teacher' | 'teacher_and_room'
+type ConflictType = 'teacher' | 'room' | 'teacher_and_room'
 
 function isDayOfWeek(value: string): value is DayOfWeek {
   return DAY_ORDER.includes(value as DayOfWeek)
@@ -43,7 +47,19 @@ function doTimesOverlap(
   secondStart: string,
   secondEnd: string,
 ) {
-  return firstStart < secondEnd && firstEnd > secondStart
+  // Compare by numeric minutes rather than lexicographic string ordering, which
+  // is only correct for zero-padded 24h HH:MM. Non-HH:MM values (e.g. '9:00')
+  // parse to null and are treated as non-overlapping.
+  const aStart = parseTimeToMinutes(firstStart)
+  const aEnd = parseTimeToMinutes(firstEnd)
+  const bStart = parseTimeToMinutes(secondStart)
+  const bEnd = parseTimeToMinutes(secondEnd)
+
+  if (aStart === null || aEnd === null || bStart === null || bEnd === null) {
+    return false
+  }
+
+  return aStart < bEnd && aEnd > bStart
 }
 
 function getGroupScheduleEntries(group: {
@@ -65,10 +81,22 @@ export async function checkConflicts(
   timeStart: string,
   timeEnd: string,
   room?: string | null,
+  teacherId?: string | null,
 ) {
   const normalizedDays = days.filter(isDayOfWeek)
 
   if (normalizedDays.length === 0) {
+    return []
+  }
+
+  // Validate the proposed window: must be HH:MM and start strictly before end.
+  // Invalid input cannot meaningfully overlap anything, so report no conflicts.
+  if (!isValidTimeValue(timeStart) || !isValidTimeValue(timeEnd)) {
+    return []
+  }
+  const proposedStart = parseTimeToMinutes(timeStart)
+  const proposedEnd = parseTimeToMinutes(timeEnd)
+  if (proposedStart === null || proposedEnd === null || proposedStart >= proposedEnd) {
     return []
   }
 
@@ -111,13 +139,31 @@ export async function checkConflicts(
         normalizeRoom(group.room) !== null &&
         normalizeRoom(group.room) === normalizedRoom
 
+      // A genuine "teacher" conflict only exists when the overlapping group
+      // belongs to the same teacher being scheduled. When no teacherId is
+      // supplied, preserve the legacy behaviour and treat every overlap as a
+      // teacher conflict.
+      const sameTeacher =
+        teacherId == null || (group.teacherId != null && group.teacherId === teacherId)
+
+      const conflictType: ConflictType = sameTeacher
+        ? sameRoom
+          ? 'teacher_and_room'
+          : 'teacher'
+        : 'room'
+
       return {
         ...group,
         schedule: getGroupScheduleEntries(group),
         studentCount: groupStudents.length,
-        conflictType: sameRoom ? 'teacher_and_room' : ('teacher' as ConflictType),
+        conflictType,
+        // Internal flag used to drop time overlaps that are not real conflicts
+        // for the scheduling teacher (different teacher AND different room).
+        _isConflict: sameTeacher || sameRoom,
       }
     })
+    .filter((group) => group._isConflict)
+    .map(({ _isConflict, ...group }) => group)
 }
 
 export async function getWeeklySchedule(tenantId: string) {

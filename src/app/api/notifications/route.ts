@@ -2,6 +2,30 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 
+type JoinRequestNotification = {
+  id: string;
+  tenantId: string;
+  userId: string;
+  type: string;
+  message: string;
+  channel: string;
+  status: string;
+  recipientPhone: string;
+  sentAt: Date | null;
+  errorMessage: string | null;
+  retries: number;
+  createdAt: Date;
+  meta: {
+    groupId: string;
+    groupName: string;
+    studentName: string;
+  };
+};
+
+// Cap on the merged response so a large backlog of join requests cannot starve
+// real DB notifications out of the list.
+const MERGED_NOTIFICATIONS_LIMIT = 50;
+
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) {
@@ -23,7 +47,7 @@ export async function GET() {
   });
 
   // ✅ إضافة طلبات الانضمام المعلقة للمعلم فقط
-  let joinRequests: any[] = [];
+  let joinRequests: JoinRequestNotification[] = [];
 
   if (user.role === "TEACHER") {
     const pending = await db.groupStudent.findMany({
@@ -71,7 +95,7 @@ export async function GET() {
     isRead: notification.status !== "QUEUED",
   }))]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 20);
+    .slice(0, MERGED_NOTIFICATIONS_LIMIT);
 
   return NextResponse.json(merged);
 }

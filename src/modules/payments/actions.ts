@@ -337,6 +337,7 @@ export async function generateReceipt(paymentId: string) {
 export async function initiateOnlinePayment(formData: FormData) {
   const tenant = await requireTenant()
   const user = await requireAuth()
+  requireRole(user.role, STAFF_ROLES)
 
   const data = initiatePaymentSchema.parse({
     studentId: formData.get('studentId'),

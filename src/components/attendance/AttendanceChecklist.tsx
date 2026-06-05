@@ -1,5 +1,14 @@
 "use client"
 
+/**
+ * DEMO / MOCK COMPONENT — not wired to any backend.
+ *
+ * This component uses hardcoded MOCK_STUDENTS and does NOT persist attendance
+ * to the server (see handleSave below). It is intentionally not imported by any
+ * production route. Do not render it in a real flow: use the attendance module
+ * (qr-checkin / sessions mark) which performs genuine server persistence.
+ */
+
 import React, { useState, useMemo } from "react"
 import { Check, X, Clock, Save, MoreHorizontal, User } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
@@ -46,11 +55,12 @@ export function AttendanceChecklist({ groupName = "المجموعة أ", student
   const isFinished = recordedCount === totalCount
 
   const handleSave = () => {
+    // DEMO ONLY: no backend wired. Do not show a success toast that falsely
+    // claims attendance was saved. Wire to the attendance API before use.
     setIsSaving(true)
-    // TODO: implement API call to save attendance
     setTimeout(() => {
       setIsSaving(false)
-      showToast.success("تم حفظ سجل الحضور بنجاح")
+      showToast.error("هذه شاشة تجريبية: لم يتم حفظ الحضور")
     }, 1500)
   }
 

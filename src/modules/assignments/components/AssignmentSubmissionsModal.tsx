@@ -38,7 +38,8 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
 
     const handleSaveGrade = async (submissionId: string) => {
         const numGrade = parseInt(gradeValue);
-        if (isNaN(numGrade) || numGrade < 0) {
+        const maxGrade = typeof assignment?.maxGrade === "number" ? assignment.maxGrade : null;
+        if (isNaN(numGrade) || numGrade < 0 || (maxGrade !== null && numGrade > maxGrade)) {
             showToast.error("الرجاء إدخال درجة صالحة");
             return;
         }
@@ -65,9 +66,14 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
 
     const handleAIGraded = async (grade: number, feedback: string) => {
         if (!aiGradingSub) return;
-        
-        const res = await gradeSubmission(aiGradingSub.id, grade, {
-            aiGrade: grade,
+
+        const maxGrade = typeof assignment?.maxGrade === "number" ? assignment.maxGrade : null;
+        const safeGrade = Number.isFinite(grade)
+            ? Math.max(0, maxGrade !== null ? Math.min(grade, maxGrade) : grade)
+            : 0;
+
+        const res = await gradeSubmission(aiGradingSub.id, safeGrade, {
+            aiGrade: safeGrade,
             aiFeedback: feedback,
             gradedByAi: true
         });
@@ -76,8 +82,8 @@ export function AssignmentSubmissionsModal({ assignmentId, onClose }: Assignment
             showToast.success("تم اعتماد تصحيح الذكاء الاصطناعي");
             setAssignment((prev: any) => ({
                 ...prev,
-                submissions: prev.submissions.map((sub: any) => 
-                    sub.id === aiGradingSub.id ? { ...sub, grade, gradedByAi: true, aiGrade: grade, aiFeedback: feedback } : sub
+                submissions: prev.submissions.map((sub: any) =>
+                    sub.id === aiGradingSub.id ? { ...sub, grade: safeGrade, gradedByAi: true, aiGrade: safeGrade, aiFeedback: feedback } : sub
                 )
             }));
         } else {

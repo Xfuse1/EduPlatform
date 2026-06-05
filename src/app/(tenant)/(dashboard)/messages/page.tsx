@@ -168,7 +168,7 @@ export default function MessagesPage() {
     const newMsg: Message = {
       id: Math.random().toString(36).substr(2, 9),
       text: newMessageText,
-      senderId: "me",
+      senderId: (session?.user as any)?.id ?? "me",
       createdAt: new Date(),
     }
 
@@ -347,7 +347,8 @@ export default function MessagesPage() {
             {/* Messages Area */}
             <div className="flex-1 space-y-4 overflow-y-auto bg-slate-50/30 p-3 dark:bg-slate-900/10 sm:space-y-6 sm:p-6">
               {activeConversation.messages.map((m, idx) => {
-                const isMe = m.senderId === "me"
+                const myId = (session?.user as any)?.id
+                const isMe = m.senderId === myId || m.senderId === "me"
                 const showDate = idx === 0 || 
                   new Date(m.createdAt).toDateString() !== new Date(activeConversation.messages[idx-1].createdAt).toDateString()
 

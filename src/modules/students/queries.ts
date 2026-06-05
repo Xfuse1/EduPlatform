@@ -115,6 +115,12 @@ export const getStudentProfile = cache(async (tenantId: string, studentId: strin
           },
         },
         groupStudents: {
+          where: {
+            group: {
+              tenantId,
+              ...(_teacherId ? { teacherId: _teacherId } : {}),
+            },
+          },
           include: {
             group: {
               include: {

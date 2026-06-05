@@ -72,6 +72,15 @@ export async function canAddGroup(tenantId: string): Promise<{
       }
     }
 
+    if (new Date() > subscription.nextBillingAt) {
+      return {
+        allowed: false,
+        currentCount: 0,
+        limit: 0,
+        message: 'انتهى الاشتراك — يرجى التجديد',
+      }
+    }
+
     const groupCount = await db.group.count({ where: { tenantId, isActive: true } })
 
     const plans = await getSubscriptionPlanConfigs()
@@ -129,12 +138,17 @@ export async function getSubscriptionUsage(tenantId: string) {
             current: studentCount,
             limit: limit.students,
             percentage:
-              limit.students === Number.MAX_SAFE_INTEGER ? 0 : (studentCount / limit.students) * 100,
+              limit.students === Number.MAX_SAFE_INTEGER || limit.students <= 0
+                ? 0
+                : Math.min(100, (studentCount / limit.students) * 100),
           },
           groups: {
             current: groupCount,
             limit: limit.groups,
-            percentage: limit.groups === Number.MAX_SAFE_INTEGER ? 0 : (groupCount / limit.groups) * 100,
+            percentage:
+              limit.groups === Number.MAX_SAFE_INTEGER || limit.groups <= 0
+                ? 0
+                : Math.min(100, (groupCount / limit.groups) * 100),
           },
         },
       },

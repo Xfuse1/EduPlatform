@@ -54,18 +54,34 @@ export async function GET(request: NextRequest) {
 
     return errorResponse(
       'GROUPS_FETCH_FAILED',
-      error instanceof Error ? error.message : 'ØªØ¹Ø°Ø± Ø¬Ù„Ø¨ Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹Ø§Øª',
+      error instanceof Error ? error.message : 'تعذر جلب المجموعات',
       400,
     )
   }
 }
 
+const GROUP_MANAGER_ROLES = ['TEACHER', 'ASSISTANT', 'CENTER_ADMIN'] as const
+
 export async function POST(request: NextRequest) {
   try {
-    const formData = await requestToFormData(request)
-    const group = await createGroup(formData)
+    await requireTenant()
+    const user = await requireAuth(request)
 
-    return successResponse(group)
+    if (!GROUP_MANAGER_ROLES.includes(user.role as (typeof GROUP_MANAGER_ROLES)[number])) {
+      return forbidden()
+    }
+
+    const formData = await requestToFormData(request)
+    const result = await createGroup(formData)
+
+    if (!result.success) {
+      if (result.fieldErrors) {
+        return validationError(result.fieldErrors)
+      }
+      return errorResponse('GROUP_CREATE_FAILED', result.message ?? 'تعذر إنشاء المجموعة', 400)
+    }
+
+    return successResponse(result)
   } catch (error) {
     if (error instanceof ZodError) {
       return validationError(error.flatten().fieldErrors)
@@ -77,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     return errorResponse(
       'GROUP_CREATE_FAILED',
-      error instanceof Error ? error.message : 'ØªØ¹Ø°Ø± Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹Ø©',
+      error instanceof Error ? error.message : 'تعذر إنشاء المجموعة',
       400,
     )
   }

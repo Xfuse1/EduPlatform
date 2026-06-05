@@ -215,7 +215,7 @@ export function TeacherLanding({
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {groups.map((group) => {
-            const progress = Math.round((group.enrolledCount / group.maxCapacity) * 100);
+            const progress = group.maxCapacity > 0 ? Math.round((group.enrolledCount / group.maxCapacity) * 100) : 0;
 
             return (
               <Card key={group.id} className="overflow-hidden border-2 border-slate-300/80 bg-white/70 shadow-lg backdrop-blur-3xl dark:border-white/10 dark:bg-white/5 dark:shadow-[0_0_20px_rgba(0,184,160,0.1)]">

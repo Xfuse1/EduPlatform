@@ -9,6 +9,12 @@ datasource db {
   // directUrl = env("DIRECT_URL")
 }
 
+// MONETARY UNIT CONVENTION:
+// All money fields below are stored as Int in WHOLE EGP (no minor units / no piasters).
+// Fee + net must always equal gross; the platform-fee rounding rule is defined in
+// src/modules/wallet/provider.ts (calculatePlatformFee). Do not introduce fractional
+// amounts without migrating these columns to a Decimal/minor-unit representation.
+
 model Tenant {
   id                    String                 @id @default(cuid())
   slug                  String                 @unique
@@ -43,8 +49,6 @@ model Tenant {
   walletWithdrawals     WalletWithdrawal[]
   financialAuditLogs    FinancialAuditLog[]
   authSessions          AuthSession[]
-
-  @@index([slug])
 }
 
 model User {
@@ -115,7 +119,7 @@ model Group {
   timeStart     String
   timeEnd       String
   maxCapacity   Int            @default(40)
-  monthlyFee    Int
+  monthlyFee    Int            // EGP (whole units)
   billingType   GroupBillingType @default(MONTHLY)
   color         String         @default("#2E86C1")
   isActive      Boolean        @default(true)
@@ -201,7 +205,7 @@ model Payment {
   id                   String         @id @default(cuid())
   tenantId             String
   studentId            String
-  amount               Int
+  amount               Int            // EGP (whole units)
   month                String
   status               PaymentStatus  @default(PENDING)
   method               PaymentMethod  @default(CASH)
@@ -355,6 +359,9 @@ model Exam {
   tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   questions   ExamQuestion[]
   submissions ExamSubmission[]
+
+  @@index([tenantId, groupId])
+  @@index([groupId])
 }
 
 model ExamQuestion {
@@ -367,6 +374,8 @@ model ExamQuestion {
   grade         Int          @default(10)
   order         Int          @default(0)
   exam          Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@index([examId])
 }
 
 model ExamSubmission {
@@ -504,7 +513,7 @@ model TeacherSubscription {
   subscriptionPlan SubscriptionPlan @default(STARTER)
   planKey        String            @default("STARTER")
   billingCycle   BillingCycle      @default(MONTHLY)
-  amount         Int
+  amount         Int               // EGP (whole units)
   isActive       Boolean           @default(true)
   nextBillingAt  DateTime
   cancelledAt    DateTime?
@@ -531,8 +540,8 @@ model SubscriptionPlanConfig {
   plan          SubscriptionPlan? @unique
   key           String           @unique
   name          String
-  monthlyPrice  Int
-  yearlyPrice   Int
+  monthlyPrice  Int              // EGP (whole units)
+  yearlyPrice   Int              // EGP (whole units)
   studentsLimit Int
   groupsLimit   Int
   sessionsLimit Int
@@ -553,7 +562,7 @@ model GroupBillingCharge {
   studentId        String
   payerUserId      String
   payeeUserId      String
-  amount           Int
+  amount           Int               // EGP (whole units)
   billingType      GroupBillingType
   reason           String
   idempotencyKey   String            @unique
@@ -576,7 +585,7 @@ model StudentBalance {
   tenantId         String
   studentId        String
   parentId         String?
-  balance          Int                    @default(0)
+  balance          Int                    @default(0) // EGP (whole units)
   lastRechargedAt  DateTime?
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
@@ -595,7 +604,7 @@ model BalanceTransaction {
   tenantId         String
   balanceId        String
   type             TransactionType
-  amount           Int
+  amount           Int                // EGP (whole units)
   reason           String
   relatedPaymentId String?
   status           TransactionStatus  @default(COMPLETED)
@@ -636,7 +645,7 @@ model UserWallet {
   id           String              @id @default(cuid())
   tenantId     String
   userId       String
-  balance      Int                 @default(0)
+  balance      Int                 @default(0) // EGP (whole units)
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
   tenant       Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -655,7 +664,7 @@ model WalletTransaction {
   walletId          String
   userId            String
   type              WalletTransactionType
-  amount            Int
+  amount            Int                   // EGP (whole units)
   reason            String
   status            TransactionStatus     @default(COMPLETED)
   relatedPaymentId  String?
@@ -686,7 +695,7 @@ model WalletWithdrawal {
   tenantId      String
   userId        String
   walletId      String
-  amount        Int
+  amount        Int                    // EGP (whole units)
   method        WalletWithdrawalMethod @default(KASHIER)
   adminMethod   WalletWithdrawalAdminMethod?
   status        WalletWithdrawalStatus @default(PENDING)

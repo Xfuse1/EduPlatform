@@ -274,6 +274,15 @@ export async function addKashierApiCredentials(kashierApiKey: string, kashierMer
   }
 }
 
+/**
+ * INTERNAL ONLY — decrypts and returns a tenant's Kashier API credentials.
+ *
+ * SECURITY: `tenantId` MUST be derived from a trusted server-side source
+ * (e.g. requireTenant() or an internal job's own record), never from
+ * client-supplied input. Request-facing callers must use
+ * getKashierApiCredentials() instead, which resolves the tenant from the
+ * authenticated context.
+ */
 export async function getKashierApiCredentialsByTenantId(tenantId: string) {
   const subscription = await db.teacherSubscription.findUnique({
     where: { tenantId },

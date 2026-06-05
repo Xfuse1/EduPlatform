@@ -28,7 +28,6 @@ type OptionalEnvKey =
 
 type EnvConfig = {
   DATABASE_URL: string
-  JWT_SECRET: string
   NEXT_PUBLIC_APP_URL: string
   REDIS_URL?: string
   REDIS_TOKEN?: string
@@ -139,7 +138,6 @@ function createEnv(): EnvConfig {
 
   return {
     DATABASE_URL: requireEnv('DATABASE_URL'),
-    JWT_SECRET: readEnv('JWT_SECRET') ?? 'dev-only-secret-change-me',
     NEXT_PUBLIC_APP_URL: appUrl,
     REDIS_URL: redisUrl ? validateUrl(redisUrl, 'REDIS_URL') : undefined,
     REDIS_TOKEN: optionalEnv('REDIS_TOKEN'),

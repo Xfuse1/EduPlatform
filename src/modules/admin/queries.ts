@@ -31,8 +31,8 @@ export const getPlatformOverview = cache(async () => {
     db.tenant.count({ where: tenantWhere }),
     db.tenant.count({ where: { ...tenantWhere, isActive: true } }),
     db.user.count({ where: userWhere }),
-    db.payment.count(),
-    db.payment.aggregate({ where: { status: "PAID" }, _sum: { amount: true } }),
+    db.payment.count({ where: { tenant: tenantWhere } }),
+    db.payment.aggregate({ where: { status: "PAID", tenant: tenantWhere }, _sum: { amount: true } }),
     db.teacherSubscription.count({ where: { isActive: true } }),
     db.teacherTransfer.count({ where: { status: { in: ["PENDING", "RETRY"] } } }),
     db.teacherTransfer.count({ where: { status: "FAILED" } }),
@@ -393,7 +393,7 @@ export async function getPlatformWallets(input?: {
           select: { name: true, slug: true },
         },
         userWallets: {
-          select: { id: true, balance: true, updatedAt: true },
+          select: { id: true, tenantId: true, balance: true, updatedAt: true },
         },
         parentStudents: {
           where: {
@@ -432,7 +432,8 @@ export async function getPlatformWallets(input?: {
 
   return {
     items: items.map((user) => {
-      const wallet = user.userWallets.find((item) => item.id) ?? null;
+      const wallet =
+        user.userWallets.find((item) => item.tenantId === user.tenantId) ?? null;
       return {
         id: wallet?.id ?? `wallet-${user.id}`,
         tenantId: user.tenantId,

@@ -1,8 +1,16 @@
 ﻿import { cache } from "react";
 
-import type { Prisma } from "@/generated/client";
+import { PaymentStatus, type Prisma } from "@/generated/client";
 import { db } from "@/lib/db";
 import { getOrCreateWallet, resolveRechargeWalletOwner, resolveTenantPayeeUserId } from "@/modules/wallet/provider";
+
+/** Coerce an unvalidated status string to a PaymentStatus enum value, or undefined. */
+function parsePaymentStatus(status?: string): PaymentStatus | undefined {
+  if (status && (Object.values(PaymentStatus) as string[]).includes(status)) {
+    return status as PaymentStatus;
+  }
+  return undefined;
+}
 
 
 function startOfCurrentMonth() {
@@ -93,6 +101,16 @@ export const getRevenueSummary = cache(async (tenantId: string, month?: string, 
     // For totals: scope to the requested month when one is given, otherwise all-time.
     const totalsCreatedAt = month ? { createdAt: requestedMonthCreatedAt } : {};
 
+    // Attribute collected revenue by the collection date (paidAt) so a payment
+    // created last month but confirmed PAID this month counts toward the month it
+    // was actually collected. Fall back to createdAt for PAID rows missing paidAt.
+    const paidInRange = (range: { gte: Date; lt?: Date }): Prisma.PaymentWhereInput => ({
+      OR: [
+        { paidAt: range },
+        { paidAt: null, createdAt: range },
+      ],
+    });
+
     const [paidScope, pendingScope, overdueScope, paidThisMonth, paidPreviousMonth] = await Promise.all([
       db.payment.aggregate({
         where: {
@@ -131,7 +149,7 @@ export const getRevenueSummary = cache(async (tenantId: string, month?: string, 
         where: {
           tenantId,
           status: "PAID",
-          createdAt: requestedMonthCreatedAt,
+          ...paidInRange(requestedMonthCreatedAt),
           ...scopeWhere,
         },
         _sum: {
@@ -142,10 +160,10 @@ export const getRevenueSummary = cache(async (tenantId: string, month?: string, 
         where: {
           tenantId,
           status: "PAID",
-          createdAt: {
+          ...paidInRange({
             gte: previousMonthStart,
             lt: requestedMonthStart,
-          },
+          }),
           ...scopeWhere,
         },
         _sum: {
@@ -268,13 +286,14 @@ export const getPayments = cache(async (
   } = {},
   teacherId?: string,
 ) => {
+  const status = parsePaymentStatus(filters.status);
   const payments = await db.payment.findMany({
     where: {
       tenantId,
       NOT: { notes: { startsWith: 'SUBSCRIPTION:' } },
       ...(filters.studentId ? { studentId: filters.studentId } : {}),
       ...(filters.month ? { month: filters.month } : {}),
-      ...(filters.status ? { status: filters.status as any } : {}),
+      ...(status ? { status } : {}),
       // TEACHER scope: restrict to students in groups this teacher owns.
       ...teacherScopePaymentWhere(teacherId),
     },

@@ -27,17 +27,29 @@ export async function logFinancialEvent(input: {
   message: string
   metadata?: Record<string, unknown>
 }) {
-  await db.financialAuditLog.create({
-    data: {
-      tenantId: input.tenantId,
-      actorId: input.actorId ?? null,
+  // Audit writes must never break the primary financial path, so any failure
+  // here is logged and swallowed rather than propagated to the caller.
+  try {
+    await db.financialAuditLog.create({
+      data: {
+        tenantId: input.tenantId,
+        actorId: input.actorId ?? null,
+        eventType: input.eventType,
+        entityType: input.entityType,
+        entityId: input.entityId ?? null,
+        message: input.message,
+        metadata: (input.metadata as unknown as import('@/generated/client').Prisma.InputJsonValue) ?? undefined,
+      },
+    })
+  } catch (error) {
+    console.error('[FINANCIAL_AUDIT] Failed to write financial audit log', {
       eventType: input.eventType,
       entityType: input.entityType,
       entityId: input.entityId ?? null,
-      message: input.message,
-      metadata: (input.metadata as unknown as import('@/generated/client').Prisma.InputJsonValue) ?? undefined,
-    },
-  })
+      tenantId: input.tenantId,
+      error,
+    })
+  }
 }
 
 

@@ -252,9 +252,9 @@ export const getSessionWithStudents = cache(async (sessionId: string, tenantId: 
 
     // Fetch details for students who are not in the group but are in attendance (guests)
     const guestIds = [...attendanceStudentIds].filter(id => !groupStudentIds.has(id));
-    const guestStudents = guestIds.length > 0 
+    const guestStudents = guestIds.length > 0
       ? await db.user.findMany({
-          where: { id: { in: guestIds } },
+          where: { id: { in: guestIds }, tenantId: currentSession.tenantId },
           select: { id: true, name: true, phone: true }
         })
       : [];

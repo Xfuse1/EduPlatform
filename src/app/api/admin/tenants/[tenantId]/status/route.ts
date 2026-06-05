@@ -1,7 +1,8 @@
 import type { NextRequest } from "next/server";
 
+import { Prisma } from "@/generated/client";
 import { db } from "@/lib/db";
-import { errorResponse, successResponse, validationError } from "@/lib/api-response";
+import { errorResponse, notFound, successResponse, validationError } from "@/lib/api-response";
 import { requireSuperAdminApi, toAdminApiError } from "@/lib/platform-admin";
 
 export async function PATCH(
@@ -31,9 +32,16 @@ export async function PATCH(
 
     return successResponse(updated);
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return notFound("السنتر غير موجود");
+    }
+
     const parsed = toAdminApiError(error);
-    const status = parsed.code === "ADMIN_API_ERROR" ? 400 : parsed.status;
-    return errorResponse(parsed.code, parsed.message, status);
+    if (parsed.code === "ADMIN_API_ERROR") {
+      console.error("PATCH /api/admin/tenants/[tenantId]/status failed:", error);
+      return errorResponse(parsed.code, "حدث خطأ غير متوقع", 500);
+    }
+    return errorResponse(parsed.code, parsed.message, parsed.status);
   }
 }
 

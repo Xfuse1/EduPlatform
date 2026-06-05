@@ -58,6 +58,17 @@ export async function createTeacherSignup(input: TeacherSignupInput): Promise<Te
       return { success: false, message: "هذا الرابط مستخدم بالفعل" };
     }
 
+    // Prevent the same phone from creating unlimited teacher tenants by picking
+    // new subdomains. User uniqueness is per-tenant, so a global teacher check is
+    // required here (mirrors the parent-signup dedupe).
+    const existingTeacher = await db.user.findFirst({
+      where: { phone: payload.phone, role: "TEACHER", isActive: true },
+      select: { id: true },
+    });
+    if (existingTeacher) {
+      return { success: false, message: "يوجد حساب مدرس مرتبط بهذا الرقم بالفعل" };
+    }
+
     const account = await db.$transaction(async (tx) => {
       const tenant = await tx.tenant.create({
         data: {

@@ -39,9 +39,25 @@ export async function setTenantStatusAction(formData: FormData) {
     throw new Error("بيانات التحديث غير صالحة");
   }
 
+  const nextActive = isActiveRaw === "true";
+
+  // Never allow suspending the platform tenant (the one that hosts SUPER_ADMIN
+  // users), otherwise the admin/platform would lock itself out since all tenant
+  // resolution requires isActive: true.
+  if (!nextActive) {
+    const platformUser = await db.user.findFirst({
+      where: { tenantId, role: "SUPER_ADMIN" },
+      select: { id: true },
+    });
+
+    if (platformUser) {
+      throw new Error("لا يمكن تعطيل حساب المنصة الخاص بالإدارة");
+    }
+  }
+
   await db.tenant.update({
     where: { id: tenantId },
-    data: { isActive: isActiveRaw === "true" },
+    data: { isActive: nextActive },
   });
 
   revalidatePath("/admin");
@@ -276,6 +292,13 @@ export async function adjustUserWalletAction(formData: FormData) {
       },
     });
   } else {
+    // PAYOUT operates directly on the submitted user's own wallet; a child/parent
+    // context does not apply here, so reject it explicitly to avoid recording a
+    // misleading child context against a wallet that is not the child's.
+    if (targetStudentId) {
+      throw new Error("لا يمكن تنفيذ سحب يدوي على محفظة الابن");
+    }
+
     const withdrawal = await db.$transaction(async (tx) => {
       const wallet = await getOrCreateWallet(tenantId, userId, tx);
       const manualWithdrawal = await tx.walletWithdrawal.create({
@@ -305,7 +328,6 @@ export async function adjustUserWalletAction(formData: FormData) {
           direction: "PAYOUT",
           withdrawalMethod: "ADMIN",
           adminMethod: adminWithdrawalMethod,
-          ...(childContext ?? {}),
         },
         tx,
       });
@@ -320,7 +342,7 @@ export async function adjustUserWalletAction(formData: FormData) {
       entityType: "TRANSFER",
       entityId: withdrawal.id,
       message: `Manual wallet withdrawal recorded (${adminWithdrawalMethod})`,
-      metadata: { userId, amount, adminMethod: adminWithdrawalMethod, ...(childContext ?? {}) },
+      metadata: { userId, amount, adminMethod: adminWithdrawalMethod },
     });
   }
 
@@ -341,7 +363,17 @@ export async function updatePlatformConfigAction(key: string, value: string) {
   revalidatePath("/payments");
 }
 
+// Keys that are safe to read without authentication. This function is exported
+// from a "use server" module, so it is reachable as a public action endpoint;
+// restricting the key to a fixed public allowlist prevents arbitrary-key reads
+// of platform configuration.
+const PUBLIC_PLATFORM_CONFIG_KEYS = new Set(["admin_contact"]);
+
 export async function getPlatformConfigValue(key: string): Promise<string | null> {
+  if (!PUBLIC_PLATFORM_CONFIG_KEYS.has(key)) {
+    return null;
+  }
+
   const row = await db.platformConfig.findUnique({ where: { key } });
   return row?.value ?? null;
 }

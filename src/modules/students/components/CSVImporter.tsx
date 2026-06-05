@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react'
 
 import Badge from '@/components/data-display/Badge'
 import EmptyState from '@/components/shared/EmptyState'
+import { isEgyptPhone, normalizeEgyptPhone, toWhatsAppUrl } from '@/lib/phone'
 import { bulkImport } from '@/modules/students/actions'
 
 import { 
@@ -337,14 +338,20 @@ export default function CSVImporter({ tenantId, groups, hideHeader = false }: CS
                 {rows
                   .filter((_, index) => result.results[index]?.success)
                   .map((row, index) => {
-                    const parentPhone = mapping.parentPhone 
-                      ? row[mapping.parentPhone]?.replace(/^0/, '20') 
+                    const parentPhoneRaw = mapping.parentPhone
+                      ? row[mapping.parentPhone] ?? ''
+                      : ''
+                    const studentPhoneRaw = mapping.phone
+                      ? row[mapping.phone] ?? ''
+                      : ''
+                    const parentPhone = isEgyptPhone(parentPhoneRaw)
+                      ? normalizeEgyptPhone(parentPhoneRaw)
                       : null
-                    const studentPhone = mapping.phone 
-                      ? row[mapping.phone]?.replace(/^0/, '20') 
+                    const studentPhone = isEgyptPhone(studentPhoneRaw)
+                      ? normalizeEgyptPhone(studentPhoneRaw)
                       : null
-                    const studentName = mapping.name 
-                      ? row[mapping.name] 
+                    const studentName = mapping.name
+                      ? row[mapping.name]
                       : `الطالب ${index + 1}`
 
                     if (!parentPhone && !studentPhone) return null
@@ -360,8 +367,8 @@ export default function CSVImporter({ tenantId, groups, hideHeader = false }: CS
                         <div className="flex items-center gap-2">
                           {parentPhone && (
                             <a
-                              href={`https://wa.me/${parentPhone}?text=${encodeURIComponent(
-                                `مرحباً، تم تسجيل ${studentName} في المنصة. سجّل حسابك كولي أمر من هنا: ${origin}/parent-register?phone=${row[mapping.parentPhone ?? ''] ?? ''}`
+                              href={`${toWhatsAppUrl(parentPhone)}?text=${encodeURIComponent(
+                                `مرحباً، تم تسجيل ${studentName} في المنصة. سجّل حسابك كولي أمر من هنا: ${origin}/parent-register?phone=${parentPhone}`
                               )}`}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -372,8 +379,8 @@ export default function CSVImporter({ tenantId, groups, hideHeader = false }: CS
                           )}
                           {studentPhone && (
                             <a
-                              href={`https://wa.me/${studentPhone}?text=${encodeURIComponent(
-                                `مرحباً ${studentName}، تم تسجيلك في المنصة. سجّل حسابك من هنا: ${origin}/register?phone=${row[mapping.phone ?? ''] ?? ''}`
+                              href={`${toWhatsAppUrl(studentPhone)}?text=${encodeURIComponent(
+                                `مرحباً ${studentName}، تم تسجيلك في المنصة. سجّل حسابك من هنا: ${origin}/register?phone=${studentPhone}`
                               )}`}
                               target="_blank"
                               rel="noopener noreferrer"

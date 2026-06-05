@@ -3,47 +3,72 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-const Tabs = ({ defaultValue, value: controlledValue, children, className, onValueChange }: {
-  defaultValue?: string,
-  value?: string,
-  children: React.ReactNode,
-  className?: string,
+type TabsContextValue = {
+  activeValue: string | undefined
+  onValueChange: (value: string) => void
+}
+
+const TabsContext = React.createContext<TabsContextValue | null>(null)
+
+function useTabsContext(component: string): TabsContextValue {
+  const context = React.useContext(TabsContext)
+  if (!context) {
+    throw new Error(`${component} must be used within a <Tabs> component`)
+  }
+  return context
+}
+
+type TabsProps = {
+  defaultValue?: string
+  value?: string
+  children: React.ReactNode
+  className?: string
   onValueChange?: (value: string) => void
-}) => {
+}
+
+const Tabs = ({ defaultValue, value: controlledValue, children, className, onValueChange }: TabsProps) => {
   const [internalValue, setInternalValue] = React.useState(defaultValue)
   const value = controlledValue !== undefined ? controlledValue : internalValue
 
-  const handleValueChange = (val: string) => {
-    if (controlledValue === undefined) setInternalValue(val)
-    if (onValueChange) onValueChange(val)
-  }
+  const handleValueChange = React.useCallback(
+    (val: string) => {
+      if (controlledValue === undefined) setInternalValue(val)
+      if (onValueChange) onValueChange(val)
+    },
+    [controlledValue, onValueChange]
+  )
+
+  const contextValue = React.useMemo<TabsContextValue>(
+    () => ({ activeValue: value, onValueChange: handleValueChange }),
+    [value, handleValueChange]
+  )
 
   return (
-    <div className={cn("w-full", className)}>
-      {React.Children.map(children, child => {
-        if (!React.isValidElement(child)) return child
-        return React.cloneElement(child as React.ReactElement<any>, { 
-          activeValue: value, 
-          onValueChange: handleValueChange 
-        })
-      })}
-    </div>
+    <TabsContext.Provider value={contextValue}>
+      <div className={cn("w-full", className)}>{children}</div>
+    </TabsContext.Provider>
   )
 }
 
-const TabsList = ({ children, className, activeValue, onValueChange }: any) => (
+type TabsListProps = {
+  children: React.ReactNode
+  className?: string
+}
+
+const TabsList = ({ children, className }: TabsListProps) => (
   <div className={cn("inline-flex min-h-10 max-w-full items-center justify-start overflow-x-auto rounded-md bg-muted p-1 text-muted-foreground", className)}>
-    {React.Children.map(children, child => {
-      if (!React.isValidElement(child)) return child
-      return React.cloneElement(child as React.ReactElement<any>, { 
-        activeValue, 
-        onValueChange 
-      })
-    })}
+    {children}
   </div>
 )
 
-const TabsTrigger = ({ value, children, className, activeValue, onValueChange }: any) => {
+type TabsTriggerProps = {
+  value: string
+  children: React.ReactNode
+  className?: string
+}
+
+const TabsTrigger = ({ value, children, className }: TabsTriggerProps) => {
+  const { activeValue, onValueChange } = useTabsContext("TabsTrigger")
   const isActive = activeValue === value
   return (
     <button
@@ -59,7 +84,14 @@ const TabsTrigger = ({ value, children, className, activeValue, onValueChange }:
   )
 }
 
-const TabsContent = ({ value, children, className, activeValue }: any) => {
+type TabsContentProps = {
+  value: string
+  children: React.ReactNode
+  className?: string
+}
+
+const TabsContent = ({ value, children, className }: TabsContentProps) => {
+  const { activeValue } = useTabsContext("TabsContent")
   if (activeValue !== value) return null
   return (
     <div className={cn("mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", className)}>

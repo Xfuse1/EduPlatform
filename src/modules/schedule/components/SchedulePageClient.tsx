@@ -6,10 +6,35 @@ import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { cn, formatClockTime, formatTime12Hour, toArabicDigits } from "@/lib/utils";
 
+type ScheduleSession = {
+  id: string;
+  timeStart: string;
+  timeEnd: string;
+  group: {
+    name: string;
+    color?: string | null;
+    groupStudents?: unknown[] | null;
+  };
+};
+
+type UpcomingExam = {
+  id: string;
+  title: string;
+  description?: string | null;
+  startAt: string | Date;
+};
+
+type PendingHomework = {
+  id: string;
+  submittedAt: string | Date;
+  student: { name: string };
+  assignment: { title: string };
+};
+
 type SchedulePageClientProps = {
-  todaySessions: any[];
-  upcomingExams: any[];
-  pendingHomework: any[];
+  todaySessions: ScheduleSession[];
+  upcomingExams: UpcomingExam[];
+  pendingHomework: PendingHomework[];
 };
 
 function formatArabicTime(value: string) {
@@ -64,16 +89,16 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
                   )}
                 >
                   <div className="mb-4 flex items-start justify-between gap-3">
-                    <div 
-                      className="w-1.5 h-8 rounded-full" 
-                      style={{ backgroundColor: session.group.color || '#1A5276' }} 
+                    <div
+                      className="w-1.5 h-8 rounded-full"
+                      style={{ backgroundColor: session.group?.color || '#1A5276' }}
                     />
                     <Badge className="bg-slate-50 text-slate-500 border-none text-[10px] px-2 py-0.5 rounded-lg dark:bg-slate-800">
-                       {session.group.groupStudents?.length || 0} طالب
+                       {session.group?.groupStudents?.length || 0} طالب
                     </Badge>
                   </div>
                   <h3 className="text-lg font-extrabold text-slate-900 dark:text-white mb-3 group-hover:text-primary">
-                    {session.group.name}
+                    {session.group?.name}
                   </h3>
                   <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
                     <Clock className="h-4 w-4 text-primary/60" />
@@ -165,8 +190,8 @@ export function SchedulePageClient({ todaySessions, upcomingExams, pendingHomewo
                         <Users className="h-5 w-5 text-slate-500" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-sm text-slate-900 dark:text-white">{sub.student.name}</h4>
-                        <p className="text-xs text-slate-500">{sub.assignment.title}</p>
+                        <h4 className="font-bold text-sm text-slate-900 dark:text-white">{sub.student?.name}</h4>
+                        <p className="text-xs text-slate-500">{sub.assignment?.title}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

@@ -3,6 +3,7 @@
 import { env } from '@/config/env'
 import { db } from '@/lib/db'
 import { errorResponse, successResponse } from '@/lib/api-response'
+import { resolveTenantPayeeUserId } from '@/modules/wallet/provider'
 
 function isAuthorized(req: NextRequest) {
   const token = req.headers.get('x-internal-jobs-secret')
@@ -33,33 +34,64 @@ export async function POST(req: NextRequest) {
   })
 
   let created = 0
+  let skipped = 0
 
   for (const subscription of expiring) {
-    const teacher = await db.user.findFirst({
-      where: {
-        tenantId: subscription.tenantId,
-        role: 'TEACHER',
-      },
+    // Resolve the recipient consistently with the financial owner of the tenant
+    // (CENTER_ADMIN first, then TEACHER/ADMIN/MANAGER) rather than an arbitrary TEACHER.
+    let recipientId: string
+    try {
+      recipientId = await resolveTenantPayeeUserId(subscription.tenantId)
+    } catch {
+      // No active owner account found for this tenant — nothing to notify.
+      skipped += 1
+      continue
+    }
+
+    const recipient = await db.user.findFirst({
+      where: { id: recipientId, tenantId: subscription.tenantId },
       select: { id: true, phone: true },
     })
 
-    if (!teacher) continue
+    if (!recipient) {
+      skipped += 1
+      continue
+    }
+
+    const billingDate = subscription.nextBillingAt.toISOString().slice(0, 10)
+
+    // Idempotency: skip if a reminder for this exact billing date already exists
+    // for this recipient, so re-running the job does not create duplicates.
+    const existing = await db.notification.findFirst({
+      where: {
+        tenantId: subscription.tenantId,
+        userId: recipient.id,
+        type: 'PAYMENT_REMINDER',
+        message: { contains: billingDate },
+      },
+      select: { id: true },
+    })
+
+    if (existing) {
+      skipped += 1
+      continue
+    }
 
     await db.notification.create({
       data: {
         tenantId: subscription.tenantId,
-        userId: teacher.id,
+        userId: recipient.id,
         type: 'PAYMENT_REMINDER',
-        message: `Subscription renewal is due on ${subscription.nextBillingAt.toISOString().slice(0, 10)}`,
+        message: `Subscription renewal is due on ${billingDate}`,
         channel: 'PUSH',
         status: 'QUEUED',
-        recipientPhone: teacher.phone,
+        recipientPhone: recipient.phone,
       },
     })
 
     created += 1
   }
 
-  return successResponse({ checked: expiring.length, created })
+  return successResponse({ checked: expiring.length, created, skipped })
 }
 

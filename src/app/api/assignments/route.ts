@@ -1,6 +1,23 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+
+const createAssignmentSchema = z.object({
+  title: z.string().trim().min(1, "عنوان الواجب مطلوب").max(200, "العنوان طويل جدًا"),
+  description: z.string().trim().max(2000).optional().nullable(),
+  groupId: z.string().trim().min(1, "المجموعة مطلوبة"),
+  dueDate: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((value) => !value || !Number.isNaN(new Date(value).getTime()), {
+      message: "تاريخ غير صالح",
+    }),
+  fileUrl: z.string().trim().max(2000).optional().nullable(),
+  answerKeyUrl: z.string().trim().max(2000).optional().nullable(),
+  maxGrade: z.coerce.number().positive("الدرجة يجب أن تكون رقمًا موجبًا").max(1000).optional(),
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,7 +27,14 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, description, groupId, dueDate, fileUrl, answerKeyUrl, maxGrade } = body;
+    const parsed = createAssignmentSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: { code: "VALIDATION_ERROR", message: "بيانات غير صحيحة", details: parsed.error.flatten() } },
+        { status: 422 },
+      );
+    }
+    const { title, description, groupId, dueDate, fileUrl, answerKeyUrl, maxGrade } = parsed.data;
 
     // Validate the target group belongs to this tenant (and to the teacher when scoped).
     const isTeacher = user.role === "TEACHER";

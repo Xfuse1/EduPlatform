@@ -70,7 +70,12 @@ function enrollmentStatusLabel(status?: string) {
 }
 
 function csvCell(value: string | number | undefined) {
-  const text = String(value ?? "");
+  let text = String(value ?? "");
+  // Neutralize spreadsheet formula/CSV injection: cells starting with =, +, -, @,
+  // tab, or CR are treated as formulas by Excel/Sheets. Prefix with an apostrophe.
+  if (/^[=+\-@\t\r]/.test(text)) {
+    text = `'${text}`;
+  }
   return `"${text.replace(/"/g, '""')}"`;
 }
 
@@ -191,7 +196,9 @@ export function StudentsPageClient({ students, groups, tenantId, canAddStudents 
       const groups = uniqueValues(studentRows.map((item) => item.group));
       const groupIds = uniqueValues(studentRows.map((item) => item.groupId));
       const enrollmentStatuses = uniqueValues(studentRows.map((item) => enrollmentStatusLabel(item.enrollmentStatus)));
-      const amountDue = studentRows.reduce((total, item) => total + item.amountDue, 0);
+      // amountDue originates from the student's single latest payment and is repeated
+      // on every enrollment row, so take it once per student instead of summing.
+      const amountDue = student.amountDue;
       const maxConsecutiveAbsences = Math.max(...studentRows.map((item) => item.consecutiveAbsences));
 
       return [

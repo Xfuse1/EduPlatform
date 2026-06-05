@@ -34,5 +34,33 @@ export default async function ExamResultsPage({ params }: { params: Promise<{ ex
 
   if (!exam) notFound();
 
-  return <ExamResultsClient exam={exam as any} />;
+  // Map the Prisma result into the shape ExamResultsClient expects. The only
+  // structural gap is the JSON `answers`/`options` fields, which we narrow here
+  // instead of leaking an `as any` across the boundary.
+  const examData = {
+    id: exam.id,
+    title: exam.title,
+    questions: exam.questions.map((question) => ({
+      id: question.id,
+      questionText: question.questionText,
+      type: question.type as "MCQ" | "ESSAY" | "TRUE_FALSE",
+      options: question.options,
+      correctAnswer: question.correctAnswer,
+      grade: question.grade,
+    })),
+    submissions: exam.submissions.map((submission) => ({
+      id: submission.id,
+      studentId: submission.studentId,
+      answers: (submission.answers ?? {}) as Record<string, string>,
+      totalGrade: submission.totalGrade,
+      aiGrade: submission.aiGrade,
+      aiFeedback: submission.aiFeedback,
+      teacherComment: submission.teacherComment,
+      gradedByAi: submission.gradedByAi,
+      submittedAt: submission.submittedAt,
+      student: submission.student,
+    })),
+  };
+
+  return <ExamResultsClient exam={examData} />;
 }

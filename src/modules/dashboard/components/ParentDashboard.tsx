@@ -1,7 +1,6 @@
 'use client';
 
-import { CalendarClock, CheckCircle2, CreditCard, UserRound, Bell, MessageSquare, Clock, BookOpen, AlertTriangle, X, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { CalendarClock, CheckCircle2, CreditCard, UserRound, Bell, MessageSquare, Clock, BookOpen, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -23,8 +22,6 @@ function todayStatusLabel(status: string) {
 }
 
 export function ParentDashboard({ data }: ParentDashboardProps) {
-  const [showBanner, setShowBanner] = useState(true);
-  
   const formatSessionDate = (date: Date) =>
     date.toLocaleDateString("ar-EG", {
       weekday: "long",
@@ -37,39 +34,6 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
 
   return (
     <div className="space-y-6" dir="rtl">
-      {/* Subscription Expiry Banner */}
-      {showBanner && (
-        <Card className="border-border-soft bg-surface backdrop-blur-[16px] shadow-sm overflow-hidden animate-in fade-in slide-in-from-top duration-500">
-          <CardContent className="flex flex-col items-stretch justify-between gap-4 p-4 sm:flex-row sm:items-center">
-            <div className="flex items-start gap-3 sm:items-center">
-              <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900 flex items-center justify-center text-amber-600">
-                <AlertTriangle className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-amber-900 dark:text-amber-200">تنبيه انتهاء الاشتراك</p>
-                <p className="text-xs text-amber-700/80 dark:text-amber-400">اشتراكك ينتهي خلال 5 أيام — يرجى التجديد لضمان استمرار الخدمة.</p>
-              </div>
-            </div>
-            <div className="flex w-full items-center gap-2 sm:w-auto">
-              <Button 
-                variant="default" 
-                className="bg-amber-600 hover:bg-amber-700 text-white min-h-10 px-6 rounded-xl text-xs font-bold shadow-none"
-                onClick={() => window.location.href = '/payments'}
-              >
-                جدد الآن
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="h-10 w-10 p-0 text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900" 
-                onClick={() => setShowBanner(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Notifications Section */}
       {data.notifications && data.notifications.length > 0 && (
         <Card className="border-border-soft bg-surface backdrop-blur-[16px]">
@@ -104,7 +68,14 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
           <CardContent className="p-4 sm:p-6">
             <p className="text-sm text-slate-500 dark:text-[#94A3B8] font-bold">متوسط الحضور</p>
             <p className="mt-3 text-2xl font-extrabold text-[#00B8A0] sm:text-3xl">
-              {data.children.length ? `${toArabicDigits(data.children[0].attendanceRate)}%` : "٠٪"}
+              {data.children.length
+                ? `${toArabicDigits(
+                    Math.round(
+                      data.children.reduce((acc, c) => acc + (c.attendanceRate || 0), 0) /
+                        data.children.length,
+                    ),
+                  )}%`
+                : "٠٪"}
             </p>
           </CardContent>
         </Card>
@@ -112,7 +83,7 @@ export function ParentDashboard({ data }: ParentDashboardProps) {
           <CardContent className="p-4 sm:p-6">
             <p className="text-sm text-slate-500 dark:text-[#94A3B8] font-bold">حالة المصروفات</p>
             <p className="mt-3 text-lg font-extrabold text-[#F5A623]">
-              {data.children[0]?.payment.status === "PAID" ? "منتظمة بالكامل" : "تحتاج مراجعة"}
+              {data.children.length > 0 && data.children.every((c) => c.payment.status === "PAID") ? "منتظمة بالكامل" : "تحتاج مراجعة"}
             </p>
           </CardContent>
         </Card>

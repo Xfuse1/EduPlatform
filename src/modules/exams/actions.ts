@@ -344,7 +344,14 @@ ${JSON.stringify(questionsList, null, 2)}
 
         const geminiData = await geminiResponse.json();
         const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
-        const result = JSON.parse(rawText);
+
+        let result: { grade?: unknown; summary?: unknown } & Record<string, unknown>;
+        try {
+            result = JSON.parse(rawText);
+        } catch {
+            console.error("AI Grade Exam: failed to parse Gemini response");
+            return { success: false, error: "تعذّر قراءة نتيجة التصحيح الآلي. حاول مرة أخرى." };
+        }
 
         // Clamp the AI-suggested grade to [0, exam.maxGrade].
         if (typeof result?.grade === "number") {
@@ -354,6 +361,6 @@ ${JSON.stringify(questionsList, null, 2)}
         return { success: true, data: result };
     } catch (error) {
         console.error("AI Grade Exam error:", error);
-        return { success: false, error: String(error) };
+        return { success: false, error: "فشل التصحيح الآلي. حاول مرة أخرى بعد قليل." };
     }
 }

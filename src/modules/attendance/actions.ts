@@ -3,8 +3,7 @@ import { requireTenant } from '@/lib/tenant'
 import { requireAuth } from '@/lib/auth'
 import { requireRole, STAFF_ROLES } from '@/lib/permissions'
 import { getTeacherScopeUserId } from '@/lib/teacher-access'
-import { buildDateTime } from '@/lib/schedule'
-import { getSessionEndDate } from '@/modules/attendance/sessionStatus'
+import { getSessionEndDate, getSessionStartDate } from '@/modules/attendance/sessionStatus'
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import {
@@ -100,36 +99,50 @@ export async function markAttendance(
 
   // ── B-06: إرسال إشعارات — fire & forget (لا يوقف الـ response) ──────────
   // ✅ session.group موجود لأننا عملنا include: { group: true } فوق
-  void Promise.allSettled(
-    validRecords.map(async (record) => {
-      const student = await db.user.findUnique({
-        where: { id: record.studentId },
-        select: { parentPhone: true, name: true },
-      })
-      if (!student?.parentPhone) return
+  // batch-load الطلاب وعلاقات أولياء الأمور مرة واحدة لتفادي N+1
+  const studentIds = validRecords.map((record) => record.studentId)
+  void (async () => {
+    const [students, parentRelations] = await Promise.all([
+      db.user.findMany({
+        where: { id: { in: studentIds } },
+        select: { id: true, parentPhone: true, name: true },
+      }),
+      db.parentStudent.findMany({
+        where: { studentId: { in: studentIds } },
+        select: { studentId: true, parentId: true },
+      }),
+    ])
 
-      const parentRelation = await db.parentStudent.findFirst({
-        where: { studentId: record.studentId },
-        select: { parentId: true },
-      })
-      if (!parentRelation) return
+    const studentById = new Map(students.map((student) => [student.id, student]))
+    const parentByStudentId = new Map(
+      parentRelations.map((relation) => [relation.studentId, relation.parentId]),
+    )
 
-      await sendNotification({
-        userId: parentRelation.parentId,
-        type:
-          record.status === 'PRESENT'
-            ? 'ATTENDANCE_PRESENT'
-            : 'ATTENDANCE_ABSENT',
-        channel: 'SMS',
-        recipientPhone: student.parentPhone,
-        templateData: {
-          studentName: student.name,
-          subject: session.group.subject,
-          time: session.timeStart,
-        },
-      })
-    }),
-  )
+    await Promise.allSettled(
+      validRecords.map(async (record) => {
+        const student = studentById.get(record.studentId)
+        if (!student?.parentPhone) return
+
+        const parentId = parentByStudentId.get(record.studentId)
+        if (!parentId) return
+
+        await sendNotification({
+          userId: parentId,
+          type:
+            record.status === 'PRESENT'
+              ? 'ATTENDANCE_PRESENT'
+              : 'ATTENDANCE_ABSENT',
+          channel: 'SMS',
+          recipientPhone: student.parentPhone,
+          templateData: {
+            studentName: student.name,
+            subject: session.group.subject,
+            time: session.timeStart,
+          },
+        })
+      }),
+    )
+  })()
   // ────────────────────────────────────────────────────────────────────────────
 
   revalidatePath('/attendance')
@@ -238,7 +251,7 @@ export async function syncOfflineRecords(
       }
 
       // تثبيت markedAt داخل نطاق الحصة (من البداية حتى النهاية)
-      const sessionStart = buildDateTime(session.date, session.timeStart)
+      const sessionStart = getSessionStartDate(session)
       const sessionEnd = getSessionEndDate(session)
       let markedAt = new Date(record.markedAt)
       if (sessionStart && markedAt < sessionStart) markedAt = sessionStart

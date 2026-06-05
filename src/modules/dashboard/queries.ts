@@ -395,9 +395,11 @@ export const getTeacherDashboardData = cache(async (tenantId: string) => {
 
 export const getStudentDashboardData = cache(async (tenantId: string, studentId: string) => {
   try {
-    // 1. Fetch Student Profile with enrollments for the current tenant
-    const student = await db.user.findUnique({
-      where: { id: studentId },
+    // 1. Fetch Student Profile with enrollments for the current tenant.
+    // Scope by tenantId + role so a studentId from another tenant is never
+    // resolvable here (enforces tenant isolation before returning parent contacts).
+    const student = await db.user.findFirst({
+      where: { id: studentId, tenantId, role: "STUDENT" },
       include: {
         groupStudents: {
           where: {
@@ -726,7 +728,15 @@ export const getCenterDashboardData = cache(async (tenantId: string) => {
       },
       take: 20,
     }).catch(() => []),
-    getRevenueSummary(tenantId),
+    getRevenueSummary(tenantId).catch(() => ({
+      collected: 0,
+      outstanding: 0,
+      total: 0,
+      collectionRate: 0,
+      thisMonth: 0,
+      lastMonth: 0,
+      change: 0,
+    })),
   ]);
 
   return {

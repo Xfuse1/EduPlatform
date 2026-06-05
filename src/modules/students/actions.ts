@@ -249,21 +249,19 @@ async function syncGroupMemberships(
     }
 
     const existingEnrollment = existingEnrollments.find((enrollment) => enrollment.groupId === groupId);
-    const activeCount = await db.groupStudent.count({
-      where: {
-        groupId,
-        status: "ACTIVE",
-      },
-    });
-
-    const nextStatus = existingEnrollment?.status === "ACTIVE"
-      ? "ACTIVE"
-      : activeCount >= group.maxCapacity
-        ? "WAITLIST"
-        : "ACTIVE";
 
     if (existingEnrollment) {
       await db.$transaction(async (tx) => {
+        // احسب السعة داخل نفس المعاملة لتقليل سباق الـ TOCTOU
+        const activeCount = await tx.groupStudent.count({
+          where: { groupId, status: "ACTIVE" },
+        });
+        const nextStatus = existingEnrollment.status === "ACTIVE"
+          ? "ACTIVE"
+          : activeCount >= group.maxCapacity
+            ? "WAITLIST"
+            : "ACTIVE";
+
         await tx.groupStudent.update({
           where: {
             id: existingEnrollment.id,
@@ -282,6 +280,12 @@ async function syncGroupMemberships(
     }
 
     await db.$transaction(async (tx) => {
+      // احسب السعة داخل نفس المعاملة لتقليل سباق الـ TOCTOU
+      const activeCount = await tx.groupStudent.count({
+        where: { groupId, status: "ACTIVE" },
+      });
+      const nextStatus = activeCount >= group.maxCapacity ? "WAITLIST" : "ACTIVE";
+
       await tx.groupStudent.create({
         data: {
           id: generateId(),
@@ -317,6 +321,7 @@ async function createStudentForTenant(tenantId: string, input: NormalizedStudent
       const phoneLookupValues = getStudentPhoneLookupValues(storedStudentPhone);
       const duplicateStudent = await db.user.findFirst({
         where: {
+          tenantId,
           role: "STUDENT",
           phone: {
             in: phoneLookupValues,
@@ -404,6 +409,7 @@ async function updateStudentForTenant(tenantId: string, input: NormalizedStudent
       const phoneLookupValues = getStudentPhoneLookupValues(input.phone);
       const duplicateStudent = await db.user.findFirst({
         where: {
+          tenantId,
           role: "STUDENT",
           phone: {
             in: phoneLookupValues,
@@ -487,8 +493,28 @@ export async function updateStudent(
   return updateStudentForTenant(tenant.id, normalizeStudentInput(formData, studentIdOverride));
 }
 
+const MAX_IMPORT_RECORDS = 500;
+
 export async function bulkImport(_tenantId: string, records: Record<string, unknown>[]) {
+  // أمان: اشتقاق الـ tenant من الجلسة (الوسيط القادم من العميل يُتجاهل)
   const tenant = await requireTenant();
+  const user = await requireAuth();
+  requireRole(user.role, STAFF_ROLES);
+
+  if (!Array.isArray(records) || records.length === 0) {
+    return { total: 0, created: 0, failed: 0, results: [] };
+  }
+
+  // حماية من إغراق الخادم بدفعات ضخمة (DoS)
+  if (records.length > MAX_IMPORT_RECORDS) {
+    return {
+      total: records.length,
+      created: 0,
+      failed: records.length,
+      results: [],
+      message: `الحد الأقصى للاستيراد ${MAX_IMPORT_RECORDS} طالب في المرة الواحدة`,
+    };
+  }
 
   const results: Array<{ index: number; success: boolean; error?: string }> = [];
   let created = 0;
@@ -589,11 +615,15 @@ export async function removeFromGroup(studentId: string, groupId: string) {
     return { success: false, message: "الطالب غير موجود" };
   }
 
-  // ✅ حذف السجل نهائياً
-  await db.groupStudent.deleteMany({
+  // ✅ إزالة ناعمة (DROPPED) بدل الحذف النهائي للحفاظ على سجل الفواتير/التدقيق
+  await db.groupStudent.updateMany({
     where: {
       groupId,
       studentId,
+    },
+    data: {
+      status: "DROPPED",
+      droppedAt: new Date(),
     },
   });
 
@@ -653,6 +683,8 @@ export async function findStudentByPhone(phone: string): Promise<{
 }> {
   try {
     const tenant = await requireTenant();
+    const user = await requireAuth();
+    requireRole(user.role, STAFF_ROLES);
     const normalized = normalizeEgyptPhone(phone.trim());
     const phoneLookupValues = getStudentPhoneLookupValues(normalized);
 
@@ -686,20 +718,11 @@ export async function findStudentByPhone(phone: string): Promise<{
       },
     } satisfies Prisma.UserSelect;
 
-    const sameTenantStudent = await db.user.findFirst({
+    // أمان: البحث محصور داخل الـ tenant الحالي فقط — لا نكشف وجود/اسم/صف
+    // طالب يخص سنترًا آخر (منع تعداد الطلاب عبر السنترات).
+    const student = await db.user.findFirst({
       where: {
         tenantId: tenant.id,
-        role: "STUDENT",
-        isActive: true,
-        phone: {
-          in: phoneLookupValues,
-        },
-      },
-      select: studentSelect,
-    });
-
-    const student = sameTenantStudent ?? await db.user.findFirst({
-      where: {
         role: "STUDENT",
         isActive: true,
         phone: {

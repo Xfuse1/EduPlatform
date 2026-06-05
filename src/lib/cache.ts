@@ -52,9 +52,16 @@ export async function setCacheValue(
     return
   }
 
-  const commandPath = ttlSeconds
-    ? `/setex/${encodeURIComponent(key)}/${ttlSeconds}/${encodeURIComponent(value)}`
-    : `/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`
+  // ttlSeconds <= 0 means "do not cache" (immediate expiry); avoid silently
+  // storing a non-expiring key via a plain SET.
+  if (typeof ttlSeconds === 'number' && ttlSeconds <= 0) {
+    return
+  }
+
+  const commandPath =
+    typeof ttlSeconds === 'number' && ttlSeconds > 0
+      ? `/setex/${encodeURIComponent(key)}/${ttlSeconds}/${encodeURIComponent(value)}`
+      : `/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`
 
   try {
     await fetch(`${env.REDIS_URL}${commandPath}`, {

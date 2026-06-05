@@ -59,11 +59,9 @@ export async function GET() {
     }
 
     return NextResponse.json(Array.from(conversationMap.values()));
-  } catch (error: any) {
-    return NextResponse.json({ 
-      error: error.message,
-      stack: error.stack  // أضف ده مؤقتاً
-    }, { status: 500 });
+  } catch (error) {
+    console.error("GET /api/conversations failed:", error);
+    return NextResponse.json({ error: "حدث خطأ غير متوقع" }, { status: 500 });
   }
 }
 
@@ -96,7 +94,8 @@ export async function PATCH(request: Request) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    console.error("PATCH /api/conversations failed:", error);
+    return NextResponse.json({ error: "حدث خطأ غير متوقع" }, { status: 500 });
   }
 }

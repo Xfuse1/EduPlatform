@@ -2,7 +2,7 @@
 
 import { LogOut, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { TeacherShareButton } from "@/components/layout/TeacherShareButton";
@@ -40,21 +40,20 @@ export function Header({
     setAvatarFailed(false);
   }, [avatarUrl]);
 
-  const shouldRenderAvatar = useMemo(() => {
-    if (!avatarUrl || avatarFailed) {
-      return false;
-    }
-
-    if (typeof window !== "undefined" && !window.location.hostname.includes("localhost") && avatarUrl.includes("/uploads/avatars/")) {
-      return false;
-    }
-
-    return true;
-  }, [avatarFailed, avatarUrl]);
+  // Render the avatar whenever we have a URL; rely on the <img> onError
+  // fallback to show initials if the image fails to load.
+  const resolvedAvatarUrl = !avatarFailed ? avatarUrl ?? null : null;
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (res.ok) {
+        router.push("/login");
+      }
+    } catch {
+      // Network/server error: keep the user on the page so they can retry
+      // rather than appearing logged out while the session may still be valid.
+    }
   };
 
   return (
@@ -62,8 +61,8 @@ export function Header({
       <div className="flex min-h-16 items-center justify-between gap-1.5 px-2.5 sm:gap-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
           <div className="hidden h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/90 p-1 text-sm font-extrabold text-primary shadow-lg shadow-primary/20 dark:bg-slate-900 sm:flex">
-            {shouldRenderAvatar ? (
-              <img src={avatarUrl as string} alt={userName} className="h-full w-full rounded-xl object-contain" onError={() => setAvatarFailed(true)} />
+            {resolvedAvatarUrl ? (
+              <img src={resolvedAvatarUrl} alt={userName} className="h-full w-full rounded-xl object-contain" onError={() => setAvatarFailed(true)} />
             ) : (
               <span className="grid h-full w-full place-items-center rounded-xl bg-gradient-to-br from-primary to-secondary text-white">
                 {getInitials(userName)}

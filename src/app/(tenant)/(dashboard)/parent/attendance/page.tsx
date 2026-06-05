@@ -30,8 +30,10 @@ interface Child {
 export default async function ParentAttendancePage({
   searchParams,
 }: {
-  searchParams: { childId?: string };
+  searchParams: Promise<{ childId?: string }>;
 }) {
+  const { childId } = await searchParams;
+
   const user = await requireAuth();
   if (user.role !== "PARENT") redirect("/student");
 
@@ -40,7 +42,7 @@ export default async function ParentAttendancePage({
   const children = childrenData.map((pc: any) => ({ id: pc.student.id, name: pc.student.name }));
 
   const selectedChild =
-    childrenData.find((pc: any) => pc.student.id === searchParams.childId) ??
+    childrenData.find((pc: any) => pc.student.id === childId) ??
     childrenData[0];
   const selectedChildId = selectedChild?.student.id;
 

@@ -77,11 +77,18 @@ function doTimesOverlap(startA: string, endA: string, startB: string, endB: stri
   return a0 < b1 && b0 < a1;
 }
 
+function normalizeRoom(room?: string | null) {
+  return room?.trim().toLowerCase() || null;
+}
+
 async function checkScheduleConflict(
   tenantId: string,
   schedule: Array<{ day: string; timeStart: string; timeEnd: string }>,
-  excludeGroupId?: string,
+  options: { teacherId?: string | null; room?: string | null; excludeGroupId?: string } = {},
 ): Promise<string | null> {
+  const { teacherId, room, excludeGroupId } = options;
+  const normalizedRoom = normalizeRoom(room);
+
   const existingGroups = await db.group.findMany({
     where: {
       tenantId,
@@ -94,11 +101,22 @@ async function checkScheduleConflict(
       timeStart: true,
       timeEnd: true,
       schedule: true,
+      teacherId: true,
+      room: true,
     },
   });
 
   for (const entry of schedule) {
     for (const group of existingGroups) {
+      // Only a genuine conflict when the same teacher is double-booked, or when
+      // the two groups share the same physical room. Different teachers in
+      // different rooms can legitimately run in parallel.
+      const sameTeacher = teacherId != null && group.teacherId === teacherId;
+      const sameRoom =
+        normalizedRoom !== null && normalizeRoom(group.room) === normalizedRoom;
+
+      if (!sameTeacher && !sameRoom) continue;
+
       const groupSchedule = parseStoredGroupSchedule(group.schedule, {
         days: group.days,
         timeStart: group.timeStart,
@@ -125,6 +143,10 @@ export async function createGroup(formData: FormData): Promise<GroupActionResult
       return { success: false, message: "غير مسموح لك بالقيام بهذا الإجراء" };
     }
 
+    if (tenant.id !== user.tenantId) {
+      return { success: false, message: "غير مسموح لك بالقيام بهذا الإجراء" };
+    }
+
     const subscriptionCheck = await canAddGroup(tenant.id);
     if (!subscriptionCheck.allowed) {
       return { success: false, message: subscriptionCheck.message ?? 'لا يمكن إضافة مجموعات بدون اشتراك نشط' };
@@ -138,7 +160,11 @@ export async function createGroup(formData: FormData): Promise<GroupActionResult
 
     const payload = getPayload(formData);
 
-    const conflict = await checkScheduleConflict(tenant.id, payload.schedule);
+    const newTeacherId = user.role === "TEACHER" ? user.id : null;
+    const conflict = await checkScheduleConflict(tenant.id, payload.schedule, {
+      teacherId: newTeacherId,
+      room: payload.room,
+    });
     if (conflict) {
       return { success: false, message: conflict };
     }
@@ -146,7 +172,7 @@ export async function createGroup(formData: FormData): Promise<GroupActionResult
     const createdGroup = await db.group.create({
       data: {
         tenantId: tenant.id,
-        teacherId: user.role === "TEACHER" ? user.id : null,
+        teacherId: newTeacherId,
         name: payload.name,
         subject: payload.subject,
         gradeLevel: payload.gradeLevel,
@@ -190,6 +216,10 @@ export async function updateGroup(
       return { success: false, message: "غير مسموح لك بالقيام بهذا الإجراء" };
     }
 
+    if (tenant.id !== user.tenantId) {
+      return { success: false, message: "غير مسموح لك بالقيام بهذا الإجراء" };
+    }
+
     const formData = groupIdOrFormData instanceof FormData ? groupIdOrFormData : maybeFormData;
     const groupId =
       typeof groupIdOrFormData === "string"
@@ -227,7 +257,12 @@ export async function updateGroup(
 
     const payload = getPayload(formData);
 
-    const conflict = await checkScheduleConflict(tenant.id, payload.schedule, groupId);
+    const effectiveTeacherId = existingGroup.teacherId ?? (user.role === "TEACHER" ? user.id : null);
+    const conflict = await checkScheduleConflict(tenant.id, payload.schedule, {
+      teacherId: effectiveTeacherId,
+      room: payload.room,
+      excludeGroupId: groupId,
+    });
     if (conflict) {
       return { success: false, message: conflict };
     }
@@ -237,7 +272,7 @@ export async function updateGroup(
         id: groupId,
       },
       data: {
-        teacherId: existingGroup.teacherId ?? (user.role === "TEACHER" ? user.id : null),
+        teacherId: effectiveTeacherId,
         name: payload.name,
         subject: payload.subject,
         gradeLevel: payload.gradeLevel,
@@ -273,6 +308,10 @@ export async function deleteGroup(groupId: string): Promise<GroupActionResult> {
     const tenant = await requireTenant();
 
     if (!canManageGroups(user.role)) {
+      return { success: false, message: "غير مسموح لك بحذف المجموعة" };
+    }
+
+    if (tenant.id !== user.tenantId) {
       return { success: false, message: "غير مسموح لك بحذف المجموعة" };
     }
 
@@ -320,6 +359,10 @@ export async function archiveGroup(groupId: string) {
   const tenant = await requireTenant();
 
   if (!canManageGroups(user.role)) {
+    throw new Error("غير مسموح لك بأرشفة المجموعة");
+  }
+
+  if (tenant.id !== user.tenantId) {
     throw new Error("غير مسموح لك بأرشفة المجموعة");
   }
 

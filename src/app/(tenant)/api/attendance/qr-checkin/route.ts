@@ -6,6 +6,12 @@ import { requireTenant } from "@/lib/tenant";
 import { completeExpiredSession } from "@/modules/attendance/sessionStatus";
 import { ensureQrBillingBeforeAttendance, incrementMonthlyConsumption } from "@/modules/groups/billing";
 
+// NOTE (known limitation): the QR token is a shared bearer secret scoped to
+// (tenant + token + not expired + IN_PROGRESS). It is not bound to a specific
+// student, so a forwarded token URL could be used for proxy attendance. It is
+// mitigated by a short TTL (qrExpiresAt) and an optional per-session scan limit
+// (qrScanLimit). Stronger binding (per-scan nonce, geofence, device signals)
+// would require schema/feature changes and is intentionally out of scope here.
 async function findActiveSessionByToken(tenantId: string, token: string) {
   const now = new Date();
 
@@ -54,27 +60,37 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: "رمز غير صالح." }, { status: 400 });
     }
 
+    // Require an authenticated same-tenant STUDENT before revealing any session
+    // details, so the endpoint cannot be used as an oracle to probe valid tokens.
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ success: false, code: "AUTH_REQUIRED", error: "يجب تسجيل الدخول أولاً." }, { status: 401 });
+    }
+
+    if (user.role !== "STUDENT") {
+      return NextResponse.json({ success: false, error: "تسجيل الحضور متاح للطلاب فقط." }, { status: 403 });
+    }
+
+    if (user.tenantId !== tenant.id) {
+      return NextResponse.json({ success: false, error: "الحساب غير تابع لنفس السنتر." }, { status: 403 });
+    }
+
     const session = await findActiveSessionByToken(tenant.id, token);
     if (!session) {
       return NextResponse.json({ success: false, error: "الكود غير صالح أو منتهي." }, { status: 404 });
     }
 
-    const user = await getCurrentUser();
-    const canCheckin = Boolean(user && user.role === "STUDENT" && user.tenantId === tenant.id);
-    const existingAttendance =
-      canCheckin && user
-        ? await db.attendance.findUnique({
-            where: {
-              sessionId_studentId: {
-                sessionId: session.id,
-                studentId: user.id,
-              },
-            },
-            select: {
-              status: true,
-            },
-          })
-        : null;
+    const existingAttendance = await db.attendance.findUnique({
+      where: {
+        sessionId_studentId: {
+          sessionId: session.id,
+          studentId: user.id,
+        },
+      },
+      select: {
+        status: true,
+      },
+    });
 
     return NextResponse.json({
       success: true,

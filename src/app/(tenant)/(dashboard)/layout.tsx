@@ -46,7 +46,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   // Use user's actual tenantId to get the correct tenant (avoids localhost first-tenant fallback bug)
-  const [userTenant, userData, adminContact] = await Promise.all([
+  const [userTenant, userData] = await Promise.all([
     db.tenant.findUnique({
       where: { id: user.tenantId },
       select: { name: true, slug: true, isActive: true },
@@ -55,11 +55,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
       where: { id: user.id },
       select: { avatarUrl: true },
     }),
-    db.user.findFirst({
-      where: { role: "SUPER_ADMIN", isActive: true },
-      orderBy: { createdAt: "asc" },
-      select: { phone: true },
-    }),
   ]);
 
   const tenantName = userTenant?.name ?? "EduPlatform";
@@ -67,6 +62,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const avatarUrl = userData?.avatarUrl ?? null;
 
   if (userTenant && !userTenant.isActive) {
+    // Only fetch the support contact when the tenant is actually suspended.
+    const adminContact = await db.user.findFirst({
+      where: { role: "SUPER_ADMIN", isActive: true },
+      orderBy: { createdAt: "asc" },
+      select: { phone: true },
+    });
+
     return (
       <AppShell
         currentPath={currentPath}

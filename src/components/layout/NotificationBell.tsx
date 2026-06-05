@@ -19,6 +19,11 @@ export type NotificationType =
   | "PAYMENT_OVERDUE"
   | "NEW_JOIN_REQUEST";
 
+export type NotificationMeta = {
+  groupId?: string;
+  [key: string]: unknown;
+};
+
 export type NotificationItem = {
   id: string;
   type: NotificationType;
@@ -26,10 +31,13 @@ export type NotificationItem = {
   createdAt: string;
   isRead: boolean;
   status: string;
-  meta?: any;
+  meta?: NotificationMeta;
 };
 
-const NOTIFICATION_CONFIG: Record<string, { icon: LucideIcon; color: string; bgColor: string; getLink?: (n: any) => string }> = {
+const NOTIFICATION_CONFIG: Record<
+  string,
+  { icon: LucideIcon; color: string; bgColor: string; getLink?: (n: NotificationItem) => string | undefined }
+> = {
   ATTENDANCE_PRESENT: { icon: CheckCircle, color: "text-emerald-600", bgColor: "bg-emerald-50 dark:bg-emerald-950/30" },
   ATTENDANCE_ABSENT: { icon: XCircle, color: "text-rose-600", bgColor: "bg-rose-50 dark:bg-rose-950/30" },
   ASSIGNMENT_DUE: { icon: BookOpen, color: "text-blue-600", bgColor: "bg-blue-50 dark:bg-blue-950/30" },
@@ -43,7 +51,7 @@ const NOTIFICATION_CONFIG: Record<string, { icon: LucideIcon; color: string; bgC
     icon: Users,
     color: "text-rose-600",
     bgColor: "bg-rose-50 dark:bg-rose-950/30",
-    getLink: (n: any) => `/teacher/groups/${n.meta?.groupId}`,
+    getLink: (n: NotificationItem) => (n.meta?.groupId ? `/teacher/groups/${n.meta.groupId}` : undefined),
   },
 };
 

@@ -50,56 +50,67 @@ export async function registerStudent(formData: FormData): Promise<RegistrationR
       };
     }
 
-    const duplicateRegistration = await db.user.findFirst({
-      where: {
-        tenantId: tenant.id,
-        role: "STUDENT",
-        name: studentName,
-        parentPhone,
-        groupStudents: {
-          some: {
-            groupId,
+    const conflict = await db.$transaction(async (tx) => {
+      const duplicateRegistration = await tx.user.findFirst({
+        where: {
+          tenantId: tenant.id,
+          role: "STUDENT",
+          name: studentName,
+          parentPhone,
+          groupStudents: {
+            some: {
+              groupId,
+            },
           },
         },
-      },
-      select: {
-        id: true,
-      },
-    });
+        select: {
+          id: true,
+        },
+      });
 
-    if (duplicateRegistration) {
-      return {
-        success: false,
-        message: "هذا الطالب مسجل بالفعل في هذه المجموعة",
-      };
-    }
+      if (duplicateRegistration) {
+        return "هذا الطالب مسجل بالفعل في هذه المجموعة" as const;
+      }
 
-    const existingParent = await db.user.findFirst({
-      where: {
-        tenantId: tenant.id,
-        phone: parentPhone,
-      },
-      select: {
-        id: true,
-        role: true,
-      },
-    });
-
-    if (existingParent && existingParent.role !== "PARENT") {
-      return {
-        success: false,
-        message: "رقم الهاتف مستخدم بالفعل لحساب آخر",
-      };
-    }
-
-    const parent =
-      existingParent ??
-      (await db.user.create({
-        data: {
+      const existingParent = await tx.user.findFirst({
+        where: {
           tenantId: tenant.id,
           phone: parentPhone,
-          name: parentName,
-          role: "PARENT",
+        },
+        select: {
+          id: true,
+          role: true,
+        },
+      });
+
+      if (existingParent && existingParent.role !== "PARENT") {
+        return "رقم الهاتف مستخدم بالفعل لحساب آخر" as const;
+      }
+
+      const parent =
+        existingParent ??
+        (await tx.user.create({
+          data: {
+            tenantId: tenant.id,
+            phone: parentPhone,
+            name: parentName,
+            role: "PARENT",
+            parentName,
+            parentPhone,
+            isActive: true,
+          },
+          select: {
+            id: true,
+          },
+        }));
+
+      const student = await tx.user.create({
+        data: {
+          tenantId: tenant.id,
+          phone: `student-${Date.now()}`,
+          name: studentName,
+          role: "STUDENT",
+          gradeLevel: grade,
           parentName,
           parentPhone,
           isActive: true,
@@ -107,38 +118,32 @@ export async function registerStudent(formData: FormData): Promise<RegistrationR
         select: {
           id: true,
         },
-      }));
+      });
 
-    const student = await db.user.create({
-      data: {
-        tenantId: tenant.id,
-        phone: `student-${Date.now()}`,
-        name: studentName,
-        role: "STUDENT",
-        gradeLevel: grade,
-        parentName,
-        parentPhone,
-        isActive: true,
-      },
-      select: {
-        id: true,
-      },
+      await tx.groupStudent.create({
+        data: {
+          groupId: group.id,
+          studentId: student.id,
+          status: "PENDING",
+        },
+      });
+
+      await tx.parentStudent.create({
+        data: {
+          parentId: parent.id,
+          studentId: student.id,
+        },
+      });
+
+      return null;
     });
 
-    await db.groupStudent.create({
-      data: {
-        groupId: group.id,
-        studentId: student.id,
-        status: "PENDING",
-      },
-    });
-
-    await db.parentStudent.create({
-      data: {
-        parentId: parent.id,
-        studentId: student.id,
-      },
-    });
+    if (conflict) {
+      return {
+        success: false,
+        message: conflict,
+      };
+    }
 
     revalidatePath("/");
     revalidatePath("/register");

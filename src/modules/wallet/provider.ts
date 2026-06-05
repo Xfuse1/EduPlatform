@@ -19,7 +19,9 @@ const TENANT_PAYEE_PRIORITY: UserRole[] = [
 ]
 
 export function calculatePlatformFee(amount: number) {
-  return Math.round((amount * env.TEACHER_TRANSFER_FEE_PERCENT) / 100)
+  // Money is integer EGP in this codebase, so the fractional fee must be rounded.
+  // Policy: floor the fee so the teacher net (amount - fee) is never short-changed.
+  return Math.floor((amount * env.TEACHER_TRANSFER_FEE_PERCENT) / 100)
 }
 
 function assertPositiveAmount(amount: number) {
@@ -163,7 +165,7 @@ export async function creditUserWallet(input: {
     })
 
     if ((input.relatedPaymentId || input.relatedTransferId || input.relatedWithdrawalId) && existing) {
-      return { wallet, transaction: existing }
+      return { wallet, transaction: existing, mutated: false }
     }
 
     const updatedWallet = await tx.userWallet.update({
@@ -187,12 +189,16 @@ export async function creditUserWallet(input: {
       },
     })
 
-    return { wallet: updatedWallet, transaction }
+    return { wallet: updatedWallet, transaction, mutated: true }
   }
 
   const result = input.tx ? await run(input.tx) : await db.$transaction(run)
 
-  if (!input.tx) {
+  // Always emit a balance audit row when an actual mutation occurred, regardless of
+  // whether the op ran inside an external (parent) transaction or its own. Skip the
+  // idempotent no-op path. logFinancialEvent swallows its own errors so it never
+  // breaks the financial path.
+  if (result.mutated) {
     await logFinancialEvent({
       tenantId: input.tenantId,
       actorId: input.createdById ?? null,
@@ -209,7 +215,7 @@ export async function creditUserWallet(input: {
     })
   }
 
-  return result
+  return { wallet: result.wallet, transaction: result.transaction }
 }
 
 export async function debitUserWallet(input: {
@@ -244,7 +250,7 @@ export async function debitUserWallet(input: {
     })
 
     if ((input.relatedPaymentId || input.relatedTransferId || input.relatedWithdrawalId) && existing) {
-      return { wallet, transaction: existing }
+      return { wallet, transaction: existing, mutated: false }
     }
 
     const updated = await tx.userWallet.updateMany({
@@ -278,12 +284,16 @@ export async function debitUserWallet(input: {
       },
     })
 
-    return { wallet: updatedWallet, transaction }
+    return { wallet: updatedWallet, transaction, mutated: true }
   }
 
   const result = input.tx ? await run(input.tx) : await db.$transaction(run)
 
-  if (!input.tx) {
+  // Always emit a balance audit row when an actual mutation occurred, regardless of
+  // whether the op ran inside an external (parent) transaction or its own. Skip the
+  // idempotent no-op path. logFinancialEvent swallows its own errors so it never
+  // breaks the financial path.
+  if (result.mutated) {
     await logFinancialEvent({
       tenantId: input.tenantId,
       actorId: input.createdById ?? null,
@@ -301,7 +311,7 @@ export async function debitUserWallet(input: {
     })
   }
 
-  return result
+  return { wallet: result.wallet, transaction: result.transaction }
 }
 
 export async function transferBetweenWallets(input: {

@@ -38,6 +38,12 @@ export async function updateTenantSettings(data: SettingsPayload): Promise<Updat
 
   const normalizedSubjects = Array.from(new Set((data.subjects ?? []).map((subject) => subject.trim()).filter(Boolean)));
 
+  // Partial update: a key is only written when it is explicitly present in the
+  // payload. Passing `undefined` means "leave unchanged" (so callers that do not
+  // edit phone never erase it); an empty/whitespace string means "clear" → null.
+  const toNullableUpdate = (value: string | undefined) =>
+    value === undefined ? undefined : value.trim() ? value.trim() : null;
+
   try {
     await db.tenant.update({
       where: {
@@ -46,10 +52,10 @@ export async function updateTenantSettings(data: SettingsPayload): Promise<Updat
       data: {
         name: data.name,
         ...(data.themeColor ? { themeColor: data.themeColor } : {}),
-        phone: data.phone?.trim() ? data.phone.trim() : null,
-        region: data.region?.trim() ? data.region.trim() : null,
-        bio: data.bio?.trim() ? data.bio.trim() : null,
-        logoUrl: data.logoUrl?.trim() ? data.logoUrl.trim() : null,
+        ...("phone" in data ? { phone: toNullableUpdate(data.phone) } : {}),
+        ...("region" in data ? { region: toNullableUpdate(data.region) } : {}),
+        ...("bio" in data ? { bio: toNullableUpdate(data.bio) } : {}),
+        ...("logoUrl" in data ? { logoUrl: toNullableUpdate(data.logoUrl) } : {}),
         subjects: normalizedSubjects,
         updatedAt: new Date(),
       },
@@ -72,9 +78,10 @@ export async function updateTenantSettings(data: SettingsPayload): Promise<Updat
 export async function updateTenant(input: FormData | Record<string, unknown>) {
   const parsed = parseTenantSettingsFormData(input);
 
+  // Note: phone is intentionally omitted — this form does not edit the tenant
+  // phone, so it must be left unchanged (not erased).
   return updateTenantSettings({
     name: parsed.name,
-    phone: undefined,
     region: parsed.region,
     bio: parsed.bio,
     logoUrl: parsed.logoUrl,

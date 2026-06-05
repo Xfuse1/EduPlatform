@@ -50,12 +50,21 @@ export async function PATCH(
       }
     }
 
-    // 1. Update the exam basic info
-    // 2. We handle questions by deleting old ones and creating new ones,
-    //    or updating if they have IDs. For simplicity in a small app,
-    //    re-creating or using upsert is common.
-    // Here we'll delete and re-create to keep it simple as requested for the UI update.
+    // Re-creating questions assigns new ids; existing ExamSubmission.answers are
+    // keyed by the old question ids, so editing questions after students have
+    // submitted would orphan every answer reference and corrupt grading/results.
+    // Block question edits once any submission exists; metadata edits stay allowed.
+    if (Array.isArray(questions)) {
+      const submissionCount = await db.examSubmission.count({ where: { examId: id } });
+      if (submissionCount > 0) {
+        return new NextResponse(
+          "Cannot edit exam questions after students have submitted answers.",
+          { status: 409 }
+        );
+      }
+    }
 
+    // Delete old questions and re-create them (only reached when no submissions exist).
     const exam = await db.$transaction(async (tx) => {
         // Delete old questions (scoped through the tenant-verified exam).
         await tx.examQuestion.deleteMany({

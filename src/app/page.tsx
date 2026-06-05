@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { getTenantBySlug } from "@/lib/tenant";
+import { extractTenantSlug } from "@/lib/tenant-host";
 import MarketingPage, { type MarketingPlan } from "@/modules/marketing/components/MarketingPage";
 import { getPlatformConfigValue } from "@/modules/admin/actions";
 import { getSubscriptionPlanConfigs, type PlanConfig } from "@/modules/payments/providers/plan-config";
@@ -10,22 +11,10 @@ import { getPublicGroups, getPublicTenantProfile } from "@/modules/public-pages/
 
 export const dynamic = "force-dynamic";
 
-const IGNORED_SUBDOMAINS = new Set(["www", "app", "api", "localhost", ""]);
-
-function extractSubdomain(host: string): string {
-  const hostname = host.split(":")[0] ?? "";
-
-  if (hostname.endsWith(".vercel.app")) {
-    return "";
-  }
-
-  if (hostname.endsWith(".localhost")) {
-    return hostname.replace(".localhost", "");
-  }
-
-  const parts = hostname.split(".");
-  return parts.length > 2 ? (parts[0] ?? "") : "";
-}
+// Subdomains that always resolve to the marketing page rather than a tenant.
+// extractTenantSlug already returns "" for www/app/localhost/apex/IP/vercel;
+// "api" is kept here as an extra reserved name for this route.
+const IGNORED_SUBDOMAINS = new Set(["api", ""]);
 
 const priceFormatter = new Intl.NumberFormat("ar-EG");
 
@@ -63,7 +52,7 @@ export default async function HomePage() {
   const headerStore = await headers();
   const host = headerStore.get("host") ?? "localhost:3000";
   const middlewareSlug = headerStore.get("x-tenant-slug") ?? "";
-  const subdomain = middlewareSlug || extractSubdomain(host);
+  const subdomain = middlewareSlug || extractTenantSlug(host);
 
   if (IGNORED_SUBDOMAINS.has(subdomain)) {
     const [plans, adminContact] = await Promise.all([

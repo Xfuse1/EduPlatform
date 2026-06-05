@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 
 import { requireAuth, UnauthorizedError } from '@/lib/auth'
 import { errorResponse, forbidden, notFound, successResponse } from '@/lib/api-response'
+import { CENTER_ADMIN_ROLES, checkRole } from '@/lib/permissions'
 import { getTeacherScopeUserId } from '@/lib/teacher-access'
 import { requireTenant } from '@/lib/tenant'
 import { getStudentById } from '@/modules/students/queries'
@@ -54,8 +55,8 @@ export async function DELETE(request: NextRequest, { params }: RouteProps) {
       requireAuth(request),
     ])
 
-    if (user.role !== 'MANAGER' && user.role !== 'ADMIN') {
-      return forbidden('لا تملك بصلاحية حذف الطلاب')
+    if (!checkRole(user.role, CENTER_ADMIN_ROLES)) {
+      return forbidden('لا تملك صلاحية حذف الطلاب')
     }
 
     await deleteStudent(tenant.id, studentId)

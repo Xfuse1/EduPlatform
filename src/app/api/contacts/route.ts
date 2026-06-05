@@ -72,7 +72,38 @@ export async function GET() {
       );
     }
 
-    // الأدوار الأخرى (ASSISTANT وغيره): نفس التينانت فقط
+    if (user.role === "STUDENT") {
+      // الطالب يرى مدرسيه فقط (المدرسين المسؤولين عن المجموعات المسجل فيها)
+      const enrollments = await db.groupStudent.findMany({
+        where: { studentId: user.id, status: "ACTIVE" },
+        select: { group: { select: { teacherId: true } } },
+      });
+
+      const teacherIds = Array.from(
+        new Set(
+          enrollments
+            .map((e) => e.group.teacherId)
+            .filter((id): id is string => Boolean(id)),
+        ),
+      );
+      if (teacherIds.length === 0) return NextResponse.json([]);
+
+      const teachers = await db.user.findMany({
+        where: { id: { in: teacherIds }, tenantId: user.tenantId, role: "TEACHER" },
+        select: { id: true, name: true, role: true, avatarUrl: true },
+      });
+
+      return NextResponse.json(
+        teachers.map((u) => ({ id: u.id, name: u.name, role: "المدرس", avatar: u.avatarUrl }))
+      );
+    }
+
+    // الأدوار الإدارية فقط (ASSISTANT / MANAGER / ADMIN / CENTER_ADMIN): نفس التينانت
+    const STAFF_CONTACT_ROLES = ["ASSISTANT", "MANAGER", "ADMIN", "CENTER_ADMIN"] as const;
+    if (!STAFF_CONTACT_ROLES.includes(user.role as (typeof STAFF_CONTACT_ROLES)[number])) {
+      return NextResponse.json([]);
+    }
+
     const users = await db.user.findMany({
       where: { tenantId: user.tenantId, id: { not: user.id }, role: { not: "STUDENT" } },
       select: { id: true, name: true, role: true, avatarUrl: true },

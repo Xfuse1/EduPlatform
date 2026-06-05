@@ -20,9 +20,10 @@ export default async function TenantSlugPage({
     notFound();
   }
 
+  // getTenantBySlug already filters isActive: true, so no extra isActive check is needed.
   const tenant = await getTenantBySlug(normalizedSlug);
 
-  if (!tenant || !tenant.isActive) {
+  if (!tenant) {
     notFound();
   }
 

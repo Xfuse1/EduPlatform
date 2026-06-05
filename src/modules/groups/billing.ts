@@ -268,6 +268,18 @@ export async function ensureQrBillingBeforeAttendance(input: {
   })
 
   if (!latestCharge || latestCharge.consumedSessions >= (latestCharge.coveredSessions ?? coveredSessions)) {
+    // Derive a deterministic cycle index from prior MONTHLY charges so that
+    // concurrent / retried scans collide on the GroupBillingCharge.idempotencyKey
+    // unique constraint instead of creating duplicate debits.
+    const priorCycles = await input.tx.groupBillingCharge.count({
+      where: {
+        tenantId: input.tenantId,
+        groupId: group.id,
+        studentId: input.studentId,
+        billingType: 'MONTHLY',
+        status: 'COMPLETED',
+      },
+    })
     return createWalletCharge({
       tx: input.tx,
       tenantId: input.tenantId,
@@ -276,7 +288,7 @@ export async function ensureQrBillingBeforeAttendance(input: {
       amount: group.monthlyFee,
       billingType: 'MONTHLY',
       reason: `تجديد اشتراك شهري - ${group.name}`,
-      idempotencyKey: `monthly:${group.id}:${input.studentId}:${Date.now()}`,
+      idempotencyKey: `monthly:${group.id}:${input.studentId}:cycle:${priorCycles + 1}`,
       relatedSessionId: input.sessionId,
       coveredSessions,
       groupName: group.name,

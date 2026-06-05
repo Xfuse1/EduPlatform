@@ -43,19 +43,27 @@ export function ExamTakingClient({ exam, studentId }: ExamTakingClientProps) {
   const [isFinished, setIsFinished] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Timer logic
+  // Timer logic: a single interval ticks down once per second; when it reaches 0
+  // it clears itself and triggers the auto-submit exactly once. Depending only on
+  // [] (not [timeLeft]) avoids recreating the interval every second and prevents
+  // the time-up branch from re-firing handleFinalSubmit on each tick.
   useEffect(() => {
-    if (timeLeft <= 0) {
-      handleFinalSubmit(); // Auto-submit when time is up
-      return;
-    }
-
     const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleFinalSubmit(); // Auto-submit when time is up (guarded internally)
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft]);
+    // handleFinalSubmit is intentionally not a dependency; it guards re-entry via
+    // isSubmitting/isFinished, and we want a single stable interval for the exam.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

@@ -1,12 +1,20 @@
-﻿import { NextRequest } from 'next/server'
+import { timingSafeEqual } from 'crypto'
+
+import { NextRequest } from 'next/server'
 
 import { env } from '@/config/env'
-import { errorResponse, successResponse } from '@/lib/api-response'
-import { processPendingTeacherTransfers } from '@/modules/payments/providers/transfer'
+import { errorResponse } from '@/lib/api-response'
+
+function safeEqual(a: string, b: string) {
+  const bufA = Buffer.from(a)
+  const bufB = Buffer.from(b)
+  if (bufA.length !== bufB.length) return false
+  return timingSafeEqual(bufA, bufB)
+}
 
 function isAuthorized(req: NextRequest) {
   const token = req.headers.get('x-internal-jobs-secret')
-  return !!env.INTERNAL_JOBS_SECRET && token === env.INTERNAL_JOBS_SECRET
+  return !!env.INTERNAL_JOBS_SECRET && !!token && safeEqual(token, env.INTERNAL_JOBS_SECRET)
 }
 
 export async function POST(req: NextRequest) {
@@ -14,10 +22,12 @@ export async function POST(req: NextRequest) {
     return errorResponse('UNAUTHORIZED', 'Invalid jobs secret', 401)
   }
 
-  const body = await req.json().catch(() => ({}))
-  const limit = typeof body.limit === 'number' ? body.limit : 20
-
-  const result = await processPendingTeacherTransfers(limit)
-  return successResponse(result)
+  // Teacher disbursements are currently handled as manual wallet withdrawals;
+  // there is no automated transfer integration yet. Report NOT_IMPLEMENTED so
+  // monitoring does not treat this endpoint as healthy work.
+  return errorResponse(
+    'NOT_IMPLEMENTED',
+    'Automated teacher transfers are not implemented (handled as manual withdrawals).',
+    501,
+  )
 }
-

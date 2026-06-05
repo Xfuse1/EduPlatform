@@ -31,10 +31,20 @@ export function ManagerAttendanceTable({ initialRecords }: { initialRecords: Rec
   }, [initialRecords, query, dateFilter]);
 
   const exportCSV = () => {
-    const header = "اسم الطالب,المجموعة,التاريخ,الحالة,الطريقة,وقت التسجيل\n";
+    const headerCells = ["اسم الطالب", "المجموعة", "التاريخ", "الحالة", "الطريقة", "وقت التسجيل"];
+    const header = headerCells.map(csvCell).join(",") + "\n";
     const body = filteredRecords
-      .map((r) => 
-        `${r.studentName},${r.groupName},${new Date(r.date).toLocaleDateString('ar-EG')},${r.status},${r.method},${new Date(r.markedAt).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true })}`
+      .map((r) =>
+        [
+          r.studentName,
+          r.groupName,
+          new Date(r.date).toLocaleDateString('ar-EG'),
+          r.status,
+          r.method,
+          new Date(r.markedAt).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true }),
+        ]
+          .map(csvCell)
+          .join(",")
       )
       .join("\n");
       
@@ -145,4 +155,13 @@ function statusLabel(status: string) {
 
 function cn(...classes: any[]) {
     return classes.filter(Boolean).join(" ");
+}
+
+// Escape a CSV field: neutralize formula injection (leading =,+,-,@) and quote/escape special chars.
+function csvCell(value: string) {
+    let cell = String(value ?? "");
+    if (/^[=+\-@]/.test(cell)) {
+        cell = "'" + cell;
+    }
+    return `"${cell.replace(/"/g, '""')}"`;
 }

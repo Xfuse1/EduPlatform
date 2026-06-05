@@ -10,8 +10,16 @@ function getKey(): Buffer {
     throw new Error('ENCRYPTION_KEY is not configured')
   }
 
-  const isHex = /^[0-9a-fA-F]+$/.test(key)
-  const keyBuffer = isHex ? Buffer.from(key, 'hex') : Buffer.from(key, 'utf8')
+  // Disambiguate by length: exactly 64 hex chars => 32-byte hex key,
+  // exactly 32 chars => raw UTF-8 (32-byte) passphrase. Anything else is misconfigured.
+  let keyBuffer: Buffer
+  if (key.length === 64 && /^[0-9a-fA-F]+$/.test(key)) {
+    keyBuffer = Buffer.from(key, 'hex')
+  } else if (key.length === 32) {
+    keyBuffer = Buffer.from(key, 'utf8')
+  } else {
+    throw new Error('ENCRYPTION_KEY must be 64 hex characters or a 32-character UTF-8 string (32 bytes)')
+  }
 
   if (keyBuffer.length !== 32) {
     throw new Error('ENCRYPTION_KEY must decode to exactly 32 bytes')

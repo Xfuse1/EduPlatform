@@ -145,6 +145,11 @@ export async function getCurrentUser() {
 
     if (!session?.user) return null;
 
+    // Reject sessions whose stored tenant no longer matches the user's tenant.
+    // A mismatch (stale session or a session minted for a foreign tenant) is
+    // treated as a forced re-login rather than silently trusting the user row.
+    if (session.tenantId !== session.user.tenantId) return null;
+
     return toSessionUser(session.user);
   } catch (error) {
     console.error("DB getCurrentUser failed:", error);

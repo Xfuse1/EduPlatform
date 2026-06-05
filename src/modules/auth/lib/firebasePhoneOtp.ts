@@ -10,14 +10,14 @@ let recaptchaContainerId: string | null = null;
 let recaptchaRenderElement: HTMLDivElement | null = null;
 let recaptchaRenderNonce = 0;
 
-// Store confirmation on window to survive Turbopack cross-page module isolation
-const getConfirmation = (): ConfirmationResult | null =>
-  (typeof window !== "undefined" ? (window as any).__otp_confirmation as ConfirmationResult : null) ?? null;
+// Keep the confirmation result in a module-scoped variable rather than a window
+// global so it is not reachable by third-party scripts and stays type-safe.
+let confirmationResult: ConfirmationResult | null = null;
+
+const getConfirmation = (): ConfirmationResult | null => confirmationResult;
 
 const setConfirmation = (result: ConfirmationResult | null) => {
-  if (typeof window !== "undefined") {
-    (window as any).__otp_confirmation = result;
-  }
+  confirmationResult = result;
 };
 
 function isLocalDevelopmentHost() {

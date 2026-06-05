@@ -7,7 +7,7 @@ import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { canManageTeacherAccounts } from "@/lib/teacher-access";
 import { requireTenant } from "@/lib/tenant";
-import { buildPhoneConflictMessage, findUserByPhone, isPhoneUniqueConstraintError } from "@/lib/user-phone";
+import { buildPhoneConflictMessage, isPhoneUniqueConstraintError } from "@/lib/user-phone";
 import { phoneSchema } from "@/modules/auth/validations";
 
 const optionalEmailSchema = z.preprocess(
@@ -74,9 +74,16 @@ export async function createTeacher(input: z.infer<typeof createTeacherSchema>) 
   }
 
   const payload = parsed.data;
-  const existingUser = await findUserByPhone(payload.phone);
+  // Scope the existence check to the current tenant. A phone that belongs to a
+  // user in ANOTHER tenant must not be readable/updatable here; it falls through
+  // to the create path where the @@unique([tenantId, phone]) constraint (per-tenant)
+  // correctly allows the same phone across tenants and rejects same-tenant dupes.
+  const existingUser = await db.user.findFirst({
+    where: { phone: payload.phone, tenantId: tenant.id },
+    select: { id: true, role: true, isActive: true },
+  });
 
-  if (existingUser && (existingUser.isActive || existingUser.role !== "TEACHER" || existingUser.tenantId !== tenant.id)) {
+  if (existingUser && (existingUser.isActive || existingUser.role !== "TEACHER")) {
     return {
       success: false,
       message: buildPhoneConflictMessage(existingUser.role),
