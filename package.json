@@ -9,7 +9,8 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:seed-plans": "node scripts/seed-subscription-plans.js",
-    "db:seed-test": "node scripts/seed-test-account.js"
+    "db:seed-test": "node scripts/seed-test-account.js",
+    "test:browser": "node scripts/browser-test.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -41,6 +42,7 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "autoprefixer": "^10.4.20",
+    "playwright": "^1.60.0",
     "postcss": "^8.5.3",
     "prisma": "^6.19.3",
     "tailwindcss": "^3.4.17",
