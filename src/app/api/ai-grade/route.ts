@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { requireAuth } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { requireTenant } from "@/lib/tenant";
 import { checkRole, STAFF_ROLES } from "@/lib/permissions";
 import { getTeacherScopeUserId } from "@/lib/teacher-access";
@@ -239,7 +239,10 @@ function extractJsonObjectText(rawText: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await requireAuth(req);
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     if (!checkRole(user.role, STAFF_ROLES)) {
       return NextResponse.json({ error: "ليس لديك صلاحية" }, { status: 403 });
     }

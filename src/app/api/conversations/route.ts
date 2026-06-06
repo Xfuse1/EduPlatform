@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { requireAuth } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const user = await requireAuth();
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Fetch all messages where the user is sender or receiver. Ownership is the
     // (senderId|receiverId == user.id) boundary — NOT tenantId — because
@@ -69,7 +72,10 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
-    const user = await requireAuth();
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const { contactId } = await request.json();
 
     if (!contactId || typeof contactId !== "string") {

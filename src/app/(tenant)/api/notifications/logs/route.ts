@@ -1,16 +1,17 @@
 import { type NextRequest } from 'next/server'
 import { requireTenant } from '@/lib/tenant'
-import { requireAuth } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/auth'
 import { checkRole, STAFF_ROLES } from '@/lib/permissions'
 import { getNotificationLogs } from '@/modules/notifications/queries'
-import { successResponse, errorResponse, forbidden } from '@/lib/api-response'
+import { successResponse, errorResponse, forbidden, unauthorized } from '@/lib/api-response'
 
 // ── API: GET /api/notifications/logs ─────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
   try {
     const tenant = await requireTenant()
-    const user = await requireAuth()
+    const user = await getCurrentUser()
+    if (!user) return unauthorized()
     // سجلّات الإشعارات تكشف أرقام هواتف المستلمين — للطاقم فقط
     if (!checkRole(user.role, STAFF_ROLES)) {
       return forbidden()
