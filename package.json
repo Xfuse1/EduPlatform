@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
-    "db:seed-plans": "node scripts/seed-subscription-plans.js"
+    "db:seed-plans": "node scripts/seed-subscription-plans.js",
+    "db:seed-test": "node scripts/seed-test-account.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
