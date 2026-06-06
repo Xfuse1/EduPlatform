@@ -130,6 +130,45 @@ async function seed() {
     create: { tenantId: tenant.id, userId: users.STUDENT.id, balance: 500 },
   });
 
+  // A session for TODAY (so attendance can be marked) — keyed on (groupId, date)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  await prisma.session.upsert({
+    where: { groupId_date: { groupId: group.id, date: today } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      groupId: group.id,
+      date: today,
+      timeStart: '16:00',
+      timeEnd: '23:59',
+      status: 'SCHEDULED',
+    },
+  });
+
+  // A published exam with 2 MCQ questions (open window) for submission testing
+  let exam = await prisma.exam.findFirst({ where: { tenantId: tenant.id, title: 'امتحان تجريبي' }, select: { id: true } });
+  if (!exam) {
+    exam = await prisma.exam.create({
+      data: {
+        tenantId: tenant.id,
+        groupId: group.id,
+        title: 'امتحان تجريبي',
+        description: 'اختبار آلي للنظام',
+        startAt: new Date(Date.now() - 5 * 60 * 1000),
+        duration: 120,
+        maxGrade: 20,
+        questions: {
+          create: [
+            { type: 'MCQ', questionText: '٢ + ٢ = ؟', options: ['٣', '٤', '٥'], correctAnswer: '٤', grade: 10, order: 1 },
+            { type: 'MCQ', questionText: 'عاصمة مصر؟', options: ['القاهرة', 'الجيزة', 'الإسكندرية'], correctAnswer: 'القاهرة', grade: 10, order: 2 },
+          ],
+        },
+      },
+      select: { id: true },
+    });
+  }
+
   console.log('✅ Test environment ready (tenant slug: ' + SLUG + ', PIN for all: ' + PIN + ')');
   console.log('   Login at  http://localhost:3000/' + SLUG + '/login   (or apex /login)');
   console.table(PEOPLE.map((p) => ({ phone: p.phone, role: p.role, PIN, name: p.name })));

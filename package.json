@@ -10,7 +10,8 @@
     "db:push": "prisma db push",
     "db:seed-plans": "node scripts/seed-subscription-plans.js",
     "db:seed-test": "node scripts/seed-test-account.js",
-    "test:browser": "node scripts/browser-test.js"
+    "test:browser": "node scripts/browser-test.js",
+    "test:browser-write": "node scripts/browser-write-test.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
